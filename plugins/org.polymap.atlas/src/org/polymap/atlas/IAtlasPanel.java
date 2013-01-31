@@ -14,30 +14,25 @@
  */
 package org.polymap.atlas;
 
-import org.osgi.framework.BundleContext;
-
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.swt.widgets.Composite;
 
 /**
- * 
+ * An Atlas panel is is the main element of the Atlas UI.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class AtlasPlugin
-        extends AbstractUIPlugin {
+public interface IAtlasPanel {
 
-    public static final String PLUGIN_ID = "org.polymap.atlas";
-
-
-    @Override
-    public void start( BundleContext context ) throws Exception {
-        super.start( context );
-    }
-
+    /**
+     * Initializes the panel and checks if it is valid fpor the given site
+     * and context.
+     * 
+     * @param site
+     * @param context
+     * @return True if the panel is valid for the given site and context.
+     */
+    public boolean init( IAtlasPanelSite site, IAtlasPanelContext context );
     
-    @Override
-    public void stop( BundleContext context ) throws Exception {
-        super.stop( context );
-    }
+    public Composite createContents( Composite parent );
     
 }

@@ -14,30 +14,21 @@
  */
 package org.polymap.atlas;
 
-import org.osgi.framework.BundleContext;
-
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
+ * Provides a factory for basic UI elements used by {@link IAtlasPanel} instances.
  * 
- *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class AtlasPlugin
-        extends AbstractUIPlugin {
+public interface IAtlasToolkit {
 
-    public static final String PLUGIN_ID = "org.polymap.atlas";
-
-
-    @Override
-    public void start( BundleContext context ) throws Exception {
-        super.start( context );
-    }
-
+    public Label createLabel( Composite parent, String text );
     
-    @Override
-    public void stop( BundleContext context ) throws Exception {
-        super.stop( context );
-    }
+    public Button createPushButton( Composite parent, String text, Image icon, SelectionListener l );
     
 }

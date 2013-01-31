@@ -14,30 +14,23 @@
  */
 package org.polymap.atlas;
 
-import org.osgi.framework.BundleContext;
-
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-
 /**
+ * A panel context is shared by all {@link IAtlasPanel} instances in the same panel
+ * hierachy.
  * 
- *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class AtlasPlugin
-        extends AbstractUIPlugin {
+public interface IAtlasPanelContext {
 
-    public static final String PLUGIN_ID = "org.polymap.atlas";
-
-
-    @Override
-    public void start( BundleContext context ) throws Exception {
-        super.start( context );
-    }
-
+    /**
+     * Store the given value for the given key in this context.
+     * 
+     * @return The previous value, or null if no value was stored for this key.
+     */
+    public <T> T put( String key, T value );
     
-    @Override
-    public void stop( BundleContext context ) throws Exception {
-        super.stop( context );
-    }
+    public <T> T putIfAbsent( String key, T value );
+    
+    public <T> T get( String key );
     
 }

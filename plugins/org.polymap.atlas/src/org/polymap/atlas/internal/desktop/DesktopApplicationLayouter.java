@@ -12,32 +12,31 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas;
+package org.polymap.atlas.internal.desktop;
 
-import org.osgi.framework.BundleContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.window.Window;
+
+import org.polymap.atlas.IAtlasApplicationLayouter;
 
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class AtlasPlugin
-        extends AbstractUIPlugin {
+public class DesktopApplicationLayouter
+        implements IAtlasApplicationLayouter {
 
-    public static final String PLUGIN_ID = "org.polymap.atlas";
+    private static Log log = LogFactory.getLog( DesktopApplicationLayouter.class );
 
 
     @Override
-    public void start( BundleContext context ) throws Exception {
-        super.start( context );
-    }
-
-    
-    @Override
-    public void stop( BundleContext context ) throws Exception {
-        super.stop( context );
+    public Window initMainWindow( Display display ) {
+        return new DesktopApplicationWindow( null );
     }
     
 }
