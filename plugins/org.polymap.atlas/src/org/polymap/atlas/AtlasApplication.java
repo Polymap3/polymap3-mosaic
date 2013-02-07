@@ -34,6 +34,7 @@ import org.polymap.core.CorePlugin;
 import org.polymap.core.runtime.Polymap;
 
 import org.polymap.atlas.internal.AtlasComponentFactory;
+import org.polymap.atlas.internal.Messages;
 
 /**
  * 
@@ -116,7 +117,7 @@ public class AtlasApplication
     
     private Display                     display;
     
-    private IAtlasApplicationLayouter   appLayouter;
+    private IApplicationLayouter   appLayouter;
 
     private Window                      appWindow;
     

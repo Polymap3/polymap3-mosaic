@@ -13,7 +13,7 @@
    <extension
          point="org.polymap.atlas.applicationLayouters">
       <applicationLayouter
-            class="org.polymap.atlas.internal.desktop.DesktopApplicationLayouter"
+            class="org.polymap.atlas.internal.desktop.DesktopApplicationManager"
             id="org.polymap.atlas.desktopApplicationLayouter">
       </applicationLayouter>
    </extension>

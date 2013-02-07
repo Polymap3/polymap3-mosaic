@@ -14,13 +14,35 @@
  */
 package org.polymap.atlas;
 
+import org.eclipse.core.runtime.IPath;
+
 /**
- * A panel context is shared by all {@link IAtlasPanel} instances in the same panel
+ * An app context is shared by all {@link IPanel} instances in the same panel
  * hierachy.
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IAtlasPanelContext {
+public interface IApplicationContext {
+
+    public <T extends IPanel> T openSibling( String extId, String name );
+    
+    public <T extends IPanel> T openChild( String extId, String name );
+    
+    public Iterable<IPanel> panelsAt( IPath path );
+    
+    /**
+     * Registers the given {@link EventHandler event handler} for event types:
+     * <ul>
+     * <li>{@link PanelChangeEvent}</li>
+     * </ul> 
+     *
+     * @see EventHandler
+     * @see EventManager
+     * @param handler
+     */
+    public void addEventHandler( Object handler );
+
+    public void removeEventHandler( Object handler );
 
     /**
      * Store the given value for the given key in this context.

@@ -16,23 +16,26 @@ package org.polymap.atlas;
 
 import org.eclipse.swt.widgets.Composite;
 
+
 /**
- * An Atlas panel is is the main element of the Atlas UI.
+ * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IAtlasPanel {
+public class DashboardPanel
+        implements IPanel {
 
-    /**
-     * Initializes the panel and checks if it is valid fpor the given site
-     * and context.
-     * 
-     * @param site
-     * @param context
-     * @return True if the panel is valid for the given site and context.
-     */
-    public boolean init( IAtlasPanelSite site, IAtlasPanelContext context );
-    
-    public Composite createContents( Composite parent );
+    @Override
+    public boolean init( IPanelSite site, IApplicationContext context ) {
+        // XXX Auto-generated method stub
+        throw new RuntimeException( "not yet implemented." );
+    }
+
+
+    @Override
+    public Composite createContents( Composite parent ) {
+        // XXX Auto-generated method stub
+        throw new RuntimeException( "not yet implemented." );
+    }
     
 }

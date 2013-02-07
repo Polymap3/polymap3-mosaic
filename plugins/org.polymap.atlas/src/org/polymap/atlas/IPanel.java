@@ -12,31 +12,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas.internal.desktop;
+package org.polymap.atlas;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.jface.window.Window;
-
-import org.polymap.atlas.IAtlasApplicationLayouter;
+import org.eclipse.swt.widgets.Composite;
 
 /**
- * 
+ * A panel is is the main element of the Atlas UI.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class DesktopApplicationLayouter
-        implements IAtlasApplicationLayouter {
+public interface IPanel {
 
-    private static Log log = LogFactory.getLog( DesktopApplicationLayouter.class );
-
-
-    @Override
-    public Window initMainWindow( Display display ) {
-        return new DesktopApplicationWindow( null );
-    }
+    /**
+     * Initializes the panel and checks if it is valid fpor the given site
+     * and context.
+     * 
+     * @param site
+     * @param context
+     * @return True if the panel is valid for the given site and context.
+     */
+    public boolean init( IPanelSite site, IApplicationContext context );
+    
+    public Composite createContents( Composite parent );
     
 }

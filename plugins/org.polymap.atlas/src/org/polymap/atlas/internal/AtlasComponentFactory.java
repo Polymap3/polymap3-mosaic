@@ -27,10 +27,10 @@ import org.eclipse.core.runtime.Platform;
 import org.polymap.core.runtime.SessionSingleton;
 
 import org.polymap.atlas.AtlasPlugin;
-import org.polymap.atlas.IAtlasApplicationLayouter;
-import org.polymap.atlas.IAtlasPanel;
-import org.polymap.atlas.IAtlasPanelContext;
-import org.polymap.atlas.IAtlasPanelSite;
+import org.polymap.atlas.IApplicationLayouter;
+import org.polymap.atlas.IPanel;
+import org.polymap.atlas.IApplicationContext;
+import org.polymap.atlas.IPanelSite;
 
 /**
  * Factory of components of the extensible Atlas UI. 
@@ -56,13 +56,13 @@ public class AtlasComponentFactory
     }
     
     
-    public IAtlasApplicationLayouter createApplicationLayouter() {
+    public IApplicationLayouter createApplicationLayouter() {
         try {
             IConfigurationElement[] elms = Platform.getExtensionRegistry()
                     .getConfigurationElementsFor( AtlasPlugin.PLUGIN_ID, APPLICATION_LAYOUTER_EXTENSION_POINT );
             assert elms.length == 1;
             
-            return (IAtlasApplicationLayouter)elms[0].createExecutableExtension( "class" );
+            return (IApplicationLayouter)elms[0].createExecutableExtension( "class" );
         }
         catch (CoreException e) {
             throw new RuntimeException( e );
@@ -70,15 +70,17 @@ public class AtlasComponentFactory
     }
     
     
-    public List<IAtlasPanel> createPanels( IAtlasPanelSite site, IAtlasPanelContext context ) {
+    public List<IPanel> createPanels( IApplicationContext context, SiteSupplier site ) {
         IConfigurationElement[] elms = Platform.getExtensionRegistry()
                 .getConfigurationElementsFor( AtlasPlugin.PLUGIN_ID, PANEL_EXTENSION_POINT );
 
-        List<IAtlasPanel> result = new ArrayList();
+        List<IPanel> result = new ArrayList();
         for (IConfigurationElement elm : elms) {
             try {
-                IAtlasPanel panel = (IAtlasPanel)elms[0].createExecutableExtension( "class" );
-                if (panel.init( site, context )) {
+                IPanel panel = (IPanel)elms[0].createExecutableExtension( "class" );
+                String name = elms[0].getAttribute( "name" );
+
+                if (panel.init( site.create( name ), context )) {
                     result.add( panel );
                 }
             }
@@ -88,5 +90,15 @@ public class AtlasComponentFactory
         }
         return result;
     }
+
     
+    /**
+     * 
+     */
+    public interface SiteSupplier {
+        
+        public IPanelSite create( String name );
+        
+    }
+
 }

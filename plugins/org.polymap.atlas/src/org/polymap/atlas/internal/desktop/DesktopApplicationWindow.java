@@ -18,61 +18,98 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.window.ApplicationWindow;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.polymap.core.project.ui.util.SimpleFormData;
+
+import org.polymap.atlas.IPanel;
 
 /**
  * The main application window for the desktop.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-class DesktopApplicationWindow
+abstract class DesktopApplicationWindow
         extends ApplicationWindow {
 
     private static Log log = LogFactory.getLog( DesktopApplicationWindow.class );
 
+    private IPanel             activePanel;
+    
     
     public DesktopApplicationWindow( Shell parentShell ) {
         super( parentShell );
         addStatusLine();
         addCoolBar( SWT.HORIZONTAL );
-       // parentShell.setText( "Atlas!" );
+    }
+
+    
+    protected abstract Composite fillNavigationArea( Composite parent );
+
+    protected abstract Composite fillPanelArea( Composite parent );
+
+    
+    @Override
+    protected Control createContents( Composite parent ) {
+        setStatus( "Status..." );
+        
+        Composite contents = new Composite( parent, SWT.NONE );
+        contents.setLayout( new FormLayout() );
+
+        Composite navi = fillNavigationArea( contents );
+        navi.setLayoutData( SimpleFormData.filled().bottom( -1 ).create() );
+        
+        Composite panels = fillPanelArea( contents );
+        panels.setLayoutData( SimpleFormData.filled().top( navi, 10 ).create() );
+        
+//        Label l = new Label( contents, SWT.NONE );
+//        l.setText( "Hallo..." );
+//        
+//        Button b = new Button( contents, SWT.PUSH );
+//        b.setText( "Push" );
+//        b.setLayoutData( new SimpleFormData().top( l, 10 ).create() );
+//        b.addSelectionListener( new SelectionAdapter() {
+//            public void widgetSelected( SelectionEvent e ) {
+//                log.info( "widgetSelected(): ..." );
+//            }
+//            public void widgetDefaultSelected( SelectionEvent e ) {
+//                log.info( "widgetDefaultSelected(): ..." );
+//            }
+//        });
+        return contents;
+    }
+
+    
+    public void setStatus( IStatus status ) {
+        assert status != null;
+        if (status.getSeverity() == IStatus.ERROR) {
+            getStatusLineManager().setErrorMessage( status.getMessage() );
+        }
+        else {
+            getStatusLineManager().setMessage( status.getMessage() );            
+        }
+    }
+
+    
+    @Override
+    protected void configureShell( Shell shell ) {
+        super.configureShell( shell );
+        shell.setText( "Mosaic" );
+        shell.setTouchEnabled( true );
+        shell.setMaximized( true );
     }
 
 
     @Override
-    protected Control createContents( Composite parent ) {
-        setStatus( "prima" );
-        
-        Composite contents = new Composite( parent, SWT.NONE );
-        contents.setLayout( new FormLayout() );
-        
-        Label l = new Label( contents, SWT.NONE );
-        l.setText( "Hallo..." );
-        
-        Button b = new Button( contents, SWT.PUSH );
-        b.setText( "Push" );
-        b.setLayoutData( new SimpleFormData().top( l, 10 ).create() );
-        b.addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e ) {
-                log.info( "widgetSelected(): ..." );
-            }
-            public void widgetDefaultSelected( SelectionEvent e ) {
-                log.info( "widgetDefaultSelected(): ..." );
-            }
-        });
-        return contents;
+    protected int getShellStyle() {
+        return SWT.CLOSE;
     }
 
 
@@ -81,10 +118,4 @@ class DesktopApplicationWindow
         return false;
     }
 
-
-    @Override
-    protected Point getInitialSize() {
-        return new Point( 800, 600 );
-    }
-    
 }

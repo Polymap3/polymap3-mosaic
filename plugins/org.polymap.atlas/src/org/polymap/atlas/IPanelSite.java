@@ -17,16 +17,20 @@ package org.polymap.atlas;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 /**
- * The interface an {@link IAtlasPanel} can use to access the system.
- *
+ * Defines the interface an {@link IPanel} can use to initialize and manipulate
+ * its UI.
+ * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IAtlasPanelSite {
+public interface IPanelSite {
 
+    public IPath getPath();
+    
     /**
      * Changes the status of the panel. {@link Status#OK_STATUS} signals that the
      * panel has valid state. If status is not valid then the given message is
@@ -44,5 +48,16 @@ public interface IAtlasPanelSite {
     public void addSidekick();
     
     public IAtlasToolkit toolkit();
+    
+//    /**
+//     * Registers the given {@link EventHandler event handler}. 
+//     *
+//     * @see EventHandler
+//     * @see EventManager
+//     * @param handler
+//     */
+//    public void addEventHandler( Object handler );
+//
+//    public void removeEventHandler( Object handler );
     
 }

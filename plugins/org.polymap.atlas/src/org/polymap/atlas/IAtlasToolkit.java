@@ -21,14 +21,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 /**
- * Provides a factory for basic UI elements used by {@link IAtlasPanel} instances.
+ * Provides a factory for basic UI elements used by {@link IPanel} instances.
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public interface IAtlasToolkit {
 
-    public Label createLabel( Composite parent, String text );
+    public Label createLabel( Composite parent, String text, int... styles );
     
     public Button createPushButton( Composite parent, String text, Image icon, SelectionListener l );
+
+    public Composite createComposite( Composite parent, int... styles );
     
 }

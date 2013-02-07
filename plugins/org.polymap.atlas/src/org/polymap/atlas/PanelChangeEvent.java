@@ -14,18 +14,18 @@
  */
 package org.polymap.atlas;
 
-import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.jface.window.Window;
+import java.util.EventObject;
 
 /**
- * An application layouter is responsible of creating and maintaining the main
- * application window, including toolbar and statusbar.
  * 
+ *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IAtlasApplicationLayouter {
+public class PanelChangeEvent
+        extends EventObject {
 
-    public Window initMainWindow( Display display );
-    
+    public PanelChangeEvent( Object source, IPanel oldPanel, IPanel newPanel ) {
+        super( source );
+    }
+
 }
