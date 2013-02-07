@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.polymap.mosaic.feature"
+      label="Mosaic Activity Server"
+      version="1.0.0.qualifier"
+      provider-name="Polymap GmbH">
+
+   <description url="http://polymap.org/mosaic">
+      Provides the Mosaic activity system.
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      /* 
+ * polymap.org
+ * Copyright 2013, Polymap GmbH. All rights reserved.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 3.0 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ */
+   </copyright>
+
+   <license url="http://polymap.org/mosaic/wiki/Lizenz.de">
+      LGPL
+   </license>
+
+   <url>
+      <discovery label="Project Website" url="http://polymap.org/mosaic"/>
+      <discovery label="POLYMAP3 Base System" url="http://polymap.org/polymap3"/>
+   </url>
+
+   <requires>
+      <import feature="org.polymap.core.feature" version="3.1.0.qualifier"/>
+   </requires>
+
+   <plugin
+         id="org.polymap.atlas"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
