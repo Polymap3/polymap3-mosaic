@@ -14,6 +14,8 @@
  */
 package org.polymap.mosaic.test;
 
+import static org.junit.Assert.*;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -23,13 +25,12 @@ import org.junit.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.polymap.core.model2.runtime.EntityRepository;
-import org.polymap.core.model2.runtime.UnitOfWork;
 import org.polymap.core.model2.store.recordstore.RecordStoreAdapter;
 import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
 
-import org.polymap.mosaic.model.CaseEvent;
 import org.polymap.mosaic.model.MosaicCase;
+import org.polymap.mosaic.model.MosaicRepositoryAssembler;
+import org.polymap.mosaic.model.MosaicSession;
 
 /**
  * 
@@ -40,52 +41,69 @@ public class MosaicCaseTest {
 
     private static Log log = LogFactory.getLog( MosaicCaseTest.class );
 
-    static EntityRepository         repo;
+    static LuceneRecordStore            store;
 
-    static LuceneRecordStore        store;
+    static MosaicRepositoryAssembler    assembler;
 
-    UnitOfWork                      uow;
+    MosaicSession                       session;
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         store = new LuceneRecordStore();
-        repo = EntityRepository.newConfiguration()
-                .setEntities( MosaicCase.class, CaseEvent.class )
-                .setStore( new RecordStoreAdapter( store ) )
-                .create();
+        assembler = new MosaicRepositoryAssembler( new RecordStoreAdapter( store ) );
     }
 
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        repo.close();
+        assembler.close();
         store.close();
+        log.info( "closed." );
     }
 
 
     @Before
     public void setUp() throws Exception {
-        uow = repo.newUnitOfWork();
-        log.info( "UoW: " + uow );
+        session = assembler.newSession();
+        log.info( "Session: " + session );
     }
 
 
     @After
     public void tearDown() throws Exception {
-        uow.close();
+        session.close();
     }
 
 
     @Test
-    public void test1() {
-        log.info( "test1(): ..." );
-        //fail( "Not yet implemented" );
-    }
-    
-    
-    @Test
-    public void test2() {
-        log.info( "test2(): ..." );
+    public void testSimpleCase() {
+        log.info( "simpleCase(): ..." );
+        
+        // create
+        MosaicCase mcase = session.createCase( "Test1" );
+        log.info( "mcase: " + mcase );
+        log.info( "id: " + mcase.id() );
+        assertEquals( "Test1", mcase.name.get() );
+        assertNotNull( mcase.created.get() );
+        assertNotNull( mcase.created.get().when.get() );
+
+        mcase.description.set( "Description" );
+        
+        // commit
+        session.commit();
+        log.info( "id: " + mcase.id() );
+        assertNotNull( mcase.id() );
+        
+        // retrieve and check
+        MosaicSession session2 = assembler.newSession();
+        assertNotSame( session, session2 );
+        MosaicCase mcase2 = session2.findCase( mcase.id() );
+        log.info( "mcase2: " + mcase2 );
+        assertNotNull( mcase2 );
+        assertNotSame( mcase, mcase2 );
+        assertEquals( "Test1", mcase2.name.get() );
+        assertNotNull( mcase2.created.get() );
+        assertNotNull( mcase2.created.get().when.get() );
     }
     
 }

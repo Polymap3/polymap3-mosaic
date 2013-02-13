@@ -16,6 +16,8 @@ package org.polymap.mosaic.model;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,13 +34,14 @@ public class CaseEvent
 
     private static Log log = LogFactory.getLog( CaseEvent.class );
     
-    protected Property<String>      who;
+    public Property<String>         who;
     
-    protected Property<Date>        when;
+    public Property<Date>           when;
 
     /**
      * Description of the event.
      */
-    protected Property<String>      why;
+    @Nullable
+    public Property<String>         why;
     
 }

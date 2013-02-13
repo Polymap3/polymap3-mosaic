@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.polymap.core.model2.CollectionProperty;
 import org.polymap.core.model2.Description;
 import org.polymap.core.model2.Entity;
+import org.polymap.core.model2.Property;
 
 /**
  * Provides the base Mosaic business case. 
@@ -31,8 +32,12 @@ public class MosaicCase
         extends Entity {
 
     private static Log log = LogFactory.getLog( MosaicCase.class );
-    
-//    protected Property<CaseEvent>           created;
+
+    public Property<String>                 name;
+
+    public Property<String>                 description;
+
+    public Property<CaseEvent>              created;
     
     /**
      * First event is the creation event.
