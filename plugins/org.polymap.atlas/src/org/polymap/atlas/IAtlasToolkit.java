@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 /**
- * Provides a factory for basic UI elements used by {@link IPanel} instances.
+ * The factory for basic UI elements used by {@link IPanel} instances.
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */

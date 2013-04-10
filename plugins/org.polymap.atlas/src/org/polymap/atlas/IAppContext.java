@@ -22,13 +22,23 @@ import org.eclipse.core.runtime.IPath;
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IApplicationContext {
+public interface IAppContext {
 
-    public <T extends IPanel> T openSibling( String extId, String name );
+    /**
+     * 
+     *
+     * @param parent The path of the panel to open.
+     * @param name The name of the panel to open
+     * @return Null if the given panels was not found.
+     */
+    public IPanel openPanel( IPath parent, String name );
     
-    public <T extends IPanel> T openChild( String extId, String name );
-    
-    public Iterable<IPanel> panelsAt( IPath path );
+    /**
+     * All direct children of the given path.
+     *
+     * @param path
+     */
+    public Iterable<IPanel> panels( IPath path );
     
     /**
      * Registers the given {@link EventHandler event handler} for event types:
@@ -45,14 +55,31 @@ public interface IApplicationContext {
     public void removeEventHandler( Object handler );
 
     /**
-     * Store the given value for the given key in this context.
      * 
-     * @return The previous value, or null if no value was stored for this key.
+     *
+     * @param supplier The supplier to add. Must not be null.
      */
-    public <T> T put( String key, T value );
+    public void addSupplier( ContextSupplier supplier );
+
+    public void removeSupplier( ContextSupplier supplier );
     
-    public <T> T putIfAbsent( String key, T value );
+    /**
+     * Retrieves the property for the given name from this context.
+     *
+     * @param source The source of this call. This is given to the supplier.
+     * @param key The key of the property.
+     * @return The property for the given key.
+     */
+    public <T> T get( Object consumer, String key );
     
-    public <T> T get( String key );
+
+    /**
+     * 
+     */
+    interface ContextSupplier {
+
+        public <T> T get( Object consumer, String key );
+            
+    }
     
 }

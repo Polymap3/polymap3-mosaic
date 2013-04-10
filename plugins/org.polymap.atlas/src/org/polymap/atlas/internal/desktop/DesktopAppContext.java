@@ -12,28 +12,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas;
+package org.polymap.atlas.internal.desktop;
 
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IPath;
 
+import org.polymap.atlas.IPanel;
+import org.polymap.atlas.internal.AbstractAppContext;
 
 /**
  * 
- *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class DashboardPanel
-        implements IPanel {
+class DesktopAppContext
+        extends AbstractAppContext {
 
     @Override
-    public boolean init( IPanelSite site, IApplicationContext context ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
-    }
-
-
-    @Override
-    public Composite createContents( Composite parent ) {
+    public IPanel openPanel( IPath parent, String name ) {
         // XXX Auto-generated method stub
         throw new RuntimeException( "not yet implemented." );
     }

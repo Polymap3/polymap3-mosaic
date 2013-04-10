@@ -41,7 +41,7 @@ abstract class DesktopApplicationWindow
 
     private static Log log = LogFactory.getLog( DesktopApplicationWindow.class );
 
-    private IPanel             activePanel;
+    private IPanel              activePanel;
     
     
     public DesktopApplicationWindow( Shell parentShell ) {
@@ -59,7 +59,7 @@ abstract class DesktopApplicationWindow
     @Override
     protected Control createContents( Composite parent ) {
         setStatus( "Status..." );
-        
+
         Composite contents = new Composite( parent, SWT.NONE );
         contents.setLayout( new FormLayout() );
 

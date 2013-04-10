@@ -17,22 +17,31 @@ package org.polymap.atlas;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * A panel is is the main element of the Atlas UI.
- *
+ * The panel is the main visual component of the Atlas UI. It typically provides a
+ * map view, an editor, wizard or a dashboard.
+ * <p/>
+ * A panel is identified by its path and name. The path defines the place in the
+ * hierarchy of panel.
+ * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public interface IPanel {
 
     /**
-     * Initializes the panel and checks if it is valid fpor the given site
-     * and context.
+     * Initializes the panel and checks if it is valid for the given site and
+     * context.
      * 
      * @param site
      * @param context
      * @return True if the panel is valid for the given site and context.
      */
-    public boolean init( IPanelSite site, IApplicationContext context );
+    public boolean init( IPanelSite site, IAppContext context );
+    
+    public void dispose();
+    
+    public String getName();
     
     public Composite createContents( Composite parent );
     
+    public IPanelSite getPanelSite();
 }

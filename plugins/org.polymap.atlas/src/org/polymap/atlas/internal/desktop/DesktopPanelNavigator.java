@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.polymap.core.runtime.event.EventHandler;
 
-import org.polymap.atlas.IApplicationContext;
+import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.PanelChangeEvent;
 
@@ -35,12 +35,12 @@ class DesktopPanelNavigator {
 
     private static Log log = LogFactory.getLog( DesktopPanelNavigator.class );
 
-    private IApplicationContext     context;
+    private IAppContext             context;
     
     private IAtlasToolkit           tk;
 
     
-    public DesktopPanelNavigator( IApplicationContext context, IAtlasToolkit tk ) {
+    public DesktopPanelNavigator( IAppContext context, IAtlasToolkit tk ) {
         this.context = context;
         this.tk = tk;
         context.addEventHandler( this );

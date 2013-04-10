@@ -14,12 +14,17 @@
  */
 package org.polymap.atlas.internal.desktop;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.base.Predicate;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.action.IAction;
@@ -30,13 +35,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
-import org.polymap.atlas.IApplicationContext;
 import org.polymap.atlas.IApplicationLayouter;
-import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.IAtlasToolkit;
-import org.polymap.atlas.internal.ApplicationContext;
+import org.polymap.atlas.IPanel;
+import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.internal.AtlasComponentFactory;
-import org.polymap.atlas.internal.AtlasComponentFactory.SiteSupplier;
 
 /**
  * 
@@ -50,7 +53,7 @@ public class DesktopApplicationManager
     
     private DesktopToolkit              tk = new DesktopToolkit();
 
-    private IApplicationContext         context = new ApplicationContext();
+    private DesktopAppContext           context = new DesktopAppContext();
     
     private DesktopApplicationWindow    mainWindow;
 
@@ -63,13 +66,11 @@ public class DesktopApplicationManager
     public Window initMainWindow( Display display ) {
         // mainWindow
         mainWindow = new DesktopApplicationWindow( null ) {
-
             @Override
             protected Composite fillNavigationArea( Composite parent ) {
                 panelNavi = new DesktopPanelNavigator( context, tk );
                 return panelNavi.createContents( parent );
             }
-            
             @Override
             protected Composite fillPanelArea( Composite parent ) {
                 panelArea = tk.createComposite( parent, SWT.BORDER );
@@ -78,11 +79,10 @@ public class DesktopApplicationManager
                 return panelArea;
             }
         };
-        
-        // panels
-        AtlasComponentFactory.instance().createPanels( context, new SiteSupplier() {
-            public IPanelSite create( String name ) {
-                return new DesktopPanelSite( new Path( name ) );
+        // open root panel / after main window is created
+        display.asyncExec( new Runnable() {
+            public void run() {
+                openPanel( Path.ROOT, null );
             }
         });
         
@@ -94,11 +94,37 @@ public class DesktopApplicationManager
     public void dispose() {
     }
 
+    
+    protected void openPanel( final IPath prefix, String name ) {
+        // find and initialize panels
+        List<IPanel> panels = AtlasComponentFactory.instance().createPanels( new Predicate<IPanel>() {
+            public boolean apply( IPanel panel ) {
+                IPath path = prefix.append( panel.getName() );
+                return panel.init( new DesktopPanelSite( path ), context );
+            }
+        });
+        
+        // add to context
+        for (IPanel panel : panels) {
+            context.addPanel( panel.getPanelSite().getPath(), panel );
+        }
 
+        //
+        for (Control child : panelArea.getChildren()) {
+            child.dispose();
+        }
+        
+        //
+        IPanel panel = panels.get( 0 );
+        panel.createContents( panelArea );
+        panelArea.layout( true );
+    }
+
+    
     /**
      * 
      */
-    class DesktopPanelSite
+    protected class DesktopPanelSite
             implements IPanelSite {
 
         private IPath               path;
@@ -110,8 +136,7 @@ public class DesktopApplicationManager
         
         @Override
         public IPath getPath() {
-            // XXX Auto-generated method stub
-            throw new RuntimeException( "not yet implemented." );
+            return path;
         }
 
         @Override

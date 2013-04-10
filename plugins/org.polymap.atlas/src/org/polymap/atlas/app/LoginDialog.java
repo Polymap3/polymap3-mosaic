@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas;
+package org.polymap.atlas.app;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.NameCallback;

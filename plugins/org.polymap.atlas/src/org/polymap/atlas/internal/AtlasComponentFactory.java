@@ -20,6 +20,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Predicate;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -29,12 +31,13 @@ import org.polymap.core.runtime.SessionSingleton;
 import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.IApplicationLayouter;
 import org.polymap.atlas.IPanel;
-import org.polymap.atlas.IApplicationContext;
+import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IPanelSite;
 
 /**
- * Factory of components of the extensible Atlas UI. 
- *
+ * Factory of components of the Atlas UI. The components are defined via several
+ * plugin extension points.
+ * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class AtlasComponentFactory
@@ -43,7 +46,9 @@ public class AtlasComponentFactory
     private static Log log = LogFactory.getLog( AtlasComponentFactory.class );
     
     public static final String          APPLICATION_LAYOUTER_EXTENSION_POINT = "applicationLayouters";
+    
     public static final String          PANEL_EXTENSION_POINT = "panels";
+    
     
     public static AtlasComponentFactory instance() {
         return instance( AtlasComponentFactory.class );
@@ -52,10 +57,13 @@ public class AtlasComponentFactory
     
     // instance *******************************************
     
-    protected AtlasComponentFactory() {
+    private AtlasComponentFactory() {
     }
     
     
+    /**
+     * Creates the main application layouter for the current environment. 
+     */
     public IApplicationLayouter createApplicationLayouter() {
         try {
             IConfigurationElement[] elms = Platform.getExtensionRegistry()
@@ -70,17 +78,26 @@ public class AtlasComponentFactory
     }
     
     
-    public List<IPanel> createPanels( IApplicationContext context, SiteSupplier site ) {
+    /**
+     * The caller is responsibel of initializing the panel by calling
+     * {@link IPanel#init(IPanelSite, IAppContext)}, and check return value.
+     * 
+     * @param parent
+     * @param name The panel name to filter, or null to get all panels.
+     * @return Newly created panel instance.
+     */
+    public List<IPanel> createPanels( Predicate<IPanel> filter ) {
         IConfigurationElement[] elms = Platform.getExtensionRegistry()
                 .getConfigurationElementsFor( AtlasPlugin.PLUGIN_ID, PANEL_EXTENSION_POINT );
 
         List<IPanel> result = new ArrayList();
         for (IConfigurationElement elm : elms) {
             try {
-                IPanel panel = (IPanel)elms[0].createExecutableExtension( "class" );
-                String name = elms[0].getAttribute( "name" );
+//                String name = elm.getAttribute( "name" );
+//                IPath path = Path.fromPortableString( elm.getAttribute( "path" ) );
 
-                if (panel.init( site.create( name ), context )) {
+                IPanel panel = (IPanel)elms[0].createExecutableExtension( "class" );
+                if (filter.apply( panel )) {
                     result.add( panel );
                 }
             }
@@ -90,15 +107,5 @@ public class AtlasComponentFactory
         }
         return result;
     }
-
     
-    /**
-     * 
-     */
-    public interface SiteSupplier {
-        
-        public IPanelSite create( String name );
-        
-    }
-
 }

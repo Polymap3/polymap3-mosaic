@@ -3,10 +3,10 @@
 <schema targetNamespace="org.polymap.atlas" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.polymap.atlas" id="applicationLayouters" name="Atlas application layouter"/>
+         <meta.schema plugin="org.polymap.atlas" id="org.polymap.atlas.panels" name="Atlas Panels"/>
       </appinfo>
       <documentation>
-         Allows to register layouters for the main window and other aspects of an Atlas application.
+         [Enter description of this extension point.]
       </documentation>
    </annotation>
 
@@ -17,9 +17,6 @@
          </appinfo>
       </annotation>
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="applicationLayouter"/>
-         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -47,49 +44,12 @@
       </complexType>
    </element>
 
-   <element name="applicationLayouter">
-      <annotation>
-         <documentation>
-            Element description.
-         </documentation>
-      </annotation>
-      <complexType>
-         <attribute name="id" type="string" use="required">
-            <annotation>
-               <documentation>
-                  An unique ID used to identify this extension.
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="description" type="string">
-            <annotation>
-               <documentation>
-                  A human readable description of the extension.
-               </documentation>
-               <appinfo>
-                  <meta.attribute translatable="true"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-         <attribute name="class" type="string" use="required">
-            <annotation>
-               <documentation>
-                  A class that implements &lt;code&gt;IAtlasApplicationLayouter&lt;/code&gt;.
-               </documentation>
-               <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.polymap.atlas.IAtlasApplicationLayouter"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
-
    <annotation>
       <appinfo>
          <meta.section type="since"/>
       </appinfo>
       <documentation>
-         Atlas 1.0
+         [Enter the first release in which this extension point appears.]
       </documentation>
    </annotation>
 

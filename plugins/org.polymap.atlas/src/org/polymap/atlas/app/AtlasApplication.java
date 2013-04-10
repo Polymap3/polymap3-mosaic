@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas;
+package org.polymap.atlas.app;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +33,8 @@ import org.eclipse.core.runtime.Status;
 import org.polymap.core.CorePlugin;
 import org.polymap.core.runtime.Polymap;
 
+import org.polymap.atlas.AtlasPlugin;
+import org.polymap.atlas.IApplicationLayouter;
 import org.polymap.atlas.internal.AtlasComponentFactory;
 import org.polymap.atlas.internal.Messages;
 
@@ -117,9 +119,9 @@ public class AtlasApplication
     
     private Display                     display;
     
-    private IApplicationLayouter   appLayouter;
+    private IApplicationLayouter        appLayouter;
 
-    private Window                      appWindow;
+    private Window                      mainWindow;
     
     public AtlasApplication() {
     }
@@ -139,10 +141,10 @@ public class AtlasApplication
             display = PlatformUI.createDisplay();
             
             appLayouter = AtlasComponentFactory.instance().createApplicationLayouter();
-            appWindow = appLayouter.initMainWindow( display );
-            appWindow.open();
+            mainWindow = appLayouter.initMainWindow( display );
+            mainWindow.open();
             
-            Shell shell = appWindow.getShell();
+            Shell shell = mainWindow.getShell();
             while (!shell.isDisposed()) {
                 if (!display.readAndDispatch()) {
                     display.sleep();

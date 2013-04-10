@@ -3,10 +3,10 @@
 <schema targetNamespace="org.polymap.atlas" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.polymap.atlas" id="applicationLayouters" name="Atlas application layouter"/>
+         <meta.schema plugin="org.polymap.atlas" id="org.polymap.atlas.panels" name="Atlas Panels"/>
       </appinfo>
       <documentation>
-         Allows to register layouters for the main window and other aspects of an Atlas application.
+         Allows to register new panels for the Atlas UI.
       </documentation>
    </annotation>
 
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="applicationLayouter"/>
+            <element ref="panel"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,37 +47,22 @@
       </complexType>
    </element>
 
-   <element name="applicationLayouter">
-      <annotation>
-         <documentation>
-            Element description.
-         </documentation>
-      </annotation>
+   <element name="panel">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  An unique ID used to identify this extension.
+                  The unique identifier of this panel.
                </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="description" type="string">
-            <annotation>
-               <documentation>
-                  A human readable description of the extension.
-               </documentation>
-               <appinfo>
-                  <meta.attribute translatable="true"/>
-               </appinfo>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  A class that implements &lt;code&gt;IAtlasApplicationLayouter&lt;/code&gt;.
+                  A class that implements &lt;code&gt;IPanel&lt;/code&gt;.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.polymap.atlas.IAtlasApplicationLayouter"/>
+                  <meta.attribute kind="java" basedOn=":org.polymap.atlas.IPanel"/>
                </appinfo>
             </annotation>
          </attribute>

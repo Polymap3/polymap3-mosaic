@@ -24,8 +24,26 @@ import java.util.EventObject;
 public class PanelChangeEvent
         extends EventObject {
 
-    public PanelChangeEvent( Object source, IPanel oldPanel, IPanel newPanel ) {
+    /** The types of {@link PanelChangeEvent}. */
+    enum TYPE {
+        BEFORE_CLOSE,
+        AFTER_CLOSE,
+        BEFORE_OPEN,
+        AFTER_OPEN
+    }
+    
+    // instance *******************************************
+    
+    private TYPE            type;
+    
+    public PanelChangeEvent( IPanel source, TYPE type ) {
         super( source );
+        this.type = type;
     }
 
+    @Override
+    public IPanel getSource() {
+        return getSource();
+    }
+    
 }

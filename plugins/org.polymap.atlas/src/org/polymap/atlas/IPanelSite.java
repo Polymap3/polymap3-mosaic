@@ -22,13 +22,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 /**
- * Defines the interface an {@link IPanel} can use to initialize and manipulate
- * its UI.
+ * The interface between the {@link IPanel} and the Atlas UI.
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public interface IPanelSite {
 
+    /**
+     * The whole path of the panel including the name of the panel as last segment.
+     */
     public IPath getPath();
     
     /**

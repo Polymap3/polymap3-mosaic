@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.polymap.atlas.applicationLayouters" name="Atlas application layouters" schema="schema/applicationLayouters.exsd"/>
+   <extension-point id="org.polymap.atlas.applicationLayouters" name="Atlas Application Layouters" schema="schema/applicationLayouters.exsd"/>
+   <extension-point id="org.polymap.atlas.panels" name="Atlas Panels" schema="schema/panels.exsd"/>
    <extension
          point="org.eclipse.rap.ui.entrypoint">
       <entrypoint
-            class="org.polymap.atlas.AtlasApplication"
+            class="org.polymap.atlas.app.AtlasApplication"
             id="org.polymap.atlas.entrypoint"
             path="/atlas">
       </entrypoint>
@@ -16,6 +17,13 @@
             class="org.polymap.atlas.internal.desktop.DesktopApplicationManager"
             id="org.polymap.atlas.desktopApplicationLayouter">
       </applicationLayouter>
+   </extension>
+   <extension
+         point="org.polymap.atlas.panels">
+      <panel
+            class="org.polymap.atlas.app.DashboardPanel"
+            id="org.polymap.atlas.dashboard">
+      </panel>
    </extension>
 
 </plugin>
