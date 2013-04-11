@@ -64,7 +64,7 @@ abstract class DesktopApplicationWindow
         contents.setLayout( new FormLayout() );
 
         Composite navi = fillNavigationArea( contents );
-        navi.setLayoutData( SimpleFormData.filled().bottom( -1 ).create() );
+        navi.setLayoutData( SimpleFormData.filled().bottom( -1 ).height( 30 ).create() );
         
         Composite panels = fillPanelArea( contents );
         panels.setLayoutData( SimpleFormData.filled().top( navi, 10 ).create() );

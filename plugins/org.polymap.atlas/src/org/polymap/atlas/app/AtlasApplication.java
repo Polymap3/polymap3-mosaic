@@ -140,6 +140,8 @@ public class AtlasApplication
         try {
             display = PlatformUI.createDisplay();
             
+            log.info( "Display DPI: " + display.getDPI().x + "x" + display.getDPI().y );
+            
             appLayouter = AtlasComponentFactory.instance().createApplicationLayouter();
             mainWindow = appLayouter.initMainWindow( display );
             mainWindow.open();

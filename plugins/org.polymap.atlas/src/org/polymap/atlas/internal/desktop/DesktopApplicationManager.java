@@ -40,6 +40,7 @@ import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.internal.AtlasComponentFactory;
+import org.polymap.atlas.internal.desktop.DesktopPanelNavigator.PLACE;
 
 /**
  * 
@@ -64,11 +65,16 @@ public class DesktopApplicationManager
 
     @Override
     public Window initMainWindow( Display display ) {
+        // panel navigator
+        panelNavi = new DesktopPanelNavigator( context, tk );
+        panelNavi.add( new DesktopSearchField( ), PLACE.SEARCH );
+        
         // mainWindow
         mainWindow = new DesktopApplicationWindow( null ) {
             @Override
             protected Composite fillNavigationArea( Composite parent ) {
                 panelNavi = new DesktopPanelNavigator( context, tk );
+                panelNavi.add( new DesktopSearchField( ), PLACE.SEARCH );
                 return panelNavi.createContents( parent );
             }
             @Override

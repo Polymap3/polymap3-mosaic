@@ -14,12 +14,19 @@
  */
 package org.polymap.atlas.internal.desktop;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.action.IContributionItem;
+
+import org.polymap.core.project.ui.util.SimpleFormData;
 import org.polymap.core.runtime.event.EventHandler;
 
 import org.polymap.atlas.IAppContext;
@@ -35,9 +42,20 @@ class DesktopPanelNavigator {
 
     private static Log log = LogFactory.getLog( DesktopPanelNavigator.class );
 
-    private IAppContext             context;
+    enum PLACE {
+        SEARCH,
+        PANEL_TOOLBAR,
+        PANEL_NAVI,
+        PANEL_PATH
+    }
     
-    private IAtlasToolkit           tk;
+    // instance *******************************************
+    
+    private IAppContext                 context;
+    
+    private IAtlasToolkit               tk;
+    
+    private Map<PLACE,IContributionItem> items = new HashMap();
 
     
     public DesktopPanelNavigator( IAppContext context, IAtlasToolkit tk ) {
@@ -45,17 +63,34 @@ class DesktopPanelNavigator {
         this.tk = tk;
         context.addEventHandler( this );
     }
+
+    
+    public IContributionItem add( IContributionItem item, PLACE place ) {
+        return items.put( place, item );
+    }
     
     
     public Composite createContents( Composite parent ) {
         Composite contents = tk.createComposite( parent, SWT.BORDER );
+        FormLayout layout = new FormLayout();
+        layout.spacing = 10;
+        contents.setLayout( layout );
+
+        // search
+        IContributionItem search = items.get( PLACE.SEARCH );
+        if (search != null) {
+            Composite searchComposite = new Composite( contents, SWT.NONE );
+            search.fill( searchComposite );
+            
+            searchComposite.setLayoutData( SimpleFormData.filled().left( 80 ).right( 100 ).create() );
+        }
+        
         return contents;
     }
     
     
     @EventHandler(display=true)
     protected void panelChanged( PanelChangeEvent ev ) {
-        
     }
     
 }
