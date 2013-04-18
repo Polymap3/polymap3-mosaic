@@ -27,7 +27,7 @@ import org.polymap.core.qi4j.event.PropertyChangeSupport;
 /**
  *
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 @Concerns( {
     PropertyChangeSupport.Concern.class

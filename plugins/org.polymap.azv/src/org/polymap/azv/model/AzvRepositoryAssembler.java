@@ -38,7 +38,7 @@ import org.polymap.rhei.data.entitystore.lucene.LuceneEntityStoreService;
 /**
  *
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class AzvRepositoryAssembler
         extends QiModuleAssembler {

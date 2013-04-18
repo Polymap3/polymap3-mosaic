@@ -41,7 +41,7 @@ import org.polymap.azv.model.Schachtschein;
 /**
  *
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class StartPanel
         extends DefaultPanel

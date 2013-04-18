@@ -22,7 +22,7 @@ import org.polymap.rhei.data.entityfeature.catalog.EntityServiceImpl;
 /**
  * The catalog service for the biotop related features.
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class AzvService
         extends EntityServiceImpl
