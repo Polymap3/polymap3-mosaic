@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.polymap.atlas.panels">
+      <panel
+            class="org.polymap.azv.ui.StartPanel"
+            id="org.polymap.azv.StartPanel">
+      </panel>
+      <panel
+            class="org.polymap.azv.ui.SchachtscheinPanel"
+            id="org.polymap.azv.SchachtscheinPanel">
+      </panel>
+   </extension>
+   <extension
+         point="org.polymap.core.model.moduleAssemblers">
+      <assembler
+            class="org.polymap.azv.model.AzvRepositoryAssembler">
+      </assembler>
+   </extension>
+
+</plugin>

@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -20,17 +20,31 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.ui.forms.widgets.Section;
+
 /**
  * The factory for basic UI elements used by {@link IPanel} instances.
- * 
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ *
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public interface IAtlasToolkit {
 
+    /**
+     *
+     * @see Label#Label(Composite, int)
+     * @param parent
+     * @param text
+     * @param styles
+     * @return Newly created control instance.
+     */
     public Label createLabel( Composite parent, String text, int... styles );
-    
+
+    public Label createLink( Composite parent, String text, int... styles );
+
     public Button createPushButton( Composite parent, String text, Image icon, SelectionListener l );
 
     public Composite createComposite( Composite parent, int... styles );
-    
+
+    public Section createSection( Composite parent, String title, int... styles );
+
 }

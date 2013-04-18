@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -41,7 +41,7 @@ import org.polymap.core.security.AbstractLoginDialog;
 /**
  * Handles the callbacks to show an UI for the LoginModule.
  * 
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class LoginDialog
         extends AbstractLoginDialog {

@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -14,14 +14,21 @@
  */
 package org.polymap.atlas;
 
+import java.net.URL;
+
 import org.osgi.framework.BundleContext;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * 
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class AtlasPlugin
         extends AbstractUIPlugin {
@@ -51,5 +58,29 @@ public class AtlasPlugin
     public void stop( BundleContext context ) throws Exception {
         super.stop( context );
     }
+
     
+    public Image imageForDescriptor( ImageDescriptor imageDescriptor, String key ) {
+        ImageRegistry images = getImageRegistry();
+        Image image = images.get( key );
+        if (image == null || image.isDisposed()) {
+            images.put( key, imageDescriptor );
+            image = images.get( key );
+        }
+        return image;
+    }
+
+    
+    public Image imageForName( String resName ) {
+        ImageRegistry images = getImageRegistry();
+        Image image = images.get( resName );
+        if (image == null || image.isDisposed()) {
+            URL res = getBundle().getResource( resName );
+            assert res != null : "Image resource not found: " + resName;
+            images.put( resName, ImageDescriptor.createFromURL( res ) );
+            image = images.get( resName );
+        }
+        return image;
+    }
+
 }

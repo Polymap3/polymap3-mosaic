@@ -23,7 +23,7 @@ import org.polymap.atlas.AtlasPlugin;
 /**
  *
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class Messages {
 

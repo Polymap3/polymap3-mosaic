@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -19,17 +19,17 @@ import java.util.EventObject;
 /**
  * 
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class PanelChangeEvent
         extends EventObject {
 
     /** The types of {@link PanelChangeEvent}. */
-    enum TYPE {
-        BEFORE_CLOSE,
-        AFTER_CLOSE,
-        BEFORE_OPEN,
-        AFTER_OPEN
+    public enum TYPE {
+        CLOSING,
+        CLOSED,
+        OPENING,
+        OPENED
     }
     
     // instance *******************************************
@@ -43,7 +43,11 @@ public class PanelChangeEvent
 
     @Override
     public IPanel getSource() {
-        return getSource();
+        return (IPanel)super.getSource();
+    }
+
+    public TYPE getType() {
+        return type;
     }
     
 }

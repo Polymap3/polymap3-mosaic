@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Bräutigam. All rights reserved.
+ * Copyright 2013, Polymap GmbH. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -14,20 +14,21 @@
  */
 package org.polymap.atlas;
 
-import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.jface.window.Window;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * An application layouter is responsible of creating and maintaining the main
- * application window, including toolbar and statusbar.
- * 
+ * This annotation injects a value from the {@link IAppContext} into the annotated
+ * field of an {@link IPanel}.
+ *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IApplicationLayouter {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Context {
 
-    public Window initMainWindow( Display display );
-    
-    public void dispose();
-    
+    String key() default "";
+
 }

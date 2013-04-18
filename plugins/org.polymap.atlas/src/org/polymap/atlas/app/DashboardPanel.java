@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -14,58 +14,87 @@
  */
 package org.polymap.atlas.app;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 
+import org.polymap.core.project.ui.util.SimpleFormData;
+import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
+import org.polymap.atlas.PanelIdentifier;
 
 /**
- * 
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ *
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class DashboardPanel
         implements IPanel {
 
+    public static final PanelIdentifier     ID = new PanelIdentifier( "dashboard" );
+
     private IPanelSite      site;
-    
-    private IAppContext     context;   
-    
+
+    private IAppContext     context;
+
+
     @Override
     public boolean init( IPanelSite _site, IAppContext _context ) {
         this.site = _site;
         this.context = _context;
+
+        site.setTitle( "Dashboard" );
+
+        // info action
+        Image icon = JFaceResources.getImage( Dialog.DLG_IMG_MESSAGE_INFO );
+        Action infoAction = new Action( "Info" ) {
+            public void run() {
+                MessageDialog.openInformation( AtlasApplication.getShellToParentOn(),
+                        "Information", "Atlas Client Version: " + AtlasPlugin.getDefault().getBundle().getVersion() );
+            }
+        };
+        infoAction.setImageDescriptor( ImageDescriptor.createFromImage( icon ) );
+        infoAction.setToolTipText( "Version Information" );
+        site.addToolbarAction( infoAction );
         return true;
     }
+
 
     @Override
     public void dispose() {
     }
 
+
     @Override
-    public String getName() {
-        return "dashboard";
+    public PanelIdentifier id() {
+        return ID;
     }
+
 
     @Override
     public Composite createContents( Composite parent ) {
         Composite contents = site.toolkit().createComposite( parent );
         contents.setLayout( new FormLayout() );
-        
+
         Label l = site.toolkit().createLabel( contents, "Dashboard!" );
         l.setLayoutData( SimpleFormData.filled().create() );
-        
+
         return contents;
     }
 
+
     @Override
-    public IPanelSite getPanelSite() {
+    public IPanelSite getSite() {
         return site;
     }
-    
+
 }

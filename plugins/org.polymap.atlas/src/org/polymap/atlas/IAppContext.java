@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -14,55 +14,60 @@
  */
 package org.polymap.atlas;
 
-import org.eclipse.core.runtime.IPath;
+import com.google.common.base.Predicate;
+
+import org.polymap.core.runtime.event.EventFilter;
 
 /**
  * An app context is shared by all {@link IPanel} instances in the same panel
  * hierachy.
- * 
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ *
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public interface IAppContext {
 
     /**
-     * 
+     *
      *
      * @param parent The path of the panel to open.
      * @param name The name of the panel to open
      * @return Null if the given panels was not found.
      */
-    public IPanel openPanel( IPath parent, String name );
-    
+    public IPanel openPanel( PanelIdentifier panelId );
+
+    public IPanel openPanel( PanelIdentifier panelId, String contextKey, Object contextValue );
+
     /**
      * All direct children of the given path.
      *
+     * @see PanelFilters
      * @param path
      */
-    public Iterable<IPanel> panels( IPath path );
-    
+    public Iterable<IPanel> findPanels( Predicate<IPanel> filter );
+
     /**
      * Registers the given {@link EventHandler event handler} for event types:
      * <ul>
      * <li>{@link PanelChangeEvent}</li>
-     * </ul> 
+     * </ul>
      *
      * @see EventHandler
      * @see EventManager
      * @param handler
      */
-    public void addEventHandler( Object handler );
+    public void addEventHandler( Object handler, EventFilter<PanelChangeEvent>... filters );
 
     public void removeEventHandler( Object handler );
 
     /**
-     * 
+     *
      *
      * @param supplier The supplier to add. Must not be null.
      */
     public void addSupplier( ContextSupplier supplier );
 
     public void removeSupplier( ContextSupplier supplier );
-    
+
     /**
      * Retrieves the property for the given name from this context.
      *
@@ -71,15 +76,15 @@ public interface IAppContext {
      * @return The property for the given key.
      */
     public <T> T get( Object consumer, String key );
-    
+
 
     /**
-     * 
+     *
      */
     interface ContextSupplier {
 
-        public <T> T get( Object consumer, String key );
-            
+        public Object get( Object consumer, String key );
+
     }
-    
+
 }

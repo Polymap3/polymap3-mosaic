@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -28,34 +28,39 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.core.runtime.IStatus;
 
 import org.polymap.core.project.ui.util.SimpleFormData;
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventHandler;
 
-import org.polymap.atlas.IPanel;
+import org.polymap.atlas.PanelChangeEvent;
+import org.polymap.atlas.PanelChangeEvent.TYPE;
+import org.polymap.atlas.internal.desktop.DesktopAppManager.DesktopPanelSite;
 
 /**
  * The main application window for the desktop.
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
-abstract class DesktopApplicationWindow
+abstract class DesktopAppWindow
         extends ApplicationWindow {
 
-    private static Log log = LogFactory.getLog( DesktopApplicationWindow.class );
+    private static Log log = LogFactory.getLog( DesktopAppWindow.class );
 
-    private IPanel              activePanel;
-    
-    
-    public DesktopApplicationWindow( Shell parentShell ) {
-        super( parentShell );
+    private DesktopAppManager       appManager;
+
+
+    public DesktopAppWindow( DesktopAppManager appManager ) {
+        super( null );
+        this.appManager = appManager;
         addStatusLine();
-        addCoolBar( SWT.HORIZONTAL );
+        //addCoolBar( SWT.HORIZONTAL );
     }
 
-    
+
     protected abstract Composite fillNavigationArea( Composite parent );
 
     protected abstract Composite fillPanelArea( Composite parent );
 
-    
+
     @Override
     protected Control createContents( Composite parent ) {
         setStatus( "Status..." );
@@ -65,39 +70,38 @@ abstract class DesktopApplicationWindow
 
         Composite navi = fillNavigationArea( contents );
         navi.setLayoutData( SimpleFormData.filled().bottom( -1 ).height( 30 ).create() );
-        
+
         Composite panels = fillPanelArea( contents );
         panels.setLayoutData( SimpleFormData.filled().top( navi, 10 ).create() );
-        
-//        Label l = new Label( contents, SWT.NONE );
-//        l.setText( "Hallo..." );
-//        
-//        Button b = new Button( contents, SWT.PUSH );
-//        b.setText( "Push" );
-//        b.setLayoutData( new SimpleFormData().top( l, 10 ).create() );
-//        b.addSelectionListener( new SelectionAdapter() {
-//            public void widgetSelected( SelectionEvent e ) {
-//                log.info( "widgetSelected(): ..." );
-//            }
-//            public void widgetDefaultSelected( SelectionEvent e ) {
-//                log.info( "widgetDefaultSelected(): ..." );
-//            }
-//        });
+
+        appManager.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
+            public boolean apply( PanelChangeEvent input ) {
+                return input.getType() == TYPE.OPENED;
+            }
+        });
         return contents;
     }
 
-    
+
+    @EventHandler(display=true)
+    protected void panelChanged( PanelChangeEvent ev ) {
+        DesktopPanelSite panelSite = (DesktopPanelSite)ev.getSource().getSite();
+        getShell().setText( "Mosaic - " + panelSite.getTitle() );
+        getShell().layout();
+    }
+
+
     public void setStatus( IStatus status ) {
         assert status != null;
         if (status.getSeverity() == IStatus.ERROR) {
             getStatusLineManager().setErrorMessage( status.getMessage() );
         }
         else {
-            getStatusLineManager().setMessage( status.getMessage() );            
+            getStatusLineManager().setMessage( status.getMessage() );
         }
     }
 
-    
+
     @Override
     protected void configureShell( Shell shell ) {
         super.configureShell( shell );

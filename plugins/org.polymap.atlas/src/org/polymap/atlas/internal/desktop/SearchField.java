@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -31,35 +31,38 @@ import org.eclipse.jface.action.ContributionItem;
 
 import org.polymap.core.project.ui.util.SimpleFormData;
 
+import org.polymap.atlas.AtlasPlugin;
+
 /**
- * 
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ *
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
-class DesktopSearchField
+class SearchField
         extends ContributionItem {
 
-    private static Log log = LogFactory.getLog( DesktopSearchField.class );
-    
-    private Text            text;
-    
+    private static Log log = LogFactory.getLog( SearchField.class );
 
-    public DesktopSearchField() {
+    private Text            text;
+
+
+    public SearchField() {
         super();
     }
-    
-    
+
+
     @Override
     public void fill( Composite parent ) {
         parent.setLayout( new FormLayout() );
-        
+
         Button btn = new Button( parent, SWT.PUSH );
-        btn.setText( "Go" );
+        btn.setToolTipText( "Start search" );
+        btn.setImage( AtlasPlugin.getDefault().imageForName( "icons/zoom.png" ) );
         btn.setLayoutData( SimpleFormData.filled().left( -1 ).create() );
-        
+
         text = new Text( parent, SWT.SEARCH | SWT.CANCEL );
         text.setLayoutData( SimpleFormData.filled().right( btn ).create() );
-        
+
         text.setText( "Search..." );
         text.setForeground( Graphics.getColor( 0xa0, 0xa0, 0xa0 ) );
         text.addFocusListener( new FocusListener() {
@@ -75,7 +78,7 @@ class DesktopSearchField
             }
         });
 //        text.addModifyListener( new ModifyListener() {
-//            
+//
 //        });
     }
 

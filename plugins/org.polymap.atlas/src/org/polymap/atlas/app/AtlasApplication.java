@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -39,21 +39,21 @@ import org.polymap.atlas.internal.AtlasComponentFactory;
 import org.polymap.atlas.internal.Messages;
 
 /**
- * 
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ *
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public class AtlasApplication
         implements IEntryPoint {
 
     private static final Log log = LogFactory.getLog( AtlasApplication.class );
-    
-    
+
+
     /**
      * Return an appropriate shell to parent dialogs on. This will be one of the
      * workbench windows (the active one) should any exist. Otherwise
      * <code>null</code> is returned.
-     * 
+     *
      * @return The shell to parent on or <code>null</code> if there is no
      *         appropriate shell.
      */
@@ -61,19 +61,19 @@ public class AtlasApplication
         return Polymap.getSessionDisplay().getActiveShell();
     }
 
-    
+
     /**
      * @see #handleError(String, String, Throwable)
      */
     public static void handleError( final String msg, Throwable e ) {
-        handleError( AtlasPlugin.PLUGIN_ID, msg, e );    
+        handleError( AtlasPlugin.PLUGIN_ID, msg, e );
     }
-    
-    
+
+
     /**
      * Handle the given error by opening an error dialog and logging the given
      * message to the CorePlugin log.
-     * 
+     *
      * @param msg The error message. If null, then a standard message is used.
      * @param e The reason of the error, must not be null.
      */
@@ -88,7 +88,7 @@ public class AtlasApplication
             log.error( "No display -> no error message." );
             return;
         }
-        
+
         Runnable runnable = new Runnable() {
             public void run() {
                 try {
@@ -96,7 +96,7 @@ public class AtlasApplication
                     ErrorDialog dialog = new ErrorDialog(
                             shell,
                             Messages.get( "PolymapWorkbench_errorDialogTitle" ),
-                            msg != null ? msg : "Fehler beim Ausf¸hren der Operation.",
+                            msg != null ? msg : "Fehler beim Ausf√ºhren der Operation.",
                             status,
                             IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR );
 //                dialog.setBlockOnOpen( true );
@@ -114,15 +114,15 @@ public class AtlasApplication
         }
     }
 
-    
+
     // instance *******************************************
-    
+
     private Display                     display;
-    
+
     private IApplicationLayouter        appLayouter;
 
     private Window                      mainWindow;
-    
+
     public AtlasApplication() {
     }
 
@@ -135,17 +135,17 @@ public class AtlasApplication
 
         // security config / login
 //        Polymap.instance().login();
-        
-        // start workbench
-        try {
+
+        // start Atlas UI
+//        try {
             display = PlatformUI.createDisplay();
-            
+
             log.info( "Display DPI: " + display.getDPI().x + "x" + display.getDPI().y );
-            
+
             appLayouter = AtlasComponentFactory.instance().createApplicationLayouter();
             mainWindow = appLayouter.initMainWindow( display );
             mainWindow.open();
-            
+
             Shell shell = mainWindow.getShell();
             while (!shell.isDisposed()) {
                 if (!display.readAndDispatch()) {
@@ -155,12 +155,12 @@ public class AtlasApplication
             log.info( "Exiting..." );
             display.dispose();
             return PlatformUI.RETURN_OK;
-        }
-        catch (Exception e) {
-            // 
-            handleError( CorePlugin.PLUGIN_ID, e.getLocalizedMessage(), e );
-            return PlatformUI.RETURN_OK;
-        }
+//        }
+//        catch (Exception e) {
+//            //
+//            handleError( CorePlugin.PLUGIN_ID, e.getLocalizedMessage(), e );
+//            return PlatformUI.RETURN_OK;
+//        }
     }
-    
+
 }

@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -17,42 +17,45 @@ package org.polymap.atlas;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 /**
  * The interface between the {@link IPanel} and the Atlas UI.
- * 
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ *
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 public interface IPanelSite {
 
     /**
      * The whole path of the panel including the name of the panel as last segment.
      */
-    public IPath getPath();
-    
+    public PanelPath getPath();
+
     /**
      * Changes the status of the panel. {@link Status#OK_STATUS} signals that the
      * panel has valid state. If status is not valid then the given message is
      * displayed.
-     * 
+     *
      * @param status The current status of the panel. {@link Status#OK_STATUS}
      *        signals that the panel has valid state.
      */
     public void changeStatus( IStatus status );
-    
+
     public void addToolbarAction( IAction action );
-    
+
     public void addToolbarItem( IContributionItem item );
-    
+
     public void addSidekick();
-    
+
     public IAtlasToolkit toolkit();
-    
+
+    public void setTitle( String string );
+
+    public String getTitle();
+
 //    /**
-//     * Registers the given {@link EventHandler event handler}. 
+//     * Registers the given {@link EventHandler event handler}.
 //     *
 //     * @see EventHandler
 //     * @see EventManager
@@ -61,5 +64,5 @@ public interface IPanelSite {
 //    public void addEventHandler( Object handler );
 //
 //    public void removeEventHandler( Object handler );
-    
+
 }

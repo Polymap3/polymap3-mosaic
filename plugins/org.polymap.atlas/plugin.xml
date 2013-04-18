@@ -12,9 +12,18 @@
       </entrypoint>
    </extension>
    <extension
+         point="org.eclipse.rap.ui.branding">
+      <branding
+            defaultEntrypointId="org.polymap.atlas.entrypoint"
+            id="org.polymap.atlas.branding"
+            servletName="atlas"
+            title="Mosaic">
+      </branding>
+   </extension>
+   <extension
          point="org.polymap.atlas.applicationLayouters">
       <applicationLayouter
-            class="org.polymap.atlas.internal.desktop.DesktopApplicationManager"
+            class="org.polymap.atlas.internal.desktop.DesktopAppManager"
             id="org.polymap.atlas.desktopApplicationLayouter">
       </applicationLayouter>
    </extension>

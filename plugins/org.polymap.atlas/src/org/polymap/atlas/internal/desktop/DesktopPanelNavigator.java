@@ -1,6 +1,6 @@
-/* 
+/*
  * polymap.org
- * Copyright 2013, Falko Br‰utigam. All rights reserved.
+ * Copyright 2013, Falko Br√§utigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -34,9 +34,9 @@ import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.PanelChangeEvent;
 
 /**
- * 
  *
- * @author <a href="http://www.polymap.de">Falko Br‰utigam</a>
+ *
+ * @author <a href="http://www.polymap.de">Falko Br√§utigam</a>
  */
 class DesktopPanelNavigator {
 
@@ -46,51 +46,76 @@ class DesktopPanelNavigator {
         SEARCH,
         PANEL_TOOLBAR,
         PANEL_NAVI,
-        PANEL_PATH
+        PANEL_SWITCHER
     }
-    
+
     // instance *******************************************
-    
+
     private IAppContext                 context;
-    
+
     private IAtlasToolkit               tk;
-    
+
     private Map<PLACE,IContributionItem> items = new HashMap();
 
-    
+
     public DesktopPanelNavigator( IAppContext context, IAtlasToolkit tk ) {
         this.context = context;
         this.tk = tk;
         context.addEventHandler( this );
     }
 
-    
+
     public IContributionItem add( IContributionItem item, PLACE place ) {
         return items.put( place, item );
     }
-    
-    
+
+
     public Composite createContents( Composite parent ) {
-        Composite contents = tk.createComposite( parent, SWT.BORDER );
+        Composite contents = tk.createComposite( parent );
         FormLayout layout = new FormLayout();
         layout.spacing = 10;
         contents.setLayout( layout );
 
         // search
         IContributionItem search = items.get( PLACE.SEARCH );
+        Composite searchComposite = null;
         if (search != null) {
-            Composite searchComposite = new Composite( contents, SWT.NONE );
+            searchComposite = new Composite( contents, SWT.NONE );
             search.fill( searchComposite );
-            
             searchComposite.setLayoutData( SimpleFormData.filled().left( 80 ).right( 100 ).create() );
         }
-        
+        // panel toolbar
+        IContributionItem tb = items.get( PLACE.PANEL_TOOLBAR );
+        Composite tbComposite = null;
+        if (tb != null) {
+            tbComposite = new Composite( contents, SWT.NONE );
+            tb.fill( tbComposite );
+            tbComposite.setLayoutData( searchComposite != null
+                    ? SimpleFormData.filled().left( 60 ).right( searchComposite ).create()
+                    : SimpleFormData.filled().left( 80 ).right( 100 ).create());
+        }
+        // panel switcher
+        IContributionItem switcher = items.get( PLACE.PANEL_SWITCHER );
+        Composite switcherComposite = null;
+        if (switcher != null) {
+            switcherComposite = new Composite( contents, SWT.NONE );
+            switcher.fill( switcherComposite );
+            switcherComposite.setLayoutData( SimpleFormData.filled().left( -1 ).right( tbComposite ).create() );
+        }
+        // panel navi
+        IContributionItem navi = items.get( PLACE.PANEL_NAVI );
+        if (navi != null) {
+            Composite naviComposite = new Composite( contents, SWT.NONE );
+            navi.fill( naviComposite );
+            naviComposite.setLayoutData( SimpleFormData.filled().right( switcherComposite ).create() );
+        }
+
         return contents;
     }
-    
-    
+
+
     @EventHandler(display=true)
     protected void panelChanged( PanelChangeEvent ev ) {
     }
-    
+
 }
