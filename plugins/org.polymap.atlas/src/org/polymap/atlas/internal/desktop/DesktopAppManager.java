@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Predicate;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -33,6 +33,8 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.atlas.IApplicationLayouter;
@@ -89,7 +91,7 @@ public class DesktopAppManager
             @Override
             protected Composite fillPanelArea( Composite parent ) {
                 panelArea = tk.createComposite( parent, SWT.BORDER );
-                panelArea.setLayout( new FormLayout() );
+                panelArea.setLayout( new FillLayout( SWT.VERTICAL ) );
                 tk.createLabel( panelArea, "Panels..." );
                 return panelArea;
             }
@@ -143,10 +145,11 @@ public class DesktopAppManager
             throw new IllegalStateException( "No panel for ID: " + panelId );
         }
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENING ) );
-        panel.createContents( panelArea );
+        Composite panelContents = panel.createContents( panelArea );
+//        panelContents.setLayoutData( SimpleFormData.filled().create() );
+        panelArea.layout( true );
         activePanel = panel;
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENED ) );
-        panelArea.layout( true );
 
         return activePanel;
     }
@@ -182,6 +185,8 @@ public class DesktopAppManager
 
         /** Toolbar tools: {@link IAction} or {@link IContributionItem}. */
         private List                tools = new ArrayList();
+        
+        private IStatus             status = Status.OK_STATUS;
 
 
         protected DesktopPanelSite( PanelPath path ) {
@@ -195,8 +200,14 @@ public class DesktopAppManager
         }
 
         @Override
-        public void changeStatus( IStatus status ) {
+        public void setStatus( IStatus status ) {
+            this.status = status;
             mainWindow.setStatus( status );
+        }
+
+        @Override
+        public IStatus getStatus() {
+            return status;
         }
 
         @Override

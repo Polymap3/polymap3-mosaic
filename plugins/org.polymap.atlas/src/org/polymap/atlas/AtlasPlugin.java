@@ -37,7 +37,7 @@ public class AtlasPlugin
 
     private static AtlasPlugin          plugin;
     
-    public static AtlasPlugin getDefault() {
+    public static AtlasPlugin instance() {
         return plugin;
     }
 
@@ -57,6 +57,7 @@ public class AtlasPlugin
     @Override
     public void stop( BundleContext context ) throws Exception {
         super.stop( context );
+        plugin = null;
     }
 
     

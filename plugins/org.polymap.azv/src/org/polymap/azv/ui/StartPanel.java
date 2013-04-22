@@ -21,13 +21,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.eclipse.ui.forms.widgets.Section;
+
+import org.polymap.core.project.ui.util.SimpleFormData;
 
 import org.polymap.atlas.DefaultPanel;
 import org.polymap.atlas.IAppContext;
@@ -69,19 +71,28 @@ public class StartPanel
     public Composite createContents( Composite parent ) {
         getSite().setTitle( "AZV" );
         Composite contents = getSite().toolkit().createComposite( parent );
-        contents.setLayout( new FillLayout() );
-        createLinkSection( contents );
+        contents.setLayout( new FormLayout() );
+        
+//        Label l = getSite().toolkit().createLabel( contents, "AZV", SWT.BORDER );
+//        l.setLayoutData( SimpleFormData.filled().left( 20 ).right( 80 ).width( 500 ).create() );
+        
+        Composite links = getSite().toolkit().createComposite( contents );
+        links.setLayout( new FillLayout() );
+        links.setLayoutData( SimpleFormData.filled().left( 30 ).right( 70 ).width( 500 ).create() );
+        Section section = createLinkSection( links );
         return contents;
     }
 
 
     protected Section createLinkSection( Composite parent ) {
-        Section section = getSite().toolkit().createSection( parent, "Aufgaben", Section.TITLE_BAR );
-        Composite client = (Composite)section.getClient();
+//        Section section = getSite().toolkit().createSection( parent, "Aufgaben", Section.TITLE_BAR );
+//        Composite client = (Composite)section.getClient();
+//
+//        client.setLayout( RowLayoutFactory.fillDefaults().type( SWT.VERTICAL ).create() );
 
-        client.setLayout( RowLayoutFactory.fillDefaults().type( SWT.VERTICAL ).create() );
-
-        Label l1 = getSite().toolkit().createLink( client, "Schachtschein beantragen" );
+        parent.setLayout( RowLayoutFactory.fillDefaults().fill( true ).type( SWT.VERTICAL ).create() );
+        
+        Button l1 = getSite().toolkit().createButton( parent, "Schachtschein beantragen", SWT.PUSH );
         l1.setToolTipText( "Einen neuen Schachtschein beantragen" );
         l1.setLayoutData( RowDataFactory.swtDefaults().create() );
         l1.addMouseListener( new MouseAdapter() {
@@ -97,7 +108,10 @@ public class StartPanel
             }
         });
 
-        return section;
+        Button b2 = getSite().toolkit().createButton( parent, "Auskunft Wasserhärte", SWT.PUSH );
+        b2.setLayoutData( RowDataFactory.swtDefaults().create() );
+        
+        return null; //section;
     }
 
 }

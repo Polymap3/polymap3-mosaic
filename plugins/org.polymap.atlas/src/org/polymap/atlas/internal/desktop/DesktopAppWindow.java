@@ -31,6 +31,7 @@ import org.polymap.core.project.ui.util.SimpleFormData;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 
+import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.PanelChangeEvent;
 import org.polymap.atlas.PanelChangeEvent.TYPE;
 import org.polymap.atlas.internal.desktop.DesktopAppManager.DesktopPanelSite;
@@ -93,11 +94,20 @@ abstract class DesktopAppWindow
 
     public void setStatus( IStatus status ) {
         assert status != null;
-        if (status.getSeverity() == IStatus.ERROR) {
-            getStatusLineManager().setErrorMessage( status.getMessage() );
-        }
-        else {
-            getStatusLineManager().setMessage( status.getMessage() );
+        switch (status.getSeverity()) {
+            case IStatus.ERROR: {
+                getStatusLineManager().setErrorMessage( 
+                        AtlasPlugin.instance().imageForName( "icons/errorstate.gif" ), status.getMessage() );
+                break;
+            }
+            case IStatus.WARNING: {
+                getStatusLineManager().setMessage( 
+                        AtlasPlugin.instance().imageForName( "icons/warningstate.gif" ), status.getMessage() );
+                break;
+            }
+            default: {
+                getStatusLineManager().setMessage( status.getMessage() );
+            }
         }
     }
 

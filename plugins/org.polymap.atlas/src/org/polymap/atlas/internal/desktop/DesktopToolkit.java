@@ -68,9 +68,12 @@ public class DesktopToolkit
     }
 
     @Override
-    public Button createPushButton( Composite parent, String text, Image icon, SelectionListener l ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+    public Button createButton( Composite parent, String text, int... styles ) {
+        Button control = adapt( new Button( parent, stylebits( styles ) ), true, true );
+        if (text != null) {
+            control.setText( text );
+        }
+        return control;
     }
 
     @Override

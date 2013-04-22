@@ -59,7 +59,7 @@ public class DashboardPanel
         Action infoAction = new Action( "Info" ) {
             public void run() {
                 MessageDialog.openInformation( AtlasApplication.getShellToParentOn(),
-                        "Information", "Atlas Client Version: " + AtlasPlugin.getDefault().getBundle().getVersion() );
+                        "Information", "Atlas Client Version: " + AtlasPlugin.instance().getBundle().getVersion() );
             }
         };
         infoAction.setImageDescriptor( ImageDescriptor.createFromImage( icon ) );

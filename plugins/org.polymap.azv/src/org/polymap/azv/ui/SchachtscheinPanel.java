@@ -18,8 +18,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.rhei.data.entityfeature.PropertyAdapter;
-import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 
 import org.polymap.atlas.Context;
@@ -28,6 +31,7 @@ import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
 import org.polymap.atlas.app.DefaultFormPanel;
+import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.model.Schachtschein;
 
 /**
@@ -68,9 +72,10 @@ public class SchachtscheinPanel
     @Override
     public void createFormContent( IFormEditorPageSite pageSite ) {
         getSite().setTitle( "Schachtschein" );
-        Composite beschreibung = pageSite.newFormField( pageSite.getPageBody(),
-                new PropertyAdapter( entity.beschreibung() ),
-                new StringFormField(), null );
+        getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Es fehlen noch Eingaben..." ) );
+
+        Composite beschreibung = new FormFieldBuilder( new PropertyAdapter( entity.beschreibung() ) ).create();
+        Composite bemerkungen = new FormFieldBuilder( new PropertyAdapter( entity.bemerkungen() ) ).create();
     }
 
 

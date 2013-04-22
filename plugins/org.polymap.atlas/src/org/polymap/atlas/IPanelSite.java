@@ -40,8 +40,10 @@ public interface IPanelSite {
      * @param status The current status of the panel. {@link Status#OK_STATUS}
      *        signals that the panel has valid state.
      */
-    public void changeStatus( IStatus status );
+    public void setStatus( IStatus status );
 
+    public IStatus getStatus();
+    
     public void addToolbarAction( IAction action );
 
     public void addToolbarItem( IContributionItem item );

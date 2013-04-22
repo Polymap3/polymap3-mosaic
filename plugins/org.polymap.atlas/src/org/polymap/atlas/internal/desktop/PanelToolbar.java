@@ -124,7 +124,7 @@ class PanelToolbar
                     }
                     ImageDescriptor image = action.getImageDescriptor();
                     if (image != null) {
-                        item.setImage( AtlasPlugin.getDefault().imageForDescriptor( image, action.getText() + "_icon" ) );
+                        item.setImage( AtlasPlugin.instance().imageForDescriptor( image, action.getText() + "_icon" ) );
                     }
                     item.addSelectionListener( new SelectionAdapter() {
                         public void widgetSelected( SelectionEvent se ) {

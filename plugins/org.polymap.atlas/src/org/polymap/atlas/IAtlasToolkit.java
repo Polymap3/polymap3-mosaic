@@ -14,8 +14,6 @@
  */
 package org.polymap.atlas;
 
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -41,7 +39,7 @@ public interface IAtlasToolkit {
 
     public Label createLink( Composite parent, String text, int... styles );
 
-    public Button createPushButton( Composite parent, String text, Image icon, SelectionListener l );
+    public Button createButton( Composite parent, String text, int... styles );
 
     public Composite createComposite( Composite parent, int... styles );
 

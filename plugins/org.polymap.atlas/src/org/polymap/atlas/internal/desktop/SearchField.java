@@ -57,7 +57,7 @@ class SearchField
 
         Button btn = new Button( parent, SWT.PUSH );
         btn.setToolTipText( "Start search" );
-        btn.setImage( AtlasPlugin.getDefault().imageForName( "icons/zoom.png" ) );
+        btn.setImage( AtlasPlugin.instance().imageForName( "icons/zoom.png" ) );
         btn.setLayoutData( SimpleFormData.filled().left( -1 ).create() );
 
         text = new Text( parent, SWT.SEARCH | SWT.CANCEL );
