@@ -81,14 +81,12 @@ public class DashboardPanel
 
 
     @Override
-    public Composite createContents( Composite parent ) {
+    public void createContents( Composite parent ) {
         Composite contents = site.toolkit().createComposite( parent );
         contents.setLayout( new FormLayout() );
 
         Label l = site.toolkit().createLabel( contents, "Dashboard!" );
         l.setLayoutData( SimpleFormData.filled().create() );
-
-        return contents;
     }
 
 

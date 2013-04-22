@@ -26,10 +26,12 @@ public abstract class DefaultPanel
         implements IPanel {
 
     private static Log log = LogFactory.getLog( DefaultPanel.class );
+    
+    public static final int     DEFAULTS_SPACING = 20;
 
-    private IPanelSite      site;
+    private IPanelSite          site;
 
-    private IAppContext     context;
+    private IAppContext         context;
 
 
     /**

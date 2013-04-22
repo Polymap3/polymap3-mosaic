@@ -145,7 +145,7 @@ public class DesktopAppManager
             throw new IllegalStateException( "No panel for ID: " + panelId );
         }
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENING ) );
-        Composite panelContents = panel.createContents( panelArea );
+        panel.createContents( panelArea );
 //        panelContents.setLayoutData( SimpleFormData.filled().create() );
         panelArea.layout( true );
         activePanel = panel;

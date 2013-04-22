@@ -15,10 +15,8 @@
 package org.polymap.atlas.internal.desktop;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,7 +29,6 @@ import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.widgets.Section;
-
 import org.polymap.core.runtime.Polymap;
 
 import org.polymap.atlas.IAtlasToolkit;
@@ -85,6 +82,7 @@ public class DesktopToolkit
     public Section createSection( Composite parent, String title, int... styles ) {
         Section result = adapt( new Section( parent, stylebits( styles ) | SWT.NO_FOCUS ) );
         result.setText( title );
+        result.setExpanded( true );
 
         result.setMenu( parent.getMenu() );
 //        if (result.toggle != null) {
@@ -108,8 +106,8 @@ public class DesktopToolkit
         FontData[] defaultFont = parent.getFont().getFontData();
         FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
         result.setFont( Graphics.getFont( bold ) );
-        result.setTitleBarForeground( Graphics.getColor( new RGB( 0x80, 0x80, 0xb0 ) ) );
-        result.setTitleBarBackground( Graphics.getColor( new RGB( 0xd0, 0xd0, 0xe0 ) ) );
+        result.setTitleBarForeground( Graphics.getColor( new RGB( 0x54, 0x82, 0xb4 ) ) );  //#5482B4
+        result.setTitleBarBackground( Graphics.getColor( new RGB( 0xd7, 0xeb, 0xff ) ) );  //#D7EBFF
         result.setTitleBarBorderColor( Graphics.getColor( new RGB( 0x80, 0x80, 0xa0 ) ) );
 
         Composite client = createComposite( result );

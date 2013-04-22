@@ -18,21 +18,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.eclipse.ui.forms.widgets.Section;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.DefaultPanel;
 import org.polymap.atlas.IAppContext;
+import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
@@ -53,10 +60,14 @@ public class StartPanel
 
     public static final PanelIdentifier ID = new PanelIdentifier( "azvstart" );
 
+    /** Just for convenience, same as <code>getSite().toolkit()</code>. */
+    private IAtlasToolkit               tk;
+    
 
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
+        this.tk = site.toolkit();
         return site.getPath().size() == 1;
     }
 
@@ -68,50 +79,125 @@ public class StartPanel
 
 
     @Override
-    public Composite createContents( Composite parent ) {
+    public void createContents( Composite parent ) {
         getSite().setTitle( "AZV" );
-        Composite contents = getSite().toolkit().createComposite( parent );
-        contents.setLayout( new FormLayout() );
+        parent.setLayout( FormLayoutFactory.defaults().margins( DEFAULTS_SPACING ).create() );
+
+        Composite contents = tk.createComposite( parent );
+        contents.setLayoutData( FormDataFactory.offset( 0 ).left( 30 ).right( 70 ).width( 500 ).create() );
+        contents.setLayout( FormLayoutFactory.defaults().spacing( DEFAULTS_SPACING*2 ).create() );
         
-//        Label l = getSite().toolkit().createLabel( contents, "AZV", SWT.BORDER );
-//        l.setLayoutData( SimpleFormData.filled().left( 20 ).right( 80 ).width( 500 ).create() );
-        
-        Composite links = getSite().toolkit().createComposite( contents );
-        links.setLayout( new FillLayout() );
-        links.setLayoutData( SimpleFormData.filled().left( 30 ).right( 70 ).width( 500 ).create() );
-        Section section = createLinkSection( links );
-        return contents;
+        Composite welcome = createWelcomeSection( contents );
+        welcome.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
+
+        Composite mosaic = createMosaicSection( contents );
+        mosaic.setLayoutData( FormDataFactory.filled().bottom( -1 ).top( welcome ).create() );
+
+        Composite actions = createActionsSection( contents );
+        actions.setLayoutData( FormDataFactory.filled().top( mosaic ).create() );
     }
 
+    
+    protected Composite createWelcomeSection( Composite parent ) {
+        Composite section = tk.createComposite( parent );
+        section.setLayout( new FillLayout() );
+        String msg = "Willkommen im Web-Portal der GKU\n\n"
+                + "Sie können verschiedene Vorgänge auslösen und Anträge stellen. Sie werden dann durch weitere Eingaben geführt.\n\n"
+                + "Außerdem können Sie den Stand von bereits ausgelösten Vorgängen hier überprüfen.";
+        tk.createLabel( section, msg, SWT.CENTER, SWT.SHADOW_IN, SWT.WRAP );
+        return section;
+    }
 
-    protected Section createLinkSection( Composite parent ) {
-//        Section section = getSite().toolkit().createSection( parent, "Aufgaben", Section.TITLE_BAR );
-//        Composite client = (Composite)section.getClient();
-//
-//        client.setLayout( RowLayoutFactory.fillDefaults().type( SWT.VERTICAL ).create() );
+    
+    protected Section createMosaicSection( Composite parent ) {
+        Section section = getSite().toolkit().createSection( parent, "Laufende Vorgänge", Section.TITLE_BAR );
+        Composite client = (Composite)section.getClient();
 
-        parent.setLayout( RowLayoutFactory.fillDefaults().fill( true ).type( SWT.VERTICAL ).create() );
-        
-        Button l1 = getSite().toolkit().createButton( parent, "Schachtschein beantragen", SWT.PUSH );
-        l1.setToolTipText( "Einen neuen Schachtschein beantragen" );
-        l1.setLayoutData( RowDataFactory.swtDefaults().create() );
-        l1.addMouseListener( new MouseAdapter() {
-            public void mouseUp( MouseEvent ev ) {
-                try {
-                    log.info( "Schachtschein!" );
-                    Schachtschein entity = AzvRepository.instance().newSchachtschein();
-                    getContext().openPanel( SchachtscheinPanel.ID, "entity", entity );
+        client.setLayout( RowLayoutFactory.fillDefaults().fill( true ).type( SWT.VERTICAL ).create() );
+        tk.createLabel( client, "Keine Vorgänge." );
+        return section;
+    }
+    
+    
+    protected Section createActionsSection( Composite parent ) {
+        Section section = getSite().toolkit().createSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );
+        Composite client = (Composite)section.getClient();
+
+        client.setLayout( RowLayoutFactory.fillDefaults().fill( true ).type( SWT.VERTICAL ).create() );
+
+        createActionButton( client, "Auskunft Wasserhärten und Qualitäten", "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
+                new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent e ) {
+                        // XXX Auto-generated method stub
+                        throw new RuntimeException( "not yet implemented." );
+                    }
                 }
-                catch (Exception e) {
-                    AtlasApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+        );
+        createActionButton( client, "Entsorgung von Abwasserbeseitigungsanlagen", "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
+                new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent e ) {
+                        // XXX Auto-generated method stub
+                        throw new RuntimeException( "not yet implemented." );
+                    }
                 }
+        );
+        createActionButton( client, "Hydrantentmanagement", "Hydrantentpläne",
+                new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent e ) {
+                        // XXX Auto-generated method stub
+                        throw new RuntimeException( "not yet implemented." );
+                    }
+                }
+        );
+        createActionButton( client, "Auskunft zum technischen Anlagen", "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
+                new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent e ) {
+                        // XXX Auto-generated method stub
+                        throw new RuntimeException( "not yet implemented." );
+                    }
+                }
+        );
+        createActionButton( client, "Antrag für Schachtscheine", "Antrag für Schachtscheine",
+                new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent ev ) {
+                        try {
+                            log.info( "Schachtschein!" );
+                            Schachtschein entity = AzvRepository.instance().newSchachtschein();
+                            getContext().openPanel( SchachtscheinPanel.ID, "entity", entity );
+                        }
+                        catch (Exception e) {
+                            AtlasApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                        }
+                    }
+                }
+        );
+        createActionButton( client, "Auskunft zu dinglichen Rechten", "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
+                new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent e ) {
+                        // XXX Auto-generated method stub
+                        throw new RuntimeException( "not yet implemented." );
+                    }
+                }
+        );
+        return section;
+    }
+
+    
+    protected Control createActionButton( Composite client, String title, String tooltip, final SelectionListener l ) {
+        Button result = tk.createButton( client, title+"...", SWT.PUSH, SWT.LEFT, SWT.FLAT );
+        result.setToolTipText( tooltip );
+        result.setImage( AtlasPlugin.instance().imageForName( "icons/run.gif" ) );
+        result.setLayoutData( RowDataFactory.swtDefaults().create() );
+        result.addMouseListener( new MouseListener() {
+            public void mouseUp( MouseEvent e ) {
+                l.widgetSelected( null );
+            }
+            public void mouseDown( MouseEvent e ) {
+            }
+            public void mouseDoubleClick( MouseEvent e ) {
+                l.widgetSelected( null );
             }
         });
-
-        Button b2 = getSite().toolkit().createButton( parent, "Auskunft Wasserhärte", SWT.PUSH );
-        b2.setLayoutData( RowDataFactory.swtDefaults().create() );
-        
-        return null; //section;
+        return result;
     }
-
 }

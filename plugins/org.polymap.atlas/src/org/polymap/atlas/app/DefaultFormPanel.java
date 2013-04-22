@@ -67,7 +67,7 @@ public abstract class DefaultFormPanel
 
 
     @Override
-    public final Composite createContents( Composite parent ) {
+    public final void createContents( Composite parent ) {
         Composite contents = getSite().toolkit().createComposite( parent );
         contents.setLayout( new FillLayout( SWT.VERTICAL ) );
 
@@ -75,8 +75,6 @@ public abstract class DefaultFormPanel
         pageBody = contents;
         pageSite = new PageContainer( this );
         createFormContent( pageSite );
-
-        return contents;
     }
 
 

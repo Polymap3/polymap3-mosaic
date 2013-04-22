@@ -14,6 +14,7 @@
  */
 package org.polymap.atlas;
 
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -42,7 +43,15 @@ public interface IPanel {
 
     public PanelIdentifier id();
 
-    public Composite createContents( Composite parent );
+    /**
+     * Creates the UI elements of this panel. 
+     * <p/>
+     * By default {@link FillLayout} is used for the <code>panelBody</code>. This can
+     * be changed as needed.
+     * 
+     * @param panelBody The parent of the UI elements to create.
+     */
+    public void createContents( Composite panelBody );
 
     public IPanelSite getSite();
 }
