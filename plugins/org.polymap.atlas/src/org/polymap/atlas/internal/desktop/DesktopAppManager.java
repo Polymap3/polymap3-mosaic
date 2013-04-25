@@ -118,14 +118,15 @@ public class DesktopAppManager
      * @param panelId
      * @throws IllegalStateException If no panel could be found for the given id.
      */
-    protected IPanel openPanel( PanelIdentifier panelId ) {
+    protected IPanel openPanel( final PanelIdentifier panelId ) {
         // find and initialize panels
         final PanelPath prefix = activePanel != null ? activePanel.getSite().getPath() : PanelPath.ROOT;
         List<IPanel> panels = AtlasComponentFactory.instance().createPanels( new Predicate<IPanel>() {
             public boolean apply( IPanel panel ) {
                 new PanelContextInjector( panel, context ).run();
                 PanelPath path = prefix.append( panel.id() );
-                return panel.init( new DesktopPanelSite( path ), context );
+                boolean wantsToBeShown = panel.init( new DesktopPanelSite( path ), context );
+                return panel.id().equals( panelId ) || wantsToBeShown;
             }
         });
 
@@ -170,6 +171,11 @@ public class DesktopAppManager
         public IPanel openPanel( PanelIdentifier panelId ) {
             return DesktopAppManager.this.openPanel( panelId );
         }
+
+        @Override
+        public void closePanel() {
+        }
+        
     }
 
 

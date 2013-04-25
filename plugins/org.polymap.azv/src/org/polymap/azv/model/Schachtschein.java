@@ -43,6 +43,9 @@ public interface Schachtschein
 
     @Optional
     Property<LineString>        geom();
+    
+    @Optional
+    Property<PersonValue>       antragsteller();
 
     @Optional
     Property<String>            beschreibung();

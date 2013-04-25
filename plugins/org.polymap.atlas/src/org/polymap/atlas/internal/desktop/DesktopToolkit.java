@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.rwt.graphics.Graphics;
 import org.eclipse.rwt.lifecycle.WidgetUtil;
@@ -69,6 +70,15 @@ public class DesktopToolkit
         Button control = adapt( new Button( parent, stylebits( styles ) ), true, true );
         if (text != null) {
             control.setText( text );
+        }
+        return control;
+    }
+    
+    @Override
+    public Text createText( Composite parent, String defaultText, int... styles ) {
+        Text control = adapt( new Text( parent, stylebits( styles ) ), true, true );
+        if (defaultText != null) {
+            control.setText( defaultText );
         }
         return control;
     }

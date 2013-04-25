@@ -17,6 +17,7 @@ package org.polymap.atlas;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.forms.widgets.Section;
 
@@ -44,5 +45,7 @@ public interface IAtlasToolkit {
     public Composite createComposite( Composite parent, int... styles );
 
     public Section createSection( Composite parent, String title, int... styles );
+
+    public Text createText( Composite parent, String defaultText, int... styles );
 
 }

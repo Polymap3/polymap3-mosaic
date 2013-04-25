@@ -28,11 +28,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.eclipse.ui.forms.widgets.Section;
 
+import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
@@ -90,8 +90,15 @@ public class StartPanel
         Composite welcome = createWelcomeSection( contents );
         welcome.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
 
-        Composite mosaic = createMosaicSection( contents );
-        mosaic.setLayoutData( FormDataFactory.filled().bottom( -1 ).top( welcome ).create() );
+        Composite mosaic = null;
+        if (getContext().get( this, "user" ) == null) {
+            mosaic = createLoginSection( contents );
+            mosaic.setLayoutData( FormDataFactory.filled().bottom( -1 ).top( welcome ).create() );
+        }
+        else {
+            mosaic = createMosaicSection( contents );
+            mosaic.setLayoutData( FormDataFactory.filled().bottom( -1 ).top( welcome ).create() );
+        }
 
         Composite actions = createActionsSection( contents );
         actions.setLayoutData( FormDataFactory.filled().top( mosaic ).create() );
@@ -102,14 +109,30 @@ public class StartPanel
         Composite section = tk.createComposite( parent );
         section.setLayout( new FillLayout() );
         String msg = "Willkommen im Web-Portal der GKU\n\n"
-                + "Sie können verschiedene Vorgänge auslösen und Anträge stellen. Sie werden dann durch weitere Eingaben geführt.\n\n"
+                + "Sie können verschiedene Vorgänge auslösen und Anträge stellen. Sie werden dann durch weitere Eingaben geführt. "
                 + "Außerdem können Sie den Stand von bereits ausgelösten Vorgängen hier überprüfen.";
         tk.createLabel( section, msg, SWT.CENTER, SWT.SHADOW_IN, SWT.WRAP );
         return section;
     }
 
     
-    protected Section createMosaicSection( Composite parent ) {
+    protected Composite createLoginSection( Composite parent ) {
+        Composite section = tk.createComposite( parent );
+        section.setLayout( RowLayoutFactory.fillDefaults().fill( true ).justify( true ).create() );
+        
+        Button loginBtn = tk.createButton( section, "Anmelden", SWT.PUSH );
+        loginBtn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent e ) {
+                getContext().openPanel( LoginPanel.ID );
+            }
+        });
+        Button registerBtn = tk.createButton( section, "Registrieren", SWT.PUSH );
+        
+        return section;
+    }
+
+    
+    protected Composite createMosaicSection( Composite parent ) {
         Section section = getSite().toolkit().createSection( parent, "Laufende Vorgänge", Section.TITLE_BAR );
         Composite client = (Composite)section.getClient();
 
@@ -123,7 +146,7 @@ public class StartPanel
         Section section = getSite().toolkit().createSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );
         Composite client = (Composite)section.getClient();
 
-        client.setLayout( RowLayoutFactory.fillDefaults().fill( true ).type( SWT.VERTICAL ).create() );
+        client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 5, 5 ).spacing( 5 ).create() );
 
         createActionButton( client, "Auskunft Wasserhärten und Qualitäten", "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
                 new SelectionAdapter() {
@@ -187,7 +210,7 @@ public class StartPanel
         Button result = tk.createButton( client, title+"...", SWT.PUSH, SWT.LEFT, SWT.FLAT );
         result.setToolTipText( tooltip );
         result.setImage( AtlasPlugin.instance().imageForName( "icons/run.gif" ) );
-        result.setLayoutData( RowDataFactory.swtDefaults().create() );
+        //result.setLayoutData( RowDataFactory.swtDefaults().create() );
         result.addMouseListener( new MouseListener() {
             public void mouseUp( MouseEvent e ) {
                 l.widgetSelected( null );

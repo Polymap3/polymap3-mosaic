@@ -80,11 +80,14 @@ public class AzvRepositoryAssembler
         LayerAssembly domainLayer = _app.layerAssembly( "application-layer" );
         ModuleAssembly domainModule = domainLayer.moduleAssembly( "azv-module" );
         domainModule.addEntities(
-                Schachtschein.class
+                Schachtschein.class,
+                Person.class
+        );
+        domainModule.addValues(
+                PersonValue.class
         );
 //        domainModule.addTransients(
 //                PflanzeComposite.class,
-//                TierComposite.class
 //        );
 
         // persistence: workspace/Lucene

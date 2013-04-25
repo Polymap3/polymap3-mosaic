@@ -37,6 +37,8 @@ public interface IAppContext {
 
     public IPanel openPanel( PanelIdentifier panelId, String contextKey, Object contextValue );
 
+    public void closePanel();
+
     /**
      * All direct children of the given path.
      *

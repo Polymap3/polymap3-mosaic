@@ -22,8 +22,6 @@ import org.opengis.feature.Property;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
@@ -68,17 +66,14 @@ public abstract class DefaultFormPanel
 
     @Override
     public final void createContents( Composite parent ) {
-        Composite contents = getSite().toolkit().createComposite( parent );
-        contents.setLayout( new FillLayout( SWT.VERTICAL ) );
-
         toolkit = new FormEditorToolkit( new FormToolkit( Polymap.getSessionDisplay() ) );
-        pageBody = contents;
+        pageBody = parent;
         pageSite = new PageContainer( this );
         createFormContent( pageSite );
     }
 
 
-    // default implementation of IFormEditorPage
+    // default implementation of IFormEditorPage **********
 
     @Override
     public final String getTitle() {
@@ -167,7 +162,11 @@ public abstract class DefaultFormPanel
         
         public FormFieldBuilder( Property prop ) {
             this.prop = prop;
-//            this.label = prop.getName().getLocalPart();
+        }
+
+        public FormFieldBuilder( Composite parent, Property prop ) {
+            this.parent = parent;
+            this.prop = prop;
         }
 
         public FormFieldBuilder( Feature feature, String propName ) {

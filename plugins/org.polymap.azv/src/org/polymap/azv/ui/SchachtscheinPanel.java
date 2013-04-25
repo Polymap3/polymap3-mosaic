@@ -19,11 +19,18 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.ui.forms.widgets.Section;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.ui.ColumnLayoutFactory;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
+
 import org.polymap.rhei.data.entityfeature.PropertyAdapter;
 import org.polymap.rhei.form.IFormEditorPageSite;
+import org.polymap.rhei.form.IFormEditorToolkit;
 
 import org.polymap.atlas.Context;
 import org.polymap.atlas.IAppContext;
@@ -50,11 +57,13 @@ public class SchachtscheinPanel
     @Context
     private Schachtschein               entity;
 
+    private IFormEditorToolkit          tk;
+    
 
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         if (super.init( site, context )) {
-            // is there an entity in context?
+            // is there an entity in the context?
             if (entity != null) {
                 return true;
             }
@@ -72,20 +81,30 @@ public class SchachtscheinPanel
     @Override
     public void createFormContent( IFormEditorPageSite pageSite ) {
         getSite().setTitle( "Schachtschein" );
+        tk = pageSite.getToolkit();
+        Composite parent = pageSite.getPageBody();
+        parent.setLayout( FormLayoutFactory.defaults().margins( DEFAULTS_SPACING ).create() );
+
+        Composite contents = tk.createComposite( parent );
+        contents.setLayoutData( FormDataFactory.offset( 0 ).left( 30 ).right( 70 ).width( 500 ).create() );
+        contents.setLayout( FormLayoutFactory.defaults().spacing( DEFAULTS_SPACING*2 ).create() );
+
         getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Es fehlen noch Eingaben..." ) );
 
-        Composite beschreibung = new FormFieldBuilder( new PropertyAdapter( entity.beschreibung() ) ).create();
-        Composite bemerkungen = new FormFieldBuilder( new PropertyAdapter( entity.bemerkungen() ) ).create();
+        Composite base = createBaseSection( contents );
+        base.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
     }
 
 
-//    protected Section createLinkSection( Composite parent ) {
-//        Section section = site.toolkit().createSection( parent, "Aufgaben", Section.TITLE_BAR );
-//        Composite client = (Composite)section.getClient();
-//
-//        client.setLayout( RowLayoutFactory.fillDefaults().type( SWT.VERTICAL ).create() );
-//
-//        return section;
-//    }
+    protected Composite createBaseSection( Composite parent ) {
+        Section section = getSite().toolkit().createSection( parent, "Basisdaten", Section.TITLE_BAR );
+        Composite client = (Composite)section.getClient();
+        client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).create() );
+
+        Composite beschreibung = new FormFieldBuilder( client, new PropertyAdapter( entity.beschreibung() ) ).create();
+        Composite bemerkungen = new FormFieldBuilder( client, new PropertyAdapter( entity.bemerkungen() ) ).create();
+
+        return section;
+    }
 
 }
