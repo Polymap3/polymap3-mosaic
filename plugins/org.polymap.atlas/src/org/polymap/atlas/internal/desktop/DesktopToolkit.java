@@ -14,7 +14,10 @@
  */
 package org.polymap.atlas.internal.desktop;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
@@ -85,7 +88,21 @@ public class DesktopToolkit
 
     @Override
     public Composite createComposite( Composite parent, int... styles ) {
-        return adapt( new Composite( parent, stylebits( styles ) ) );
+        boolean scrollable = ArrayUtils.contains( styles, SWT.V_SCROLL )
+                || ArrayUtils.contains( styles, SWT.H_SCROLL );
+        
+        Composite result = null;
+        if (scrollable) { 
+            result = new ScrolledComposite( parent, stylebits( styles ) );
+            ((ScrolledComposite)result).setExpandHorizontal( true );
+            ((ScrolledComposite)result).setExpandVertical( true );
+            result.setLayout( new FillLayout() );
+            ((ScrolledComposite)result).setContent( createComposite( result, SWT.NONE ) );
+        }
+        else {
+            result = new Composite( parent, stylebits( styles ) );
+        }
+        return adapt( result );
     }
 
     @Override
