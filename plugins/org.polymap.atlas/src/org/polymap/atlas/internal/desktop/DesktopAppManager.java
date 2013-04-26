@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Predicate;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -68,6 +70,8 @@ public class DesktopAppManager
 
     private DesktopPanelNavigator       panelNavi;
 
+    private ScrolledComposite           scrolledPanelContainer;
+
     private Composite                   panelArea;
 
     private IPanel                      activePanel;
@@ -90,10 +94,11 @@ public class DesktopAppManager
             }
             @Override
             protected Composite fillPanelArea( Composite parent ) {
-                panelArea = tk.createComposite( parent, SWT.BORDER );
+                scrolledPanelContainer = (ScrolledComposite)tk.createComposite( parent, SWT.BORDER, SWT.V_SCROLL );
+                panelArea = (Composite)scrolledPanelContainer.getContent();
                 panelArea.setLayout( new FillLayout( SWT.VERTICAL ) );
                 tk.createLabel( panelArea, "Panels..." );
-                return panelArea;
+                return scrolledPanelContainer;
             }
         };
         // open root panel / after main window is created
@@ -145,10 +150,14 @@ public class DesktopAppManager
         if (panel == null) {
             throw new IllegalStateException( "No panel for ID: " + panelId );
         }
+        
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENING ) );
+        
         panel.createContents( panelArea );
-//        panelContents.setLayoutData( SimpleFormData.filled().create() );
         panelArea.layout( true );
+        Point panelSize = panelArea.computeSize( SWT.DEFAULT, SWT.DEFAULT );
+        scrolledPanelContainer.setMinHeight( panelSize.y );
+
         activePanel = panel;
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENED ) );
 

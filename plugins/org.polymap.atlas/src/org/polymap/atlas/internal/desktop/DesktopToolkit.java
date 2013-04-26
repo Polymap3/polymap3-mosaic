@@ -96,8 +96,11 @@ public class DesktopToolkit
             result = new ScrolledComposite( parent, stylebits( styles ) );
             ((ScrolledComposite)result).setExpandHorizontal( true );
             ((ScrolledComposite)result).setExpandVertical( true );
+            
+            Composite content = createComposite( result );
+            ((ScrolledComposite)result).setContent( content );
+            
             result.setLayout( new FillLayout() );
-            ((ScrolledComposite)result).setContent( createComposite( result, SWT.NONE ) );
         }
         else {
             result = new Composite( parent, stylebits( styles ) );
