@@ -1,4 +1,4 @@
-/*
+/* 
  * polymap.org
  * Copyright 2013, Polymap GmbH. All rights reserved.
  *
@@ -14,20 +14,25 @@
  */
 package org.polymap.atlas;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * This annotation allows to explicitly set the scope of {@link ContextProperty}.
- *
+ * This interface allows to access an {@link IAppContext} property. Instances are
+ * automatically injected into objects of type {@link IPanel} when initialized.
+ * <p/>
+ * By default the <b>scope</b> of the property is the <b>package</b> of the
+ * {@link IPanel} class. The {@link Context} annotation can be used to explicitly set
+ * the scope.
+ * 
+ * @see Context
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface Context {
+public interface ContextProperty<T> {
 
-    String scope() default "";
+    public T get();
     
+    public T set( T value );
+    
+    public Class<T> getDeclaredType();
+    
+    public String getScope();
+
 }

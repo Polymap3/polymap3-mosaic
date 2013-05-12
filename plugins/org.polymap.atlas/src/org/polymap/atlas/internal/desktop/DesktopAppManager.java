@@ -23,16 +23,16 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Predicate;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.forms.widgets.ScrolledPageBook;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -70,9 +70,7 @@ public class DesktopAppManager
 
     private DesktopPanelNavigator       panelNavi;
 
-    private ScrolledComposite           scrolledPanelContainer;
-
-    private Composite                   panelArea;
+    private ScrolledPageBook            scrolledPanelContainer;
 
     private IPanel                      activePanel;
 
@@ -94,10 +92,13 @@ public class DesktopAppManager
             }
             @Override
             protected Composite fillPanelArea( Composite parent ) {
-                scrolledPanelContainer = (ScrolledComposite)tk.createComposite( parent, SWT.BORDER, SWT.V_SCROLL );
-                panelArea = (Composite)scrolledPanelContainer.getContent();
-                panelArea.setLayout( new FillLayout( SWT.VERTICAL ) );
-                tk.createLabel( panelArea, "Panels..." );
+                scrolledPanelContainer = new ScrolledPageBook( parent, SWT.BORDER | SWT.V_SCROLL );
+                scrolledPanelContainer.showEmptyPage();
+                
+//                scrolledPanelContainer = (ScrolledComposite)tk.createComposite( parent, SWT.BORDER, SWT.V_SCROLL );
+//                panelArea = (Composite)scrolledPanelContainer.getContent();
+//                panelArea.setLayout( new FillLayout( SWT.VERTICAL ) );
+//                tk.createLabel( panelArea, "Panels..." );
                 return scrolledPanelContainer;
             }
         };
@@ -140,11 +141,6 @@ public class DesktopAppManager
             context.addPanel( panel );
         }
 
-        // clear panelArea
-        for (Control child : panelArea.getChildren()) {
-            child.dispose();
-        }
-
         //
         IPanel panel = context.getPanel( prefix.append( panelId ) );
         if (panel == null) {
@@ -153,9 +149,13 @@ public class DesktopAppManager
         
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENING ) );
         
-        panel.createContents( panelArea );
-        panelArea.layout( true );
-        Point panelSize = panelArea.computeSize( SWT.DEFAULT, SWT.DEFAULT );
+        Composite page = scrolledPanelContainer.createPage( panel.id() );
+        page.setLayout( new FillLayout() );
+        panel.createContents( page );
+        page.layout( true );
+        scrolledPanelContainer.showPage( panel.id() );
+        
+        Point panelSize = page.computeSize( SWT.DEFAULT, SWT.DEFAULT );
         scrolledPanelContainer.setMinHeight( panelSize.y );
 
         activePanel = panel;
@@ -164,7 +164,25 @@ public class DesktopAppManager
         return activePanel;
     }
 
+    
+    protected void closePanel() {
+        assert activePanel != null;
+        
+        EventManager.instance().publish( new PanelChangeEvent( activePanel, TYPE.CLOSING ) );
+        scrolledPanelContainer.removePage( activePanel.id() );
+        
+        PanelPath activePath = activePanel.getSite().getPath();
+        context.removePanels( activePath );
+        activePanel.dispose();
+        EventManager.instance().publish( new PanelChangeEvent( activePanel, TYPE.CLOSED ) );
+        
+        activePath = activePath.removeLast( 1 );
+        activePanel = context.getPanel( activePath );
+        scrolledPanelContainer.showPage( activePanel.id() );
+        EventManager.instance().publish( new PanelChangeEvent( activePanel, TYPE.ACTIVATED ) );
+    }
 
+    
     protected DesktopAppContext getContext() {
         return context;
     }
@@ -183,8 +201,8 @@ public class DesktopAppManager
 
         @Override
         public void closePanel() {
+            DesktopAppManager.this.closePanel();
         }
-        
     }
 
 

@@ -21,7 +21,10 @@ import org.polymap.core.runtime.event.EventFilter;
 /**
  * An app context is shared by all {@link IPanel} instances in the same panel
  * hierachy.
- *
+ * <p/>
+ * Properties of the context can be injected into an {@link IPanel} by declaring a
+ * {@link ContextProperty} with appropriate type and scope.
+ * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public interface IAppContext {
@@ -34,8 +37,6 @@ public interface IAppContext {
      * @return Null if the given panels was not found.
      */
     public IPanel openPanel( PanelIdentifier panelId );
-
-    public IPanel openPanel( PanelIdentifier panelId, String contextKey, Object contextValue );
 
     public void closePanel();
 
@@ -60,33 +61,5 @@ public interface IAppContext {
     public void addEventHandler( Object handler, EventFilter<PanelChangeEvent>... filters );
 
     public void removeEventHandler( Object handler );
-
-    /**
-     *
-     *
-     * @param supplier The supplier to add. Must not be null.
-     */
-    public void addSupplier( ContextSupplier supplier );
-
-    public void removeSupplier( ContextSupplier supplier );
-
-    /**
-     * Retrieves the property for the given name from this context.
-     *
-     * @param source The source of this call. This is given to the supplier.
-     * @param key The key of the property.
-     * @return The property for the given key.
-     */
-    public <T> T get( Object consumer, String key );
-
-
-    /**
-     *
-     */
-    interface ContextSupplier {
-
-        public Object get( Object consumer, String key );
-
-    }
 
 }

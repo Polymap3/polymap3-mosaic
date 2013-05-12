@@ -21,30 +21,27 @@ import java.util.EventObject;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class PanelChangeEvent
+public class PropertyAccessEvent
         extends EventObject {
 
-    /** The types of {@link PanelChangeEvent}. */
+    /** The types of {@link PropertyAccessEvent}. */
     public enum TYPE {
-        CLOSING,
-        CLOSED,
-        OPENING,
-        OPENED, 
-        ACTIVATED
+        GET,
+        SET
     }
     
     // instance *******************************************
     
     private TYPE            type;
     
-    public PanelChangeEvent( IPanel source, TYPE type ) {
+    public PropertyAccessEvent( ContextProperty source, TYPE type ) {
         super( source );
         this.type = type;
     }
 
     @Override
-    public IPanel getSource() {
-        return (IPanel)super.getSource();
+    public ContextProperty getSource() {
+        return (ContextProperty)super.getSource();
     }
 
     public TYPE getType() {

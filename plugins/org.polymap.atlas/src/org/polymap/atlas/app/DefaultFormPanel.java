@@ -72,7 +72,7 @@ public abstract class DefaultFormPanel
         createFormContent( pageSite );
     }
 
-
+    
     // default implementation of IFormEditorPage **********
 
     @Override

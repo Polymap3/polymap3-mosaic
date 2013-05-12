@@ -65,7 +65,7 @@ public class PanelPath
     public PanelPath removeLast( int count ) {
         assert count >= 0;
         PanelPath result = new PanelPath( this );
-        for (int i=count; i>=0; i--) {
+        for (int i=count; i>0; i--) {
             result.segments.remove( i );
         }
         return result;
@@ -104,6 +104,15 @@ public class PanelPath
             return segments.equals( other.segments );
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder( 128 ).append( "PanelPath[" );
+        for (PanelIdentifier segment : segments) {
+            buf.append( "/" ).append( segment.id() );
+        }
+        return buf.append( "]" ).toString();
     }
 
 }

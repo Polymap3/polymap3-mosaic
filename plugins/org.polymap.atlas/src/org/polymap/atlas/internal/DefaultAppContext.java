@@ -14,24 +14,22 @@
  */
 package org.polymap.atlas.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventManager;
 
+import org.polymap.atlas.ContextProperty;
 import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.PanelChangeEvent;
-import org.polymap.atlas.PanelIdentifier;
 import org.polymap.atlas.PanelPath;
 
 /**
@@ -44,22 +42,27 @@ public abstract class DefaultAppContext
 
     private static Log log = LogFactory.getLog( DefaultAppContext.class );
 
+    /**
+     * 
+     */
+    class PropertyValue {
+        protected Object        value;
+        protected String        scope;
+
+        public PropertyValue( Object value, String scope ) {
+            this.value = value;
+            this.scope = scope;
+        }
+    }
+
+    
+    // instance *******************************************
+    
     /** The property suppliers. */
-    private Set<ContextSupplier>        suppliers = new HashSet();
+    private List<PropertyValue>             properties = new ArrayList();
 
     /** The panel hierarchy. */
-    private Map<PanelPath,IPanel>       panels = new HashMap();
-
-
-    @Override
-    public IPanel openPanel( PanelIdentifier panelId, final String contextKey, final Object contextValue ) {
-        addSupplier( new ContextSupplier() {
-            public Object get( Object consumer, String key ) {
-                return key.equals( contextKey ) ? contextValue : null;
-            }
-        });
-        return openPanel( panelId );
-    }
+    private Map<PanelPath,IPanel>           panels = new HashMap();
 
 
     public IPanel getPanel( PanelPath path ) {
@@ -81,7 +84,9 @@ public abstract class DefaultAppContext
 
 
     public void removePanels( PanelPath path ) {
-        throw new RuntimeException( "not implemented yet" );
+        if (panels.remove( path ) == null) {
+            throw new IllegalStateException( "No Panel exists at: " + path );
+        }
     }
 
 
@@ -97,34 +102,50 @@ public abstract class DefaultAppContext
     }
 
 
-    @Override
-    public void addSupplier( ContextSupplier supplier ) {
-        if (!suppliers.add( supplier )) {
-            throw new IllegalArgumentException( "Supplier already registered." );
+    public Object getPropertyValue( ContextProperty prop ) {
+        PropertyValue result = findPropertyValue( prop );
+        return result != null ? result.value : null;
+    }
+    
+
+    public Object setPropertyValue( ContextProperty prop, Object value ) {
+        PropertyValue found = findPropertyValue( prop );
+        if (found != null) {
+            Object result = found.value;
+            found.value = value;
+            return result;
+        }
+        else {
+            properties.add( new PropertyValue( value, prop.getScope() ) );
+            return null;
         }
     }
 
-
-    @Override
-    public void removeSupplier( ContextSupplier supplier ) {
-        suppliers.remove( supplier );
-    }
-
-
-    @Override
-    public <T> T get( final Object consumer, final String key ) {
-        for (ContextSupplier supplier : suppliers) {
-            try {
-                Object value = supplier.get( consumer, key );
-                if (value != null) {
-                    return (T)value;
+    
+    protected PropertyValue findPropertyValue( ContextProperty prop ) {
+        PropertyValue result = null;
+        for (PropertyValue value : properties) {
+            if (value.scope.equals( prop.getScope() )
+                    && prop.getDeclaredType().isAssignableFrom( value.value.getClass() )) {
+                if (result != null) {
+                    throw new IllegalStateException( "Several matches for context property: " + prop );                    
                 }
-            }
-            catch (Exception e) {
-                log.warn( "", e );
+                result = value;
             }
         }
-        return null;
+        return result;
     }
+    
+
+//    protected int subTypeDistance( Class<?> type, Class<?> subType ) {
+//        Class<?> cursor = subType;
+//        for (int i=0; cursor != null; i++) {
+//            if (cursor.equals( type )) {
+//                return i;
+//            }
+//            cursor = subType.getSuperclass();
+//        }
+//        throw new RuntimeException( "Types are not related: " + type.getSimpleName() + " - " + subType.getSimpleName() );
+//    }
 
 }
