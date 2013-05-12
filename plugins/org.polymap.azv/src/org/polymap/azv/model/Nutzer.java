@@ -18,12 +18,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.qi4j.api.common.Optional;
+import org.qi4j.api.common.UseDefaults;
 import org.qi4j.api.concern.Concerns;
 import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
 
-import org.polymap.core.model.Entity;
+import org.polymap.core.qi4j.QiEntity;
 import org.polymap.core.qi4j.event.ModelChangeSupport;
 import org.polymap.core.qi4j.event.PropertyChangeSupport;
 
@@ -36,15 +37,24 @@ import org.polymap.core.qi4j.event.PropertyChangeSupport;
     PropertyChangeSupport.Concern.class
 })
 @Mixins( {
-    Person.Mixin.class, 
+    Nutzer.Mixin.class, 
     PropertyChangeSupport.Mixin.class,
-    ModelChangeSupport.Mixin.class
+    ModelChangeSupport.Mixin.class,
+    QiEntity.Mixin.class
 })
-public interface Person
-        extends EntityComposite, Entity/*, JsonState*/ {
+public interface Nutzer
+        extends EntityComposite, QiEntity, PropertyChangeSupport {
+    
+    Property<PersonValue>       person();
     
     @Optional
-    Property<PersonValue>       person();
+    Property<String>            passwordHash();
+    
+    /**
+     * Wurde die Identität des Nutzers überprüft?
+     */
+    @UseDefaults
+    Property<Boolean>           authentifiziert();
     
     /**
      * Creates a string representation of this person by appending all
@@ -60,7 +70,7 @@ public interface Person
      * Methods and transient fields.
      */
     public static abstract class Mixin
-            implements Person {
+            implements Nutzer {
         
         private static Log log = LogFactory.getLog( Mixin.class );
 

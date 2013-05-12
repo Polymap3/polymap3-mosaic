@@ -81,7 +81,7 @@ public class AzvRepositoryAssembler
         ModuleAssembly domainModule = domainLayer.moduleAssembly( "azv-module" );
         domainModule.addEntities(
                 Schachtschein.class,
-                Person.class
+                Nutzer.class
         );
         domainModule.addValues(
                 PersonValue.class

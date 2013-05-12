@@ -32,7 +32,7 @@ import org.polymap.rhei.data.entityfeature.PropertyAdapter;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.form.IFormEditorToolkit;
 
-import org.polymap.atlas.Context;
+import org.polymap.atlas.ContextProperty;
 import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
@@ -54,17 +54,16 @@ public class SchachtscheinPanel
 
     public static final PanelIdentifier ID = new PanelIdentifier( "schachtschein" );
 
-    @Context
-    private Schachtschein               entity;
+    private ContextProperty<Schachtschein>  entity;
 
-    private IFormEditorToolkit          tk;
+    private IFormEditorToolkit              tk;
     
 
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         if (super.init( site, context )) {
             // is there an entity in the context?
-            if (entity != null) {
+            if (entity.get() != null) {
                 return true;
             }
         }
@@ -101,8 +100,8 @@ public class SchachtscheinPanel
         Composite client = (Composite)section.getClient();
         client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).create() );
 
-        Composite beschreibung = new FormFieldBuilder( client, new PropertyAdapter( entity.beschreibung() ) ).create();
-        Composite bemerkungen = new FormFieldBuilder( client, new PropertyAdapter( entity.bemerkungen() ) ).create();
+        Composite beschreibung = new FormFieldBuilder( client, new PropertyAdapter( entity.get().beschreibung() ) ).create();
+        Composite bemerkungen = new FormFieldBuilder( client, new PropertyAdapter( entity.get().bemerkungen() ) ).create();
 
         return section;
     }

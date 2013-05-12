@@ -14,9 +14,12 @@
  */
 package org.polymap.azv.ui;
 
+import javax.security.auth.login.LoginException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.qi4j.api.unitofwork.NoSuchEntityException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -27,16 +30,23 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.atlas.ContextProperty;
 import org.polymap.atlas.DefaultPanel;
 import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IAppContext.ContextSupplier;
 import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
+import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.model.AzvRepository;
+import org.polymap.azv.model.Nutzer;
 
 /**
  * 
@@ -50,19 +60,26 @@ public class LoginPanel
 
     public static final PanelIdentifier ID = new PanelIdentifier( "login" );
 
-    private IAtlasToolkit           tk;
+    private ContextProperty<Nutzer>        nutzer;
 
-    private Text                    nameText;
+    private ContextProperty<UserPrincipal> user;
 
-    private Text                    pwdText;
+    private IAtlasToolkit                  tk;
 
-    private Button loginBtn;
+    private Text                           nameText;
+
+    private Text                           pwdText;
+
+    private Button                         loginBtn;
 
     
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
         this.tk = site.toolkit();
+        
+        //assert nutzer.get() == null;
+        
         // open only if directly called
         return false;
     }
@@ -111,22 +128,46 @@ public class LoginPanel
                 login( nameText.getText(), pwdText.getText() );
             }
         });
+
+        // XXX fake login
+        nameText.setText( "admin" );
+        pwdText.setText( "login" );
     }
     
     
-    protected void login( String name, String passwd ) {
-        final UserPrincipal user = new UserPrincipal( name ) {
-            @Override
-            public String getPassword() {
-                return "fake";
-            }
-        };
-        getContext().addSupplier( new ContextSupplier() {
-            public Object get( Object consumer, String key ) {
-                return key.equals( "user" ) ? user : null;
-            }
-        });
-        getContext().closePanel();
+    protected void login( final String name, final String passwd ) {
+        // user
+        try {
+            Polymap.instance().login( name, passwd );
+            user.set( (UserPrincipal)Polymap.instance().getUser() );
+        }
+        catch (LoginException e) {
+            log.info( "Login: no user found for name: " + name );
+        }
+        
+        // nutzer
+        try {
+            Nutzer found = AzvRepository.instance().findEntity( Nutzer.class, name );
+            // FIXME check password
+            nutzer.set( found );
+            user.set( new UserPrincipal( name ) {
+                @Override
+                public String getPassword() {
+                    return passwd;
+                }
+            });
+        }
+        catch (NoSuchEntityException e) {
+            log.info( "Login: no Nutzer found for name: " + name );
+        }
+        
+        // check and return
+        if (user.get() != null || nutzer.get() != null) {
+            getContext().closePanel();
+        }
+        else {
+            getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
+        }
     }
     
 }

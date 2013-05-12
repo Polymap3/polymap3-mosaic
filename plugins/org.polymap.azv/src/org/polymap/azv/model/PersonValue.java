@@ -20,7 +20,7 @@ import org.qi4j.api.property.Property;
 import org.qi4j.api.value.ValueComposite;
 
 /**
- * Person value, used by {@link Person}. 
+ * Person value, used by {@link Nutzer}. 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */

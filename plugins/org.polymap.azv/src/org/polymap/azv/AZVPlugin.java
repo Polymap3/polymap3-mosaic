@@ -32,6 +32,9 @@ public class AZVPlugin
     private static Log log = LogFactory.getLog( AZVPlugin.class );
 
     public static final String      ID = "org.polymap.azv";
+    
+    /* The property scope of the AZV plugin. */
+    public static final String      PROPERTY_SCOPE = ID; 
 
     private static AZVPlugin        instance;
 
