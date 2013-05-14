@@ -26,11 +26,14 @@ public class PanelChangeEvent
 
     /** The types of {@link PanelChangeEvent}. */
     public enum TYPE {
-        CLOSING,
-        CLOSED,
-        OPENING,
-        OPENED, 
-        ACTIVATED
+        INITIALIZING,
+        INITIALIZED,
+        DISPOSING,
+        DISPOSED,
+        ACTIVATING,
+        ACTIVATED,
+        DEACTIVATING,
+        DEACTIVATED
     }
     
     // instance *******************************************

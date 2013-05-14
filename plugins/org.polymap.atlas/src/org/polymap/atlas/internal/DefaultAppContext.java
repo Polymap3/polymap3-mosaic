@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Collections2;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventManager;
 
@@ -72,7 +72,8 @@ public abstract class DefaultAppContext
 
     @Override
     public Iterable<IPanel> findPanels( Predicate<IPanel> filter ) {
-        return Iterables.filter( panels.values(), filter );
+        // make a copy so that contents is stable while iterating (remove)
+        return new ArrayList( Collections2.filter( panels.values(), filter ) );
     }
 
 
@@ -83,11 +84,52 @@ public abstract class DefaultAppContext
     }
 
 
-    public void removePanels( PanelPath path ) {
+    public void removePanel( PanelPath path ) {
         if (panels.remove( path ) == null) {
             throw new IllegalStateException( "No Panel exists at: " + path );
         }
     }
+
+    
+//    protected IPanel openPanel( final PanelIdentifier panelId ) {
+//        // find and initialize panels
+//        final PanelPath prefix = activePanel != null ? activePanel.getSite().getPath() : PanelPath.ROOT;
+//        List<IPanel> createdPanels = AtlasComponentFactory.instance().createPanels( new Predicate<IPanel>() {
+//            public boolean apply( IPanel panel ) {
+//                new PanelContextInjector( panel, DefaultAppContext.this ).run();
+//                PanelPath path = prefix.append( panel.id() );
+//                boolean wantsToBeShown = panel.init( new DesktopPanelSite( path ), this );
+//                return panel.id().equals( panelId ) || wantsToBeShown;
+//            }
+//        });
+//
+//        // add to context
+//        for (IPanel panel : createdPanels) {
+//            addPanel( panel );
+//        }
+//
+//        //
+//        IPanel panel = getPanel( prefix.append( panelId ) );
+//        if (panel == null) {
+//            throw new IllegalStateException( "No panel for ID: " + panelId );
+//        }
+//        
+//        EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENING ) );
+//        
+//        Composite page = scrolledPanelContainer.createPage( panel.id() );
+//        page.setLayout( new FillLayout() );
+//        panel.createContents( page );
+//        page.layout( true );
+//        scrolledPanelContainer.showPage( panel.id() );
+//        
+//        Point panelSize = page.computeSize( SWT.DEFAULT, SWT.DEFAULT );
+//        scrolledPanelContainer.setMinHeight( panelSize.y );
+//
+//        activePanel = panel;
+//        EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.OPENED ) );
+//
+//        return activePanel;
+//    }
 
 
     @Override

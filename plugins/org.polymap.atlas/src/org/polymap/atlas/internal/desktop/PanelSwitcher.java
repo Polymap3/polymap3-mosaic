@@ -14,22 +14,35 @@
  */
 package org.polymap.atlas.internal.desktop;
 
+import static org.polymap.atlas.PanelFilters.withPrefix;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.rwt.graphics.Graphics;
 
 import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.layout.RowDataFactory;
+import org.eclipse.jface.layout.RowLayoutFactory;
+
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.PanelChangeEvent;
 import org.polymap.atlas.PanelChangeEvent.TYPE;
+import org.polymap.atlas.PanelPath;
 
 /**
  *
@@ -41,7 +54,10 @@ public class PanelSwitcher
 
     private static Log log = LogFactory.getLog( PanelSwitcher.class );
 
-    private DesktopAppManager   appManager;
+    private static final Color          COLOR_ACTIVE_BG  = DesktopToolkit.COLOR_SECTION_TITLE_BG;
+    private static final Color          COLOR_ACTIVE_FG  = Graphics.getColor( 10, 10, 10 );
+
+    private DesktopAppManager           appManager;
 
     private List<PanelChangeEvent>      pendingStartEvents = new ArrayList();
 
@@ -55,7 +71,7 @@ public class PanelSwitcher
 
         appManager.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
             public boolean apply( PanelChangeEvent input ) {
-                return input.getType() == TYPE.OPENED;
+                return input.getType() == TYPE.ACTIVATED;
             }
         });
     }
@@ -64,7 +80,7 @@ public class PanelSwitcher
     @Override
     public void fill( Composite parent ) {
         this.contents = parent;
-        contents.setLayout( new FormLayout() );
+        contents.setLayout( RowLayoutFactory.fillDefaults().spacing( 0 ).create() );
 
         // fire pending events
         for (PanelChangeEvent ev : pendingStartEvents) {
@@ -75,6 +91,40 @@ public class PanelSwitcher
 
 
     protected void updateUI() {
+        // clear contents
+        for (Control child : contents.getChildren()) {
+            child.dispose();
+        }
+        
+//        Label l = new Label( contents, SWT.NONE );
+//        l.setText( " -> " );
+        
+        PanelPath prefix = activePanel.getSite().getPath().removeLast( 1 );
+        for (final IPanel panel : appManager.getContext().findPanels( withPrefix( prefix ) )) {
+            Button btn = new Button( contents, SWT.PUSH | SWT.SHADOW_IN );
+            btn.setText( panel.getSite().getTitle() );
+            btn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
+            
+            if (panel.equals( activePanel )) {
+                FontData[] defaultFont = btn.getFont().getFontData();
+                FontData bold = new FontData( defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD );
+                btn.setFont( Graphics.getFont( bold ) );
+                
+                //btn.setEnabled( false );
+                btn.setBackground( COLOR_ACTIVE_BG );
+                //btn.setForeground( COLOR_ACTIVE_FG );
+                btn.setSelection( true );
+            }
+            else {
+                btn.addSelectionListener( new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent ev ) {
+                        appManager.activatePanel( panel.id() );
+                    }
+                });
+            }
+        }
+        
+        contents.getParent().layout( true );
     }
 
 
@@ -85,7 +135,7 @@ public class PanelSwitcher
             return;
         }
         // open
-        if (ev.getType() == TYPE.OPENED) {
+        if (ev.getType() == TYPE.ACTIVATED) {
             activePanel = ev.getSource();
             updateUI();
         }

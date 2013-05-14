@@ -20,9 +20,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.collect.Iterables;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -31,14 +31,13 @@ import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.PanelChangeEvent;
-import org.polymap.atlas.PanelIdentifier;
 import org.polymap.atlas.PanelChangeEvent.TYPE;
 import org.polymap.atlas.PanelPath;
 
@@ -70,7 +69,7 @@ public class PanelNavigator
 
         appManager.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
             public boolean apply( PanelChangeEvent input ) {
-                return input.getType() == TYPE.OPENED;
+                return input.getType() == TYPE.ACTIVATED;
             }
         });
     }
@@ -83,12 +82,12 @@ public class PanelNavigator
 
         // breadcrumb
         breadcrumb = new Composite( parent, SWT.NONE );
-        breadcrumb.setLayoutData( SimpleFormData.filled().right( 50 ).create() );
+        breadcrumb.setLayoutData( FormDataFactory.filled().right( 50 ).create() );
         breadcrumb.setLayout( RowLayoutFactory.fillDefaults().fill( false ).create() );
 
         //
         panelSwitcher = new Composite( parent, SWT.NONE );
-        panelSwitcher.setLayoutData( SimpleFormData.filled().left( 50 ).create() );
+        panelSwitcher.setLayoutData( FormDataFactory.filled().left( 50 ).create() );
 
         // fire pending events
         for (PanelChangeEvent ev : pendingStartEvents) {
@@ -109,16 +108,35 @@ public class PanelNavigator
         homeBtn.setImage( AtlasPlugin.instance().imageForName( "icons/house.png" ) );
         homeBtn.setToolTipText( "Go back to home page" );
         homeBtn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
+        homeBtn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent e ) {
+                while (activePanel.getSite().getPath().size() > 1) {
+                    appManager.closePanel();
+                    activePanel = appManager.getActivePanel();
+                }
+            }
+        });
+        
         // path
-        PanelPath path = activePanel.getSite().getPath();
-        for (PanelIdentifier panelId : Iterables.skip( path, 1 )) {
-            //Label sep = new Label( breadcrumb, SWT.SEPARATOR );
+        PanelPath path = activePanel.getSite().getPath().removeLast( 1 );
+        while (path.size() > 1) {
+            final IPanel panel = appManager.getContext().getPanel( path );
 
             Button btn = new Button( breadcrumb, SWT.FLAT );
             btn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
-            //panel = appManager.getContext().getPanel( )
-            btn.setText( panelId.toString() );
+            
+            btn.setText( panel.getSite().getTitle() );
             //btn.setToolTipText( "Go to " + path.segment( i ) );
+
+            btn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent e ) {
+                    while (!activePanel.equals( panel )) {
+                        appManager.closePanel();
+                        activePanel = appManager.getActivePanel();
+                    }
+                }
+            });
+            path = path.removeLast( 1 );
         }
         breadcrumb.layout( true );
     }
@@ -131,7 +149,7 @@ public class PanelNavigator
             return;
         }
         // open
-        if (ev.getType() == TYPE.OPENED) {
+        if (ev.getType() == TYPE.ACTIVATED) {
             activePanel = ev.getSource();
             updateBreadcrumb();
         }

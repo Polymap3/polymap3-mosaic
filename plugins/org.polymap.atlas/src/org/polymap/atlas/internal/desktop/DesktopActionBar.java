@@ -26,21 +26,21 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IContributionItem;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
 import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.PanelChangeEvent;
 
 /**
- *
+ * The mail action bar displayed at the top of the main window.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-class DesktopPanelNavigator {
+class DesktopActionBar {
 
-    private static Log log = LogFactory.getLog( DesktopPanelNavigator.class );
+    private static Log log = LogFactory.getLog( DesktopActionBar.class );
 
     enum PLACE {
         SEARCH,
@@ -58,7 +58,7 @@ class DesktopPanelNavigator {
     private Map<PLACE,IContributionItem> items = new HashMap();
 
 
-    public DesktopPanelNavigator( IAppContext context, IAtlasToolkit tk ) {
+    public DesktopActionBar( IAppContext context, IAtlasToolkit tk ) {
         this.context = context;
         this.tk = tk;
         context.addEventHandler( this );
@@ -82,7 +82,7 @@ class DesktopPanelNavigator {
         if (search != null) {
             searchComposite = new Composite( contents, SWT.NONE );
             search.fill( searchComposite );
-            searchComposite.setLayoutData( SimpleFormData.filled().left( 80 ).right( 100 ).create() );
+            searchComposite.setLayoutData( FormDataFactory.filled().left( 80 ).right( 100 ).create() );
         }
         // panel toolbar
         IContributionItem tb = items.get( PLACE.PANEL_TOOLBAR );
@@ -91,8 +91,8 @@ class DesktopPanelNavigator {
             tbComposite = new Composite( contents, SWT.NONE );
             tb.fill( tbComposite );
             tbComposite.setLayoutData( searchComposite != null
-                    ? SimpleFormData.filled().left( 60 ).right( searchComposite ).create()
-                    : SimpleFormData.filled().left( 80 ).right( 100 ).create());
+                    ? FormDataFactory.filled().left( 60 ).right( searchComposite ).create()
+                    : FormDataFactory.filled().left( 80 ).right( 100 ).create());
         }
         // panel switcher
         IContributionItem switcher = items.get( PLACE.PANEL_SWITCHER );
@@ -100,14 +100,14 @@ class DesktopPanelNavigator {
         if (switcher != null) {
             switcherComposite = new Composite( contents, SWT.NONE );
             switcher.fill( switcherComposite );
-            switcherComposite.setLayoutData( SimpleFormData.filled().left( -1 ).right( tbComposite ).create() );
+            switcherComposite.setLayoutData( FormDataFactory.filled().left( -1 ).right( tbComposite ).create() );
         }
         // panel navi
         IContributionItem navi = items.get( PLACE.PANEL_NAVI );
         if (navi != null) {
             Composite naviComposite = new Composite( contents, SWT.NONE );
             navi.fill( naviComposite );
-            naviComposite.setLayoutData( SimpleFormData.filled().right( switcherComposite ).create() );
+            naviComposite.setLayoutData( FormDataFactory.filled().right( switcherComposite ).create() );
         }
 
         return contents;

@@ -25,7 +25,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
+import org.polymap.core.ui.FormDataFactory;
+
 import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IPanel;
@@ -49,6 +50,9 @@ public class DashboardPanel
 
     @Override
     public boolean init( IPanelSite _site, IAppContext _context ) {
+        if (_site.getPath().size() > 1) {
+            return false;
+        }
         this.site = _site;
         this.context = _context;
 
@@ -86,7 +90,7 @@ public class DashboardPanel
         contents.setLayout( new FormLayout() );
 
         Label l = site.toolkit().createLabel( contents, "Dashboard!" );
-        l.setLayoutData( SimpleFormData.filled().create() );
+        l.setLayoutData( FormDataFactory.filled().create() );
     }
 
 

@@ -29,7 +29,7 @@ import org.eclipse.rwt.graphics.Graphics;
 
 import org.eclipse.jface.action.ContributionItem;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
+import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.atlas.AtlasPlugin;
 
@@ -58,10 +58,10 @@ class SearchField
         Button btn = new Button( parent, SWT.PUSH );
         btn.setToolTipText( "Start search" );
         btn.setImage( AtlasPlugin.instance().imageForName( "icons/zoom.png" ) );
-        btn.setLayoutData( SimpleFormData.filled().left( -1 ).create() );
+        btn.setLayoutData( FormDataFactory.filled().left( -1 ).create() );
 
         text = new Text( parent, SWT.SEARCH | SWT.CANCEL );
-        text.setLayoutData( SimpleFormData.filled().right( btn ).create() );
+        text.setLayoutData( FormDataFactory.filled().right( btn ).create() );
 
         text.setText( "Search..." );
         text.setForeground( Graphics.getColor( 0xa0, 0xa0, 0xa0 ) );

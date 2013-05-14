@@ -63,10 +63,12 @@ public class PanelPath
     }
 
     public PanelPath removeLast( int count ) {
-        assert count >= 0;
+        assert count >= 0 : "Parameter 'count' must not be <= 0: " + count;
+        assert segments.size() >= count : "Parameter count >= segments.size()!";
+
         PanelPath result = new PanelPath( this );
-        for (int i=count; i>0; i--) {
-            result.segments.remove( i );
+        for (int i=0; i<count; i++) {
+            result.segments.remove( segments.size()-1 );
         }
         return result;
     }
@@ -80,7 +82,7 @@ public class PanelPath
 //    }
 
     public boolean isPrefixOf( PanelPath path ) {
-        return segments.size() <= path.segments.size()
+        return segments.size() < path.segments.size()
                 && segments.equals( path.segments.subList( 0, segments.size() ) );
     }
 

@@ -18,6 +18,7 @@ import org.apache.commons.lang.ArrayUtils;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
@@ -33,6 +34,7 @@ import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.widgets.Section;
+
 import org.polymap.core.runtime.Polymap;
 
 import org.polymap.atlas.IAtlasToolkit;
@@ -47,6 +49,8 @@ public class DesktopToolkit
         implements IAtlasToolkit {
 
     public static final String  CUSTOM_VARIANT_VALUE = "desktop";
+    public static final Color   COLOR_SECTION_TITLE_FG = Graphics.getColor( new RGB( 0x54, 0x82, 0xb4 ) );
+    public static final Color   COLOR_SECTION_TITLE_BG = Graphics.getColor( new RGB( 0xd7, 0xeb, 0xff ) );
 
     private FormColors          colors;
 
@@ -136,8 +140,8 @@ public class DesktopToolkit
         FontData[] defaultFont = parent.getFont().getFontData();
         FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
         result.setFont( Graphics.getFont( bold ) );
-        result.setTitleBarForeground( Graphics.getColor( new RGB( 0x54, 0x82, 0xb4 ) ) );  //#5482B4
-        result.setTitleBarBackground( Graphics.getColor( new RGB( 0xd7, 0xeb, 0xff ) ) );  //#D7EBFF
+        result.setTitleBarForeground( COLOR_SECTION_TITLE_FG );
+        result.setTitleBarBackground( COLOR_SECTION_TITLE_BG );
         result.setTitleBarBorderColor( Graphics.getColor( new RGB( 0x80, 0x80, 0xa0 ) ) );
 
         Composite client = createComposite( result );

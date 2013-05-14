@@ -27,9 +27,9 @@ import org.eclipse.jface.window.ApplicationWindow;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.PanelChangeEvent;
@@ -70,14 +70,14 @@ abstract class DesktopAppWindow
         contents.setLayout( new FormLayout() );
 
         Composite navi = fillNavigationArea( contents );
-        navi.setLayoutData( SimpleFormData.filled().bottom( -1 ).height( 30 ).create() );
+        navi.setLayoutData( FormDataFactory.filled().bottom( -1 ).height( 30 ).create() );
 
         Composite panels = fillPanelArea( contents );
-        panels.setLayoutData( SimpleFormData.filled().top( navi, 10 ).create() );
+        panels.setLayoutData( FormDataFactory.filled().top( navi, 10 ).create() );
 
         appManager.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
             public boolean apply( PanelChangeEvent input ) {
-                return input.getType() == TYPE.OPENED;
+                return input.getType() == TYPE.ACTIVATED;
             }
         });
         return contents;

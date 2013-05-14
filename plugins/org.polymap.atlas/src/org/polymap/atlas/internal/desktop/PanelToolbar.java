@@ -33,10 +33,10 @@ import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.polymap.core.project.ui.util.SimpleFormData;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.atlas.AtlasPlugin;
 import org.polymap.atlas.PanelChangeEvent;
@@ -53,7 +53,7 @@ class PanelToolbar
 
     private static Log log = LogFactory.getLog( PanelToolbar.class );
 
-    private DesktopAppManager   appManager;
+    private DesktopAppManager           appManager;
 
     private Composite                   contents;
 
@@ -65,7 +65,7 @@ class PanelToolbar
 
         appManager.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
             public boolean apply( PanelChangeEvent input ) {
-                return input.getType() == TYPE.OPENED;
+                return true; //input.getType() == TYPE.ACTIVATED;
             }
         });
     }
@@ -91,15 +91,15 @@ class PanelToolbar
             return;
         }
         // close
-        if (ev.getType() == TYPE.CLOSED) {
+        if (ev.getType() == TYPE.DEACTIVATED) {
             for (Control child : contents.getChildren()) {
                 child.dispose();
             }
         }
         // open
-        if (ev.getType() == TYPE.OPENED) {
+        if (ev.getType() == TYPE.ACTIVATED) {
             ToolBar tb = new ToolBar( contents, SWT.BORDER /*| SWT.FLAT*/ );
-            tb.setLayoutData( SimpleFormData.filled().height( 28 ).create() );
+            tb.setLayoutData( FormDataFactory.filled().height( 28 ).create() );
 
             DesktopPanelSite panelSite = (DesktopPanelSite)ev.getSource().getSite();
             for (Object tool : panelSite.getTools()) {
