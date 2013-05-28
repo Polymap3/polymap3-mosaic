@@ -1,0 +1,103 @@
+/*******************************************************************************
+ * Copyright (c) 2012 EclipseSource and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    EclipseSource - initial API and implementation
+ ******************************************************************************/
+
+/* Default theme for all widgets */
+
+* {
+  color: #4a4a4a;
+  background-color: #fff;
+  background-image: none;
+  font: 13px Verdana, "Lucida Sans", Arial, Helvetica, sans-serif;
+}
+
+*:disabled {
+  color: #CFCFCF;
+}
+
+Widget-ToolTip {
+  padding: 8px;
+  background-color: #f0f0f0;
+  background-image : gradient(
+    linear, left top, right top,
+    from( #f8f9ff ),
+    to( #f4f4f4 )
+  );
+  border: 1px solid #a0b3ca;
+  border-radius: 2px;
+  font: 14px Verdana, "Lucida Sans", Arial, Helvetica, sans-serif;
+  color: #4a4a4a;
+  opacity: 1;
+  animation: fadeIn 200ms linear, fadeOut 600ms ease-out;
+  box-shadow: none;
+}
+
+
+/* Shell titlebar */
+
+Shell-Titlebar {
+  font: 14px Verdana, "Lucida Sans", Arial, Helvetica, sans-serif;
+  background-color: #00f0c0;
+  background-gradient-color: #0080c0;
+  color: #ffffff;
+  background-image: gradient(
+    linear, left top, left bottom,
+    from( #416693 ), to( #5882b5 )
+  );
+  padding: 0 10px 0 10px;
+  margin: 0px;
+  height: 38px;
+  border: none;
+  border-radius: 0;
+  text-shadow: none;
+}
+
+Shell-Titlebar:inactive {
+  background-color: #7996a5;
+  background-gradient-color: #7996a5;
+  background-image: gradient(
+    linear, left top, left bottom,
+    from( #818181 ), to( #b5b5b5 )
+  );
+}
+
+
+/* ToolTip default theme */
+
+ToolTip {
+  cursor: default;
+  border: 3px solid #a0b3ca;
+  border-radius: 2px;
+  padding: 8px;
+  opacity: 1;
+  color: #4a4a4a;
+  background-image : gradient(
+    linear, left top, right top,
+    from( #f8f9ff ),
+    to( #f4f4f4 )
+  );
+  font: 14px Verdana, "Lucida Sans", Arial, Helvetica, sans-serif;
+  background-color: #fcfcfc;
+  animation: fadeIn 200ms linear, fadeOut 600ms ease-out;
+  box-shadow: 0 0 4px #adadad;
+}
+
+ToolTip-Text {
+  color: #4a4a4a;
+  font: bold 14px Verdana, "Lucida Sans", Arial, Helvetica, sans-serif;
+  text-shadow: none;
+}
+
+ToolTip-Message {
+  color: #4a4a4a;
+  font: 14px Verdana, "Lucida Sans", Arial, Helvetica, sans-serif;
+  text-shadow: none;
+}
+

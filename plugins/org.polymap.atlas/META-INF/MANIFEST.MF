@@ -8,7 +8,8 @@ Bundle-Vendor: Polymap GmbH
 Require-Bundle: org.polymap.core;bundle-version="3.2.0";visibility:=reexport,
  org.polymap.core.project;bundle-version="3.2.0";visibility:=reexport,
  org.eclipse.rap.ui.forms;bundle-version="1.5.0";visibility:=reexport,
- org.polymap.rhei.form;bundle-version="2.0.0"
+ org.polymap.rhei.form;bundle-version="2.0.0",
+ org.eclipse.rap.design.example;bundle-version="1.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.polymap.atlas,
