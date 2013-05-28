@@ -104,6 +104,7 @@ public class LoginPanel
         l1.setLayoutData( FormDataFactory.offset( 0 ).left( 0 ).top( 0 ).right( 0, 120 ).create() );
         nameText = tk.createText( contents, "", SWT.BORDER );
         nameText.setLayoutData( FormDataFactory.offset( 0 ).left( l1 ).top( 0 ).right( 100 ).create() );
+        nameText.setFocus();
         nameText.addModifyListener( new ModifyListener() {
             public void modifyText( ModifyEvent ev ) {
                 loginBtn.setEnabled( nameText.getText().length() > 0 && pwdText.getText().length() > 0 );

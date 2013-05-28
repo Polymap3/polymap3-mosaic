@@ -14,6 +14,9 @@
  */
 package org.polymap.azv.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -72,14 +75,18 @@ public class StartPanel
     /** Just for convenience, same as <code>getSite().toolkit()</code>. */
     private IAtlasToolkit                   tk;
     
+    /** Set by the {@link LoginPanel}. */
     private ContextProperty<UserPrincipal>  user;
     
+    /** Set by the {@link LoginPanel}. */
     private ContextProperty<Nutzer>         nutzer;
     
     //@Context(scope=AZVPlugin.PROPERTY_SCOPE)
     private ContextProperty<Entity>         entity;
 
     private Section                         mosaicSection;
+    
+    private List<Control>                   actionBtns = new ArrayList();
 
     
     @Override
@@ -95,7 +102,13 @@ public class StartPanel
         return ID;
     }
 
+    
+    protected boolean isAuthenticatedUser() {
+        return user.get() != null ||
+                nutzer.get() != null && nutzer.get().authentifiziert().get();
+    }
 
+    
     @Override
     public void createContents( Composite parent ) {
         getSite().setTitle( "AZV" );
@@ -143,6 +156,10 @@ public class StartPanel
             fillCaseSection( client );
         }
         client.layout( true );
+        
+        for (Control btn : actionBtns) {
+            btn.setEnabled( isAuthenticatedUser() );
+        }
     }
     
     
@@ -191,60 +208,62 @@ public class StartPanel
 
         client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).margins( 5, 5 ).spacing( 5 ).create() );
 
-        createActionButton( client, "Auskunft Wasserhärten und Qualitäten", "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
+        createActionButton( client, "Auskunft Wasserhärten und Qualitäten", 
+                "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
                 new SelectionAdapter() {
-                    public void widgetSelected( SelectionEvent e ) {
-                        // XXX Auto-generated method stub
-                        throw new RuntimeException( "not yet implemented." );
-                    }
-                }
-        );
-        createActionButton( client, "Entsorgung von Abwasserbeseitigungsanlagen", "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
+            public void widgetSelected( SelectionEvent e ) {
+                // XXX Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+        });
+        actionBtns.add( createActionButton( client, "Entsorgung von Abwasserbeseitigungsanlagen", 
+                "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
                 new SelectionAdapter() {
-                    public void widgetSelected( SelectionEvent e ) {
-                        // XXX Auto-generated method stub
-                        throw new RuntimeException( "not yet implemented." );
-                    }
-                }
-        );
-        createActionButton( client, "Hydrantentmanagement", "Hydrantentpläne",
+            public void widgetSelected( SelectionEvent e ) {
+                // XXX Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+        }));
+        actionBtns.add( createActionButton( client, "Hydrantentmanagement", "Hydrantentpläne",
                 new SelectionAdapter() {
-                    public void widgetSelected( SelectionEvent e ) {
-                        // XXX Auto-generated method stub
-                        throw new RuntimeException( "not yet implemented." );
-                    }
-                }
-        );
-        createActionButton( client, "Auskunft zum technischen Anlagen", "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
+            public void widgetSelected( SelectionEvent e ) {
+                // XXX Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+        }));
+        actionBtns.add( createActionButton( client, "Auskunft zum technischen Anlagen", 
+                "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
                 new SelectionAdapter() {
-                    public void widgetSelected( SelectionEvent e ) {
-                        // XXX Auto-generated method stub
-                        throw new RuntimeException( "not yet implemented." );
-                    }
-                }
-        );
-        createActionButton( client, "Antrag für Schachtscheine", "Antrag für Schachtscheine",
+            public void widgetSelected( SelectionEvent e ) {
+                // XXX Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+        }));
+        actionBtns.add( createActionButton( client, "Antrag für Schachtscheine", 
+                "Antrag für Schachtscheine",
                 new SelectionAdapter() {
-                    public void widgetSelected( SelectionEvent ev ) {
-                        try {
-                            log.info( "Schachtschein!" );
-                            entity.set( AzvRepository.instance().newSchachtschein() );
-                            getContext().openPanel( SchachtscheinPanel.ID );
-                        }
-                        catch (Exception e) {
-                            AtlasApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
-                        }
-                    }
+            public void widgetSelected( SelectionEvent ev ) {
+                try {
+                    log.info( "Schachtschein!" );
+                    entity.set( AzvRepository.instance().newSchachtschein() );
+                    getContext().openPanel( SchachtscheinPanel.ID );
                 }
-        );
-        createActionButton( client, "Auskunft zu dinglichen Rechten", "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
+                catch (Exception e) {
+                    AtlasApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                }
+            }
+        }));
+        actionBtns.add( createActionButton( client, "Auskunft zu dinglichen Rechten", 
+                "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
                 new SelectionAdapter() {
-                    public void widgetSelected( SelectionEvent e ) {
-                        // XXX Auto-generated method stub
-                        throw new RuntimeException( "not yet implemented." );
-                    }
-                }
-        );
+            public void widgetSelected( SelectionEvent e ) {
+                // XXX Auto-generated method stub
+                throw new RuntimeException( "not yet implemented." );
+            }
+        }));
+        for (Control btn : actionBtns) {
+            btn.setEnabled( isAuthenticatedUser() );
+        }
         return section;
     }
 

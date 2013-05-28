@@ -93,7 +93,7 @@ public class NutzerPanel
         parent.setLayout( FormLayoutFactory.defaults().margins( DEFAULTS_SPACING ).create() );
 
         Composite client = tk.createComposite( parent );
-        client.setLayoutData( FormDataFactory.offset( 0 ).top( 0 ).left( 25 ).right( 75 ).width( 500 ).create() );
+        client.setLayoutData( FormDataFactory.offset( 0 ).top( 0, 75 ).left( 25 ).right( 75 ).width( 500 ).create() );
         client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).create() );
         
         Nutzer entity = nutzer.get();

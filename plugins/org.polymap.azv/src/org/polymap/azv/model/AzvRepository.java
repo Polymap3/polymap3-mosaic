@@ -14,6 +14,8 @@
  */
 package org.polymap.azv.model;
 
+import java.security.Principal;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,6 +39,8 @@ import org.polymap.core.runtime.entity.ConcurrentModificationException;
 
 import org.polymap.rhei.data.entitystore.lucene.LuceneEntityStoreService;
 
+import sun.security.acl.PrincipalImpl;
+
 /**
  *
  *
@@ -48,6 +52,8 @@ public class AzvRepository
     private static Log log = LogFactory.getLog( AzvRepository.class );
 
     public static final String              NAMESPACE = "http://polymap.org/azv";
+    
+    public static final Principal           CHECKED_IDENTITY = new PrincipalImpl( "CHECKED_IDENTITY" );
 
     /**
      * Get or create the repository for the current user session.

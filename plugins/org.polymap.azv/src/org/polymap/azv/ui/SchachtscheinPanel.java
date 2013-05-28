@@ -85,7 +85,7 @@ public class SchachtscheinPanel
         parent.setLayout( FormLayoutFactory.defaults().margins( DEFAULTS_SPACING ).create() );
 
         Composite contents = tk.createComposite( parent );
-        contents.setLayoutData( FormDataFactory.offset( 0 ).left( 30 ).right( 70 ).width( 500 ).create() );
+        contents.setLayoutData( FormDataFactory.offset( 0 ).left( 25 ).right( 75 ).width( 500 ).create() );
         contents.setLayout( FormLayoutFactory.defaults().spacing( DEFAULTS_SPACING*2 ).create() );
 
         getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Es fehlen noch Eingaben..." ) );
@@ -100,7 +100,8 @@ public class SchachtscheinPanel
         Composite client = (Composite)section.getClient();
         client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).create() );
 
-        Composite beschreibung = new FormFieldBuilder( client, new PropertyAdapter( entity.get().beschreibung() ) ).create();
+        new FormFieldBuilder( client, new PropertyAdapter( entity.get().beschreibung() ) )
+                .create().setFocus();
         Composite bemerkungen = new FormFieldBuilder( client, new PropertyAdapter( entity.get().bemerkungen() ) ).create();
 
         return section;

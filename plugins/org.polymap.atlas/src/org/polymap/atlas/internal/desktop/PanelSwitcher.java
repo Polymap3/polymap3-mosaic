@@ -38,7 +38,6 @@ import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
-
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.PanelChangeEvent;
 import org.polymap.atlas.PanelChangeEvent.TYPE;
