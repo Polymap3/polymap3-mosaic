@@ -14,34 +14,34 @@
  */
 package org.polymap.mosaic.api;
 
-import java.util.List;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs2.FileObject;
+
 
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class MosaicCase
+public class MosaicCaseEvent
         extends RemoteObject {
+
+    private static Log log = LogFactory.getLog( MosaicCaseEvent.class );
     
     public Property<String>     id = new Immutable( new JsonProperty( "identity", String.class ) ); 
 
-    /** The name of the case. */
-    public Property<String>     name = new JsonProperty( "name", String.class ); 
+    public Property<String>     name = new Immutable( new JsonProperty( "name", String.class ) ); 
 
-    /** The entire desciption text of the case. */
-    public Property<String>     description = new JsonProperty( "description", String.class );
+    public Property<String>     description = new Immutable( new JsonProperty( "description", String.class ) );
 
+    public Property<String>     user = new Immutable( new JsonProperty( "user", String.class ) ); 
 
-    MosaicCase( FileObject f ) {
-        super( f );
+    public Property<String>     time = new JsonProperty( "time", String.class );
+
+    
+    protected MosaicCaseEvent( FileObject folder ) {
+        super( folder );
     }
-    
-    
-    public List<MosaicCaseEvent> events() {
-        return MosaicRemoteServer.instance().queryEvents( this );
-    }
-    
+
 }

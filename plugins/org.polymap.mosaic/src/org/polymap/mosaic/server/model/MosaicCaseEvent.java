@@ -33,21 +33,34 @@ import org.polymap.core.qi4j.event.ModelChangeSupport;
         QiEntity.Mixin.class,
         ModelChangeSupport.Mixin.class
 })
-interface MosaicCaseEvent
+public interface MosaicCaseEvent
         extends IMosaicCaseEvent, ModelChangeSupport, QiEntity, EntityComposite {
 
+    public Property<String> name();
+    
+    public Property<String> description();
+    
     public Property<String> user();
     
     public Property<Date> time();
 
-    public Property<String> description();
-    
     
     /**
      * Transient fields and method implementations.
      */
     public abstract class Mixin
             implements MosaicCaseEvent {
+
+        
+        @Override
+        public String getName() {
+            return name().get();
+        }
+
+        @Override
+        public String getDescription() {
+            return description().get();
+        }
 
         @Override
         public String getUser() {
@@ -57,11 +70,6 @@ interface MosaicCaseEvent
         @Override
         public Date getTime() {
             return time().get();
-        }
-
-        @Override
-        public String getDescription() {
-            return description().get();
         }
     }
 }

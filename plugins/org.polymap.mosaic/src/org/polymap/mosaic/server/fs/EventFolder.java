@@ -28,7 +28,6 @@ import org.polymap.service.fs.spi.IContentFolder;
 import org.polymap.service.fs.spi.IContentNode;
 import org.polymap.service.fs.spi.IContentProvider;
 
-import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 
 /**
@@ -36,32 +35,27 @@ import org.polymap.mosaic.server.model.IMosaicCaseEvent;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class EventsFolder
+public class EventFolder
         extends DefaultContentFolder
         implements IContentFolder {
 
-    private static Log log = LogFactory.getLog( EventsFolder.class );
+    private static Log log = LogFactory.getLog( EventFolder.class );
 
-    public static final String          NAME = "Events";
-    
-    
-    public EventsFolder( IPath parentPath, IContentProvider provider, IMosaicCase source ) {
-        super( NAME, parentPath, provider, source );
-        assert source != null;
+
+    public EventFolder( IPath parentPath, IContentProvider provider, IMosaicCaseEvent source ) {
+        super( source.getName(), parentPath, provider, source );
     }
 
 
     @Override
-    public IMosaicCase getSource() {
-        return (IMosaicCase)super.getSource();
+    public IMosaicCaseEvent getSource() {
+        return (IMosaicCaseEvent)super.getSource();
     }
 
 
     public List<? extends IContentNode> getChildren( Map<String,String> params ) {
         List<IContentNode> result = new ArrayList();
-        for (IMosaicCaseEvent event : getSource().getEvents()) {
-            result.add( new EventFolder( getPath(), getProvider(), event ) );            
-        }
+        result.add( new EventFile( getPath(), getProvider(), getSource() ) );            
         return result;
     }
 

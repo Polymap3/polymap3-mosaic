@@ -15,6 +15,7 @@
 package org.polymap.mosaic.server.fs;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ import org.polymap.service.fs.spi.NotAuthorizedException;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCase;
+import org.polymap.mosaic.server.model.MosaicCaseEvent;
 import org.polymap.mosaic.server.model.MosaicRepository;
 
 /**
@@ -76,8 +78,8 @@ public class MosaicCaseFolder
 
     public List<? extends IContentNode> getChildren( Map<String, String> params ) {
         List<IContentNode> result = new ArrayList();
-        result.add( new MosaicCaseFile( getPath(), getProvider(), entity ) );
-        result.add( new EventsFolder( getPath(), getProvider(), entity ) );
+        result.add( new MosaicCaseFile( getPath(), getProvider(), getSource() ) );
+        result.add( new EventsFolder( getPath(), getProvider(), getSource() ) );
         return result;
     }
 
@@ -87,9 +89,21 @@ public class MosaicCaseFolder
             log.info( "New MosaicCase: " + getName() );
             
             final MosaicRepository repo = MosaicRepository.instance();
+            // event
+            final MosaicCaseEvent created = repo.newEntity( MosaicCaseEvent.class, null, new EntityCreator<MosaicCaseEvent>() {
+                public void create( MosaicCaseEvent prototype ) throws Exception {
+                    prototype.name().set( "Angelegt" );
+                    prototype.description().set( "Der Vorgang wurde angelegt." );
+                    prototype.time().set( new Date() );
+                    prototype.user().set( "unbekannt" );
+                }
+            });
+            // case
             entity = repo.newEntity( MosaicCase.class, getName(), new EntityCreator<MosaicCase>() {
                 public void create( MosaicCase prototype ) throws Exception {
                     prototype.name().set( getName() );
+                    
+                    prototype.events().add( created );
                 }
             });
             repo.commitChanges();

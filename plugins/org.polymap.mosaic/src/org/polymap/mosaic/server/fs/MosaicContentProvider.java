@@ -49,6 +49,8 @@ public class MosaicContentProvider
     @Override
     public List<? extends IContentNode> getChildren( IPath path ) {
         IContentFolder parent = getSite().getFolder( path );
+        Request request = WebDavServer.request();
+        
         // root
         if (path.segmentCount() == 0) {
             return Collections.singletonList( new RootFolder( path, this ) );
@@ -59,13 +61,19 @@ public class MosaicContentProvider
         }
         // MosaicCaseFolder
         else if (parent instanceof MosaicCasesFolder) {
-            Request request = WebDavServer.request();
             return ((MosaicCasesFolder)parent).getChildren( request.getParams() );
         }
         // MosaicCaseFile
         else if (parent instanceof MosaicCaseFolder) {
-            Request request = WebDavServer.request();
             return ((MosaicCaseFolder)parent).getChildren( request.getParams() );
+        }
+        // events
+        else if (parent instanceof EventsFolder) {
+            return ((EventsFolder)parent).getChildren( request.getParams() );
+        }
+        // event
+        else if (parent instanceof EventFolder) {
+            return ((EventFolder)parent).getChildren( request.getParams() );
         }
         return null;
     }

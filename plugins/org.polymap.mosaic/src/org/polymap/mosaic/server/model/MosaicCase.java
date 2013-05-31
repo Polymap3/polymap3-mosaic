@@ -21,6 +21,9 @@ import org.qi4j.api.entity.association.ManyAssociation;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+
 import org.polymap.core.qi4j.QiEntity;
 import org.polymap.core.qi4j.event.ModelChangeSupport;
 
@@ -71,8 +74,11 @@ public interface MosaicCase
 
         @Override
         public Iterable<IMosaicCaseEvent> getEvents() {
-            // XXX Auto-generated method stub
-            throw new RuntimeException( "not yet implemented." );
+            return Iterables.transform( events(), new Function<MosaicCaseEvent,IMosaicCaseEvent>() {
+                public IMosaicCaseEvent apply( MosaicCaseEvent input ) {
+                    return input;
+                }
+            });
         }
     }
     

@@ -138,7 +138,7 @@ public abstract class RemoteObject {
     
     
     /**
-     * 
+     * A property of a {@link RemoteObject}.
      */
     public interface Property<T> {
         
@@ -212,6 +212,13 @@ public abstract class RemoteObject {
         @Override
         public void set( T value ) {
             throw new UnsupportedOperationException( "Property is immutable." );
+        }
+
+        /**
+         * Allows to init this immutable property without getting an exception.
+         */
+        public void init( T value ) {
+            delegate.set( value );
         }
     }
 

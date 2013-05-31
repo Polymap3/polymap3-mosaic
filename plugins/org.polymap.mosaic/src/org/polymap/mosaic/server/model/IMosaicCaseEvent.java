@@ -18,18 +18,24 @@ import java.util.Date;
 
 import org.polymap.core.model.Entity;
 
+import org.polymap.rhei.data.model.JsonState;
+
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public interface IMosaicCaseEvent
-        extends Entity {
+        extends Entity, JsonState {
+
+    /** Overview description of the event. */
+    public String getName();
+
+    /** Full description of the event. */
+    public String getDescription();
 
     public String getUser();
     
     public Date getTime();
-
-    public String getDescription();
 
 }

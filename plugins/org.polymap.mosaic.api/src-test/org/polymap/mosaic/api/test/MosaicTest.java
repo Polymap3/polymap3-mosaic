@@ -14,12 +14,15 @@
  */
 package org.polymap.mosaic.api.test;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.apache.commons.vfs2.FileSystemException;
 import org.polymap.mosaic.api.MosaicCase;
+import org.polymap.mosaic.api.MosaicCaseEvent;
 import org.polymap.mosaic.api.MosaicRemoteServer;
 
 /**
@@ -41,13 +44,26 @@ public class MosaicTest {
 
     @Test
     public void createCaseTest() throws FileSystemException {
+        // create
         String name = String.valueOf( System.currentTimeMillis() );
-        MosaicCase mosaicCase = server.createCase( name, "der erste :)" );
+        MosaicCase created = server.createCase( name, "der erste :)" );
         
-        Assert.assertEquals( name, mosaicCase.name.get() );
-        Assert.assertEquals( "der erste :)", mosaicCase.description.get() );
-
-        mosaicCase.store();
+        Assert.assertEquals( name, created.name.get() );
+        Assert.assertEquals( "der erste :)", created.description.get() );
+        created.store();
+        
+        // load case
+        MosaicCase loaded = server.findCase( name );
+        Assert.assertNotNull( loaded );
+        Assert.assertEquals( name, loaded.name.get() );
+        Assert.assertEquals( "der erste :)", loaded.description.get() );
+        
+        // check events
+        List<MosaicCaseEvent> events = loaded.events();
+        Assert.assertEquals( 1, events.size() );
+        
+        MosaicCaseEvent event = events.get( 0 );
+        Assert.assertEquals( "Angelegt", event.name.get() );
     }
     
 }
