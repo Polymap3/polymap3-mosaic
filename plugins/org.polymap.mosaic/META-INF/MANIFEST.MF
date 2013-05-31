@@ -5,8 +5,10 @@ Bundle-SymbolicName: org.polymap.mosaic;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.polymap.mosaic.MosaicPlugin
 Bundle-Vendor: Polymap GmbH
-Require-Bundle: org.polymap.core;bundle-version="3.2.0"
+Require-Bundle: org.polymap.core;bundle-version="3.2.0",
+ org.polymap.core.model;bundle-version="3.2.0",
+ org.polymap.rhei.data;bundle-version="2.0.0",
+ org.polymap.service.fs;bundle-version="3.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.polymap.mosaic,
- org.polymap.mosaic.model
+Export-Package: org.polymap.mosaic

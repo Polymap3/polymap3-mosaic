@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.polymap.core.model.moduleAssemblers">
+      <assembler
+            class="org.polymap.mosaic.server.model.MosaicRepositoryAssembler">
+      </assembler>
+   </extension>
+   <extension
+         point="org.polymap.service.fs.contentProviders">
+      <contentProvider
+            class="org.polymap.mosaic.server.fs.MosaicContentProvider"
+            id="org.polymap.mosaic.fs.MosaicContentProvider"
+            name="Mosaic Server">
+      </contentProvider>
+   </extension>
+
+</plugin>
