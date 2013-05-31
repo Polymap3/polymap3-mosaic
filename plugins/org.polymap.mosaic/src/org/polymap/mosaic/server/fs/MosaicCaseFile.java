@@ -44,7 +44,7 @@ import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicRepository;
 
 /**
- * Represents the 'object.json' file of a Mosaic case.
+ * The 'object.json' file of a Mosaic case.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -57,9 +57,9 @@ public class MosaicCaseFile
     public static final String          NAME = "object.json";
     
 
-    public MosaicCaseFile( String name, IPath parentPath, IContentProvider provider, IMosaicCase source ) {
-        super( name, parentPath, provider, source );
-        assert NAME.equals( name );
+    public MosaicCaseFile( IPath parentPath, IContentProvider provider, IMosaicCase source ) {
+        super( NAME, parentPath, provider, source );
+        assert source != null;
     }
 
 
@@ -73,7 +73,7 @@ public class MosaicCaseFile
     public void replaceContent( InputStream in, Long length ) 
             throws IOException, BadRequestException, NotAuthorizedException {
         try {
-            String json = IOUtils.toString( in );
+            String json = IOUtils.toString( in, MosaicContentProvider.ENCODING );
             log.info( "JSON: " + json );
 
             final MosaicRepository repo = MosaicRepository.instance();
@@ -97,13 +97,17 @@ public class MosaicCaseFile
     @Override
     public void sendContent( OutputStream out, Range range, Map<String, String> params, String contentType )
             throws IOException, BadRequestException {
+        OutputStreamWriter writer = new OutputStreamWriter( out, MosaicContentProvider.ENCODING );
         try {
-            final MosaicRepository repo = MosaicRepository.instance();
             JSONObject json = getSource().encodeJsonState( false );
-            json.write( new OutputStreamWriter( out, MosaicContentProvider.ENCODING ) );
+            log.info( "JSON: " + json.toString( 4 ) );
+            json.write( writer );
         }
         catch (Exception e) {
             throw new RuntimeException( e );
+        }
+        finally {
+            IOUtils.closeQuietly( writer );
         }
     }
 

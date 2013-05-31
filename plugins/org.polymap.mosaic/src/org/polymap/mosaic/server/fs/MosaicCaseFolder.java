@@ -57,11 +57,17 @@ public class MosaicCaseFolder
     private IMosaicCase                 entity;
     
     
-    public MosaicCaseFolder( final String name, IPath parentPath, IContentProvider provider ) {
+    public MosaicCaseFolder( String name, IPath parentPath, IContentProvider provider ) {
         super( name, parentPath, provider, null );
     }
     
     
+    public MosaicCaseFolder( String name, IPath parentPath, IContentProvider provider, MosaicCase entity ) {
+        super( name, parentPath, provider, entity );
+        this.entity = entity;
+    }
+
+
     @Override
     public IMosaicCase getSource() {
         return entity;
@@ -69,7 +75,9 @@ public class MosaicCaseFolder
 
 
     public List<? extends IContentNode> getChildren( Map<String, String> params ) {
-        List<? extends IContentNode> result = new ArrayList();
+        List<IContentNode> result = new ArrayList();
+        result.add( new MosaicCaseFile( getPath(), getProvider(), entity ) );
+        result.add( new EventsFolder( getPath(), getProvider(), entity ) );
         return result;
     }
 
@@ -106,7 +114,7 @@ public class MosaicCaseFolder
             if (json != null && json.length() > 0) {
                 entity.decodeJsonState( new JSONObject( json ), repo, false );
             }
-            return new MosaicCaseFile( newName, getPath(), getProvider(), entity );
+            return new MosaicCaseFile( getPath(), getProvider(), entity );
         }
         catch (Exception e) {
             throw new RuntimeException( e );

@@ -14,18 +14,19 @@
  */
 package org.polymap.mosaic.api;
 
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 
@@ -35,6 +36,8 @@ import org.apache.commons.vfs2.FileSystemException;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public abstract class RemoteObject {
+
+    private static Log log = LogFactory.getLog( RemoteObject.class );
 
     public static final String  OBJECT_FILENAME = "object.json";
     
@@ -72,15 +75,17 @@ public abstract class RemoteObject {
      * @throws MosaicRemoteException
      */
     public void store() {
-        OutputStream out = null;
+        Writer out = null;
         try {
             FileObject f = folder.getChild( OBJECT_FILENAME );
             if (f == null) {
                 f = MosaicRemoteServer.instance().fsManager().resolveFile( folder, OBJECT_FILENAME );
                 f.createFile();
             }
-            out = new BufferedOutputStream( f.getContent().getOutputStream() );
-            json.write( new OutputStreamWriter( out, MosaicRemoteServer.ENCODING ) );
+            
+            log.info( "JSON:" + json.toString( 4 ) );
+            out = new OutputStreamWriter( f.getContent().getOutputStream(), MosaicRemoteServer.ENCODING );
+            json.write( out );
         }
         catch (Exception e) {
             throw new MosaicRemoteException( e );

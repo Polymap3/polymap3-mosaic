@@ -60,7 +60,7 @@ public class MosaicCasesFolder
         Query<MosaicCase> query = MosaicRepository.instance().findEntities( MosaicCase.class, null, 0, -1 );
         List<MosaicCaseFolder> result = new ArrayList();
         for (MosaicCase entity : query) {
-            result.add( new MosaicCaseFolder( entity.getName(), getPath(), getProvider() ) ); 
+            result.add( new MosaicCaseFolder( entity.getName(), getPath(), getProvider(), entity ) ); 
         }
         return result;
     }
