@@ -14,6 +14,8 @@
  */
 package org.polymap.mosaic.api;
 
+import java.util.ConcurrentModificationException;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +50,14 @@ public abstract class RemoteObject {
     private JSONObject          json;
 
     
+    /** 
+     * No args ctor for the internal query interface. 
+     */
+    protected RemoteObject() {
+        create();
+    }
+    
+    
     protected RemoteObject( FileObject folder ) {
         assert folder != null;
         this.folder = folder;
@@ -74,7 +84,7 @@ public abstract class RemoteObject {
      *
      * @throws MosaicRemoteException
      */
-    public void store() {
+    public void store() throws ConcurrentModificationException {
         Writer out = null;
         try {
             FileObject f = folder.getChild( OBJECT_FILENAME );
@@ -87,6 +97,7 @@ public abstract class RemoteObject {
             out = new OutputStreamWriter( f.getContent().getOutputStream(), MosaicRemoteServer.ENCODING );
             json.write( out );
         }
+        // FIXME check for concurrent modifications
         catch (Exception e) {
             throw new MosaicRemoteException( e );
         }
@@ -140,7 +151,7 @@ public abstract class RemoteObject {
     /**
      * A property of a {@link RemoteObject}.
      */
-    public interface Property<T> {
+    public static interface Property<T> {
         
         public T get();
         
@@ -151,15 +162,18 @@ public abstract class RemoteObject {
     /**
      * 
      */
-    public class JsonProperty<T>
+    public static class JsonProperty<T>
             implements Property<T> {
+        
+        private RemoteObject    obj;
         
         private String          key;
         
         private Class<T>        type;
 
-        protected JsonProperty( String key, Class<T> type ) {
-            assert key != null && type != null;
+        protected JsonProperty( RemoteObject obj, String key, Class<T> type ) {
+            assert obj!= null && key != null && type != null;
+            this.obj = obj;
             this.key = key;
             this.type = type;
         }
@@ -167,7 +181,7 @@ public abstract class RemoteObject {
         @Override
         public T get() {
             if (String.class.equals( type )) {
-                return (T)json().optString( key );                
+                return (T)obj.json().optString( key );                
             }
             throw new RuntimeException( "Property type not supported: " + type );
         }
@@ -181,8 +195,8 @@ public abstract class RemoteObject {
                     || value instanceof Float
                     || value instanceof Double
                     || value instanceof Boolean) {
-                json().remove( key );
-                json().put( key, value );
+                obj.json().remove( key );
+                obj.json().put( key, value );
             }
             else {
                 throw new RuntimeException( "Property type not supported: " + type );
@@ -194,12 +208,12 @@ public abstract class RemoteObject {
     /**
      * 
      */
-    public class Immutable<T>
+    public static class ImmutableProperty<T>
             implements Property<T> {
         
         private Property    delegate;
 
-        protected Immutable( Property delegate ) {
+        protected ImmutableProperty( Property delegate ) {
             assert delegate != null;
             this.delegate = delegate;
         }

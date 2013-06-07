@@ -17,21 +17,28 @@ package org.polymap.mosaic.api;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.lang.reflect.Field;
 import java.net.URL;
-
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 
 import com.google.common.base.Joiner;
 
-import org.polymap.mosaic.api.RemoteObject.Immutable;
+import org.polymap.mosaic.api.RemoteObject.ImmutableProperty;
+import org.polymap.mosaic.api.RemoteObject.JsonProperty;
+import org.polymap.mosaic.api.RemoteObject.Property;
 
 /**
  * Represents a connection to a remote Mosaic server.
  * <p/>
- * XXX There is no cache of the remote files and/or folders. Do we need one? 
- *
+ * There is no session or user transaction concept in the Mosaic API. Multiple
+ * threads can access the repository concurrently. Every {@link RemoteObject} type
+ * exposes a <code>store()</code> method.
+ * <p/>
+ * XXX There is no cache of the remote files and/or folders. Do we need one?
+ * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class MosaicRemoteServer {
@@ -42,6 +49,11 @@ public class MosaicRemoteServer {
 
     public static final String          FOLDER_CASES = "Cases";
     public static final String          FOLDER_EVENTS = "Events";
+    public static final String          FOLDER_SEARCH = "Search";
+
+    public static final String          QUERY_PARAM = "query";
+    public static final String          FIRSTRESULT_PARAM = "firstResult";
+    public static final String          MAXRESULTS_PARAM = "maxResults";
 
     private static MosaicRemoteServer   instance = new MosaicRemoteServer(); 
     
@@ -56,13 +68,14 @@ public class MosaicRemoteServer {
     
     private String                      rootUri;
 
-    private FileObject                  casesFolder;
+    private FileObject                  allCasesFolder;
     
     
     protected MosaicRemoteServer() {
         try {
             fsManager = new StandardFileSystemManager();
-            URL config = MosaicRemoteServer.class.getClassLoader().getResource( "vfs_config.xml" );
+            ClassLoader cl = MosaicRemoteServer.class.getClassLoader();
+            URL config = cl.getResource( "vfs_config.xml" );
             //URL config = MosaicApiPlugin.context().getBundle().getResource( "vfs_config.xml" );
             fsManager.setConfiguration( config );
             fsManager.init();
@@ -70,7 +83,7 @@ public class MosaicRemoteServer {
             rootUri = System.getProperty( PROP_ROOT_URI );
             assert rootUri != null;
 
-            casesFolder = fsManager.resolveFile( Joiner.on( "/" ).join( rootUri, FOLDER_CASES ) );
+            allCasesFolder = fsManager.resolveFile( Joiner.on( "/" ).join( rootUri, FOLDER_CASES ) );
         }
         catch (FileSystemException e) {
             throw new RuntimeException( e );
@@ -83,22 +96,59 @@ public class MosaicRemoteServer {
     }
 
     
+    private <T extends RemoteObject> T injectProperties( final T obj ) {
+        return (T)new PropertyInjector( obj ) {
+            protected Property createProperty( Field field, Class propertyType ) {
+                JsonName a = field.getAnnotation( JsonName.class );
+                String name = a != null ? a.value() : field.getName();
+                Property result = new JsonProperty( obj, name, propertyType );
+                
+                if (field.getAnnotation( Immutable.class ) != null ) {
+                    result = new ImmutableProperty( result );
+                }
+                return result;
+            }
+        }.run();    
+    }
+    
+    
     /**
     *
     * @param query
-    * @return 
+    * @return The queried cases, or an empty list if result set is empty.
     * @throws MosaicRemoteException
     */
    public List<MosaicCase> queryCases( MosaicQuery query ) {
+       assert query != null;
        try {
            List<MosaicCase> result = new ArrayList( 256 );
-           for (FileObject f : casesFolder.getChildren()) {
-               result.add( new MosaicCase( f ) );
+
+           String queryString = new String( Base64.encodeBase64( query.getQueryString().getBytes( ENCODING ) ) );
+           StringBuilder uri = new StringBuilder( 256 )
+                   .append( rootUri ).append( "/" ).append( FOLDER_CASES )
+                   .append( "/search-" ).append( queryString );
+
+//           if (query.getFirstResult() > 0) {
+//               uri.append( "&firstResult=" ).append( query.getFirstResult() );
+//           }
+//           if (query.getMaxResults() < Integer.MAX_VALUE) {
+//               uri.append( "&maxResults=" ).append( query.getMaxResults() );
+//           }
+
+           FileObject folder = fsManager.resolveFile( uri.toString() );
+           for (FileObject f : folder.getChildren()) {
+               // FIXME Milton delivers a 'shadow' folder with that name; or something wrong with the provider?
+               if (!f.getName().getBaseName().endsWith( queryString )) {
+                   result.add( injectProperties( new MosaicCase( f ) ) );
+               }
            }
            return result;
        }
        catch (FileSystemException e) {
            throw new MosaicRemoteException( e );
+       }
+       catch (Exception e) {
+           throw new RuntimeException( e );
        }
    }
    
@@ -114,7 +164,7 @@ public class MosaicRemoteServer {
        try {
            String url = Joiner.on( "/" ).join( rootUri, FOLDER_CASES, id );
            FileObject f = fsManager.resolveFile( url );
-           return f.exists() ? new MosaicCase( f ) : null;
+           return f.exists() ? injectProperties( new MosaicCase( f ) ) : null;
        }
        catch (FileSystemException e) {
            throw new MosaicRemoteException( e );
@@ -133,15 +183,15 @@ public class MosaicRemoteServer {
     public MosaicCase createCase( String name, String description ) {
         assert name != null;
         try {
-            FileObject f = fsManager.resolveFile( casesFolder, name );
+            FileObject f = fsManager.resolveFile( allCasesFolder, name );
 //            if (f.exists() || f.getType() != FileType.FOLDER) {
 //                throw new MosaicRemoteException( "Folder already exists: " + f.getName() );
 //            }
             f.createFolder();
             
-            MosaicCase result = new MosaicCase( f );
+            MosaicCase result = injectProperties( new MosaicCase( f ) );
             result.create();
-            ((Immutable)result.id).init( name );
+            ((ImmutableProperty)result.id).init( name );
             result.name.set( name );
             result.description.set( description );
             return result;
@@ -167,7 +217,7 @@ public class MosaicRemoteServer {
             for (FileObject f : rs.getChildren()) {
                 // FIXME Milton delivers a 'shadow' folder with that name; or something wrong with the provider?
                 if (!f.getName().getBaseName().equals( FOLDER_EVENTS )) {
-                    result.add( new MosaicCaseEvent( f ) );
+                    result.add( injectProperties( new MosaicCaseEvent( f ) ) );
                 }
             }
             return result;

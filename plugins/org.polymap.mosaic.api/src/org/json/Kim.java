@@ -106,7 +106,7 @@ public class Kim {
         if (this.length > 0) {
             this.bytes = new byte[this.length];
             for (int at = 0; at < this.length; at += 1) {
-                value = (int) bytes[at + from] & 0xFF;
+                value = bytes[at + from] & 0xFF;
                 sum += value;
                 this.hashcode += sum;
                 this.bytes[at] = (byte) value;
@@ -137,7 +137,6 @@ public class Kim {
      *            The point at which to take bytes.
      * @param thru
      *            The point at which to stop taking bytes.
-     * @return the substring
      */
     public Kim(Kim kim, int from, int thru) {
         this(kim.bytes, from, thru);
@@ -290,7 +289,7 @@ public class Kim {
      *            The position within the byte array to take the byes.
      * @return The position immediately after the copy.
      */
-    public int copy(byte[] bytes, int at) {
+    public int copy(@SuppressWarnings("hiding") byte[] bytes, int at) {
         System.arraycopy(this.bytes, 0, bytes, at, this.length);
         return at + this.length;
     }
@@ -330,7 +329,7 @@ public class Kim {
         if (at < 0 || at > this.length) {
             throw new JSONException("Bad character at " + at);
         }
-        return ((int) this.bytes[at]) & 0xFF;
+        return this.bytes[at] & 0xFF;
     }
 
     /**
@@ -352,6 +351,7 @@ public class Kim {
     public String toString() throws JSONException {
         if (this.string == null) {
             int c;
+            @SuppressWarnings("hiding")
             int length = 0;
             char chars[] = new char[this.length];
             for (int at = 0; at < this.length; at += characterSize(c)) {

@@ -16,7 +16,9 @@ package org.polymap.mosaic.server.fs;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,11 +47,19 @@ public class MosaicContentProvider
     /** The content encoding of the JSON files. */
     public static final String              ENCODING = "utf-8";
 
+    /** The name of the query request parameter. */
+    public static final String              QUERY_PARAM = "query";
+    /** The name of the firstResult request parameter. */
+    public static final String              FIRSTRESULT_PARAM = "firstResult";
+    /** The name of the maxResults request parameter. */
+    public static final String              MAXRESULTS_PARAM = "maxResults";
+
 
     @Override
     public List<? extends IContentNode> getChildren( IPath path ) {
         IContentFolder parent = getSite().getFolder( path );
         Request request = WebDavServer.request();
+        Map<String,String> requestParams = request.getParams() != null ? request.getParams() : MapUtils.EMPTY_MAP;
         
         // root
         if (path.segmentCount() == 0) {
@@ -61,19 +71,19 @@ public class MosaicContentProvider
         }
         // MosaicCaseFolder
         else if (parent instanceof MosaicCasesFolder) {
-            return ((MosaicCasesFolder)parent).getChildren( request.getParams() );
+            return ((MosaicCasesFolder)parent).getChildren( request.getAbsolutePath(), requestParams );
         }
         // MosaicCaseFile
         else if (parent instanceof MosaicCaseFolder) {
-            return ((MosaicCaseFolder)parent).getChildren( request.getParams() );
+            return ((MosaicCaseFolder)parent).getChildren( requestParams );
         }
         // events
         else if (parent instanceof EventsFolder) {
-            return ((EventsFolder)parent).getChildren( request.getParams() );
+            return ((EventsFolder)parent).getChildren( requestParams );
         }
         // event
         else if (parent instanceof EventFolder) {
-            return ((EventFolder)parent).getChildren( request.getParams() );
+            return ((EventFolder)parent).getChildren( requestParams );
         }
         return null;
     }

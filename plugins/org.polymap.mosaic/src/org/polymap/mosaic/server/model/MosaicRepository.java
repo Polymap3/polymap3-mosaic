@@ -17,9 +17,15 @@ package org.polymap.mosaic.server.model;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.qi4j.api.service.ServiceReference;
+
 import org.polymap.core.qi4j.Qi4jPlugin;
+import org.polymap.core.qi4j.Qi4jPlugin.Session;
 import org.polymap.core.qi4j.QiModule;
 import org.polymap.core.qi4j.QiModuleAssembler;
+import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
+
+import org.polymap.rhei.data.entitystore.lucene.LuceneEntityStoreService;
 
 /**
  * 
@@ -39,11 +45,29 @@ public class MosaicRepository
     public static final MosaicRepository instance() {
         return Qi4jPlugin.Session.instance().module( MosaicRepository.class );
     }
+
     
+    // instance *******************************************
     
-    //
+    private LuceneRecordStore recordStore;
+
+    
     protected MosaicRepository( QiModuleAssembler assembler ) {
         super( assembler );
     }
 
+    
+    @Override
+    public void init( Session session ) {
+        super.init( session );
+
+        ServiceReference<LuceneEntityStoreService> ref = assembler.getModule().serviceFinder().findService( LuceneEntityStoreService.class );
+        recordStore = ref.get().getStore();
+    }
+
+
+    public LuceneRecordStore recordStore() {
+        return recordStore;
+    }
+    
 }

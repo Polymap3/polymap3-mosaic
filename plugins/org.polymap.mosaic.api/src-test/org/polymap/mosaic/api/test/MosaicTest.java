@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.apache.commons.vfs2.FileSystemException;
 import org.polymap.mosaic.api.MosaicCase;
 import org.polymap.mosaic.api.MosaicCaseEvent;
+import org.polymap.mosaic.api.MosaicQuery;
 import org.polymap.mosaic.api.MosaicRemoteServer;
 
 /**
@@ -42,7 +43,8 @@ public class MosaicTest {
         server = MosaicRemoteServer.instance();
     }
 
-    @Test
+    
+    //@Test
     public void createCaseTest() throws FileSystemException {
         // create
         String name = String.valueOf( System.currentTimeMillis() );
@@ -64,6 +66,30 @@ public class MosaicTest {
         
         MosaicCaseEvent event = events.get( 0 );
         Assert.assertEquals( "Angelegt", event.name.get() );
+    }
+
+    
+    @Test
+    public void queryCaseTest() throws FileSystemException {
+        // create
+        String name = String.valueOf( System.currentTimeMillis() );
+        MosaicCase created = server.createCase( name, "der erste :)" );
+        
+        // query1
+        MosaicQuery<MosaicCase> query = MosaicQuery.forType( MosaicCase.class ).setMaxResults( 100 );
+        query.eq().name.set( name );
+        //query.match().description.set( "der*" );
+        
+        List<MosaicCase> results = server.queryCases( query );
+        Assert.assertEquals( 1, results.size() );
+
+        // query2
+        query = MosaicQuery.forType( MosaicCase.class ).setMaxResults( 100 );
+        query.eq().name.set( name );
+        query.match().description.set( "das*" );
+        
+        results = server.queryCases( query );
+        Assert.assertEquals( 0, results.size() );
     }
     
 }

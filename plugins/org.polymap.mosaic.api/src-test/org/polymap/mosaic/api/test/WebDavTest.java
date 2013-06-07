@@ -15,8 +15,6 @@
 package org.polymap.mosaic.api.test;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
-
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
@@ -40,7 +38,7 @@ public class WebDavTest {
         fsManager.init();
     }
 
-    @Test
+    //@Test
     public void ping() throws FileSystemException {
         FileObject folder = fsManager.resolveFile( rootURI + "Cases" );
         for (FileObject f : folder.getChildren()) {

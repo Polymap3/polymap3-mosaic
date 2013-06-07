@@ -82,10 +82,6 @@ public class MosaicRepositoryAssembler
                 MosaicCase.class,
                 MosaicCaseEvent.class
         );
-//        domainModule.addValues(
-//        );
-//        domainModule.addTransients(
-//        );
 
         // persistence: workspace/Lucene
         File root = new File( Polymap.getWorkspacePath().toFile(), "data" );

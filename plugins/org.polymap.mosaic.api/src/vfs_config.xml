@@ -20,7 +20,7 @@
         <scheme name="webdav"/>
     </provider>
     
-    <!-- default-provider class-name="org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider">
+    <default-provider class-name="org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider">
         <scheme name="file"/>
-    </default-provider-->
+    </default-provider>
 </providers>

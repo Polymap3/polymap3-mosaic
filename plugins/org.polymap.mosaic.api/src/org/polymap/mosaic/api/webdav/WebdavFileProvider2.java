@@ -12,45 +12,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.mosaic.api;
+package org.polymap.mosaic.api.webdav;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.provider.URLFileName;
+import org.apache.commons.vfs2.provider.webdav.WebdavFileProvider;
 
 /**
- * 
+ * Fix issues regarding the default implementation of {@link URLFileName}.
  *
+ * @see WebdavFileNameParser2
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class MosaicCaseEvent
-        extends RemoteObject {
+public class WebdavFileProvider2
+        extends WebdavFileProvider {
 
-    private static Log log = LogFactory.getLog( MosaicCaseEvent.class );
-    
-    @Immutable
-    @JsonName("identity")
-    public Property<String>     id; 
+    private static Log log = LogFactory.getLog( WebdavFileProvider2.class );
 
-    @Immutable
-    @JsonName("name")
-    public Property<String>     name; 
-
-    @Immutable
-    @JsonName("description")
-    public Property<String>     description;
-
-    @Immutable
-    @JsonName("user")
-    public Property<String>     user; 
-
-    @Immutable
-    @JsonName("time")
-    public Property<String>     time;
-
-    
-    protected MosaicCaseEvent( FileObject folder ) {
-        super( folder );
+    public WebdavFileProvider2() {
+        super();
+        setFileNameParser( WebdavFileNameParser2.instance() );
     }
-
+    
 }

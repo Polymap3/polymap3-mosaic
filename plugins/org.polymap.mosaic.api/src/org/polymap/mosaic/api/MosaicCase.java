@@ -26,15 +26,26 @@ import org.apache.commons.vfs2.FileObject;
 public class MosaicCase
         extends RemoteObject {
     
-    public Property<String>     id = new Immutable( new JsonProperty( "identity", String.class ) ); 
+    @Immutable
+    @JsonName("identity")
+    public Property<String>     id; 
 
     /** The name of the case. */
-    public Property<String>     name = new JsonProperty( "name", String.class ); 
+    @JsonName("name")
+    public Property<String>     name; 
 
     /** The entire desciption text of the case. */
-    public Property<String>     description = new JsonProperty( "description", String.class );
+    @JsonName("description")
+    public Property<String>     description;
 
-
+    
+    /** 
+     * No args ctor for the internal query interface. 
+     */
+    MosaicCase() {        
+    }
+    
+    
     MosaicCase( FileObject f ) {
         super( f );
     }
