@@ -37,7 +37,9 @@ import org.polymap.mosaic.api.RemoteObject.Property;
  * threads can access the repository concurrently. Every {@link RemoteObject} type
  * exposes a <code>store()</code> method.
  * <p/>
- * XXX There is no cache of the remote files and/or folders. Do we need one?
+ * XXX There is no cache of the remote files and/or folders. Every call to a method
+ * of {@link MosaicRemoteServer} might (in fact currently does) return a newly
+ * created instance of the remote objects. Subject to change?
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -99,10 +101,11 @@ public class MosaicRemoteServer {
     private <T extends RemoteObject> T injectProperties( final T obj ) {
         return (T)new PropertyInjector( obj ) {
             protected Property createProperty( Field field, Class propertyType ) {
+                // JsonProperty
                 JsonName a = field.getAnnotation( JsonName.class );
                 String name = a != null ? a.value() : field.getName();
                 Property result = new JsonProperty( obj, name, propertyType );
-                
+                // ImmutableProperty
                 if (field.getAnnotation( Immutable.class ) != null ) {
                     result = new ImmutableProperty( result );
                 }
@@ -113,44 +116,44 @@ public class MosaicRemoteServer {
     
     
     /**
-    *
-    * @param query
-    * @return The queried cases, or an empty list if result set is empty.
-    * @throws MosaicRemoteException
-    */
-   public List<MosaicCase> queryCases( MosaicQuery query ) {
-       assert query != null;
-       try {
-           List<MosaicCase> result = new ArrayList( 256 );
+     *
+     * @param query
+     * @return The queried cases, or an empty list if result set is empty.
+     * @throws MosaicRemoteException
+     */
+    public List<MosaicCase> queryCases( MosaicQuery query ) {
+        assert query != null;
+        try {
+            List<MosaicCase> result = new ArrayList( 256 );
 
-           String queryString = new String( Base64.encodeBase64( query.getQueryString().getBytes( ENCODING ) ) );
-           StringBuilder uri = new StringBuilder( 256 )
-                   .append( rootUri ).append( "/" ).append( FOLDER_CASES )
-                   .append( "/search-" ).append( queryString );
+            String queryString = new String( Base64.encodeBase64( query.getQueryString().getBytes( ENCODING ) ) );
+            StringBuilder uri = new StringBuilder( 256 )
+                    .append( rootUri ).append( "/" ).append( FOLDER_CASES )
+                    .append( "/search-" ).append( queryString );
 
-//           if (query.getFirstResult() > 0) {
-//               uri.append( "&firstResult=" ).append( query.getFirstResult() );
-//           }
-//           if (query.getMaxResults() < Integer.MAX_VALUE) {
-//               uri.append( "&maxResults=" ).append( query.getMaxResults() );
-//           }
+            //           if (query.getFirstResult() > 0) {
+            //               uri.append( "&firstResult=" ).append( query.getFirstResult() );
+            //           }
+            //           if (query.getMaxResults() < Integer.MAX_VALUE) {
+            //               uri.append( "&maxResults=" ).append( query.getMaxResults() );
+            //           }
 
-           FileObject folder = fsManager.resolveFile( uri.toString() );
-           for (FileObject f : folder.getChildren()) {
-               // FIXME Milton delivers a 'shadow' folder with that name; or something wrong with the provider?
-               if (!f.getName().getBaseName().endsWith( queryString )) {
-                   result.add( injectProperties( new MosaicCase( f ) ) );
-               }
-           }
-           return result;
-       }
-       catch (FileSystemException e) {
-           throw new MosaicRemoteException( e );
-       }
-       catch (Exception e) {
-           throw new RuntimeException( e );
-       }
-   }
+            FileObject folder = fsManager.resolveFile( uri.toString() );
+            for (FileObject f : folder.getChildren()) {
+                // FIXME Milton delivers a 'shadow' folder with that name; or something wrong with the provider?
+                if (!f.getName().getBaseName().endsWith( queryString )) {
+                    result.add( injectProperties( new MosaicCase( f ) ) );
+                }
+            }
+            return result;
+        }
+        catch (FileSystemException e) {
+            throw new MosaicRemoteException( e );
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
    
    
     /**

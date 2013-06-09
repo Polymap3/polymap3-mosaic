@@ -31,7 +31,7 @@ import org.polymap.mosaic.api.MosaicRemoteServer;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class MosaicTest {
+public class BasicTests {
 
     private static MosaicRemoteServer   server;
     
@@ -44,7 +44,7 @@ public class MosaicTest {
     }
 
     
-    //@Test
+    @Test
     public void createCaseTest() throws FileSystemException {
         // create
         String name = String.valueOf( System.currentTimeMillis() );
@@ -90,6 +90,34 @@ public class MosaicTest {
         
         results = server.queryCases( query );
         Assert.assertEquals( 0, results.size() );
+    }
+    
+
+    @Test
+    public void modifyCaseTest() throws Exception {
+        // create
+        String name = String.valueOf( System.currentTimeMillis() );
+        MosaicCase created = server.createCase( name, "ein Vorgang" );
+        created.store();
+        
+        // load and manipulate
+        MosaicCase manipulated = server.findCase( name );
+        Assert.assertNotNull( manipulated );
+        manipulated.description.set( "geändert" );
+        manipulated.store();
+        
+        // load and check
+        MosaicCase checked = server.findCase( name );
+        Assert.assertEquals( "geändert", checked.description.get() );
+    }
+    
+    
+    @Test(expected=UnsupportedOperationException.class)
+    public void immutablePropertyTest() throws Exception {
+        // create
+        String name = String.valueOf( System.currentTimeMillis() );
+        MosaicCase created = server.createCase( name, "ein Vorgang" );
+        created.id.set( "immutable" );
     }
     
 }
