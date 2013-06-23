@@ -15,6 +15,7 @@
 package org.polymap.atlas.internal.desktop;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -37,8 +38,9 @@ import org.eclipse.ui.forms.widgets.Section;
 
 import org.polymap.core.runtime.Polymap;
 
-import org.polymap.atlas.IAtlasToolkit;
-
+import org.polymap.atlas.toolkit.ILayoutContainer;
+import org.polymap.atlas.toolkit.IPanelSection;
+import org.polymap.atlas.toolkit.IPanelToolkit;
 
 /**
  *
@@ -46,9 +48,9 @@ import org.polymap.atlas.IAtlasToolkit;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class DesktopToolkit
-        implements IAtlasToolkit {
+        implements IPanelToolkit {
 
-    public static final String  CUSTOM_VARIANT_VALUE = "desktop";
+    public static final String  CUSTOM_VARIANT_VALUE = "atlas-panel";
     public static final Color   COLOR_SECTION_TITLE_FG = Graphics.getColor( new RGB( 0x54, 0x82, 0xb4 ) );
     public static final Color   COLOR_SECTION_TITLE_BG = Graphics.getColor( new RGB( 0xd7, 0xeb, 0xff ) );
 
@@ -76,7 +78,7 @@ public class DesktopToolkit
     public Button createButton( Composite parent, String text, int... styles ) {
         Button control = adapt( new Button( parent, stylebits( styles ) ), true, true );
         if (text != null) {
-            control.setText( text );
+            control.setText( StringUtils.upperCase( text, Polymap.getSessionLocale() ) );
         }
         return control;
     }
@@ -112,6 +114,7 @@ public class DesktopToolkit
         return adapt( result );
     }
 
+    
     @Override
     public Section createSection( Composite parent, String title, int... styles ) {
         Section result = adapt( new Section( parent, stylebits( styles ) | SWT.NO_FOCUS ) );
@@ -155,6 +158,24 @@ public class DesktopToolkit
         return result;
     }
 
+    
+    @Override
+    public IPanelSection createPanelSection( Composite parent, String title, int... styles ) {
+        DesktopPanelSection result = new DesktopPanelSection( this, parent, styles );
+        adapt( result.getControl() );
+        if (title != null) {
+            result.setTitle( title );
+        }
+        return result;
+    }
+
+    
+    @Override
+    public IPanelSection createPanelSection( ILayoutContainer parent, String title, int... styles ) {
+        return createPanelSection( parent.getBody(), title, styles );
+    }
+
+    
     protected <T extends Composite> T adapt( T composite ) {
         composite.setData( WidgetUtil.CUSTOM_VARIANT, CUSTOM_VARIANT_VALUE );
 

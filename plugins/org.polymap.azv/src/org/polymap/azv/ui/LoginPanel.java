@@ -21,29 +21,32 @@ import org.apache.commons.logging.LogFactory;
 
 import org.qi4j.api.unitofwork.NoSuchEntityException;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.UserPrincipal;
-import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
+
+import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
+import org.polymap.rhei.field.FormFieldEvent;
+import org.polymap.rhei.field.IFormFieldListener;
+import org.polymap.rhei.field.StringFormField;
+import org.polymap.rhei.field.StringFormField.Style;
+import org.polymap.rhei.form.IFormEditorPageSite;
 
 import org.polymap.atlas.ContextProperty;
 import org.polymap.atlas.DefaultPanel;
 import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
+import org.polymap.atlas.app.FormContainer;
+import org.polymap.atlas.toolkit.IPanelSection;
+import org.polymap.atlas.toolkit.IPanelToolkit;
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Nutzer;
@@ -64,20 +67,13 @@ public class LoginPanel
 
     private ContextProperty<UserPrincipal> user;
 
-    private IAtlasToolkit                  tk;
-
-    private Text                           nameText;
-
-    private Text                           pwdText;
-
-    private Button                         loginBtn;
+    private IPanelToolkit                  tk;
 
     
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
         this.tk = site.toolkit();
-        
         //assert nutzer.get() == null;
         
         // open only if directly called
@@ -95,80 +91,121 @@ public class LoginPanel
     public void createContents( Composite panelBody ) {
         getSite().setTitle( "Login" );
         panelBody.setLayout( FormLayoutFactory.defaults().margins( DEFAULTS_SPACING ).create() );
-
-        Composite contents = tk.createComposite( panelBody );
-        contents.setLayoutData( FormDataFactory.offset( 0 ).top( 0, 50 ).left( 30 ).right( 70 ).width( 500 ).create() );
-        contents.setLayout( FormLayoutFactory.defaults().spacing( 10 ).create() );
         
-        Label l1 = tk.createLabel( contents, "EMail" );
-        l1.setLayoutData( FormDataFactory.offset( 0 ).left( 0 ).top( 0 ).right( 0, 120 ).create() );
-        nameText = tk.createText( contents, "", SWT.BORDER );
-        nameText.setLayoutData( FormDataFactory.offset( 0 ).left( l1 ).top( 0 ).right( 100 ).create() );
-        nameText.setFocus();
-        nameText.addModifyListener( new ModifyListener() {
-            public void modifyText( ModifyEvent ev ) {
-                loginBtn.setEnabled( nameText.getText().length() > 0 && pwdText.getText().length() > 0 );
-            }
-        });
-
-        Label l2 = tk.createLabel( contents, "Passwort" );
-        l2.setLayoutData( FormDataFactory.offset( 0 ).left( 0 ).top( nameText ).right( 0, 120 ).create() );
-        pwdText = tk.createText( contents, "", SWT.BORDER, SWT.PASSWORD );
-        pwdText.setLayoutData( FormDataFactory.offset( 0 ).left( l2 ).top( nameText ).right( 100 ).create() );
-        pwdText.addModifyListener( new ModifyListener() {
-            public void modifyText( ModifyEvent ev ) {
-                loginBtn.setEnabled( nameText.getText().length() > 0 && pwdText.getText().length() > 0 );
-            }
-        });
+        IPanelSection section = tk.createPanelSection( panelBody, "Anmelden" );
         
-        loginBtn = tk.createButton( contents, "Anmelden" );
-        loginBtn.setLayoutData( FormDataFactory.offset( 0 ).top( pwdText ).right( 100 ).create() );
-        loginBtn.setEnabled( false );
-        loginBtn.addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                login( nameText.getText(), pwdText.getText() );
-            }
-        });
+        new LoginForm( nutzer, user ) {
+            protected void login( String name, String passwd ) {
+                super.login( name, passwd );
 
-        // XXX fake login
-        nameText.setText( "admin" );
-        pwdText.setText( "login" );
+                if (user.get() != null || nutzer.get() != null) {
+                    getContext().closePanel();
+                }
+                else {
+                    getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
+                }
+            }
+            
+        }.createContents( section );
     }
     
     
-    protected void login( final String name, final String passwd ) {
-        // user
-        try {
-            Polymap.instance().login( name, passwd );
-            user.set( (UserPrincipal)Polymap.instance().getUser() );
-        }
-        catch (LoginException e) {
-            log.info( "Login: no user found for name: " + name );
-        }
+    
+    /**
+     * 
+     */
+    public static class LoginForm
+            extends FormContainer {
+
+        protected ContextProperty<Nutzer>        nutzer;
+
+        protected ContextProperty<UserPrincipal> user;
+
+        protected Button                         loginBtn;
+
+        protected String                         username = "admin", password = "login";
+
+        private IFormEditorPageSite              formSite;
         
-        // nutzer
-        try {
-            Nutzer found = AzvRepository.instance().findEntity( Nutzer.class, name );
-            // FIXME check password
-            nutzer.set( found );
-            user.set( new UserPrincipal( name ) {
-                @Override
-                public String getPassword() {
-                    return passwd;
+        
+        public LoginForm( ContextProperty<Nutzer> nutzer, ContextProperty<UserPrincipal> user ) {
+            this.nutzer = nutzer;
+            this.user = user;
+        }
+
+
+        @Override
+        public void createFormContent( IFormEditorPageSite site ) {
+            formSite = site;
+            Composite body = site.getPageBody();
+            // username
+            new FormFieldBuilder( body, new PlainValuePropertyAdapter( "username", username ) )
+                    .setField( new StringFormField() ).create().setFocus();
+            // password
+            new FormFieldBuilder( body, new PlainValuePropertyAdapter( "password", password ) )
+                    .setField( new StringFormField( Style.PASSWORD ) ).create();
+            // btn
+            loginBtn = site.getToolkit().createButton( body, "Anmelden", SWT.PUSH );
+            loginBtn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    login( username, password );
+                }
+            });
+            
+            // listener
+            site.addFieldListener( new IFormFieldListener() {
+                public void fieldChange( FormFieldEvent ev ) {
+                    if (ev.getFieldName().equals( "username" ) ) {
+                        username = ev.getNewValue();
+                    }
+                    else if (ev.getFieldName().equals( "password" ) ) {
+                        password = ev.getNewValue();
+                    }
+                    else {
+                        throw new IllegalStateException( "Unknown form field: " + ev.getFieldName() );
+                    }
+                    if (loginBtn != null) {
+                        loginBtn.setEnabled( username.length() > 0 && password.length() > 0 );
+                    }
                 }
             });
         }
-        catch (NoSuchEntityException e) {
-            log.info( "Login: no Nutzer found for name: " + name );
-        }
-        
-        // check and return
-        if (user.get() != null || nutzer.get() != null) {
-            getContext().closePanel();
-        }
-        else {
-            getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
-        }
-    }
+
     
+        protected void login( final String name, final String passwd ) {
+            // user
+            try {
+                Polymap.instance().login( name, passwd );
+                user.set( (UserPrincipal)Polymap.instance().getUser() );
+            }
+            catch (LoginException e) {
+                log.info( "Login: no user found for name: " + name );
+            }
+            
+            // nutzer
+            try {
+                Nutzer found = AzvRepository.instance().findEntity( Nutzer.class, name );
+                // FIXME check password
+                nutzer.set( found );
+                user.set( new UserPrincipal( name ) {
+                    @Override
+                    public String getPassword() {
+                        return passwd;
+                    }
+                });
+            }
+            catch (NoSuchEntityException e) {
+                log.info( "Login: no Nutzer found for name: " + name );
+            }
+            
+            // check
+            if (user.get() != null || nutzer.get() != null) {
+                formSite.clearFields();
+                loginBtn.dispose();
+                
+                formSite.getToolkit().createLabel( formSite.getPageBody(), user.get().getName() );
+            }
+        }
+    }        
+        
 }

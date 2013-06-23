@@ -100,9 +100,8 @@ public class SchachtscheinPanel
         Composite client = (Composite)section.getClient();
         client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).create() );
 
-        new FormFieldBuilder( client, new PropertyAdapter( entity.get().beschreibung() ) )
-                .create().setFocus();
-        Composite bemerkungen = new FormFieldBuilder( client, new PropertyAdapter( entity.get().bemerkungen() ) ).create();
+        new FormFieldBuilder( client, new PropertyAdapter( entity.get().beschreibung() ) ).create().setFocus();
+        new FormFieldBuilder( client, new PropertyAdapter( entity.get().bemerkungen() ) ).create();
 
         return section;
     }

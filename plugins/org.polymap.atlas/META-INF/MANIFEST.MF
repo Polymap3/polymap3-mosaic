@@ -13,4 +13,5 @@ Require-Bundle: org.polymap.core;bundle-version="3.2.0";visibility:=reexport,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.polymap.atlas,
- org.polymap.atlas.app
+ org.polymap.atlas.app,
+ org.polymap.atlas.toolkit

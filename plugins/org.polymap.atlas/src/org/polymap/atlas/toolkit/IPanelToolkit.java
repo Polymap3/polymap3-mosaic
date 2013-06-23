@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas;
+package org.polymap.atlas.toolkit;
 
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -21,12 +21,14 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.forms.widgets.Section;
 
+import org.polymap.atlas.IPanel;
+
 /**
  * The factory for basic UI elements used by {@link IPanel} instances.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IAtlasToolkit {
+public interface IPanelToolkit {
 
     /**
      *
@@ -47,5 +49,22 @@ public interface IAtlasToolkit {
     public Section createSection( Composite parent, String title, int... styles );
 
     public Text createText( Composite parent, String defaultText, int... styles );
+
+    /**
+     * Creates a top level section.
+     * 
+     * @param parent
+     * @param title The heading of this section, or null if no heading.
+     * @param styles One of the {@link IPanelSection} constants.
+     * @return Newly created viewer instance.
+     */
+    public IPanelSection createPanelSection( Composite parent, String title, int... styles );
+
+    /**
+     * Equivalent of calling <code>createPanelSection( parent.getBody(), title, styles )</code>.
+     * 
+     * @see #createPanelSection(Composite, String, int...)
+     */
+    public IPanelSection createPanelSection( ILayoutContainer parent, String title, int... styles );
 
 }

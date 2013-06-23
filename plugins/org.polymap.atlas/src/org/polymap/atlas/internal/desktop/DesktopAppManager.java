@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.Status;
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.atlas.IApplicationLayouter;
-import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelChangeEvent;
@@ -51,6 +50,7 @@ import org.polymap.atlas.internal.AtlasComponentFactory;
 import org.polymap.atlas.internal.DefaultAppContext;
 import org.polymap.atlas.internal.PanelContextInjector;
 import org.polymap.atlas.internal.desktop.DesktopActionBar.PLACE;
+import org.polymap.atlas.toolkit.IPanelToolkit;
 
 /**
  *
@@ -328,7 +328,7 @@ public class DesktopAppManager
         }
 
         @Override
-        public IAtlasToolkit toolkit() {
+        public IPanelToolkit toolkit() {
             return tk;
         }
 

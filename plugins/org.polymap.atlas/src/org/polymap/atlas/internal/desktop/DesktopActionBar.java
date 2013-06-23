@@ -30,8 +30,8 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IAtlasToolkit;
 import org.polymap.atlas.PanelChangeEvent;
+import org.polymap.atlas.toolkit.IPanelToolkit;
 
 /**
  * The mail action bar displayed at the top of the main window.
@@ -53,12 +53,12 @@ class DesktopActionBar {
 
     private IAppContext                 context;
 
-    private IAtlasToolkit               tk;
+    private IPanelToolkit               tk;
 
     private Map<PLACE,IContributionItem> items = new HashMap();
 
 
-    public DesktopActionBar( IAppContext context, IAtlasToolkit tk ) {
+    public DesktopActionBar( IAppContext context, IPanelToolkit tk ) {
         this.context = context;
         this.tk = tk;
         context.addEventHandler( this );

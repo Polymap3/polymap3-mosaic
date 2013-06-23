@@ -20,6 +20,8 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.atlas.toolkit.IPanelToolkit;
+
 /**
  * The interface between the {@link IPanel} and the Atlas UI.
  *
@@ -50,7 +52,7 @@ public interface IPanelSite {
 
     public void addSidekick();
 
-    public IAtlasToolkit toolkit();
+    public IPanelToolkit toolkit();
 
     public void setTitle( String string );
 
