@@ -24,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.rwt.lifecycle.WidgetUtil;
+
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -44,6 +46,7 @@ import org.polymap.rhei.internal.form.AbstractFormEditorPageContainer;
 import org.polymap.rhei.internal.form.FormEditorToolkit;
 
 import org.polymap.atlas.AtlasPlugin;
+import org.polymap.atlas.internal.desktop.DesktopToolkit;
 import org.polymap.atlas.toolkit.ILayoutContainer;
 
 /**
@@ -67,6 +70,7 @@ public abstract class FormContainer
     public final void createContents( ILayoutContainer parent ) {
         toolkit = new FormEditorToolkit( new FormToolkit( Polymap.getSessionDisplay() ) );
         pageBody = parent.getBody();
+        pageBody.setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-form"  );
         pageSite = new PageContainer( this );
 
         try {
