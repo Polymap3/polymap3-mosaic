@@ -21,9 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -31,7 +29,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Scrollable;
 
-import org.eclipse.rwt.graphics.Graphics;
+import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.ui.forms.widgets.Section;
 
@@ -50,7 +48,7 @@ class DesktopPanelSection
 
     private static Log log = LogFactory.getLog( DesktopPanelSection.class );
     
-    private Section                 control;
+    private PanelSection            control;
     
     private int                     level;
 
@@ -69,18 +67,22 @@ class DesktopPanelSection
 
     
     public DesktopPanelSection( DesktopToolkit tk, Composite parent, int[] styles ) {
-        control = new Section( parent, SWT.NO_FOCUS | SWT.BORDER );
+        control = new PanelSection( parent, SWT.NO_FOCUS | SWT.BORDER );
         control.setData( "panelSection", this );
         control.setExpanded( true );
         control.setMenu( parent.getMenu() );
         control.setLayout( new FillLayout() );
 
-        FontData[] defaultFont = parent.getFont().getFontData();
-        FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
-        control.setFont( Graphics.getFont( bold ) );
-        control.setTitleBarForeground( DesktopToolkit.COLOR_SECTION_TITLE_FG );
-        control.setTitleBarBackground( DesktopToolkit.COLOR_SECTION_TITLE_BG );
-        control.setTitleBarBorderColor( Graphics.getColor( new RGB( 0x80, 0x80, 0xa0 ) ) );
+//        FontData[] defaultFont = parent.getFont().getFontData();
+//        FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
+//        control.setFont( Graphics.getFont( bold ) );
+//        control.setTitleBarForeground( DesktopToolkit.COLOR_SECTION_TITLE_FG );
+//        control.setTitleBarBackground( DesktopToolkit.COLOR_SECTION_TITLE_BG );
+//        control.setTitleBarBorderColor( Graphics.getColor( new RGB( 0x80, 0x80, 0xa0 ) ) );
+
+        control.getTitleControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-title"  );
+        //control.getTextClient().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-client"  );
+        //control.getDescriptionControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section"  );
         
         Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS, SWT.BORDER ) ) ); // {
 //            // get informed about Controls added/removed to/from the section body
@@ -192,6 +194,22 @@ class DesktopPanelSection
         return this;
     }
 
+    
+    /**
+     * 
+     */
+    static class PanelSection
+            extends Section {
+        
+        public PanelSection( Composite parent, int style ) {
+            super( parent, style );
+        }
+
+        public Control getTitleControl() {
+            return textLabel;
+        }
+    }
+    
     
     /**
      * 
