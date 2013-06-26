@@ -84,7 +84,7 @@ class DesktopPanelSection
         //control.getTextClient().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-client"  );
         //control.getDescriptionControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section"  );
         
-        Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS, SWT.BORDER ) ) ); // {
+        Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS ) ) ); // {
 //            // get informed about Controls added/removed to/from the section body
 //            @Override
 //            public <T> T getAdapter( Class<T> adapter ) {
