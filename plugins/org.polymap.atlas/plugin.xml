@@ -17,17 +17,16 @@
             defaultEntrypointId="org.polymap.atlas.entrypoint"
             id="org.polymap.atlas.branding"
             servletName="atlas"
-            themeId="org.eclipse.rap.rwt.theme.Default"
+            themeId="mosaic.theme"
             title="Mosaic">
       </branding>
    </extension>
    <extension
-         point="org.eclipse.rap.ui.themes">
-      <themeContribution
-            file="atlas.css"
-            themeId="org.eclipse.rap.rwt.theme.Default">
-      </themeContribution>
-   </extension>
+      point="org.eclipse.rap.ui.themes">
+    <themeContribution
+        themeId="mosaic.theme"
+        file="atlas.css" />
+  </extension>
    <extension
          point="org.polymap.atlas.applicationLayouters">
       <applicationLayouter
