@@ -14,14 +14,23 @@
  */
 package org.polymap.atlas.toolkit;
 
-import java.util.List;
-
-import org.eclipse.swt.widgets.Composite;
+import org.polymap.atlas.internal.cp.IConstraint;
+import org.polymap.atlas.internal.cp.Prioritized;
 
 /**
  * 
  */
-public abstract class LayoutConstraint {
+public abstract class LayoutConstraint
+        extends Prioritized
+        implements IConstraint {
+    
+    private Integer         priority;
+
+    
+    public LayoutConstraint( int priority ) {
+        super( priority );
+    }
+    
     
     //protected abstract void layout( Composite composite, List<LayoutConstraint> constraints );
     

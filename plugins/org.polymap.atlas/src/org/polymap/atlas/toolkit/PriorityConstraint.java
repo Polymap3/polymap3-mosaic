@@ -14,6 +14,9 @@
  */
 package org.polymap.atlas.toolkit;
 
+import org.polymap.atlas.internal.cp.IScore;
+import org.polymap.atlas.internal.cp.ISolution;
+
 /**
  * The priority of an element inside a container. Higher priorities are displayed
  * more eye-catching. In most cases this means that higher priorities are displayed
@@ -25,13 +28,21 @@ public class PriorityConstraint
     private int         value = -1;
 
 
-    public PriorityConstraint( int value ) {
+    public PriorityConstraint( int value, int priority ) {
+        super( priority );
         this.value = value;
     }
 
     
     public int getValue() {
         return value;
+    }
+
+
+    @Override
+    public IScore score( ISolution solution ) {
+        // XXX Auto-generated method stub
+        throw new RuntimeException( "not yet implemented." );
     }
     
 }

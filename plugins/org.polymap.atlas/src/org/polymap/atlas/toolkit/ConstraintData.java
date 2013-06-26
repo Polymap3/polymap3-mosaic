@@ -16,14 +16,19 @@ package org.polymap.atlas.toolkit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.ListIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
+
+import org.polymap.atlas.internal.cp.ISolver;
 
 /**
  * Layout data to be used for child widgets of {@link ILayoutContainer}s such
@@ -39,7 +44,7 @@ public class ConstraintData {
 
     protected int                   currentWhint, currentHhint, currentWidth = -1, currentHeight = -1;
     
-    protected List<LayoutConstraint> constraints = new ArrayList( 3 );
+    protected ArrayList<LayoutConstraint> constraints = new ArrayList( 3 );
 
     
     public ConstraintData( LayoutConstraint... constraints ) {
@@ -48,8 +53,24 @@ public class ConstraintData {
     
     
     public ConstraintData addConstraint( LayoutConstraint constraint ) {
-        constraints.add( constraint );
+        for (ListIterator<LayoutConstraint> it=constraints.listIterator(); it.hasNext(); ) {
+            if (it.next().getClass().equals( constraint.getClass() )) {
+                it.set( constraint );
+            }
+        }
         return this;
+    }
+    
+    
+    public void fillSolver( ISolver solver ) {
+        for (LayoutConstraint constraint : constraints) {
+            solver.addConstraint( constraint );
+        }
+    }
+
+    
+    public <T extends LayoutConstraint> T constraint( Class<T> type ) {
+        return (T)Iterables.find( constraints, Predicates.instanceOf( type ) );
     }
     
     

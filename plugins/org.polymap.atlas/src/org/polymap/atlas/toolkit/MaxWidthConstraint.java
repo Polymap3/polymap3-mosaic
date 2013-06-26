@@ -14,6 +14,9 @@
  */
 package org.polymap.atlas.toolkit;
 
+import org.polymap.atlas.internal.cp.IScore;
+import org.polymap.atlas.internal.cp.ISolution;
+
 /**
  * 
  */
@@ -23,13 +26,21 @@ public class MaxWidthConstraint
     private int         value = -1;
 
 
-    public MaxWidthConstraint( int value ) {
+    public MaxWidthConstraint( int value, int priority ) {
+        super( priority );
         this.value = value;
     }
 
     
     public int getValue() {
         return value;
+    }
+
+
+    @Override
+    public IScore score( ISolution solution ) {
+        // XXX Auto-generated method stub
+        throw new RuntimeException( "not yet implemented." );
     }
     
 }

@@ -12,35 +12,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas.toolkit;
-
-import org.polymap.atlas.internal.cp.IScore;
-import org.polymap.atlas.internal.cp.ISolution;
+package org.polymap.atlas.internal.cp;
 
 /**
  * 
+ *
+ * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class MinWidthConstraint
-        extends LayoutConstraint {
+public interface IOptimizationGoal<S extends ISolution, SC extends IScore> {
+
+    public abstract boolean optimize( S solution );
     
-    private int         value = -1;
-
-
-    public MinWidthConstraint( int value, int priority ) {
-        super( priority );
-        this.value = value;
-    }
+    public abstract SC score( S solution );
 
     
-    public int getValue() {
-        return value;
-    }
-
-
-    @Override
-    public IScore score( ISolution solution ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+    /**
+     * 
+     */
+    public interface Step {
+    
+        public abstract void revoke();
+        
     }
     
 }

@@ -12,35 +12,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas.toolkit;
-
-import org.polymap.atlas.internal.cp.IScore;
-import org.polymap.atlas.internal.cp.ISolution;
+package org.polymap.atlas.internal.cp;
 
 /**
  * 
+ * <p/>
+ * Note that a solution implementation MUST provide a {@link #hashCode()} method.
+ *
+ * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class MinWidthConstraint
-        extends LayoutConstraint {
+public interface ISolution {
+        //extends Cloneable {
+
+    public <S extends ISolution> S copy();
     
-    private int         value = -1;
-
-
-    public MinWidthConstraint( int value, int priority ) {
-        super( priority );
-        this.value = value;
-    }
-
     
-    public int getValue() {
-        return value;
-    }
-
-
-    @Override
-    public IScore score( ISolution solution ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
-    }
+    /**
+     * The surrogate (hash) code of a solution is used to identify this solution for
+     * backtracking. Sub-classes MUST provide an implementation.
+     */
+    public String surrogate();
     
 }

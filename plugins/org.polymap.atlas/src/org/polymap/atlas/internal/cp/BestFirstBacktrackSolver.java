@@ -1,0 +1,146 @@
+/* 
+ * polymap.org
+ * Copyright 2013, Polymap GmbH. All rights reserved.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 3.0 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ */
+package org.polymap.atlas.internal.cp;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.polymap.core.runtime.Timer;
+
+/**
+ * 
+ *
+ * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
+ */
+public class BestFirstBacktrackSolver
+        extends DefaultSolver {
+
+    private static Log log = LogFactory.getLog( BestFirstBacktrackSolver.class );
+
+    private int                             timeoutMillis;
+
+    /** The surrogates of the seen solutions so far. */
+    private Set<String>                     seen = new HashSet();
+    
+    private SolutionQueue<ExtScoredSolution> queue, terminals;
+    
+    /**
+     * Bound priority queue. 
+     */
+    class SolutionQueue<T extends ScoredSolution>
+            extends LinkedList<T> {
+
+        protected int         maxSize;
+
+        public SolutionQueue( int maxSize ) {
+            this.maxSize = maxSize;
+        }
+
+        @Override
+        public boolean add( T elm ) {
+            boolean success = super.add( elm );
+            assert success;
+            // XXX
+            Collections.sort( this );
+            if (size() > maxSize) {
+                remove( 0 );
+            }
+            return true;
+        }
+    }
+    
+
+    /**
+     * 
+     */
+    class ExtScoredSolution
+            extends ScoredSolution {
+        
+        public int      goalsIndex = 0;
+
+        public ExtScoredSolution( ISolution solution, IScore score ) {
+            super( solution, score );
+        }
+    }
+    
+    
+    /**
+     * 
+     * @param timeoutMillis Max time in milliseconds to spent in optimizer.
+     * @param maxQueueSize
+     */
+    public BestFirstBacktrackSolver( int timeoutMillis, int maxQueueSize ) {
+        this.timeoutMillis = timeoutMillis;
+        this.queue = new SolutionQueue( maxQueueSize );
+        this.terminals = new SolutionQueue( maxQueueSize );
+    }
+
+    
+    @Override
+    public List<ScoredSolution> solve( ISolution start ) {
+        Timer timer = new Timer();
+        ArrayList<IOptimizationGoal> goals = Prioritized.sort( goals() );
+        List<IConstraint> constraints = constraints();
+
+        // start solution
+        queue.add( new ExtScoredSolution( start, new PercentScore( 0 ) ) );
+        
+        //
+        while (!queue.isEmpty() && timer.elapsedTime() < timeoutMillis) {
+            // current best solution
+            ExtScoredSolution best = queue.getLast();
+            
+            // find next optimization step
+            ISolution optimized = null;
+            for (; optimized==null && best.goalsIndex<goals.size(); best.goalsIndex++) {
+                IOptimizationGoal goal = goals.get( best.goalsIndex );
+
+                optimized = best.solution.copy();
+                if (goal.optimize( optimized )) {
+                    if (seen.contains( optimized.surrogate() )) {
+                        optimized = null;
+                    }
+                }
+            }
+            // no optimization found -> terminal
+            if (optimized == null) {
+                queue.removeLast();
+                terminals.add( best );
+            }
+            // score optimized solution -> queue
+            else {
+                IScore optimizedScore = new PercentScore( 1 );
+                for (IConstraint constraint : constraints) {
+                    IScore s = constraint.score( optimized );
+                    optimizedScore = optimizedScore != null ? optimizedScore.add( s ) : s;
+                }
+                queue.add( new ExtScoredSolution( optimized, optimizedScore ) );
+                seen.add( optimized.surrogate() );
+            }            
+        }
+        
+        SolutionQueue result = new SolutionQueue( queue.maxSize );
+        result.addAll( queue );
+        result.addAll( terminals );
+        return result;
+    }
+    
+}
