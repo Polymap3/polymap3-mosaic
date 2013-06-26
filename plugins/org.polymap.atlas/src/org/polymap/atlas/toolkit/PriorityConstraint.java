@@ -14,8 +14,8 @@
  */
 package org.polymap.atlas.toolkit;
 
-import org.polymap.atlas.internal.cp.IScore;
-import org.polymap.atlas.internal.cp.ISolution;
+import org.polymap.atlas.internal.ConstraintLayout.LayoutSolution;
+import org.polymap.atlas.internal.cp.PercentScore;
 
 /**
  * The priority of an element inside a container. Higher priorities are displayed
@@ -40,9 +40,9 @@ public class PriorityConstraint
 
 
     @Override
-    public IScore score( ISolution solution ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+    public PercentScore score( LayoutSolution solution ) {
+        // this is soft constraint; it is enforced by the optimizer goal
+        return PercentScore.NULL;
     }
     
 }

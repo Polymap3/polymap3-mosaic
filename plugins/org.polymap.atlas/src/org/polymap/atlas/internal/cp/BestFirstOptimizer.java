@@ -27,13 +27,16 @@ import org.polymap.core.runtime.Timer;
 
 /**
  * 
- *
+ * <p>
+ * This optimizer finds also invalid solutions that fail on one or more given
+ * constraints.
+ * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class BestFirstBacktrackSolver
+public class BestFirstOptimizer
         extends DefaultSolver {
 
-    private static Log log = LogFactory.getLog( BestFirstBacktrackSolver.class );
+    private static Log log = LogFactory.getLog( BestFirstOptimizer.class );
 
     private int                             timeoutMillis;
 
@@ -41,6 +44,7 @@ public class BestFirstBacktrackSolver
     private Set<String>                     seen = new HashSet();
     
     private SolutionQueue<ExtScoredSolution> queue, terminals;
+    
     
     /**
      * Bound priority queue. 
@@ -87,7 +91,7 @@ public class BestFirstBacktrackSolver
      * @param timeoutMillis Max time in milliseconds to spent in optimizer.
      * @param maxQueueSize
      */
-    public BestFirstBacktrackSolver( int timeoutMillis, int maxQueueSize ) {
+    public BestFirstOptimizer( int timeoutMillis, int maxQueueSize ) {
         this.timeoutMillis = timeoutMillis;
         this.queue = new SolutionQueue( maxQueueSize );
         this.terminals = new SolutionQueue( maxQueueSize );
@@ -96,29 +100,32 @@ public class BestFirstBacktrackSolver
     
     @Override
     public List<ScoredSolution> solve( ISolution start ) {
+        assert goals().size() > 0;
+        
         Timer timer = new Timer();
         ArrayList<IOptimizationGoal> goals = Prioritized.sort( goals() );
         List<IConstraint> constraints = constraints();
 
         // start solution
-        queue.add( new ExtScoredSolution( start, new PercentScore( 0 ) ) );
+        queue.add( new ExtScoredSolution( start, PercentScore.NULL ) );
         
         //
-        while (!queue.isEmpty() && timer.elapsedTime() < timeoutMillis) {
+        int loops = 0; 
+        for ( ;!queue.isEmpty() && timer.elapsedTime() < timeoutMillis; loops++) {
             // current best solution
             ExtScoredSolution best = queue.getLast();
             
             // find next optimization step
             ISolution optimized = null;
-            for (; optimized==null && best.goalsIndex<goals.size(); best.goalsIndex++) {
+            while (optimized == null && best.goalsIndex < goals.size()) {
                 IOptimizationGoal goal = goals.get( best.goalsIndex );
 
                 optimized = best.solution.copy();
-                if (goal.optimize( optimized )) {
-                    if (seen.contains( optimized.surrogate() )) {
-                        optimized = null;
-                    }
+                if (!goal.optimize( optimized )
+                        || seen.contains( optimized.surrogate() )) {
+                    optimized = null;
                 }
+                best.goalsIndex ++;
             }
             // no optimization found -> terminal
             if (optimized == null) {
@@ -128,18 +135,26 @@ public class BestFirstBacktrackSolver
             // score optimized solution -> queue
             else {
                 IScore optimizedScore = new PercentScore( 1 );
+                for (IOptimizationGoal goal : goals) {
+                    IScore s = goal.score( optimized );
+                    optimizedScore = optimizedScore != null ? optimizedScore.add( s ) : s;
+                }
                 for (IConstraint constraint : constraints) {
                     IScore s = constraint.score( optimized );
-                    optimizedScore = optimizedScore != null ? optimizedScore.add( s ) : s;
+                    optimizedScore = optimizedScore.add( s );
                 }
                 queue.add( new ExtScoredSolution( optimized, optimizedScore ) );
                 seen.add( optimized.surrogate() );
             }            
         }
         
-        SolutionQueue result = new SolutionQueue( queue.maxSize );
+        SolutionQueue<ScoredSolution> result = new SolutionQueue( queue.maxSize );
         result.addAll( queue );
         result.addAll( terminals );
+        log.info( "solutions found: queue=" + queue.size() + ", terminals=" + terminals.size() 
+                + ", maxScore=" + result.getLast().score
+                + ", loops=" + loops + ", seen=" + seen.size()
+                + " (" + timer.elapsedTime() + "ms)" );
         return result;
     }
     

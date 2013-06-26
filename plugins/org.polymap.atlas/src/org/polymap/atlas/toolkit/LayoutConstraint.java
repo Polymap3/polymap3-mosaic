@@ -14,7 +14,9 @@
  */
 package org.polymap.atlas.toolkit;
 
+import org.polymap.atlas.internal.ConstraintLayout.LayoutSolution;
 import org.polymap.atlas.internal.cp.IConstraint;
+import org.polymap.atlas.internal.cp.PercentScore;
 import org.polymap.atlas.internal.cp.Prioritized;
 
 /**
@@ -22,7 +24,7 @@ import org.polymap.atlas.internal.cp.Prioritized;
  */
 public abstract class LayoutConstraint
         extends Prioritized
-        implements IConstraint {
+        implements IConstraint<LayoutSolution,PercentScore> {
     
     private Integer         priority;
 

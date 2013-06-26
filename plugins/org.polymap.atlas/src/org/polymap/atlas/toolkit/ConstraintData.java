@@ -53,11 +53,15 @@ public class ConstraintData {
     
     
     public ConstraintData addConstraint( LayoutConstraint constraint ) {
+        // already exists?
         for (ListIterator<LayoutConstraint> it=constraints.listIterator(); it.hasNext(); ) {
             if (it.next().getClass().equals( constraint.getClass() )) {
                 it.set( constraint );
+                return this;
             }
         }
+        // no? -> add
+        constraints.add( constraint );
         return this;
     }
     

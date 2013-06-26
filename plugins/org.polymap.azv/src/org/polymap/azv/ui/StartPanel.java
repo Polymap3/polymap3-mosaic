@@ -116,12 +116,18 @@ public class StartPanel
         parent.setLayout( new FillLayout() );
 
         contents = tk.createPanelSection( parent, "Alles" );
-        contents.addConstraint( new MinWidthConstraint( 500 ) )
-                .addConstraint( new MaxWidthConstraint( 800 ) );
+        contents.addConstraint( new MinWidthConstraint( 500, 0 ) )
+                .addConstraint( new MaxWidthConstraint( 800, 0 ) );
+        
+//        Button btn1 = tk.createButton( contents.getBody(), "1", SWT.PUSH, SWT.WRAP );
+//        btn1.setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ) ) );
+//        Button btn2 = tk.createButton( contents.getBody(), "2 (xxxxxxxxxxxxxxxxxxxxx)", SWT.PUSH  );
+//        btn2.setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
+//        Button btn3 = tk.createButton( contents.getBody(), "3", SWT.PUSH  );
         
         createWelcomeSection( contents );
         createLoginSection( contents );
-        createCasesSection( contents );
+//        createCasesSection( contents );
         createActionsSection( contents );
         
         // listen to PropertyAccessEvent
@@ -155,7 +161,7 @@ public class StartPanel
     
     protected void createLoginSection( ILayoutContainer parent ) {
         loginSection = tk.createPanelSection( parent, "Anmelden" );
-        loginSection.addConstraint( new MinWidthConstraint( 300 ) );
+        loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
         
         new LoginPanel.LoginForm( nutzer, user ).createContents( loginSection );
     }

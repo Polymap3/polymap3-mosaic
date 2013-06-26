@@ -22,16 +22,38 @@ package org.polymap.atlas.internal.cp;
 public class PercentScore
         implements IScore {
 
-    private int         value;
+    public static final PercentScore NULL = new PercentScore( 0 );
+    
+    public static final PercentScore INVALID = new PercentScore( -1 );
+    
+    private int             value;
+    
     
     public PercentScore( int value ) {
-        assert value >= 0 && value <= 100: "Value must be in the range 0..100.";
+        assert value == -1 || value >= 0 && value <= 100: "Value must be in the range 0..100: " + value;
         this.value = value;
     }
 
     @Override
-    public IScore add( IScore s ) {
-        return new PercentScore( (value + ((PercentScore)s).value) / 2 );
+    public String toString() {
+        return "PercentScore[" + value + "%]";
+    }
+
+    public int getValue() {
+        return value;
+    }
+    
+    @Override
+    public IScore add( IScore o ) {
+        PercentScore other = (PercentScore)o;
+        return other != INVALID ? new PercentScore( (value + other.value / 2 ) ) : INVALID;
+    }
+
+    @Override
+    public IScore prioritize( int priority ) {
+        assert priority >= 1;
+        int remain = 100 - value;
+        return new PercentScore( value + (remain - (remain / priority)) );
     }
 
     @Override

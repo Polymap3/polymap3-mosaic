@@ -22,6 +22,8 @@ package org.polymap.atlas.internal.cp;
 public interface IScore
         extends Comparable<IScore> {
 
-    IScore add( IScore s );
+    public IScore add( IScore s );
+    
+    public IScore prioritize( int priority );
 
 }

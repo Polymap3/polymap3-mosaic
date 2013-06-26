@@ -14,8 +14,8 @@
  */
 package org.polymap.atlas.toolkit;
 
-import org.polymap.atlas.internal.cp.IScore;
-import org.polymap.atlas.internal.cp.ISolution;
+import org.polymap.atlas.internal.ConstraintLayout.LayoutSolution;
+import org.polymap.atlas.internal.cp.PercentScore;
 
 /**
  * 
@@ -38,9 +38,9 @@ public class MaxWidthConstraint
 
 
     @Override
-    public IScore score( ISolution solution ) {
+    public PercentScore score( LayoutSolution solution ) {
         // XXX Auto-generated method stub
         throw new RuntimeException( "not yet implemented." );
     }
-    
+
 }

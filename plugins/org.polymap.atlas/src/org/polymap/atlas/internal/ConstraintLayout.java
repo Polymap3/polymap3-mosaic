@@ -16,8 +16,10 @@ package org.polymap.atlas.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 
-import org.polymap.atlas.internal.cp.BestFirstBacktrackSolver;
+import org.polymap.atlas.internal.cp.BestFirstOptimizer;
 import org.polymap.atlas.internal.cp.IOptimizationGoal;
 import org.polymap.atlas.internal.cp.ISolution;
 import org.polymap.atlas.internal.cp.ISolver;
@@ -63,9 +65,9 @@ public class ConstraintLayout
         assert solution == null || solution.composite == composite;
         
         if (solution == null || flushCache) {
-            ISolver solver = new BestFirstBacktrackSolver( 100, 10 );
-            solver.addGoal( new ElementsFitColumnGoal( 3 ) );
-//            solver.addGoal( new PriorityOnTopGoal( 2 ) );
+            ISolver solver = new BestFirstOptimizer( 200, 10 );
+            solver.addGoal( new PriorityOnTopGoal( 2 ) );
+            solver.addGoal( new MinOverallHeightGoal( composite.getClientArea().height, 2 ) );
 //            solver.addGoal( new MaxColumnsGoal( this ), 1 );
 //            solver.addGoal( new ElementRelationGoal( this ), 1 );
 
@@ -75,7 +77,10 @@ public class ConstraintLayout
                     data.fillSolver( solver );
                 }
             }
-            List<ScoredSolution> results = solver.solve( new LayoutSolution( composite ) );
+            LayoutSolution start = new LayoutSolution( composite );
+            start.justifyElements();
+            
+            List<ScoredSolution> results = solver.solve( start );
             solution = (LayoutSolution)results.get( results.size()-1 ).solution;
         }
     }
@@ -118,12 +123,12 @@ public class ConstraintLayout
     /**
      * 
      */
-    static class LayoutSolution
+    public static class LayoutSolution
             implements ISolution {
 
         public Composite                composite;
         
-        public List<LayoutColumn>       columns = new ArrayList();
+        public ArrayList<LayoutColumn>  columns = new ArrayList( 3 );
         
         
         public LayoutSolution( Composite composite ) {
@@ -140,10 +145,11 @@ public class ConstraintLayout
 
         @Override
         public String surrogate() {
-            int result = 0;
+            int result = 1;
             for (LayoutColumn column : columns) {
+                result = 31 * result + column.width;
                 for (LayoutElement elm : column) {
-                    result ^= elm.hashCode();                
+                    result = 31 * result + elm.hashCode();
                 }
             }
             return String.valueOf( result );
@@ -162,13 +168,38 @@ public class ConstraintLayout
             }
             return result;
         }
+        
+        public LayoutElement remove( int index ) {
+            int c = 0;
+            for (LayoutColumn column : columns) {
+                for (Iterator<LayoutElement> it=column.iterator(); it.hasNext(); c++) {
+                    LayoutElement elm = it.next();
+                    if (c == index) {
+                        it.remove();
+                        return elm;
+                    }
+                }
+            }
+            throw new IllegalArgumentException( "Invalid index: index=" + index + ", size=" + c );
+        }
+        
+        public void justifyElements() {
+            // compute columns width
+            for (LayoutColumn column : columns) {
+                column.width = Math.max( 100, column.computeMinWidth( 100 ) );
+            }
+            // set element heights
+            for (LayoutColumn column : columns) {
+                column.justifyElements();
+            }
+        }
     }
     
 
     /**
      * 
      */
-    static class LayoutColumn
+    public static class LayoutColumn
             extends ArrayList<LayoutElement> {
     
         public int      width;
@@ -180,8 +211,9 @@ public class ConstraintLayout
             }
         }
 
-        public LayoutColumn( Collection<? extends LayoutElement> c ) {
-            super( c );
+        public LayoutColumn( LayoutColumn other ) {
+            super( other );
+            this.width = other.width;
         }
 
         public int computeMinWidth( int wHint ) {
@@ -205,11 +237,11 @@ public class ConstraintLayout
     /**
      * 
      */
-    static class LayoutElement {
+    public static class LayoutElement {
         
         public Control  control;
         
-        public int      x, y, height;
+        public int      height;
         
         public LayoutElement( Control control ) {
             assert control != null;
@@ -217,7 +249,7 @@ public class ConstraintLayout
         }
 
         public <T extends LayoutConstraint> T constraint( Class<T> type, T defaultValue ) {
-            ConstraintData data = (ConstraintData)control.getData();
+            ConstraintData data = (ConstraintData)control.getLayoutData();
             return data != null ? data.constraint( type ) : defaultValue;
         }
 
@@ -229,38 +261,6 @@ public class ConstraintLayout
         @Override
         public boolean equals( Object obj ) {
             return control.equals( ((LayoutElement)obj).control );
-        }
-    }
-    
-    
-    /**
-     * 
-     */
-    static class ElementsFitColumnGoal
-            extends Prioritized
-            implements IOptimizationGoal<LayoutSolution,PercentScore> {
-
-        public ElementsFitColumnGoal( Comparable priority ) {
-            super( priority );
-        }
-
-        @Override
-        public boolean optimize( LayoutSolution solution ) {
-            // compute columns width
-            for (LayoutColumn column : solution.columns) {
-                column.width = Math.max( 100, column.computeMinWidth( 100 ) );
-            }
-            // set element heights
-            for (LayoutColumn column : solution.columns) {
-                column.justifyElements();
-            }
-            return true;
-        }
-
-        @Override
-        public PercentScore score( LayoutSolution solution ) {
-            // XXX Auto-generated method stub
-            throw new RuntimeException( "not yet implemented." );
         }
     }
     
@@ -328,19 +328,58 @@ public class ConstraintLayout
     /**
      * 
      */
-    static class EqualColumnHeightGoal
+    static class MinOverallHeightGoal
+            extends Prioritized
             implements IOptimizationGoal<LayoutSolution,PercentScore> {
+
+        private static final Random rand = new Random();
+        
+        private int                 clientHeight;
+
+        public MinOverallHeightGoal( int clientHeight, Comparable priority ) {
+            super( priority );
+            this.clientHeight = clientHeight;
+        }
 
         @Override
         public boolean optimize( LayoutSolution solution ) {
-            // XXX Auto-generated method stub
-            throw new RuntimeException( "not yet implemented." );
+            int elmIndex = rand.nextInt( solution.elements().size() );
+            LayoutElement elm = solution.remove( elmIndex );
+            
+            if (solution.columns.size() == 1) {
+                solution.columns.add( new LayoutColumn( Collections.singletonList( elm.control ) ) );
+            }
+            else {
+                int columnIndex = rand.nextInt( solution.columns.size() );
+                LayoutColumn column = solution.columns.get( columnIndex );
+                column.add( elm );
+            }
+            solution.justifyElements();
+            return true;
         }
 
         @Override
         public PercentScore score( LayoutSolution solution ) {
-            // XXX Auto-generated method stub
-            throw new RuntimeException( "not yet implemented." );
+            int maxColumnHeight = 0, minColumnHeight = Integer.MAX_VALUE;
+            for (LayoutColumn column : solution.columns) {
+                // avoid random column produced by the random optimization
+                if (column.size() == 0) {
+                    return PercentScore.INVALID;
+                }
+                
+                int columnHeight = 0;
+                for (LayoutElement elm : column) {
+                    assert elm.height > 0;
+                    columnHeight += elm.height;
+                }
+                maxColumnHeight = Math.max( columnHeight, maxColumnHeight );
+                minColumnHeight = Math.min( columnHeight, minColumnHeight );
+            }
+            // kann größer als 100 sein
+            int heightPercent = (int)(100d / clientHeight * maxColumnHeight);
+            PercentScore result = new PercentScore( 100 - Math.min( 100, heightPercent ) );
+            assert result.getValue() >= 0;
+            return result;
         }
         
     }
