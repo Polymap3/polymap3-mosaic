@@ -26,6 +26,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -179,6 +180,7 @@ public class StartPanel
 
         createActionButton( body, "Auskunft Wasserhärten und Qualitäten", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
+                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -187,6 +189,7 @@ public class StartPanel
         });
         actionBtns.add( createActionButton( body, "Entsorgung von Abwasserbeseitigungsanlagen", 
                 "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
+                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -194,6 +197,7 @@ public class StartPanel
             }
         }));
         actionBtns.add( createActionButton( body, "Hydrantentmanagement", "Hydrantentpläne",
+                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -202,6 +206,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Auskunft zum technischen Anlagen", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
+                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -210,6 +215,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Antrag für Schachtscheine", 
                 "Antrag für Schachtscheine",
+                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
@@ -224,6 +230,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Auskunft zu dinglichen Rechten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
+                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -237,10 +244,10 @@ public class StartPanel
     }
 
     
-    protected Control createActionButton( Composite client, String title, String tooltip, final SelectionListener l ) {
+    protected Control createActionButton( Composite client, String title, String tooltip, Image image, final SelectionListener l ) {
         Button result = tk.createButton( client, title+"...", SWT.PUSH, SWT.LEFT, SWT.FLAT );
         result.setToolTipText( tooltip );
-        result.setImage( AtlasPlugin.instance().imageForName( "icons/run.gif" ) );
+        result.setImage( image );
         //result.setLayoutData( RowDataFactory.swtDefaults().create() );
         result.addMouseListener( new MouseListener() {
             public void mouseUp( MouseEvent e ) {
