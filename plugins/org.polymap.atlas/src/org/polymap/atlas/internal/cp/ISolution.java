@@ -12,30 +12,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas.toolkit;
-
-import org.polymap.atlas.internal.ConstraintLayout.LayoutSolution;
-import org.polymap.atlas.internal.cp.IConstraint;
-import org.polymap.atlas.internal.cp.PercentScore;
-import org.polymap.atlas.internal.cp.Prioritized;
+package org.polymap.atlas.internal.cp;
 
 /**
  * 
+ * <p/>
+ * Note that a solution implementation MUST provide a {@link #hashCode()} method.
+ *
+ * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public abstract class LayoutConstraint
-        extends Prioritized
-        implements IConstraint<LayoutSolution,PercentScore> {
-    
-    private Integer         priority;
+public interface ISolution {
+        //extends Cloneable {
 
-    
-    public LayoutConstraint( int priority ) {
-        super( priority );
-    }
+    public <S extends ISolution> S copy();
     
     
-    //protected abstract void layout( Composite composite, List<LayoutConstraint> constraints );
+    /**
+     * The surrogate (hash) code of a solution is used to identify this solution for
+     * backtracking. Sub-classes MUST provide an implementation.
+     */
+    public String surrogate();
     
 }
-
-

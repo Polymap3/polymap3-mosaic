@@ -14,6 +14,9 @@
  */
 package org.polymap.atlas.toolkit;
 
+import org.polymap.atlas.internal.ConstraintLayout.LayoutSolution;
+import org.polymap.atlas.internal.cp.PercentScore;
+
 /**
  * 
  */
@@ -23,7 +26,8 @@ public class MaxWidthConstraint
     private int         value = -1;
 
 
-    public MaxWidthConstraint( int value ) {
+    public MaxWidthConstraint( int value, int priority ) {
+        super( priority );
         this.value = value;
     }
 
@@ -31,5 +35,12 @@ public class MaxWidthConstraint
     public int getValue() {
         return value;
     }
-    
+
+
+    @Override
+    public PercentScore score( LayoutSolution solution ) {
+        // XXX Auto-generated method stub
+        throw new RuntimeException( "not yet implemented." );
+    }
+
 }

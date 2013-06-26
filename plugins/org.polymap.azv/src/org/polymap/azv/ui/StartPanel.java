@@ -26,6 +26,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -116,12 +117,18 @@ public class StartPanel
         parent.setLayout( new FillLayout() );
 
         contents = tk.createPanelSection( parent, "Alles" );
-        contents.addConstraint( new MinWidthConstraint( 500 ) )
-                .addConstraint( new MaxWidthConstraint( 800 ) );
+        contents.addConstraint( new MinWidthConstraint( 500, 0 ) )
+                .addConstraint( new MaxWidthConstraint( 800, 0 ) );
+        
+//        Button btn1 = tk.createButton( contents.getBody(), "1", SWT.PUSH, SWT.WRAP );
+//        btn1.setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ) ) );
+//        Button btn2 = tk.createButton( contents.getBody(), "2 (xxxxxxxxxxxxxxxxxxxxx)", SWT.PUSH  );
+//        btn2.setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
+//        Button btn3 = tk.createButton( contents.getBody(), "3", SWT.PUSH  );
         
         createWelcomeSection( contents );
         createLoginSection( contents );
-        createCasesSection( contents );
+//        createCasesSection( contents );
         createActionsSection( contents );
         
         // listen to PropertyAccessEvent
@@ -155,7 +162,7 @@ public class StartPanel
     
     protected void createLoginSection( ILayoutContainer parent ) {
         loginSection = tk.createPanelSection( parent, "Anmelden" );
-        loginSection.addConstraint( new MinWidthConstraint( 300 ) );
+        loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
         
         new LoginPanel.LoginForm( nutzer, user ).createContents( loginSection );
     }
@@ -173,6 +180,7 @@ public class StartPanel
 
         createActionButton( body, "Wasserqualität", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
+                AtlasPlugin.instance().imageForName( "icons/waterdrop.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -181,6 +189,7 @@ public class StartPanel
         });
         actionBtns.add( createActionButton( body, "Entsorgung", 
                 "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
+                AtlasPlugin.instance().imageForName( "icons/truck.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -188,6 +197,7 @@ public class StartPanel
             }
         }));
         actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
+                AtlasPlugin.instance().imageForName( "icons/fire.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -196,6 +206,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Leitungsauskunft", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
+                AtlasPlugin.instance().imageForName( "icons/pipelines.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -204,6 +215,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Schachtscheine", 
                 "Antrag für Schachtscheine",
+                AtlasPlugin.instance().imageForName( "icons/letter.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
@@ -218,6 +230,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
+                AtlasPlugin.instance().imageForName( "icons/letters.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -230,11 +243,10 @@ public class StartPanel
         return section;
     }
 
-    
-    protected Control createActionButton( Composite client, String title, String tooltip, final SelectionListener l ) {
+    protected Control createActionButton( Composite client, String title, String tooltip, Image image, final SelectionListener l ) {
         Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT, SWT.FLAT );
         result.setToolTipText( tooltip );
-        result.setImage( AtlasPlugin.instance().imageForName( "icons/run.gif" ) );
+        result.setImage( image );
         //result.setLayoutData( RowDataFactory.swtDefaults().create() );
         result.addMouseListener( new MouseListener() {
             public void mouseUp( MouseEvent e ) {

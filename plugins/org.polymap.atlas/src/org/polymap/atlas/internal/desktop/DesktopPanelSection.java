@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Scrollable;
 
@@ -81,49 +82,17 @@ class DesktopPanelSection
 //        control.setTitleBarBorderColor( Graphics.getColor( new RGB( 0x80, 0x80, 0xa0 ) ) );
 
         control.getTitleControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-title"  );
+        //control.getSeparatorControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-separator"  );
         //control.getTextClient().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-client"  );
         //control.getDescriptionControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section"  );
         
-        Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS ) ) ); // {
-//            // get informed about Controls added/removed to/from the section body
-//            @Override
-//            public <T> T getAdapter( Class<T> adapter ) {
-//                if (adapter == IControlHolderAdapter.class) {
-//                    
-//                    final IControlHolderAdapter delegate = super.getAdapter( IControlHolderAdapter.class );
-//                    return (T)new IControlHolderAdapter() {
-//                        @Override
-//                        public int size() {
-//                            return delegate.size();
-//                        }
-//                        @Override
-//                        public void remove( Control c ) {
-//                            delegate.remove( c );
-//                            controlRemoved( c );
-//                        }
-//                        @Override
-//                        public int indexOf( Control c ) {
-//                            return delegate.indexOf( c );
-//                        }
-//                        @Override
-//                        public Control[] getControls() {
-//                            return delegate.getControls();
-//                        }
-//                        @Override
-//                        public void add( Control c, int index ) {
-//                            delegate.add( c, index );
-//                            controlAdded( c );
-//                        }
-//                        @Override
-//                        public void add( Control c ) {
-//                            delegate.add( c );
-//                            controlAdded( c );
-//                        }
-//                    };
-//                }
-//                return super.getAdapter( adapter );
-//            }
-//        });
+        Label sep = new Label( control, SWT.SEPARATOR | SWT.HORIZONTAL );
+        sep.setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-separator"  );
+        control.setSeparatorControl( sep );
+        
+        Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS ) ) );
+
+        //client.setLayout( new ConstraintLayout() );
         client.setLayout( new PanelSectionLayout() );
         control.setClient( client );
         

@@ -12,30 +12,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.atlas.toolkit;
-
-import org.polymap.atlas.internal.ConstraintLayout.LayoutSolution;
-import org.polymap.atlas.internal.cp.IConstraint;
-import org.polymap.atlas.internal.cp.PercentScore;
-import org.polymap.atlas.internal.cp.Prioritized;
+package org.polymap.atlas.internal.cp;
 
 /**
  * 
+ *
+ * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public abstract class LayoutConstraint
-        extends Prioritized
-        implements IConstraint<LayoutSolution,PercentScore> {
+public interface IOptimizationGoal<S extends ISolution, SC extends IScore> {
+
+    public abstract boolean optimize( S solution );
     
-    private Integer         priority;
+    public abstract SC score( S solution );
 
     
-    public LayoutConstraint( int priority ) {
-        super( priority );
+    /**
+     * 
+     */
+    public interface Step {
+    
+        public abstract void revoke();
+        
     }
     
-    
-    //protected abstract void layout( Composite composite, List<LayoutConstraint> constraints );
-    
 }
-
-
