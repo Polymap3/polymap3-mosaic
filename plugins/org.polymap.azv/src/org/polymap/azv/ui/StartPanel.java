@@ -171,7 +171,7 @@ public class StartPanel
         IPanelSection section = tk.createPanelSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );
         Composite body = section.getBody();
 
-        createActionButton( body, "Auskunft Wasserhärten und Qualitäten", 
+        createActionButton( body, "Wasserqualität", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
@@ -179,7 +179,7 @@ public class StartPanel
                 throw new RuntimeException( "not yet implemented." );
             }
         });
-        actionBtns.add( createActionButton( body, "Entsorgung von Abwasserbeseitigungsanlagen", 
+        actionBtns.add( createActionButton( body, "Entsorgung", 
                 "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
@@ -187,14 +187,14 @@ public class StartPanel
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Hydrantentmanagement", "Hydrantentpläne",
+        actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Auskunft zum technischen Anlagen", 
+        actionBtns.add( createActionButton( body, "Leitungsauskunft", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
@@ -202,7 +202,7 @@ public class StartPanel
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Antrag für Schachtscheine", 
+        actionBtns.add( createActionButton( body, "Schachtscheine", 
                 "Antrag für Schachtscheine",
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
@@ -216,7 +216,7 @@ public class StartPanel
                 }
             }
         }));
-        actionBtns.add( createActionButton( body, "Auskunft zu dinglichen Rechten", 
+        actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
@@ -232,7 +232,7 @@ public class StartPanel
 
     
     protected Control createActionButton( Composite client, String title, String tooltip, final SelectionListener l ) {
-        Button result = tk.createButton( client, title+"...", SWT.PUSH, SWT.LEFT, SWT.FLAT );
+        Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT, SWT.FLAT );
         result.setToolTipText( tooltip );
         result.setImage( AtlasPlugin.instance().imageForName( "icons/run.gif" ) );
         //result.setLayoutData( RowDataFactory.swtDefaults().create() );
