@@ -94,7 +94,7 @@ public class DesktopAppManager
             }
             @Override
             protected Composite fillPanelArea( Composite parent ) {
-                scrolledPanelContainer = new ScrolledPageBook( parent, SWT.BORDER | SWT.V_SCROLL );
+                scrolledPanelContainer = new ScrolledPageBook( parent, SWT.V_SCROLL );
                 scrolledPanelContainer.showEmptyPage();
                 
 //                scrolledPanelContainer = (ScrolledComposite)tk.createComposite( parent, SWT.BORDER, SWT.V_SCROLL );

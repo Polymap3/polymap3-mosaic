@@ -18,10 +18,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.rwt.graphics.Graphics;
+import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.window.ApplicationWindow;
 
@@ -64,16 +72,23 @@ abstract class DesktopAppWindow
 
     @Override
     protected Control createContents( Composite parent ) {
+        // statusLine
         setStatus( "Status..." );
+        Control statusLine = getStatusLineManager().getControl();
+        statusLine.setBackground( Graphics.getColor( new RGB( 0x80, 0x80, 0xf0 ) ) );
+        statusLine.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-status"  );
 
         Composite contents = new Composite( parent, SWT.NONE );
         contents.setLayout( new FormLayout() );
 
+        // navi
         Composite navi = fillNavigationArea( contents );
         navi.setLayoutData( FormDataFactory.filled().bottom( -1 ).height( 30 ).create() );
+        navi.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
 
         Composite panels = fillPanelArea( contents );
         panels.setLayoutData( FormDataFactory.filled().top( navi, 10 ).create() );
+        panels.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-panels"  );
 
         appManager.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
             public boolean apply( PanelChangeEvent input ) {
@@ -113,17 +128,26 @@ abstract class DesktopAppWindow
 
 
     @Override
-    protected void configureShell( Shell shell ) {
+    protected void configureShell( final Shell shell ) {
         super.configureShell( shell );
         shell.setText( "Mosaic" );
         shell.setTouchEnabled( true );
-        shell.setMaximized( true );
+
+        Listener resizeListener = new Listener() {
+            public void handleEvent( Event ev ) {
+                Rectangle bounds = Display.getCurrent().getBounds();
+                shell.setBounds( 0, 60, bounds.width, bounds.height - 60 );
+            }
+        };
+        resizeListener.handleEvent( null );
+        Display.getCurrent().addListener( SWT.Resize, resizeListener );
     }
 
 
     @Override
     protected int getShellStyle() {
-        return SWT.CLOSE;
+        // no border, no title
+        return SWT.NO_TRIM;
     }
 
 

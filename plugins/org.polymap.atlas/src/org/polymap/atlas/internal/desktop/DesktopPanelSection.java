@@ -85,11 +85,7 @@ class DesktopPanelSection
         //control.getSeparatorControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-separator"  );
         //control.getTextClient().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-client"  );
         //control.getDescriptionControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section"  );
-        
-        Label sep = new Label( control, SWT.SEPARATOR | SWT.HORIZONTAL );
-        sep.setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-separator"  );
-        control.setSeparatorControl( sep );
-        
+                
         Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS ) ) );
 
         //client.setLayout( new ConstraintLayout() );
@@ -149,6 +145,11 @@ class DesktopPanelSection
     @Override
     public IPanelSection setTitle( String title ) {
         control.setText( title );
+        if (control.getSeparatorControl() == null) {
+            Label sep = new Label( control, SWT.SEPARATOR | SWT.HORIZONTAL );
+            sep.setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-separator"  );
+            control.setSeparatorControl( sep );
+        }
         return this;
     }
 
