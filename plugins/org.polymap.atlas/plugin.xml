@@ -14,6 +14,7 @@
    <extension
          point="org.eclipse.rap.ui.branding">
       <branding
+            body="body.html"
             defaultEntrypointId="org.polymap.atlas.entrypoint"
             id="org.polymap.atlas.branding"
             servletName="atlas"

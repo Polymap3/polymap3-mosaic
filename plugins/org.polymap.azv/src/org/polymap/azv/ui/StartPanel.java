@@ -51,11 +51,13 @@ import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
 import org.polymap.atlas.PropertyAccessEvent;
 import org.polymap.atlas.app.AtlasApplication;
+import org.polymap.atlas.toolkit.ConstraintData;
 import org.polymap.atlas.toolkit.ILayoutContainer;
 import org.polymap.atlas.toolkit.IPanelSection;
 import org.polymap.atlas.toolkit.IPanelToolkit;
 import org.polymap.atlas.toolkit.MaxWidthConstraint;
 import org.polymap.atlas.toolkit.MinWidthConstraint;
+import org.polymap.atlas.toolkit.PriorityConstraint;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Nutzer;
 
@@ -116,20 +118,21 @@ public class StartPanel
         getSite().setTitle( "AZV" );
         parent.setLayout( new FillLayout() );
 
-        contents = tk.createPanelSection( parent, "Alles" );
-        contents.addConstraint( new MinWidthConstraint( 500, 0 ) )
-                .addConstraint( new MaxWidthConstraint( 800, 0 ) );
+        contents = tk.createPanelSection( parent, null );
+        contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
+                .addConstraint( new MaxWidthConstraint( 800, 1 ) );
         
-//        Button btn1 = tk.createButton( contents.getBody(), "1", SWT.PUSH, SWT.WRAP );
-//        btn1.setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ) ) );
-//        Button btn2 = tk.createButton( contents.getBody(), "2 (xxxxxxxxxxxxxxxxxxxxx)", SWT.PUSH  );
-//        btn2.setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
-//        Button btn3 = tk.createButton( contents.getBody(), "3", SWT.PUSH  );
+        Button btn1 = tk.createButton( contents.getBody(), "1", SWT.PUSH, SWT.WRAP );
+        btn1.setLayoutData( new ConstraintData( 
+                new PriorityConstraint( 1, 1 )/*, new MaxWidthConstraint( 300, 1 )*/ ) );
+        Button btn2 = tk.createButton( contents.getBody(), "2 (xxxxxxxxxxxxxxxxxxxxx)", SWT.PUSH  );
+        btn2.setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
+        Button btn3 = tk.createButton( contents.getBody(), "3", SWT.PUSH  );
         
-        createWelcomeSection( contents );
-        createLoginSection( contents );
+//        createWelcomeSection( contents );
+//        createLoginSection( contents );
 //        createCasesSection( contents );
-        createActionsSection( contents );
+//        createActionsSection( contents );
         
         // listen to PropertyAccessEvent
         EventManager.instance().subscribe( this, new EventFilter<PropertyAccessEvent>() {
