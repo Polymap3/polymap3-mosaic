@@ -17,6 +17,10 @@ package org.polymap.atlas;
 import java.net.URL;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTracker;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -41,8 +45,9 @@ public class AtlasPlugin
         return plugin;
     }
 
-
     // instance *******************************************
+
+    private ServiceTracker              httpServiceTracker;
 
     public AtlasPlugin() {
     }
@@ -51,11 +56,31 @@ public class AtlasPlugin
     public void start( BundleContext context ) throws Exception {
         super.start( context );
         plugin = this;
+        
+        // register HTTP resource
+        httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
+            public Object addingService( ServiceReference reference ) {
+                HttpService httpService = (HttpService)super.addingService( reference );                
+                if (httpService != null) {
+                    try {
+                        httpService.registerResources( "/resources", "/resources", null );
+                    }
+                    catch (NamespaceException e) {
+                        throw new RuntimeException( e );
+                    }
+                }
+                return httpService;
+            }
+        };
+        httpServiceTracker.open();
     }
 
     
     @Override
     public void stop( BundleContext context ) throws Exception {
+        httpServiceTracker.close();
+        httpServiceTracker = null;
+        
         super.stop( context );
         plugin = null;
     }
