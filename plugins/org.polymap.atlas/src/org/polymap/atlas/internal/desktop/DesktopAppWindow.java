@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -28,7 +27,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.rwt.graphics.Graphics;
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.window.ApplicationWindow;
@@ -75,7 +73,6 @@ abstract class DesktopAppWindow
         // statusLine
         setStatus( "Status..." );
         Control statusLine = getStatusLineManager().getControl();
-        statusLine.setBackground( Graphics.getColor( new RGB( 0x80, 0x80, 0xf0 ) ) );
         statusLine.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-status"  );
 
         Composite contents = new Composite( parent, SWT.NONE );
