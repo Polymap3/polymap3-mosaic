@@ -321,8 +321,8 @@ background-image: gradient(
 */
 }
 
-Button[TOGGLE]:selected, Button[PUSH]:selected {
-	background-color: #216292;
+Button[TOGGLE]:selected {
+	background-color: #2977a3;
 
  /*
  background-image: gradient(
@@ -334,7 +334,7 @@ Button[TOGGLE]:selected, Button[PUSH]:selected {
 }
 
 Button[TOGGLE]:selected:hover {
-	background-color: #2977a3;
+	background-color: #216292;
 
 
 /*
@@ -359,6 +359,11 @@ Button[RADIO][BORDER] {
   border: 1px solid #bdbdbd;
   border-radius: 2px;
 }
+
+
+Button.atlas-navi {
+  background-color: green;
+  }
 
 Button-CheckIcon {
   background-image: url( resource/widget/rap/button/check-unselected.png );
@@ -1293,7 +1298,7 @@ Text[BORDER],
 Text[MULTI][BORDER] {
   border: 1px solid #cdcdcd;
   border-radius: 2px;
-  background-color: #ffffff;
+  background-color: #f5f9fc;
   box-shadow: inset 0 0 1px #bdbdbd;
 }
 
@@ -2255,21 +2260,21 @@ Label.atlas-panel-section-title {
 /*Forms Background*/
 
 Composite.atlas-panel-form {
-  background-color: #f7f7f7;
+  background-color: #dfe7ec;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
 }
 Composite.formeditor-field {
-  background-color: #f7f7f7;
+  background-color: #dfe7ec;
 }
 Composite.atlas-navi {
-  background-color: #f6f6f6;
+  background-color: #dfe7ec;
 }
 
 /*Forms Fields*/
 
 Text:focused.formeditor {
-  background-color: transparent;
+  background-color: #fff;
 }
 
 
