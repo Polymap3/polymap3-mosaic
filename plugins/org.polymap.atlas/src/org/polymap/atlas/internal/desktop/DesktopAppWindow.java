@@ -70,13 +70,18 @@ abstract class DesktopAppWindow
 
     @Override
     protected Control createContents( Composite parent ) {
+        Composite contents = (Composite)super.createContents( parent );
+        contents.setLayout( new FormLayout() );
+
         // statusLine
         setStatus( "Status..." );
-        Control statusLine = getStatusLineManager().getControl();
+        Composite statusLine = (Composite)getStatusLineManager().getControl();
         statusLine.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-status"  );
-
-        Composite contents = new Composite( parent, SWT.NONE );
-        contents.setLayout( new FormLayout() );
+        statusLine.setBackground( null );
+        for (Control child : statusLine.getChildren()) {
+            child.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-status"  );
+            child.setBackground( null );
+        }
 
         // navi
         Composite navi = fillNavigationArea( contents );

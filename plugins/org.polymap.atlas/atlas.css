@@ -2262,7 +2262,9 @@ Composite.atlas-panel-form {
 Composite.formeditor-field {
   background-color: #f7f7f7;
 }
-Composite.atlas-navi {
+Composite.atlas-navi,
+Composite.atlas-status,
+CLabel.atlas-status {
   background-color: #f6f6f6;
 }
 
