@@ -11,25 +11,25 @@
 
 /*! fonts */
 
-@font-face {
-    font-family: 'OpenSansLight';
-    src: url('fonts/OpenSans-Light-webfont.eot');
-    src: url('fonts/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-Light-webfont.woff') format('woff'),
-         url('fonts/OpenSans-Light-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-Light-webfont.svg#OpenSansLight') format('svg');
+/*@font-face {
+    font-family: 'Open Sans';
+    src: url('resources/fonts/OpenSans-Light-webfont.eot');
+    src: url('resources/fonts/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-Light-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-Light-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-Light-webfont.svg#Open Sans') format('svg');
     font-weight: normal;
     font-style: normal;
 
 }
 
 @font-face {
-    font-family: 'OpenSansLightItalic';
-    src: url('fonts/OpenSans-LightItalic-webfont.eot');
-    src: url('fonts/OpenSans-LightItalic-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-LightItalic-webfont.woff') format('woff'),
-         url('fonts/OpenSans-LightItalic-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-LightItalic-webfont.svg#OpenSansLightItalic') format('svg');
+    font-family: 'Open SansItalic';
+    src: url('resources/fonts/OpenSans-LightItalic-webfont.eot');
+    src: url('resources/fonts/OpenSans-LightItalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-LightItalic-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-LightItalic-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-LightItalic-webfont.svg#Open SansItalic') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -37,11 +37,11 @@
 
 @font-face {
     font-family: 'OpenSansRegular';
-    src: url('fonts/OpenSans-Regular-webfont.eot');
-    src: url('fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-Regular-webfont.woff') format('woff'),
-         url('fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-Regular-webfont.svg#OpenSansRegular') format('svg');
+    src: url('resources/fonts/OpenSans-Regular-webfont.eot');
+    src: url('resources/fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-Regular-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-Regular-webfont.svg#OpenSansRegular') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -49,11 +49,11 @@
 
 @font-face {
     font-family: 'OpenSansItalic';
-    src: url('fonts/OpenSans-Italic-webfont.eot');
-    src: url('fonts/OpenSans-Italic-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-Italic-webfont.woff') format('woff'),
-         url('fonts/OpenSans-Italic-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-Italic-webfont.svg#OpenSansItalic') format('svg');
+    src: url('resources/fonts/OpenSans-Italic-webfont.eot');
+    src: url('resources/fonts/OpenSans-Italic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-Italic-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-Italic-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-Italic-webfont.svg#OpenSansItalic') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -61,11 +61,11 @@
 
 @font-face {
     font-family: 'OpenSansSemibold';
-    src: url('fonts/OpenSans-Semibold-webfont.eot');
-    src: url('fonts/OpenSans-Semibold-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-Semibold-webfont.woff') format('woff'),
-         url('fonts/OpenSans-Semibold-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-Semibold-webfont.svg#OpenSansSemibold') format('svg');
+    src: url('resources/fonts/OpenSans-Semibold-webfont.eot');
+    src: url('resources/fonts/OpenSans-Semibold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-Semibold-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-Semibold-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-Semibold-webfont.svg#OpenSansSemibold') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -73,11 +73,11 @@
 
 @font-face {
     font-family: 'OpenSansSemiboldItalic';
-    src: url('fonts/OpenSans-SemiboldItalic-webfont.eot');
-    src: url('fonts/OpenSans-SemiboldItalic-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-SemiboldItalic-webfont.woff') format('woff'),
-         url('fonts/OpenSans-SemiboldItalic-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-SemiboldItalic-webfont.svg#OpenSansSemiboldItalic') format('svg');
+    src: url('resources/fonts/OpenSans-SemiboldItalic-webfont.eot');
+    src: url('resources/fonts/OpenSans-SemiboldItalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-SemiboldItalic-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-SemiboldItalic-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-SemiboldItalic-webfont.svg#OpenSansSemiboldItalic') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -85,11 +85,11 @@
 
 @font-face {
     font-family: 'OpenSansBold';
-    src: url('fonts/OpenSans-Bold-webfont.eot');
-    src: url('fonts/OpenSans-Bold-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-Bold-webfont.woff') format('woff'),
-         url('fonts/OpenSans-Bold-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-Bold-webfont.svg#OpenSansBold') format('svg');
+    src: url('resources/fonts/OpenSans-Bold-webfont.eot');
+    src: url('resources/fonts/OpenSans-Bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-Bold-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-Bold-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-Bold-webfont.svg#OpenSansBold') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -97,11 +97,11 @@
 
 @font-face {
     font-family: 'OpenSansBoldItalic';
-    src: url('fonts/OpenSans-BoldItalic-webfont.eot');
-    src: url('fonts/OpenSans-BoldItalic-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-BoldItalic-webfont.woff') format('woff'),
-         url('fonts/OpenSans-BoldItalic-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-BoldItalic-webfont.svg#OpenSansBoldItalic') format('svg');
+    src: url('resources/fonts/OpenSans-BoldItalic-webfont.eot');
+    src: url('resources/fonts/OpenSans-BoldItalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-BoldItalic-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-BoldItalic-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-BoldItalic-webfont.svg#OpenSansBoldItalic') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -109,11 +109,11 @@
 
 @font-face {
     font-family: 'OpenSansExtrabold';
-    src: url('fonts/OpenSans-ExtraBold-webfont.eot');
-    src: url('fonts/OpenSans-ExtraBold-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-ExtraBold-webfont.woff') format('woff'),
-         url('fonts/OpenSans-ExtraBold-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-ExtraBold-webfont.svg#OpenSansExtrabold') format('svg');
+    src: url('resources/fonts/OpenSans-ExtraBold-webfont.eot');
+    src: url('resources/fonts/OpenSans-ExtraBold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-ExtraBold-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-ExtraBold-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-ExtraBold-webfont.svg#OpenSansExtrabold') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -121,15 +121,15 @@
 
 @font-face {
     font-family: 'OpenSansExtraboldItalic';
-    src: url('fonts/OpenSans-ExtraBoldItalic-webfont.eot');
-    src: url('fonts/OpenSans-ExtraBoldItalic-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OpenSans-ExtraBoldItalic-webfont.woff') format('woff'),
-         url('fonts/OpenSans-ExtraBoldItalic-webfont.ttf') format('truetype'),
-         url('fonts/OpenSans-ExtraBoldItalic-webfont.svg#OpenSansExtraboldItalic') format('svg');
+    src: url('resources/fonts/OpenSans-ExtraBoldItalic-webfont.eot');
+    src: url('resources/fonts/OpenSans-ExtraBoldItalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('resources/fonts/OpenSans-ExtraBoldItalic-webfont.woff') format('woff'),
+         url('resources/fonts/OpenSans-ExtraBoldItalic-webfont.ttf') format('truetype'),
+         url('resources/fonts/OpenSans-ExtraBoldItalic-webfont.svg#OpenSansExtraboldItalic') format('svg');
     font-weight: normal;
     font-style: normal;
 
-}
+}*/
 
 /* Custom theme for all widgets */
 
@@ -137,7 +137,7 @@
   color: #222222;
   background-color: #fff;
   background-image: none;
-  font: 15px/150% "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 15px/150% "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
 }
 
 *:disabled {
@@ -154,7 +154,7 @@ Widget-ToolTip {
   );
   border: 1px solid #eee;
   border-radius: 2px;
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   opacity: 1;
   animation: fadeIn 200ms linear, fadeOut 600ms ease-out;
@@ -176,10 +176,10 @@ Display {
   rwt-warning-image: url( resource/widget/rap/dialog/warning.png );
   rwt-working-image: url( resource/widget/rap/dialog/information.png );
 
-  rwt-fontlist: 15px "OpenSansLight", 'Segoe UI', Corbel, Calibri, Tahoma, 'Lucida Sans Unicode';
+  rwt-fontlist: 15px "Open Sans", 'Segoe UI', Corbel, Calibri, Tahoma, 'Lucida Sans Unicode';
 
   background-image: url( resource/widget/rap/display/browser_bg.png );
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
 }
 
 /* Default theme for all controls */
@@ -213,11 +213,10 @@ Composite[BORDER] {
 /* Button default theme */
 
 Button {
-  font: 15px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
-  font-weight: 300;
-  background-image: none);
+  font: 15px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  background-image: none;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 6px 15px;
   spacing: 2px;
   cursor: default;
@@ -230,13 +229,14 @@ Button {
 }
 
 Button[PUSH],
+Button[PUSH].formeditor,
 Button[TOGGLE],
 Button[PUSH][BORDER],
 Button[TOGGLE][BORDER],
 Button[PUSH][FLAT],
 Button[TOGGLE][FLAT] {
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 6px 15px;
   background-color: #5a9cbd;
 /*
@@ -321,8 +321,8 @@ background-image: gradient(
 */
 }
 
-Button[TOGGLE]:selected {
-	background-color: #2977a3;
+Button[TOGGLE]:selected, Button[PUSH]:selected {
+	background-color: #216292;
 
  /*
  background-image: gradient(
@@ -436,7 +436,7 @@ Button-FocusIndicator[CHECK], Button-FocusIndicator[RADIO] {
 
 Combo,
 Combo[BORDER] {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   background-color: #ffffff;
   border: 1px solid #aaaaaa;
@@ -520,7 +520,7 @@ CTabFolder {
 }
 
 CTabItem {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   background-color: #f0f0f0;
   background-image: none;
@@ -550,7 +550,7 @@ CTabFolder-DropDownButton-Icon:hover {
 /* Group default theme */
 
 Group {
-  font: 10px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 10px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   background-color: #ffffff;
   border: none;
@@ -576,7 +576,7 @@ Group-Label {
 /* Label default theme */
 
 Label {
-  font: lighter 15px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 15px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   background-color: transparent;
   background-image: none;
@@ -612,7 +612,7 @@ Label-SeparatorLine[SHADOW_OUT] {
 /* Link default theme */
 
 Link {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   text-shadow: none;
 }
@@ -633,7 +633,7 @@ Link-Hyperlink:disabled {
 /* List default theme */
 
 List {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   background-color: #ffffff;
   border: none;
   color: #4a4a4a;
@@ -645,7 +645,7 @@ List[BORDER] {
 
 List-Item {
   padding: 5px 10px 5px 10px;
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   background-color: #ffffff;
   color: inherit;
   background-image: none;
@@ -865,7 +865,7 @@ Shell-DisplayOverlay {
 /* Shell titlebar */
 
 Shell-Titlebar {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   background-color: #0080c0;
   background-gradient-color: #0080c0;
   color: #ffffff;
@@ -973,7 +973,7 @@ Shell-CloseButton:inactive:hover {
 /* Spinner default theme */
 
 Spinner {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   border: none;
   border-radius: 0 2px 2px 0;
   color: #464a4e;
@@ -1060,7 +1060,7 @@ Spinner-DownButton-Icon:hover {
 /* TabFolder default theme */
 
 TabFolder {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   border: none;
 }
 
@@ -1097,7 +1097,7 @@ TabItem:selected {
 /* Table default theme */
 
 Table {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   background-color: #ffffff;
   background-image: none;
   color: #4a4a4a;
@@ -1109,7 +1109,7 @@ Table[BORDER] {
 }
 
 TableColumn {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   background-color: #f0f0f0;
   padding: 8px 3px 8px 3px;
   background-image: gradient(
@@ -1270,7 +1270,7 @@ Table-Checkbox:checked:grayed:hover {
 /* Text default theme */
 
 Text {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   border: none;
   border-radius: 2px;
   padding: 5px 10px 5px 10px;
@@ -1318,7 +1318,7 @@ Text-Message {
 /* ToolBar default theme */
 
 ToolBar {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   padding: 0;
   spacing: 0;
@@ -1475,7 +1475,7 @@ Tree-RowOverlay:linesvisible:even:selected:unfocused {
 }
 
 TreeColumn {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: inherit;
   background-color: #f0f0f0;
    background-image: gradient(
@@ -1651,7 +1651,7 @@ Scale-Thumb:focused {
 /* DateTime default theme */
 
 DateTime {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   border: none;
   border-radius: 0 2px 2px 0;
   color: #464a4e;
@@ -1711,7 +1711,7 @@ DateTime-Calendar-Navbar {
     from( #416693 ), to( #5882b5 )
   );
   color: white;
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   text-shadow: none;
 }
 
@@ -1990,7 +1990,7 @@ Slider-DownButton-Icon[VERTICAL] {
 ToolTip {
   cursor: default;
   border: 1px solid #cdcdcd;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 8px;
   opacity: 1;
   color: #181818;
@@ -1999,7 +1999,7 @@ ToolTip {
     from( #f8f9ff ),
     to( #f4f4f4 )
   );
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   background-color: #cdcdcd;
   animation: fadeIn 200ms linear, fadeOut 600ms ease-out;
   box-shadow: 0 0 4px #adadad;
@@ -2019,20 +2019,20 @@ ToolTip-Image[ICON_WARNING] {
 
 ToolTip-Text {
   color: #4a4a4a;
-  font: bold 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: bold 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   text-shadow: none;
 }
 
 ToolTip-Message {
   color: #4a4a4a;
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   text-shadow: none;
 }
 
 /* CCombo default theme */
 
 CCombo {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   background-color: #ffffff;
   background-image: none;
@@ -2105,7 +2105,7 @@ CCombo-FocusIndicator {
 /* CLabel default theme */
 
 CLabel {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #4a4a4a;
   background-color: #ffffff;
   background-image: none;
@@ -2177,7 +2177,7 @@ ScrollBar-DownButton[VERTICAL] {
 /* FileUpload default theme */
 
 FileUpload {
-  font: 14px "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 14px "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   background-image: gradient(
     linear, left top, left bottom,
     from( #f9f9f9 ),
@@ -2235,30 +2235,43 @@ Shell.jface_contentProposalPopup, Shell.jface_infoPopupDialog {
   box-shadow: 0 0 4px #ababab;
 }
 
+/* Mosaic User-Styles */
+
+
+
 /* Mosaic CSS-Pseudoklassen */
 
 /*Section Heading*/
 
 Label.atlas-panel-section-title {
-  font: 22px/150% "OpenSansLight", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+  font: 22px/150% "Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
   color: #333;
-  font-weight: lighter;
   border-bottom: 1px;
   border-bottom-color: #5a9cbd;
 }
 
-/*Form Hintergrund*/
+/*Forms*/
+
+/*Forms Background*/
 
 Composite.atlas-panel-form {
   background-color: #f7f7f7;
   border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 Composite.formeditor-field {
   background-color: #f7f7f7;
 }
-Text.formeditor {
-  background-color: green;
+Composite.atlas-navi {
+  background-color: #f6f6f6;
 }
+
+/*Forms Fields*/
+
+Text:focused.formeditor {
+  background-color: #f6f6f6;
+}
+
+
 
 /*--------------*/
