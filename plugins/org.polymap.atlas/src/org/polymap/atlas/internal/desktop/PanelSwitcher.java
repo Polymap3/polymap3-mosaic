@@ -25,12 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.rwt.graphics.Graphics;
-
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
@@ -96,14 +93,14 @@ public class PanelSwitcher
         
         PanelPath prefix = activePanel.getSite().getPath().removeLast( 1 );
         for (final IPanel panel : appManager.getContext().findPanels( withPrefix( prefix ) )) {
-            Button btn = new Button( contents, SWT.PUSH | SWT.SHADOW_IN );
+            Button btn = new Button( contents, SWT.TOGGLE );
             btn.setText( panel.getSite().getTitle() );
             btn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
             
             if (panel.equals( activePanel )) {
-                FontData[] defaultFont = btn.getFont().getFontData();
-                FontData bold = new FontData( defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD );
-                btn.setFont( Graphics.getFont( bold ) );
+//                FontData[] defaultFont = btn.getFont().getFontData();
+//                FontData bold = new FontData( defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD );
+//                btn.setFont( Graphics.getFont( bold ) );
                 
                 //btn.setEnabled( false );
                 btn.setSelection( true );

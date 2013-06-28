@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
@@ -126,6 +127,10 @@ public class PanelNavigator
         while (path.size() > 1) {
             final IPanel panel = appManager.getContext().getPanel( path );
 
+            Label separator = new Label( breadcrumb, SWT.VERTICAL );
+            separator.setText( "|" );
+            separator.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
+            
             Button btn = new Button( breadcrumb, SWT.DEFAULT );
             btn.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
             btn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
