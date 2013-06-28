@@ -2269,7 +2269,7 @@ Composite.atlas-navi {
 /*Forms Fields*/
 
 Text:focused.formeditor {
-  background-color: #f6f6f6;
+  background-color: transparent;
 }
 
 
