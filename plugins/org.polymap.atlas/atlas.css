@@ -270,7 +270,7 @@ Button[ARROW][FLAT] {
 Button[ARROW]:default,
 Button[PUSH]:default,
 Button[TOGGLE]:default {
-  background-color: #5a9cbd;
+  /*background-color: #5a9cbd;*/
 /*
 background-image: gradient(
     linear, left top, left bottom,
@@ -361,8 +361,13 @@ Button[RADIO][BORDER] {
 }
 
 
-Button.atlas-navi {
-  background-color: green;
+Button[TOGGLE].atlas-navi,
+ Button[PUSH].atlas-navi {
+  background-color: transparent;
+  }
+
+ Button[PUSH]:hover.atlas-navi {
+  background-color: #ededed;
   }
 
 Button-CheckIcon {
@@ -1305,7 +1310,7 @@ Text[MULTI][BORDER] {
 Text[BORDER]:focused,
 Text[MULTI][BORDER]:focused {
   border: 1px solid #4a8aaf;
-  box-shadow: 0 0 1px #4a8aaf;
+  box-shadow: 0 0 3px #4a8aaf;
 }
 
 Text[BORDER]:disabled,
@@ -2260,15 +2265,15 @@ Label.atlas-panel-section-title {
 /*Forms Background*/
 
 Composite.atlas-panel-form {
-  background-color: #dfe7ec;
+  background-color: #e8e6e3;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
 }
 Composite.formeditor-field {
-  background-color: #dfe7ec;
+  background-color: #e8e6e3;
 }
 Composite.atlas-navi {
-  background-color: #dfe7ec;
+  background-color: #e8e6e3;
 }
 
 /*Forms Fields*/
