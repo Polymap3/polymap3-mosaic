@@ -30,12 +30,10 @@ public class MinWidthConstraint
         super( priority );
         this.value = value;
     }
-
     
     public int getValue() {
         return value;
     }
-
 
     @Override
     public PercentScore score( LayoutSolution solution ) {

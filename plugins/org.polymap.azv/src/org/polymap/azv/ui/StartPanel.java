@@ -51,13 +51,11 @@ import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
 import org.polymap.atlas.PropertyAccessEvent;
 import org.polymap.atlas.app.AtlasApplication;
-import org.polymap.atlas.toolkit.ConstraintData;
 import org.polymap.atlas.toolkit.ILayoutContainer;
 import org.polymap.atlas.toolkit.IPanelSection;
 import org.polymap.atlas.toolkit.IPanelToolkit;
 import org.polymap.atlas.toolkit.MaxWidthConstraint;
 import org.polymap.atlas.toolkit.MinWidthConstraint;
-import org.polymap.atlas.toolkit.PriorityConstraint;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Nutzer;
 

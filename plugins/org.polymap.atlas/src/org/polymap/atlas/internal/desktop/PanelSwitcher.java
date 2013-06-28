@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -52,9 +51,6 @@ public class PanelSwitcher
         extends ContributionItem {
 
     private static Log log = LogFactory.getLog( PanelSwitcher.class );
-
-    private static final Color          COLOR_ACTIVE_BG  = DesktopToolkit.COLOR_SECTION_TITLE_BG;
-    private static final Color          COLOR_ACTIVE_FG  = Graphics.getColor( 10, 10, 10 );
 
     private DesktopAppManager           appManager;
 
@@ -110,8 +106,6 @@ public class PanelSwitcher
                 btn.setFont( Graphics.getFont( bold ) );
                 
                 //btn.setEnabled( false );
-                btn.setBackground( COLOR_ACTIVE_BG );
-                //btn.setForeground( COLOR_ACTIVE_FG );
                 btn.setSelection( true );
             }
             else {

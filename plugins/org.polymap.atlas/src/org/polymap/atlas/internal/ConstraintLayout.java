@@ -40,6 +40,8 @@ import org.polymap.atlas.internal.cp.PercentScore;
 import org.polymap.atlas.internal.cp.Prioritized;
 import org.polymap.atlas.toolkit.ConstraintData;
 import org.polymap.atlas.toolkit.LayoutConstraint;
+import org.polymap.atlas.toolkit.MaxWidthConstraint;
+import org.polymap.atlas.toolkit.MinWidthConstraint;
 import org.polymap.atlas.toolkit.PriorityConstraint;
 
 /**
@@ -67,7 +69,7 @@ public class ConstraintLayout
         if (solution == null || flushCache) {
             ISolver solver = new BestFirstOptimizer( 200, 10 );
             solver.addGoal( new PriorityOnTopGoal( 2 ) );
-            solver.addGoal( new MinOverallHeightGoal( composite.getClientArea().height, 2 ) );
+//            solver.addGoal( new MinOverallHeightGoal( composite.getClientArea().height, 2 ) );
 //            solver.addGoal( new MaxColumnsGoal( this ), 1 );
 //            solver.addGoal( new ElementRelationGoal( this ), 1 );
 
@@ -102,10 +104,8 @@ public class ConstraintLayout
             for (LayoutElement elm : column) {
                 assert elm.height >= 0;
                 elm.control.setBounds( colX, elmY, column.width, elm.height );
-                
                 elmY += elm.height + spacing;
             }
-            
             colX += column.width + spacing;
         }
     }
@@ -123,7 +123,7 @@ public class ConstraintLayout
     /**
      * 
      */
-    public static class LayoutSolution
+    public class LayoutSolution
             implements ISolution {
 
         public Composite                composite;
@@ -184,9 +184,12 @@ public class ConstraintLayout
         }
         
         public void justifyElements() {
+            int clientWidth = composite.getClientArea().width;
+            int columnWidth = (clientWidth / columns.size()) - (marginWidth*2) - ((columns.size()-1) * spacing);
+            
             // compute columns width
             for (LayoutColumn column : columns) {
-                column.width = Math.max( 100, column.computeMinWidth( 100 ) );
+                column.width = column.computeMaxWidth( columnWidth );
             }
             // set element heights
             for (LayoutColumn column : columns) {
@@ -216,13 +219,12 @@ public class ConstraintLayout
             this.width = other.width;
         }
 
-        public int computeMinWidth( int wHint ) {
-            int result = 0;
+        public int computeMaxWidth( int wHint ) {
+            int result = wHint;
             for (LayoutElement elm : this) {
-                Point elmSize = elm.control.computeSize( wHint, SWT.DEFAULT );
-                result = Math.max( result, elmSize.x );
+                result = Math.min( result, elm.computeWidth( wHint ) );
             }
-            return result;
+            return Math.min( wHint, result );
         }
         
         public void justifyElements() {
@@ -250,9 +252,20 @@ public class ConstraintLayout
 
         public <T extends LayoutConstraint> T constraint( Class<T> type, T defaultValue ) {
             ConstraintData data = (ConstraintData)control.getLayoutData();
-            return data != null ? data.constraint( type ) : defaultValue;
+            return data != null ? data.constraint( type, defaultValue ) : defaultValue;
         }
 
+        public int computeWidth( int wHint ) {
+            int width = control.computeSize( wHint, SWT.DEFAULT ).x;
+            // min constraint
+            MinWidthConstraint minConstraint = constraint( MinWidthConstraint.class, null );
+            width = minConstraint != null ? Math.max( minConstraint.getValue(), width ) : width;
+            // max constraint
+            MaxWidthConstraint maxConstraint = constraint( MaxWidthConstraint.class, null );
+            width = maxConstraint != null ? Math.min( maxConstraint.getValue(), width ) : width;
+            return width;
+        }
+        
         @Override
         public int hashCode() {
             return control.hashCode();

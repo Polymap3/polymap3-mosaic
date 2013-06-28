@@ -31,16 +31,15 @@ public class MaxWidthConstraint
         this.value = value;
     }
 
-    
     public int getValue() {
         return value;
     }
 
-
     @Override
     public PercentScore score( LayoutSolution solution ) {
-        // XXX Auto-generated method stub
-        throw new RuntimeException( "not yet implemented." );
+        // constraint is ensured by the layout algorithm
+        // FIXME what is the neutral element to return here?
+        return new PercentScore( 0 );
     }
 
 }
