@@ -81,7 +81,7 @@ class DesktopActionBar {
         Composite searchComposite = null;
         if (search != null) {
             searchComposite = new Composite( contents, SWT.NONE );
-            search.fill( searchComposite );
+//            search.fill( searchComposite );
             searchComposite.setLayoutData( FormDataFactory.filled().left( 80 ).right( 100 ).create() );
         }
         // panel toolbar
@@ -89,7 +89,7 @@ class DesktopActionBar {
         Composite tbComposite = null;
         if (tb != null) {
             tbComposite = new Composite( contents, SWT.NONE );
-            tb.fill( tbComposite );
+//            tb.fill( tbComposite );
             tbComposite.setLayoutData( searchComposite != null
                     ? FormDataFactory.filled().left( 60 ).right( searchComposite ).create()
                     : FormDataFactory.filled().left( 80 ).right( 100 ).create());

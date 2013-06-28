@@ -27,6 +27,9 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.rwt.lifecycle.WidgetUtil;
+
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
@@ -104,9 +107,10 @@ public class PanelNavigator
             control.dispose();
         }
         // home
-        Button homeBtn = new Button( breadcrumb, SWT.FLAT );
+        Button homeBtn = new Button( breadcrumb, SWT.DEFAULT );
+        homeBtn.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
         homeBtn.setImage( AtlasPlugin.instance().imageForName( "resources/icons/house.png" ) );
-        homeBtn.setToolTipText( "Go back to home page" );
+        homeBtn.setToolTipText( "Zurück zur Startseite" );
         homeBtn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
         homeBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
@@ -118,11 +122,12 @@ public class PanelNavigator
         });
         
         // path
-        PanelPath path = activePanel.getSite().getPath().removeLast( 1 );
+        PanelPath path = activePanel.getSite().getPath(); //.removeLast( 1 );
         while (path.size() > 1) {
             final IPanel panel = appManager.getContext().getPanel( path );
 
-            Button btn = new Button( breadcrumb, SWT.FLAT );
+            Button btn = new Button( breadcrumb, SWT.DEFAULT );
+            btn.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
             btn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
             
             btn.setText( panel.getSite().getTitle() );
