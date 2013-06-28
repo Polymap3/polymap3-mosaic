@@ -105,7 +105,7 @@ public class PanelNavigator
         }
         // home
         Button homeBtn = new Button( breadcrumb, SWT.FLAT );
-        homeBtn.setImage( AtlasPlugin.instance().imageForName( "icons/house.png" ) );
+        homeBtn.setImage( AtlasPlugin.instance().imageForName( "resources/icons/house.png" ) );
         homeBtn.setToolTipText( "Go back to home page" );
         homeBtn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
         homeBtn.addSelectionListener( new SelectionAdapter() {

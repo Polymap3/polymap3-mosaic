@@ -179,44 +179,44 @@ public class StartPanel
         IPanelSection section = tk.createPanelSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );
         Composite body = section.getBody();
 
-        createActionButton( body, "Auskunft Wasserhärten und Qualitäten", 
+        createActionButton( body, "Wasserqualität", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
-                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
+                AtlasPlugin.instance().imageForName( "resources/icons/waterdrop.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
         });
-        actionBtns.add( createActionButton( body, "Entsorgung von Abwasserbeseitigungsanlagen", 
+        actionBtns.add( createActionButton( body, "Entsorgung", 
                 "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
-                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
+                AtlasPlugin.instance().imageForName( "resources/icons/truck.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Hydrantentmanagement", "Hydrantentpläne",
-                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
+        actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
+                AtlasPlugin.instance().imageForName( "resources/icons/fire.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Auskunft zum technischen Anlagen", 
+        actionBtns.add( createActionButton( body, "Leitungsauskunft", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
-                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
+                AtlasPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Antrag für Schachtscheine", 
+        actionBtns.add( createActionButton( body, "Schachtscheine", 
                 "Antrag für Schachtscheine",
-                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
+                AtlasPlugin.instance().imageForName( "resources/icons/letter.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
@@ -229,9 +229,9 @@ public class StartPanel
                 }
             }
         }));
-        actionBtns.add( createActionButton( body, "Auskunft zu dinglichen Rechten", 
+        actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
-                AtlasPlugin.instance().imageForName( "icons/run.gif" ),
+                AtlasPlugin.instance().imageForName( "resources/icons/letters.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -244,9 +244,8 @@ public class StartPanel
         return section;
     }
 
-    
     protected Control createActionButton( Composite client, String title, String tooltip, Image image, final SelectionListener l ) {
-        Button result = tk.createButton( client, title+"...", SWT.PUSH, SWT.LEFT, SWT.FLAT );
+        Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT, SWT.FLAT );
         result.setToolTipText( tooltip );
         result.setImage( image );
         //result.setLayoutData( RowDataFactory.swtDefaults().create() );
