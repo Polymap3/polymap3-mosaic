@@ -145,7 +145,7 @@ public class LoginPanel
             new FormFieldBuilder( body, new PlainValuePropertyAdapter( "password", password ) )
                     .setField( new StringFormField( Style.PASSWORD ) ).create();
             // btn
-            loginBtn = site.getToolkit().createButton( body, "Anmelden", SWT.PUSH );
+            loginBtn = site.getToolkit().createButton( body, "ANMELDEN", SWT.PUSH );
             loginBtn.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected( SelectionEvent ev ) {
                     login( username, password );

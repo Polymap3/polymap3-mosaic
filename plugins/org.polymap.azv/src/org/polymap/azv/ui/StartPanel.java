@@ -113,7 +113,7 @@ public class StartPanel
     
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "AZV" );
+        getSite().setTitle( "LOGIN" );
         parent.setLayout( new FillLayout() );
 
         contents = tk.createPanelSection( parent, null );
@@ -129,7 +129,7 @@ public class StartPanel
         
         createWelcomeSection( contents );
         createLoginSection( contents );
-        createCasesSection( contents );
+//        createCasesSection( contents );
         createActionsSection( contents );
         
         // listen to PropertyAccessEvent
