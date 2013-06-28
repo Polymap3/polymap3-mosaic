@@ -43,47 +43,7 @@ public class BestFirstOptimizer
     /** The surrogates of the seen solutions so far. */
     private Set<String>                     seen = new HashSet();
     
-    private SolutionQueue<ExtScoredSolution> queue, terminals;
-    
-    
-    /**
-     * Bound priority queue. 
-     */
-    class SolutionQueue<T extends ScoredSolution>
-            extends LinkedList<T> {
-
-        protected int         maxSize;
-
-        public SolutionQueue( int maxSize ) {
-            this.maxSize = maxSize;
-        }
-
-        @Override
-        public boolean add( T elm ) {
-            boolean success = super.add( elm );
-            assert success;
-            // XXX
-            Collections.sort( this );
-            if (size() > maxSize) {
-                remove( 0 );
-            }
-            return true;
-        }
-    }
-    
-
-    /**
-     * 
-     */
-    class ExtScoredSolution
-            extends ScoredSolution {
-        
-        public int      goalsIndex = 0;
-
-        public ExtScoredSolution( ISolution solution, IScore score ) {
-            super( solution, score );
-        }
-    }
+    private SolutionQueue<ExScoredSolution> queue, terminals;
     
     
     /**
@@ -100,20 +60,20 @@ public class BestFirstOptimizer
     
     @Override
     public List<ScoredSolution> solve( ISolution start ) {
-        assert goals().size() > 0;
+        //assert goals().size() > 0;
         
         Timer timer = new Timer();
         ArrayList<IOptimizationGoal> goals = Prioritized.sort( goals() );
         List<IConstraint> constraints = constraints();
 
         // start solution
-        queue.add( new ExtScoredSolution( start, PercentScore.NULL ) );
+        queue.add( new ExScoredSolution( start, PercentScore.NULL ) );
         
         //
         int loops = 0; 
         for ( ;!queue.isEmpty() && timer.elapsedTime() < timeoutMillis; loops++) {
             // current best solution
-            ExtScoredSolution best = queue.getLast();
+            ExScoredSolution best = queue.getLast();
             
             // find next optimization step
             ISolution optimized = null;
@@ -143,7 +103,7 @@ public class BestFirstOptimizer
                     IScore s = constraint.score( optimized );
                     optimizedScore = optimizedScore.add( s );
                 }
-                queue.add( new ExtScoredSolution( optimized, optimizedScore ) );
+                queue.add( new ExScoredSolution( optimized, optimizedScore ) );
                 seen.add( optimized.surrogate() );
             }            
         }
@@ -156,6 +116,48 @@ public class BestFirstOptimizer
                 + ", loops=" + loops + ", seen=" + seen.size()
                 + " (" + timer.elapsedTime() + "ms)" );
         return result;
+    }
+
+
+    /**
+     * Bound priority queue. 
+     */
+    class SolutionQueue<T extends ScoredSolution>
+            extends LinkedList<T> {
+    
+        protected int         maxSize;
+    
+        public SolutionQueue( int maxSize ) {
+            this.maxSize = maxSize;
+        }
+    
+        @Override
+        public boolean add( T elm ) {
+            int index = Collections.binarySearch( this, elm );
+            if (index >= 0) {
+                super.add( index, elm );
+            } else {
+                super.add( ~index, elm );                
+            }
+            if (size() > maxSize) {
+                remove( 0 );
+            }
+            return true;
+        }
+    }
+
+
+    /**
+     * 
+     */
+    class ExScoredSolution
+            extends ScoredSolution {
+        
+        public int      goalsIndex = 0;
+    
+        public ExScoredSolution( ISolution solution, IScore score ) {
+            super( solution, score );
+        }
     }
     
 }

@@ -16,8 +16,6 @@ package org.polymap.atlas.toolkit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.ListIterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -44,26 +42,26 @@ public class ConstraintData {
 
     protected int                   currentWhint, currentHhint, currentWidth = -1, currentHeight = -1;
     
-    protected ArrayList<LayoutConstraint> constraints = new ArrayList( 3 );
+    protected ArrayList<LayoutConstraint> constraints;
 
     
     public ConstraintData( LayoutConstraint... constraints ) {
-        this.constraints.addAll( Arrays.asList( constraints ) );
+        this.constraints = new ArrayList( Arrays.asList( constraints ) );
     }
     
     
-    public ConstraintData addConstraint( LayoutConstraint constraint ) {
-        // already exists?
-        for (ListIterator<LayoutConstraint> it=constraints.listIterator(); it.hasNext(); ) {
-            if (it.next().getClass().equals( constraint.getClass() )) {
-                it.set( constraint );
-                return this;
-            }
-        }
-        // no? -> add
-        constraints.add( constraint );
-        return this;
-    }
+//    public ConstraintData addConstraint( LayoutConstraint constraint ) {
+//        // already exists?
+//        for (ListIterator<LayoutConstraint> it=constraints.listIterator(); it.hasNext(); ) {
+//            if (it.next().getClass().equals( constraint.getClass() )) {
+//                it.set( constraint );
+//                return this;
+//            }
+//        }
+//        // no? -> add
+//        constraints.add( constraint );
+//        return this;
+//    }
     
     
     public void fillSolver( ISolver solver ) {
@@ -73,8 +71,8 @@ public class ConstraintData {
     }
 
     
-    public <T extends LayoutConstraint> T constraint( Class<T> type ) {
-        return (T)Iterables.find( constraints, Predicates.instanceOf( type ) );
+    public <T extends LayoutConstraint> T constraint( Class<T> type, T defaultValue ) {
+        return (T)Iterables.find( constraints, Predicates.instanceOf( type ), defaultValue );
     }
     
     
