@@ -50,7 +50,6 @@ import org.polymap.atlas.PanelIdentifier;
 import org.polymap.atlas.PropertyAccessEvent;
 import org.polymap.atlas.app.AtlasApplication;
 import org.polymap.atlas.toolkit.ConstraintData;
-import org.polymap.atlas.toolkit.ConstraintLayout;
 import org.polymap.atlas.toolkit.ILayoutContainer;
 import org.polymap.atlas.toolkit.IPanelSection;
 import org.polymap.atlas.toolkit.IPanelToolkit;
@@ -121,9 +120,6 @@ public class StartPanel
         contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
                 .addConstraint( new MaxWidthConstraint( 800, 1 ) );
         
-        ((ConstraintLayout)contents.getBody().getLayout()).spacing = 30;
-        ((ConstraintLayout)contents.getBody().getLayout()).marginWidth = 30;
-        
 //        Button btn1 = tk.createButton( contents.getBody(), "1", SWT.PUSH, SWT.WRAP );
 //        btn1.setLayoutData( new ConstraintData( 
 //                new PriorityConstraint( 1, 1 ), new MinWidthConstraint( 500, 1 ) ) );
@@ -133,7 +129,7 @@ public class StartPanel
         
         createWelcomeSection( contents );
         welcomeSection.getControl().setLayoutData( new ConstraintData( 
-                new PriorityConstraint( 5, 1 ), new MinWidthConstraint( 500, 1 ) ) );
+                new PriorityConstraint( 5, 1 ), new MinWidthConstraint( 400, 1 ) ) );
         createLoginSection( contents );
         loginSection.getControl().setLayoutData( new ConstraintData( 
                 new PriorityConstraint( 2, 1 ) ) );

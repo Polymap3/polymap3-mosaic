@@ -14,12 +14,16 @@
  */
 package org.polymap.azv.model;
 
+import java.util.Date;
+
 import org.qi4j.api.common.Optional;
 import org.qi4j.api.concern.Concerns;
 import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
+
 import com.vividsolutions.jts.geom.LineString;
+
 import org.polymap.core.qi4j.QiEntity;
 import org.polymap.core.qi4j.event.ModelChangeSupport;
 import org.polymap.core.qi4j.event.PropertyChangeSupport;
@@ -46,6 +50,14 @@ public interface Schachtschein
     
     @Optional
     Property<PersonValue>       antragsteller();
+
+    /** Maßnahmestart */
+    @Optional
+    Property<Date>              startDate();
+
+    /** Maßnahmeende */
+    @Optional
+    Property<Date>              endDate();
 
     @Optional
     Property<String>            beschreibung();

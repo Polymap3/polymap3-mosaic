@@ -108,7 +108,7 @@ public class PanelNavigator
             control.dispose();
         }
         // home
-        Button homeBtn = new Button( breadcrumb, SWT.DEFAULT );
+        Button homeBtn = new Button( breadcrumb, SWT.PUSH );
         homeBtn.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
         homeBtn.setImage( AtlasPlugin.instance().imageForName( "resources/icons/house.png" ) );
         homeBtn.setToolTipText( "Zurück zur Startseite" );
@@ -131,7 +131,7 @@ public class PanelNavigator
             separator.setText( "|" );
             separator.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
             
-            Button btn = new Button( breadcrumb, SWT.DEFAULT );
+            Button btn = new Button( breadcrumb, SWT.PUSH );
             btn.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
             btn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
             

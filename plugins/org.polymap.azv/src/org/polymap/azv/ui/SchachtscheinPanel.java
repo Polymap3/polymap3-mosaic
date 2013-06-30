@@ -17,20 +17,16 @@ package org.polymap.azv.ui;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.ui.forms.widgets.Section;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.ui.ColumnLayoutFactory;
-import org.polymap.core.ui.FormDataFactory;
-import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.data.entityfeature.PropertyAdapter;
+import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
-import org.polymap.rhei.form.IFormEditorToolkit;
 
 import org.polymap.atlas.ContextProperty;
 import org.polymap.atlas.IAppContext;
@@ -38,8 +34,22 @@ import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
 import org.polymap.atlas.app.DefaultFormPanel;
-import org.polymap.azv.AZVPlugin;
+import org.polymap.atlas.app.FormContainer;
+import org.polymap.atlas.toolkit.ConstraintData;
+import org.polymap.atlas.toolkit.IPanelSection;
+import org.polymap.atlas.toolkit.IPanelToolkit;
+import org.polymap.atlas.toolkit.MinWidthConstraint;
+import org.polymap.atlas.toolkit.PriorityConstraint;
 import org.polymap.azv.model.Schachtschein;
+import org.polymap.openlayers.rap.widget.OpenLayersWidget;
+import org.polymap.openlayers.rap.widget.base_types.Bounds;
+import org.polymap.openlayers.rap.widget.base_types.Projection;
+import org.polymap.openlayers.rap.widget.controls.LayerSwitcherControl;
+import org.polymap.openlayers.rap.widget.controls.MousePositionControl;
+import org.polymap.openlayers.rap.widget.controls.NavigationControl;
+import org.polymap.openlayers.rap.widget.controls.ScaleControl;
+import org.polymap.openlayers.rap.widget.controls.ScaleLineControl;
+import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
 /**
  *
@@ -56,7 +66,9 @@ public class SchachtscheinPanel
 
     private ContextProperty<Schachtschein>  entity;
 
-    private IFormEditorToolkit              tk;
+    private IPanelToolkit                   tk;
+    
+    private IPanelSection                   baseSection, mapSection;
     
 
     @Override
@@ -80,30 +92,72 @@ public class SchachtscheinPanel
     @Override
     public void createFormContent( IFormEditorPageSite pageSite ) {
         getSite().setTitle( "Schachtschein" );
-        tk = pageSite.getToolkit();
-        Composite parent = pageSite.getPageBody();
-        parent.setLayout( FormLayoutFactory.defaults().margins( DEFAULTS_SPACING ).create() );
+        tk = getSite().toolkit();
+        
+        IPanelSection contents = tk.createPanelSection( pageSite.getPageBody(), null );
 
-        Composite contents = tk.createComposite( parent );
-        contents.setLayoutData( FormDataFactory.offset( 0 ).left( 25 ).right( 75 ).width( 500 ).create() );
-        contents.setLayout( FormLayoutFactory.defaults().spacing( DEFAULTS_SPACING*2 ).create() );
+        // baseSection
+        baseSection = tk.createPanelSection( contents, "Basisdaten - Schachtschein" );
+        baseSection.getControl().setLayoutData( new ConstraintData( 
+                new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        new BasedataForm().createContents( baseSection );
 
-        getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Es fehlen noch Eingaben..." ) );
+        // mapSection
+        mapSection = tk.createPanelSection( contents, "Ort", SWT.BORDER );
+        Composite body = mapSection.getBody();
+        body.setLayout( ColumnLayoutFactory.defaults().create() );
+        
+        OpenLayersWidget olwidget = new OpenLayersWidget( body, SWT.MULTI | SWT.WRAP, "openlayers/full/OpenLayers-2.12.1.js" );
+        olwidget.setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 500 ) );
 
-        Composite base = createBaseSection( contents );
-        base.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
+        // init map
+        String srs = "EPSG:4326";
+        Projection proj = new Projection( srs );
+        String units = srs.equals( "EPSG:4326" ) ? "degrees" : "m";
+        float maxResolution = srs.equals( "EPSG:4326" ) ? (360/256) : 500000;
+        Bounds maxExtent = new Bounds( 12.80, 53.00, 14.30, 54.50 );
+        //Bounds maxExtent = new Bounds( 3358000, 5916000, 3456000, 5986000 );
+        olwidget.createMap( proj, proj, units, maxExtent, maxResolution );
+        
+//        OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
+        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
+        osm.setIsBaseLayer( true );
+        olwidget.getMap().addLayer( osm );
+        olwidget.getMap().addControl( new NavigationControl() );
+        olwidget.getMap().addControl( new LayerSwitcherControl() );
+        olwidget.getMap().addControl( new MousePositionControl() );
+        olwidget.getMap().addControl( new ScaleLineControl() );
+        olwidget.getMap().addControl( new ScaleControl() );
+
+        olwidget.getMap().zoomToExtent( maxExtent, true );
+        olwidget.getMap().zoomTo( 9 );
     }
 
 
-    protected Composite createBaseSection( Composite parent ) {
-        Section section = getSite().toolkit().createSection( parent, "Basisdaten", Section.TITLE_BAR );
-        Composite client = (Composite)section.getClient();
-        client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).create() );
+    /**
+     * 
+     */
+    public class BasedataForm
+            extends FormContainer {
 
-        new FormFieldBuilder( client, new PropertyAdapter( entity.get().beschreibung() ) ).create().setFocus();
-        new FormFieldBuilder( client, new PropertyAdapter( entity.get().bemerkungen() ) ).create();
+        @Override
+        public void createFormContent( IFormEditorPageSite site ) {
+            Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
 
-        return section;
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().beschreibung() ) )
+                    .setValidator( new NotNullValidator() ).create().setFocus();
+            //new FormFieldBuilder( body, new PropertyAdapter( entity.get().antragsteller() ) ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().startDate() ) )
+                    .setLabel( "Beginn" ).setToolTipText( "Geplanter Beginn der Arbeiten" ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().endDate() ) )
+                    .setLabel( "Ende" ).setToolTipText( "Geplantes Ende der Arbeiten" ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().bemerkungen() ) )
+                    .setField( new TextFormField() ).create()
+                    .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );
+            
+            activateStatusAdapter( getSite() );
+        }
     }
 
 }

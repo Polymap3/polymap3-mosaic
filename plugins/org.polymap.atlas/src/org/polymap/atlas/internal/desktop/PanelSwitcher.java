@@ -28,12 +28,16 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.rwt.lifecycle.WidgetUtil;
+
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
+
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.PanelChangeEvent;
 import org.polymap.atlas.PanelChangeEvent.TYPE;
@@ -94,6 +98,7 @@ public class PanelSwitcher
         PanelPath prefix = activePanel.getSite().getPath().removeLast( 1 );
         for (final IPanel panel : appManager.getContext().findPanels( withPrefix( prefix ) )) {
             Button btn = new Button( contents, SWT.TOGGLE );
+            btn.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-navi"  );
             btn.setText( panel.getSite().getTitle() );
             btn.setLayoutData( RowDataFactory.swtDefaults().hint( SWT.DEFAULT, 28 ).create() );
             

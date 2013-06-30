@@ -31,12 +31,16 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.Polymap;
 import org.polymap.rhei.field.CheckboxFormField;
 import org.polymap.rhei.field.DateTimeFormField;
+import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormField;
+import org.polymap.rhei.field.IFormFieldListener;
 import org.polymap.rhei.field.IFormFieldValidator;
 import org.polymap.rhei.field.NumberValidator;
 import org.polymap.rhei.field.StringFormField;
@@ -46,6 +50,7 @@ import org.polymap.rhei.internal.form.AbstractFormEditorPageContainer;
 import org.polymap.rhei.internal.form.FormEditorToolkit;
 
 import org.polymap.atlas.AtlasPlugin;
+import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.internal.desktop.DesktopToolkit;
 import org.polymap.atlas.toolkit.ILayoutContainer;
 
@@ -65,6 +70,8 @@ public abstract class FormContainer
     private Composite           pageBody;
 
     private PageContainer       pageSite;
+    
+    private IFormFieldListener  statusAdapter;
 
 
     public final void createContents( ILayoutContainer parent ) {
@@ -82,6 +89,26 @@ public abstract class FormContainer
         }
     }
 
+    
+    /**
+     * Activates an adapter that routes form valid status to the given panel and its
+     * status line.
+     */
+    public void activateStatusAdapter( final IPanelSite panelSite ) {
+        assert statusAdapter == null;
+        pageSite.addFieldListener( statusAdapter = new IFormFieldListener() {
+            @Override
+            public void fieldChange( FormFieldEvent ev ) {
+                if (ev.getEventCode() == VALUE_CHANGE) {
+                    panelSite.setStatus( pageSite.isValid() ? Status.OK_STATUS 
+                            : new Status( IStatus.ERROR, AtlasPlugin.PLUGIN_ID, "Eingaben noch nicht vollständig/korrekt." ));
+                }
+            }
+        });
+        // init status message
+        statusAdapter.fieldChange( new FormFieldEvent( this, this, null, null, IFormFieldListener.VALUE_CHANGE, null, null ) );
+    }
+    
     
     // default implementation of IFormEditorPage **********
 

@@ -61,10 +61,18 @@ public class ConstraintLayout
     private LayoutSolution      solution;
 
     
-    private void computeSolution( Composite composite, boolean flushCache ) {
+    private boolean computeSolution( Composite composite, boolean flushCache ) {
         assert solution == null || solution.composite == composite;
         
         if (solution == null || flushCache) {
+            if (composite.getClientArea().width <= 0) {
+                return false;
+            }
+            if (composite.getClientArea().width > 1800) {
+                log.info( "Invalid client area width: " + composite.getClientArea().width );
+                return false;
+            }
+
             ISolver solver = new BestFirstOptimizer( 200, 10 );
             solver.addGoal( new PriorityOnTopGoal( 2 ) );
             solver.addGoal( new MinOverallHeightGoal( composite.getClientArea().height, 1 ) );
@@ -83,42 +91,40 @@ public class ConstraintLayout
             List<ScoredSolution> results = solver.solve( start );
             solution = (LayoutSolution)results.get( results.size()-1 ).solution;
         }
+        return solution != null;
     }
     
     
     @Override
     protected void layout( Composite composite, boolean flushCache ) {
-        if (composite.getClientArea().width <= 0) {
-            return;
-        }
         // compute solution
-        computeSolution( composite, flushCache );
+        if (computeSolution( composite, flushCache )) {
+            // layout elements
+            Rectangle clientArea = composite.getClientArea();
+            int colX = marginWidth;
 
-        // layout elements
-        Rectangle clientArea = composite.getClientArea();
-        int colX = marginWidth;
+            for (LayoutColumn column : solution.columns) {
+                assert column.width > 0;
+                int elmY = marginHeight;
 
-        for (LayoutColumn column : solution.columns) {
-            assert column.width > 0;
-            int elmY = marginHeight;
-
-            for (LayoutElement elm : column) {
-                assert elm.height >= 0;
-                elm.control.setBounds( colX, elmY, column.width, elm.height );
-                elmY += elm.height + spacing;
+                for (LayoutElement elm : column) {
+                    assert elm.height >= 0;
+                    elm.control.setBounds( colX, elmY, column.width, elm.height );
+                    elmY += elm.height + spacing;
+                }
+                colX += column.width + spacing;
             }
-            colX += column.width + spacing;
         }
     }
 
     
     @Override
     protected Point computeSize( Composite composite, int wHint, int hHint, boolean flushCache ) {
-        if (composite.getClientArea().width <= 0) {
-            return new Point( 250, 160 );
-        }
-        // compute solution
-        computeSolution( composite, flushCache );
+//        if (composite.getClientArea().width <= 0) {
+//            return new Point( 250, 160 );
+//        }
+//        // compute solution
+//        computeSolution( composite, flushCache );
         
         return new Point( 250, 160 );
     }

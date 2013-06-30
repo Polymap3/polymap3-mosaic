@@ -118,6 +118,11 @@ abstract class DesktopAppWindow
     public void setStatus( IStatus status ) {
         assert status != null;
         switch (status.getSeverity()) {
+            case IStatus.OK: {
+                getStatusLineManager().setErrorMessage( null ); 
+                getStatusLineManager().setMessage( null );
+                break;
+            }
             case IStatus.ERROR: {
                 getStatusLineManager().setErrorMessage( 
                         AtlasPlugin.instance().imageForName( "resources/icons/errorstate.gif" ), status.getMessage() );
