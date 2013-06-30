@@ -25,11 +25,13 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.UserPrincipal;
+import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
@@ -138,6 +140,7 @@ public class LoginPanel
         public void createFormContent( IFormEditorPageSite site ) {
             formSite = site;
             Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
             // username
             new FormFieldBuilder( body, new PlainValuePropertyAdapter( "username", username ) )
                     .setField( new StringFormField() ).create().setFocus();
@@ -155,14 +158,11 @@ public class LoginPanel
             // listener
             site.addFieldListener( new IFormFieldListener() {
                 public void fieldChange( FormFieldEvent ev ) {
-                    if (ev.getFieldName().equals( "username" ) ) {
+                    if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "username" ) ) {
                         username = ev.getNewValue();
                     }
-                    else if (ev.getFieldName().equals( "password" ) ) {
+                    else if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "password" ) ) {
                         password = ev.getNewValue();
-                    }
-                    else {
-                        throw new IllegalStateException( "Unknown form field: " + ev.getFieldName() );
                     }
                     if (loginBtn != null) {
                         loginBtn.setEnabled( username.length() > 0 && password.length() > 0 );
@@ -198,13 +198,13 @@ public class LoginPanel
                 log.info( "Login: no Nutzer found for name: " + name );
             }
             
-            // check
-            if (user.get() != null || nutzer.get() != null) {
-                formSite.clearFields();
-                loginBtn.dispose();
-                
-                formSite.getToolkit().createLabel( formSite.getPageBody(), user.get().getName() );
-            }
+//            // check
+//            if (user.get() != null || nutzer.get() != null) {
+//                formSite.getPageBody().dispose();
+//                loginBtn.dispose();
+//                
+//                formSite.getToolkit().createLabel( formSite.getPageBody(), user.get().getName() );
+//            }
         }
     }        
         

@@ -35,6 +35,7 @@ import org.eclipse.rwt.lifecycle.WidgetUtil;
 import org.eclipse.ui.forms.widgets.Section;
 
 import org.polymap.atlas.toolkit.ConstraintData;
+import org.polymap.atlas.toolkit.ConstraintLayout;
 import org.polymap.atlas.toolkit.ILayoutElement;
 import org.polymap.atlas.toolkit.IPanelSection;
 import org.polymap.atlas.toolkit.LayoutConstraint;
@@ -57,6 +58,7 @@ class DesktopPanelSection
     
     
     public void dispose() {
+        control.dispose();
     }
 
     
@@ -86,10 +88,10 @@ class DesktopPanelSection
         //control.getTextClient().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-client"  );
         //control.getDescriptionControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section"  );
                 
-        Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS ) ) );
+        Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS, SWT.BORDER ) ) );
 
-        //client.setLayout( new ConstraintLayout() );
-        client.setLayout( new PanelSectionLayout() );
+        client.setLayout( new ConstraintLayout() );
+        //client.setLayout( new PanelSectionLayout() );
         control.setClient( client );
         
         level = getParentPanel() != null ? getParentPanel().getLevel()+1 : 0;

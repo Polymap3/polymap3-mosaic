@@ -35,7 +35,6 @@ import org.eclipse.ui.forms.widgets.ScrolledPageBook;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.atlas.IApplicationLayouter;
@@ -159,17 +158,19 @@ public class DesktopAppManager
         // update UI
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.ACTIVATING ) );
         
-        Composite page = scrolledPanelContainer.createPage( panel.id() );
-        page.setLayout( new FillLayout() );
+        final Composite page = scrolledPanelContainer.createPage( panel.id() );
+        page.setLayout( new FillLayout( SWT.VERTICAL ) );
+//        ((FillLayout)page.getLayout()).marginWidth = 8;
         panel.createContents( page );
-        page.layout( true );
         scrolledPanelContainer.showPage( panel.id() );
-        
+
         Point panelSize = page.computeSize( SWT.DEFAULT, SWT.DEFAULT );
         scrolledPanelContainer.setMinHeight( panelSize.y );
 
         activePanel = panel;
         EventManager.instance().publish( new PanelChangeEvent( panel, TYPE.ACTIVATED ) );
+
+        mainWindow.delayedRefresh( null );
 
         return activePanel;
     }
@@ -229,6 +230,8 @@ public class DesktopAppManager
             scrolledPanelContainer.setMinHeight( panelSize.y );
         }
         EventManager.instance().publish( new PanelChangeEvent( activePanel, TYPE.ACTIVATED ) );
+        
+        mainWindow.delayedRefresh( null );
     }
 
 
@@ -330,6 +333,11 @@ public class DesktopAppManager
         @Override
         public IPanelToolkit toolkit() {
             return tk;
+        }
+
+        @Override
+        public void layout( boolean changed ) {
+            mainWindow.delayedRefresh( null );
         }
 
     }

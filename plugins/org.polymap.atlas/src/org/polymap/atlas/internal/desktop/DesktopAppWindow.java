@@ -14,6 +14,8 @@
  */
 package org.polymap.atlas.internal.desktop;
 
+import java.util.Random;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,11 +29,15 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.rwt.lifecycle.UICallBack;
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.window.ApplicationWindow;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
@@ -114,12 +120,12 @@ abstract class DesktopAppWindow
         switch (status.getSeverity()) {
             case IStatus.ERROR: {
                 getStatusLineManager().setErrorMessage( 
-                        AtlasPlugin.instance().imageForName( "icons/errorstate.gif" ), status.getMessage() );
+                        AtlasPlugin.instance().imageForName( "resources/icons/errorstate.gif" ), status.getMessage() );
                 break;
             }
             case IStatus.WARNING: {
                 getStatusLineManager().setMessage( 
-                        AtlasPlugin.instance().imageForName( "icons/warningstate.gif" ), status.getMessage() );
+                        AtlasPlugin.instance().imageForName( "resources/icons/warningstate.gif" ), status.getMessage() );
                 break;
             }
             default: {
@@ -135,17 +141,42 @@ abstract class DesktopAppWindow
         shell.setText( "Mosaic" );
         shell.setTouchEnabled( true );
 
-        Listener resizeListener = new Listener() {
+//        shell.setMaximized( true );
+
+        final Listener resizeListener = new Listener() {
             public void handleEvent( Event ev ) {
                 Rectangle bounds = Display.getCurrent().getBounds();
                 shell.setBounds( 0, 60, bounds.width, bounds.height - 60 );
             }
         };
         resizeListener.handleEvent( null );
-        Display.getCurrent().addListener( SWT.Resize, resizeListener );
+//        Display.getCurrent().addListener( SWT.Resize, resizeListener );
+        
+//        delayedRefresh( shell );
     }
 
+    private Random rand = new Random();
+    
+    public void delayedRefresh( final Shell shell ) {
+        final Shell s = shell != null ? shell : getShell();
+        UICallBack.activate( "layout" );
+        Job job = new Job( "Layout" ) {
+            protected IStatus run( IProgressMonitor monitor ) {
+                s.getDisplay().asyncExec( new Runnable() {
+                    public void run() {
+                        log.info( "layout..." );
+                        Rectangle bounds = Display.getCurrent().getBounds();
+                        s.setBounds( 0, 60, bounds.width, bounds.height - 60 - rand.nextInt( 3 ) - 1 );
+                    }
+                });
+                return Status.OK_STATUS;
+            }
+        };
+        //job.setUser( true );
+        job.schedule( 3000 );
+    }
 
+    
     @Override
     protected int getShellStyle() {
         // no border, no title
