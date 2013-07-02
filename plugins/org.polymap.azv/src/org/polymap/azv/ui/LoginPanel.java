@@ -129,6 +129,8 @@ public class LoginPanel
 
         private IFormEditorPageSite              formSite;
         
+        private IFormFieldListener               fieldListener;
+        
         
         public LoginForm( ContextProperty<Nutzer> nutzer, ContextProperty<UserPrincipal> user ) {
             this.nutzer = nutzer;
@@ -156,7 +158,7 @@ public class LoginPanel
             });
             
             // listener
-            site.addFieldListener( new IFormFieldListener() {
+            site.addFieldListener( fieldListener = new IFormFieldListener() {
                 public void fieldChange( FormFieldEvent ev ) {
                     if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "username" ) ) {
                         username = ev.getNewValue();
@@ -164,7 +166,7 @@ public class LoginPanel
                     else if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "password" ) ) {
                         password = ev.getNewValue();
                     }
-                    if (loginBtn != null) {
+                    if (loginBtn != null && !loginBtn.isDisposed()) {
                         loginBtn.setEnabled( username.length() > 0 && password.length() > 0 );
                     }
                 }

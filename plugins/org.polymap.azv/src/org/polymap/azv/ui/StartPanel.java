@@ -20,6 +20,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.qi4j.api.query.Query;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -27,6 +29,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -36,6 +39,8 @@ import org.eclipse.rwt.RWT;
 import org.eclipse.ui.forms.widgets.Section;
 
 import org.polymap.core.model.Entity;
+import org.polymap.core.runtime.entity.EntityStateEvent;
+import org.polymap.core.runtime.entity.IEntityStateListener;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -58,6 +63,7 @@ import org.polymap.atlas.toolkit.MinWidthConstraint;
 import org.polymap.atlas.toolkit.PriorityConstraint;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Nutzer;
+import org.polymap.azv.model.Schachtschein;
 import org.polymap.azv.ui.LoginPanel.LoginForm;
 
 /**
@@ -91,6 +97,8 @@ public class StartPanel
 
     private IPanelSection                   loginSection, casesSection, welcomeSection;
 
+    private CasesTableViewer                casesViewer;
+    
     
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
@@ -183,11 +191,42 @@ public class StartPanel
     }
 
     
+    private IEntityStateListener casesListener;
+
     protected void createCasesSection( IPanelSection parent ) {
         casesSection = tk.createPanelSection( parent, "Aktuelle Vorgänge" );
         casesSection.getControl().setLayoutData( new ConstraintData( 
                 new PriorityConstraint( 2, 1 ) ) );
-        tk.createLabel( casesSection.getBody(), "Keine Vorgänge." );
+
+        casesSection.getBody().setLayout( new FillLayout() );
+        
+        final Query<Schachtschein> elms = AzvRepository.instance().findEntities( Schachtschein.class, null, 0, -1 );
+        if (elms.count() == 0) {
+            tk.createLabel( casesSection.getBody(), "Keine aktuellen Vorgänge." );
+        } 
+        else {
+            casesViewer = new CasesTableViewer( casesSection.getBody(), elms );
+        }
+            
+        AzvRepository.instance().addEntityListener( casesListener = new IEntityStateListener() {
+            public void modelChanged( EntityStateEvent ev ) {
+                casesSection.getBody().getDisplay().asyncExec( new Runnable() {
+                    public void run() {
+                        if (elms.count() == 0) {
+                            tk.createLabel( casesSection.getBody(), "Keine Vorgänge." );
+                        } 
+                        else if (casesViewer == null) {
+                            casesSection.getBody().getChildren()[0].dispose();
+                            casesViewer = new CasesTableViewer( casesSection.getBody(), elms );
+                        }
+                        else {
+                            casesViewer.refresh();
+                            contents.getBody().layout( true );
+                        }
+                    }
+                });
+            }
+        });
     }
     
     
@@ -236,7 +275,6 @@ public class StartPanel
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
-                    log.info( "Schachtschein!" );
                     entity.set( AzvRepository.instance().newSchachtschein() );
                     getContext().openPanel( SchachtscheinPanel.ID );
                 }

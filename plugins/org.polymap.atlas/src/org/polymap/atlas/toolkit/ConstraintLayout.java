@@ -120,13 +120,18 @@ public class ConstraintLayout
     
     @Override
     protected Point computeSize( Composite composite, int wHint, int hHint, boolean flushCache ) {
-//        if (composite.getClientArea().width <= 0) {
-//            return new Point( 250, 160 );
-//        }
-//        // compute solution
-//        computeSolution( composite, flushCache );
+        // compute solution
+        if (computeSolution( composite, flushCache )) {
+            // find heighest column
+            LayoutColumn maxColumn = null;
+            for (LayoutColumn column : solution.columns) {
+                maxColumn = maxColumn == null || column.height >= maxColumn.height ? column : maxColumn;
+            }
+            int height = maxColumn.height + (2*marginHeight) + ((maxColumn.size()-1)*spacing);
+            return new Point( SWT.DEFAULT, height );
+        }
         
-        return new Point( 250, 160 );
+        return new Point( SWT.DEFAULT, SWT.DEFAULT );
     }
 
     
@@ -395,9 +400,7 @@ public class ConstraintLayout
                 minColumn = minColumn == null || column.height < minColumn.height ? column : minColumn;
                 maxColumn = maxColumn == null || column.height >= maxColumn.height ? column : maxColumn;
             }
-            if (minColumn == maxColumn) {
-                assert minColumn != maxColumn : "minColumn:" + minColumn.height + ", maxColumn:" + maxColumn.height;
-            }
+            assert minColumn != maxColumn : "minColumn:" + minColumn.height + ", maxColumn:" + maxColumn.height;
             
             // biggest column has just 1 elm -> nothing to optimize
             if (maxColumn.size() == 1) {

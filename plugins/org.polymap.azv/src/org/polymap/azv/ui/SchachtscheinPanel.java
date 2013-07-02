@@ -18,13 +18,23 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.ui.ColumnLayoutFactory;
 
+import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
 import org.polymap.rhei.data.entityfeature.PropertyAdapter;
+import org.polymap.rhei.field.FormFieldEvent;
+import org.polymap.rhei.field.IFormFieldLabel;
+import org.polymap.rhei.field.IFormFieldListener;
+import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 
@@ -33,6 +43,7 @@ import org.polymap.atlas.IAppContext;
 import org.polymap.atlas.IPanel;
 import org.polymap.atlas.IPanelSite;
 import org.polymap.atlas.PanelIdentifier;
+import org.polymap.atlas.app.AtlasApplication;
 import org.polymap.atlas.app.DefaultFormPanel;
 import org.polymap.atlas.app.FormContainer;
 import org.polymap.atlas.toolkit.ConstraintData;
@@ -40,6 +51,7 @@ import org.polymap.atlas.toolkit.IPanelSection;
 import org.polymap.atlas.toolkit.IPanelToolkit;
 import org.polymap.atlas.toolkit.MinWidthConstraint;
 import org.polymap.atlas.toolkit.PriorityConstraint;
+import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Schachtschein;
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
 import org.polymap.openlayers.rap.widget.base_types.Bounds;
@@ -68,7 +80,11 @@ public class SchachtscheinPanel
 
     private IPanelToolkit                   tk;
     
-    private IPanelSection                   baseSection, mapSection;
+    private IPanelSection                   baseSection, mapSection, geoSection;
+
+    private OpenLayersWidget                olwidget;
+
+    public Button submitBtn;
     
 
     @Override
@@ -96,21 +112,43 @@ public class SchachtscheinPanel
         
         IPanelSection contents = tk.createPanelSection( pageSite.getPageBody(), null );
 
+        // welcomeSection
+        IPanelSection welcomeSection = tk.createPanelSection( contents, "Schachtschein" );
+        welcomeSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 5, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        String msg = "Das Antragsverfahren Schachtschein ist Voraussetzung für die Durchführung von Baumaßnahmen. "
+                + "Die Beantragung kann direkt hier im Portal erfolgen. Schachtscheine sind eine tolle Sache. Jeder sollte einen haben!";
+        Label l = tk.createFlowText( welcomeSection.getBody(), msg/*, SWT.BORDER*/ );
+        l.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+
         // baseSection
-        baseSection = tk.createPanelSection( contents, "Basisdaten - Schachtschein" );
-        baseSection.getControl().setLayoutData( new ConstraintData( 
-                new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        baseSection = tk.createPanelSection( contents, "Basisdaten" );
+        baseSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+//        Label l1 = tk.createFlowText( baseSection.getBody(), "Schachtschein." );
+//        l1.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+//        
+//        String msg = "Das Antragsverfahren Schachtschein ist Voraussetzung für die Durchführung von Baumaßnahmen. "
+//                + "Die Beantragung kann direkt hier im Portal erfolgen. Schachtscheine sind eine tolle Sache. Jeder sollte einen haben!";
+//        Label l = tk.createFlowText( baseSection.getBody(), msg, SWT.BORDER );
+//        l.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
         new BasedataForm().createContents( baseSection );
+
+        // geoSection
+        geoSection = tk.createPanelSection( contents, "Geodaten" );
+        geoSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        msg = "Upload von Shapefile oder DXF.";
+        l = tk.createLabel( geoSection.getBody(), msg );
+        l.setLayoutData( new ConstraintData( new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        new UploadForm().createContents( geoSection );
 
         // mapSection
         mapSection = tk.createPanelSection( contents, "Ort", SWT.BORDER );
         Composite body = mapSection.getBody();
-        body.setLayout( ColumnLayoutFactory.defaults().create() );
-        
-        OpenLayersWidget olwidget = new OpenLayersWidget( body, SWT.MULTI | SWT.WRAP, "openlayers/full/OpenLayers-2.12.1.js" );
-        olwidget.setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 500 ) );
+        body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).create() );
 
-        // init map
+        // map widget
+        olwidget = new OpenLayersWidget( body, SWT.MULTI | SWT.WRAP, "openlayers/full/OpenLayers-2.12.1.js" );
+        olwidget.setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 420 ) );
+
         String srs = "EPSG:4326";
         Projection proj = new Projection( srs );
         String units = srs.equals( "EPSG:4326" ) ? "degrees" : "m";
@@ -133,17 +171,75 @@ public class SchachtscheinPanel
         olwidget.getMap().zoomTo( 9 );
     }
 
+    
+    /**
+     * 
+     */
+    public static class UploadForm
+            extends FormContainer {
 
+        private IFormFieldListener      fieldListener;
+        
+        @Override
+        public void createFormContent( final IFormEditorPageSite site ) {
+            Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
+
+            // upload field
+            new FormFieldBuilder( body, new PlainValuePropertyAdapter( "upload", null ) )
+                    .setField( new StringFormField() ).create().setFocus();
+        }
+    }
+    
+    
+    /**
+     * 
+     */
+    public static class AddressSearchForm
+            extends FormContainer {
+
+        private IFormFieldListener      fieldListener;
+        
+        @Override
+        public void createFormContent( final IFormEditorPageSite site ) {
+            Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
+            // search field
+            new FormFieldBuilder( body, new PlainValuePropertyAdapter( "search", null ) )
+                    .setField( new StringFormField() ).create().setFocus();
+            // btn
+            final Button okBtn = site.getToolkit().createButton( body, "ANZEIGEN", SWT.PUSH );
+            okBtn.setEnabled( false );
+            okBtn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    //log.info( "Suchstring: " + site.getFieldValue( "search" ) );
+                }
+            });
+            
+            // listener
+            site.addFieldListener( fieldListener = new IFormFieldListener() {
+                public void fieldChange( FormFieldEvent ev ) {
+                    if (ev.getEventCode() == VALUE_CHANGE && okBtn != null) {
+                        okBtn.setEnabled( site.isValid() );
+                    }
+                }
+            });
+        }
+    }
+    
+    
     /**
      * 
      */
     public class BasedataForm
             extends FormContainer {
 
+        private IFormFieldListener          fieldListener;
+
         @Override
-        public void createFormContent( IFormEditorPageSite site ) {
+        public void createFormContent( final IFormEditorPageSite site ) {
             Composite body = site.getPageBody();
-            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new PropertyAdapter( entity.get().beschreibung() ) )
                     .setValidator( new NotNullValidator() ).create().setFocus();
@@ -156,6 +252,52 @@ public class SchachtscheinPanel
                     .setField( new TextFormField() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );
             
+            // address
+            Composite plzLine = site.getToolkit().createComposite( body );
+            plzLine.setLayout( new FillLayout( SWT.HORIZONTAL ) );
+            new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().plz() ) )
+                    .setValidator( new NotNullValidator() ).setLabel( "PLZ/Ort" ).setToolTipText( "Postleitzahl der Baumaßnahme" ).create();
+            new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().ort() ) )
+                    .setValidator( new NotNullValidator() ).setLabel( IFormFieldLabel.NO_LABEL ).setToolTipText( "Ort der Baumaßnahme" ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().strasse() ) )
+                    .setValidator( new NotNullValidator() ).setLabel( "Strasse" ).setToolTipText( "Adresse der Baumaßnahme" ).create();
+
+            submitBtn = site.getToolkit().createButton( body, "BEANTRAGEN", SWT.PUSH );
+            submitBtn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    try {
+                        site.doSubmit( null );
+                        AzvRepository.instance().commitChanges();
+                        getContext().closePanel();
+                    }
+                    catch (Exception e) {
+                        AtlasApplication.handleError( "Vorgang konnte nicht angelegt werden.", e );
+                    }
+                }
+            });
+            
+            // address listener
+            site.addFieldListener( fieldListener = new IFormFieldListener() {
+                public void fieldChange( FormFieldEvent ev ) {
+                    if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "ort" )) {
+                        if (ev.getNewValue().equals( "Anklam" )) {
+                            olwidget.getMap().setCenter( 13.70, 53.85 );
+                            olwidget.getMap().zoomTo( 13 );
+                        }
+                        else if (ev.getNewValue().equals( "Friedland" )) {
+                            olwidget.getMap().setCenter( 13.54, 53.66 );
+                            olwidget.getMap().zoomTo( 13 );
+                        }
+                        else if (ev.getNewValue().equals( "Jarmen" )) {
+                            olwidget.getMap().setCenter( 13.33, 53.92 );
+                            olwidget.getMap().zoomTo( 13 );
+                        }
+                        else {
+                            log.info( "unbekannter Ort: " + ev.getNewValue() );
+                        }
+                    }
+                }
+            });
             activateStatusAdapter( getSite() );
         }
     }

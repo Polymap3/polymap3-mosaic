@@ -22,6 +22,7 @@ import org.opengis.feature.Property;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.rwt.lifecycle.WidgetUtil;
@@ -76,7 +77,7 @@ public abstract class FormContainer
 
     public final void createContents( ILayoutContainer parent ) {
         toolkit = new FormEditorToolkit( new FormToolkit( Polymap.getSessionDisplay() ) );
-        pageBody = parent.getBody();
+        pageBody = new Composite( parent.getBody(), SWT.NONE );
         pageBody.setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-form"  );
         pageSite = new PageContainer( this );
 

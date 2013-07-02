@@ -17,6 +17,7 @@ package org.polymap.azv.model;
 import java.util.Date;
 
 import org.qi4j.api.common.Optional;
+import org.qi4j.api.common.UseDefaults;
 import org.qi4j.api.concern.Concerns;
 import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.mixin.Mixins;
@@ -49,6 +50,10 @@ public interface Schachtschein
     Property<LineString>        geom();
     
     @Optional
+    @UseDefaults
+    Property<Integer>           antragStatus();
+
+    @Optional
     Property<PersonValue>       antragsteller();
 
     /** Maßnahmestart */
@@ -64,5 +69,14 @@ public interface Schachtschein
 
     @Optional
     Property<String>            bemerkungen();
+
+    @Optional
+    Property<String>            strasse();
+    
+    @Optional
+    Property<String>            plz();
+    
+    @Optional
+    Property<String>            ort();
 
 }

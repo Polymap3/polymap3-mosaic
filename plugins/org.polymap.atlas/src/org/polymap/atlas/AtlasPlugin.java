@@ -22,12 +22,20 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.statushandlers.StatusAdapter;
+import org.eclipse.ui.statushandlers.StatusManager;
+import org.eclipse.ui.statushandlers.StatusManager.INotificationListener;
+
+import org.eclipse.core.runtime.IStatus;
 
 /**
  * 
@@ -37,6 +45,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 public class AtlasPlugin
         extends AbstractUIPlugin {
 
+    private static final Log log = LogFactory.getLog( AtlasPlugin.class );
+    
     public static final String PLUGIN_ID = "org.polymap.atlas";
 
     private static AtlasPlugin          plugin;
@@ -56,7 +66,17 @@ public class AtlasPlugin
     public void start( BundleContext context ) throws Exception {
         super.start( context );
         plugin = this;
-        
+
+        // status
+        StatusManager.getManager().addListener( new INotificationListener() {
+            public void statusManagerNotified( int type, StatusAdapter[] adapters ) {
+                for (StatusAdapter adapter : adapters) {
+                    IStatus status = adapter.getStatus();
+                    log.warn( status.getMessage(), status.getException() );
+                }
+            }
+        });
+
         // register HTTP resource
         httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
             public Object addingService( ServiceReference reference ) {

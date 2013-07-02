@@ -88,7 +88,7 @@ class DesktopPanelSection
         //control.getTextClient().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-client"  );
         //control.getDescriptionControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section"  );
                 
-        Composite client = tk.adapt( new Composite( control, SWT.NO_FOCUS | tk.stylebits( styles ) ) );
+        Composite client = tk.adapt( new Composite( control, SWT.NO_FOCUS /*| SWT.BORDER*/ | tk.stylebits( styles ) ) );
 
         ConstraintLayout clientLayout = new ConstraintLayout();
         client.setLayout( clientLayout );
@@ -97,9 +97,10 @@ class DesktopPanelSection
         
         level = getParentPanel() != null ? getParentPanel().getLevel()+1 : 0;
 
-        assert level >=0 && level <= 3 : "Section levels out of range: " + level;
-        int spacing = (3 - level) * 10;
-        clientLayout.marginWidth = spacing;
+        assert level >=0 && level <= 2 : "Section levels out of range: " + level;
+        int spacing = (2 - level) * 15;
+        clientLayout.marginWidth = level == 0 ? 30 : 0; //spacing;
+        clientLayout.marginHeight = 0;
         clientLayout.spacing = spacing;
     }
 

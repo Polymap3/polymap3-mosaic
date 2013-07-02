@@ -40,6 +40,8 @@ public interface IPanelToolkit {
      */
     public Label createLabel( Composite parent, String text, int... styles );
 
+    public Label createFlowText( Composite parent, String text, int... styles );
+
     public Label createLink( Composite parent, String text, int... styles );
 
     public Button createButton( Composite parent, String text, int... styles );
