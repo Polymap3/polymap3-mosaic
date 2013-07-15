@@ -98,10 +98,21 @@ class DesktopPanelSection
         level = getParentPanel() != null ? getParentPanel().getLevel()+1 : 0;
 
         assert level >=0 && level <= 2 : "Section levels out of range: " + level;
-        int spacing = (2 - level) * 15;
-        clientLayout.marginWidth = level == 0 ? 30 : 0; //spacing;
+        switch (level) {
+            case 0:
+                clientLayout.spacing = 40;
+                clientLayout.marginWidth = 40;
+                break;
+            case 1:
+                clientLayout.spacing = 10;
+                clientLayout.marginWidth = 0;
+                break;
+        }
         clientLayout.marginHeight = 0;
-        clientLayout.spacing = spacing;
+
+//        int spacing = (2 - level) * 20;
+//        clientLayout.marginWidth = level == 0 ? 30 : 0; //spacing;
+//        clientLayout.spacing = spacing;
     }
 
     

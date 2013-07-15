@@ -362,14 +362,19 @@ Button[RADIO][BORDER] {
 
 
 Button[TOGGLE].atlas-navi,
- Button[PUSH].atlas-navi {
+Button[PUSH].atlas-navi {
   background-color: transparent;
-  }
+}
+Button[TOGGLE]:selected.atlas-navi,
+Button[TOGGLE]:hover.atlas-navi,
+Button[PUSH]:hover.atlas-navi {
+ background-color: #AAA599;
+}
 
- Button[PUSH]:hover.atlas-navi {
+/*Button[PUSH]:hover.atlas-navi {
   background-color: #ededed;
   }
-
+*/
 Button-CheckIcon {
   background-image: url( resource/widget/rap/button/check-unselected.png );
 }
@@ -1148,11 +1153,13 @@ TableItem {
   background-image: none;
 }
 
-
-TableItem:linesvisible:even {
+TableItem:linesvisible {
+  border-bottom: 1px solid #bdbdbd;
+}
+/*TableItem:linesvisible:even {
   background-color: #f0f0f0;
   color: inherit;
-}
+}*/
 
 
 Table-RowOverlay {
@@ -1240,11 +1247,11 @@ Table-Cell {
 }
 
 Table-GridLine {
-  color: #dedede;
+  color: transparent;  /*#dedede;*/
 }
 
 Table-GridLine:horizontal {
-  color: transparent;
+  color: #dedede;  /*transparent;*/
 }
 
 Table-Checkbox {
@@ -1665,7 +1672,7 @@ DateTime {
   border: none;
   border-radius: 0 2px 2px 0;
   color: #464a4e;
-  background-color: #ffffff;
+  background-color: #f5f9fc;
   background-image: none;
   text-shadow: none;
 }

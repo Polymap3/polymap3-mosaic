@@ -94,7 +94,7 @@ public class BestFirstOptimizer
             }
             // score optimized solution -> queue
             else {
-                IScore optimizedScore = new PercentScore( 1 );
+                IScore optimizedScore = null;
                 for (IOptimizationGoal goal : goals) {
                     IScore s = goal.score( optimized );
                     optimizedScore = optimizedScore != null ? optimizedScore.add( s ) : s;
@@ -111,7 +111,7 @@ public class BestFirstOptimizer
         SolutionQueue<ScoredSolution> result = new SolutionQueue( queue.maxSize );
         result.addAll( queue );
         result.addAll( terminals );
-        log.info( "solutions found: queue=" + queue.size() + ", terminals=" + terminals.size() 
+        log.info( "queue=" + queue.size() + ", terminals=" + terminals.size() 
                 + ", maxScore=" + result.getLast().score
                 + ", loops=" + loops + ", seen=" + seen.size()
                 + " (" + timer.elapsedTime() + "ms)" );

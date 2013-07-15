@@ -14,8 +14,6 @@
  */
 package org.polymap.atlas.internal.desktop;
 
-import java.util.Random;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -149,18 +147,36 @@ abstract class DesktopAppWindow
 //        shell.setMaximized( true );
 
         final Listener resizeListener = new Listener() {
+            private Rectangle   prev;
             public void handleEvent( Event ev ) {
                 Rectangle bounds = Display.getCurrent().getBounds();
-                shell.setBounds( 0, 60, bounds.width, bounds.height - 60 );
+                if (!bounds.equals( prev )) {
+                    log.info( "layout..." );
+                    shell.setBounds( 0, 60, bounds.width, bounds.height - 60 );
+                    shell.layout( true );
+                    prev = bounds;
+                }
             }
         };
         resizeListener.handleEvent( null );
 //        Display.getCurrent().addListener( SWT.Resize, resizeListener );
+
+//        new Job( "Display bounds refresher" ) {
+//            protected IStatus run( IProgressMonitor monitor ) {
+//                shell.getDisplay().asyncExec( new Runnable() {
+//                    public void run() {
+//                        resizeListener.handleEvent( null );
+//                    }
+//                });
+//                this.schedule( 1000 );
+//                return Status.OK_STATUS;
+//            }
+//        }.schedule( 1000 );
         
 //        delayedRefresh( shell );
     }
 
-    private Random rand = new Random();
+    private int refreshCount = 1;
     
     public void delayedRefresh( final Shell shell ) {
         final Shell s = shell != null ? shell : getShell();
@@ -171,14 +187,15 @@ abstract class DesktopAppWindow
                     public void run() {
                         log.info( "layout..." );
                         Rectangle bounds = Display.getCurrent().getBounds();
-                        s.setBounds( 0, 60, bounds.width, bounds.height - 60 - rand.nextInt( 3 ) - 1 );
+                        int random = refreshCount++ % 3;
+                        s.setBounds( 0, 60, bounds.width, bounds.height - 60 - random );
                     }
                 });
                 return Status.OK_STATUS;
             }
         };
         //job.setUser( true );
-        job.schedule( 3000 );
+        job.schedule( 1000 );
     }
 
     

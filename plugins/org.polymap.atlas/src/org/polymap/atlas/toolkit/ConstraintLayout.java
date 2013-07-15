@@ -17,15 +17,12 @@ package org.polymap.atlas.toolkit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.TreeMultimap;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -59,24 +56,26 @@ public class ConstraintLayout
     public int                  spacing = 10;
     
     private LayoutSolution      solution;
+    
+    private Rectangle           clientArea;
 
     
     private boolean computeSolution( Composite composite, boolean flushCache ) {
         assert solution == null || solution.composite == composite;
         
         if (solution == null || flushCache) {
-            if (composite.getClientArea().width <= 0) {
+            clientArea = composite.getClientArea();
+            if (clientArea.width <= 0 || clientArea.width > 1800
+                    || clientArea.height < 0) {
+                //log.info( "Invalid client area: " + clientArea );
                 return false;
             }
-            if (composite.getClientArea().width > 1800) {
-                log.info( "Invalid client area width: " + composite.getClientArea().width );
-                return false;
-            }
-
+            
+            log.info( "LAYOUT: " + composite.hashCode() + " -> " + clientArea );
+            
             ISolver solver = new BestFirstOptimizer( 200, 10 );
-            solver.addGoal( new PriorityOnTopGoal( 2 ) );
-            solver.addGoal( new MinOverallHeightGoal( composite.getClientArea().height, 1 ) );
-//            solver.addGoal( new MaxColumnsGoal( this ), 1 );
+            solver.addGoal( new PriorityOnTopGoal( 1 ) );
+            solver.addGoal( new MinOverallHeightGoal( Math.max( 1000, clientArea.height ), 2 ) );
 //            solver.addGoal( new ElementRelationGoal( this ), 1 );
 
             for (Control child : composite.getChildren()) {
@@ -100,7 +99,6 @@ public class ConstraintLayout
         // compute solution
         if (computeSolution( composite, flushCache )) {
             // layout elements
-            Rectangle clientArea = composite.getClientArea();
             int colX = marginWidth;
 
             for (LayoutColumn column : solution.columns) {
@@ -120,6 +118,8 @@ public class ConstraintLayout
     
     @Override
     protected Point computeSize( Composite composite, int wHint, int hHint, boolean flushCache ) {
+        Point result = null;
+        
         // compute solution
         if (computeSolution( composite, flushCache )) {
             // find heighest column
@@ -128,10 +128,13 @@ public class ConstraintLayout
                 maxColumn = maxColumn == null || column.height >= maxColumn.height ? column : maxColumn;
             }
             int height = maxColumn.height + (2*marginHeight) + ((maxColumn.size()-1)*spacing);
-            return new Point( SWT.DEFAULT, height );
+            result = new Point( SWT.DEFAULT, height );
+            //log.info( "    computeSize: " + result );
         }
-        
-        return new Point( SWT.DEFAULT, SWT.DEFAULT );
+        else {
+            result = new Point( wHint, hHint );
+        }
+        return result;
     }
 
     
@@ -148,7 +151,7 @@ public class ConstraintLayout
         
         public LayoutSolution( Composite composite ) {
             this.composite = composite;
-            assert composite.getClientArea().width > 0;
+            assert clientArea.width > 0;
             this.columns.add( new LayoutColumn( Arrays.asList( composite.getChildren() ) ) );
         }
         
@@ -214,8 +217,7 @@ public class ConstraintLayout
 
         /** Equal width for all columns. */
         public int defaultColumnWidth() {
-            int clientWidth = composite.getClientArea().width;
-            int result = (clientWidth - (marginWidth*2) - ((columns.size()-1) * spacing)) / columns.size();
+            int result = (clientArea.width - (marginWidth*2) - ((columns.size()-1) * spacing)) / columns.size();
             assert result > 0;
             return result;
         }
@@ -341,27 +343,37 @@ public class ConstraintLayout
 
         @Override
         public PercentScore score( LayoutSolution solution ) {
-            int elmPercent = 100 / solution.elements().size();
-            int result = 100;
-
-            // sort (descending) all elms using their y pos in column
-            Multimap<Integer,LayoutElement> heightSortedElms = TreeMultimap.create( Ordering.natural(), Ordering.arbitrary() );
-            for (LayoutColumn column : solution.columns) {
-                int y = 0; //Integer.MAX_VALUE;
-                for (LayoutElement elm : column) {
-                    heightSortedElms.put( y, elm );
-                    y += elm.height;
+            // sort ascending height
+            ArrayList<LayoutElement> heightSortedElms = new ArrayList( solution.elements() );
+            Collections.sort( heightSortedElms, new Comparator<LayoutElement>() {
+                public int compare( LayoutElement elm1, LayoutElement elm2 ) {
+                    assert elm1.height > 0 && elm2.height > 0;
+                    return elm1.height - elm2.height;
                 }
-            }
+            });
+            
+            
+//            // sort (descending) all elms using their y pos in column
+//            Multimap<Integer,LayoutElement> heightSortedElms = TreeMultimap.create( Ordering.natural(), Ordering.arbitrary() );
+//            for (LayoutColumn column : solution.columns) {
+//                int y = 0; //Integer.MAX_VALUE;
+//                for (LayoutElement elm : column) {
+//                    heightSortedElms.put( y, elm );
+//                    y += elm.height;
+//                }
+//            }
+
+            int elmPercent = 100 / solution.elements().size();
+            int result = 0;
 
             LayoutElement prev = null;
-            for (LayoutElement elm : heightSortedElms.values()) {
+            for (LayoutElement elm : heightSortedElms) {
                 if (prev != null) {
                     PriorityConstraint prevPrio = prev.constraint( PriorityConstraint.class, new PriorityConstraint( 0, 0 ) );
                     PriorityConstraint elmPrio = elm.constraint( PriorityConstraint.class, new PriorityConstraint( 0, 0 ) );
 
-                    if (prevPrio.getValue() < elmPrio.getValue()) {
-                        result -= elmPercent;
+                    if (prevPrio.getValue() > elmPrio.getValue()) {
+                        result += elmPercent;
                     }
                 }
                 prev = elm;
@@ -384,6 +396,7 @@ public class ConstraintLayout
 
         public MinOverallHeightGoal( int clientHeight, Comparable priority ) {
             super( priority );
+            assert clientHeight > 0;
             this.clientHeight = clientHeight;
         }
 
@@ -433,10 +446,15 @@ public class ConstraintLayout
                 maxColumnHeight = Math.max( column.height, maxColumnHeight );
                 minColumnHeight = Math.min( column.height, minColumnHeight );
             }
-            // kann größer als 100 sein
+            
+//            // result: ratio = max/min
+//            double ratio = (100d / maxColumnHeight * minColumnHeight);
+//            PercentScore result = new PercentScore( (int)ratio );
+            
+            // might be > 100
             int heightPercent = (int)(100d / clientHeight * maxColumnHeight);
             PercentScore result = new PercentScore( 100 - Math.min( 100, heightPercent ) );
-            assert result.getValue() >= 0;
+            assert result.getValue() >= 0 && result.getValue() <= 100;
             return result;
         }
         
