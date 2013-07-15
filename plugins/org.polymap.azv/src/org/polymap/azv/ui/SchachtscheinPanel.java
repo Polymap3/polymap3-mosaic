@@ -29,6 +29,19 @@ import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.ui.ColumnLayoutFactory;
 
+import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.IAppContext;
+import org.polymap.rhei.batik.IPanel;
+import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.app.BatikApplication;
+import org.polymap.rhei.batik.app.DefaultFormPanel;
+import org.polymap.rhei.batik.app.FormContainer;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
 import org.polymap.rhei.data.entityfeature.PropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
@@ -38,19 +51,6 @@ import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 
-import org.polymap.atlas.ContextProperty;
-import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IPanel;
-import org.polymap.atlas.IPanelSite;
-import org.polymap.atlas.PanelIdentifier;
-import org.polymap.atlas.app.AtlasApplication;
-import org.polymap.atlas.app.DefaultFormPanel;
-import org.polymap.atlas.app.FormContainer;
-import org.polymap.atlas.toolkit.ConstraintData;
-import org.polymap.atlas.toolkit.IPanelSection;
-import org.polymap.atlas.toolkit.IPanelToolkit;
-import org.polymap.atlas.toolkit.MinWidthConstraint;
-import org.polymap.atlas.toolkit.PriorityConstraint;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Schachtschein;
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
@@ -114,7 +114,7 @@ public class SchachtscheinPanel
 
         // welcomeSection
         IPanelSection welcomeSection = tk.createPanelSection( contents, "Schachtschein" );
-        welcomeSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 5, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        welcomeSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ), new MinWidthConstraint( 400, 1 ) ) );
         String msg = "Das Antragsverfahren Schachtschein ist Voraussetzung für die Durchführung von Baumaßnahmen. "
                 + "Die Beantragung kann direkt hier im Portal erfolgen. Schachtscheine sind eine tolle Sache. Jeder sollte einen haben!";
         Label l = tk.createFlowText( welcomeSection.getBody(), msg/*, SWT.BORDER*/ );
@@ -122,7 +122,7 @@ public class SchachtscheinPanel
 
         // baseSection
         baseSection = tk.createPanelSection( contents, "Basisdaten" );
-        baseSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        baseSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ), new MinWidthConstraint( 400, 1 ) ) );
 //        Label l1 = tk.createFlowText( baseSection.getBody(), "Schachtschein." );
 //        l1.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
 //        
@@ -134,7 +134,7 @@ public class SchachtscheinPanel
 
         // geoSection
         geoSection = tk.createPanelSection( contents, "Geodaten" );
-        geoSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        geoSection.getControl().setLayoutData( new ConstraintData( /*new PriorityConstraint( 1, 1 ),*/ new MinWidthConstraint( 400, 1 ) ) );
         msg = "Upload von Shapefile oder DXF.";
         l = tk.createLabel( geoSection.getBody(), msg );
         l.setLayoutData( new ConstraintData( new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
@@ -271,7 +271,7 @@ public class SchachtscheinPanel
                         getContext().closePanel();
                     }
                     catch (Exception e) {
-                        AtlasApplication.handleError( "Vorgang konnte nicht angelegt werden.", e );
+                        BatikApplication.handleError( "Vorgang konnte nicht angelegt werden.", e );
                     }
                 }
             });

@@ -45,22 +45,24 @@ import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.UserPrincipal;
-import org.polymap.atlas.AtlasPlugin;
-import org.polymap.atlas.ContextProperty;
-import org.polymap.atlas.DefaultPanel;
-import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IPanel;
-import org.polymap.atlas.IPanelSite;
-import org.polymap.atlas.PanelIdentifier;
-import org.polymap.atlas.PropertyAccessEvent;
-import org.polymap.atlas.app.AtlasApplication;
-import org.polymap.atlas.toolkit.ConstraintData;
-import org.polymap.atlas.toolkit.ILayoutContainer;
-import org.polymap.atlas.toolkit.IPanelSection;
-import org.polymap.atlas.toolkit.IPanelToolkit;
-import org.polymap.atlas.toolkit.MaxWidthConstraint;
-import org.polymap.atlas.toolkit.MinWidthConstraint;
-import org.polymap.atlas.toolkit.PriorityConstraint;
+
+import org.polymap.rhei.batik.BatikPlugin;
+import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.DefaultPanel;
+import org.polymap.rhei.batik.IAppContext;
+import org.polymap.rhei.batik.IPanel;
+import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.PropertyAccessEvent;
+import org.polymap.rhei.batik.app.BatikApplication;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
+import org.polymap.rhei.batik.toolkit.ILayoutContainer;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Nutzer;
 import org.polymap.azv.model.Schachtschein;
@@ -140,7 +142,7 @@ public class StartPanel
                 new PriorityConstraint( 5, 1 ), new MinWidthConstraint( 400, 1 ) ) );
         createLoginSection( contents );
         loginSection.getControl().setLayoutData( new ConstraintData( 
-                new PriorityConstraint( 2, 1 ) ) );
+                new PriorityConstraint( 4, 1 ) ) );
         createActionsSection( contents );
         
         // listen to PropertyAccessEvent
@@ -236,7 +238,7 @@ public class StartPanel
 
         createActionButton( body, "Wasserqualität", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
-                AtlasPlugin.instance().imageForName( "resources/icons/waterdrop.png" ),
+                BatikPlugin.instance().imageForName( "resources/icons/waterdrop.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -245,7 +247,7 @@ public class StartPanel
         });
         actionBtns.add( createActionButton( body, "Entsorgung", 
                 "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
-                AtlasPlugin.instance().imageForName( "resources/icons/truck.png" ),
+                BatikPlugin.instance().imageForName( "resources/icons/truck.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -253,7 +255,7 @@ public class StartPanel
             }
         }));
         actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
-                AtlasPlugin.instance().imageForName( "resources/icons/fire.png" ),
+                BatikPlugin.instance().imageForName( "resources/icons/fire.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -262,7 +264,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Leitungsauskunft", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
-                AtlasPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
+                BatikPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -271,7 +273,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Schachtscheine", 
                 "Antrag für Schachtscheine",
-                AtlasPlugin.instance().imageForName( "resources/icons/letter.png" ),
+                BatikPlugin.instance().imageForName( "resources/icons/letter.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
@@ -279,13 +281,13 @@ public class StartPanel
                     getContext().openPanel( SchachtscheinPanel.ID );
                 }
                 catch (Exception e) {
-                    AtlasApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                    BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
                 }
             }
         }));
         actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
-                AtlasPlugin.instance().imageForName( "resources/icons/letters.png" ),
+                BatikPlugin.instance().imageForName( "resources/icons/letters.png" ),
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub

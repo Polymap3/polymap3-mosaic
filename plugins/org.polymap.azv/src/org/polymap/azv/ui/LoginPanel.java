@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.qi4j.api.unitofwork.NoSuchEntityException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,6 +35,14 @@ import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.DefaultPanel;
+import org.polymap.rhei.batik.IAppContext;
+import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.app.FormContainer;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldListener;
@@ -41,14 +50,6 @@ import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.StringFormField.Style;
 import org.polymap.rhei.form.IFormEditorPageSite;
 
-import org.polymap.atlas.ContextProperty;
-import org.polymap.atlas.DefaultPanel;
-import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IPanelSite;
-import org.polymap.atlas.PanelIdentifier;
-import org.polymap.atlas.app.FormContainer;
-import org.polymap.atlas.toolkit.IPanelSection;
-import org.polymap.atlas.toolkit.IPanelToolkit;
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Nutzer;

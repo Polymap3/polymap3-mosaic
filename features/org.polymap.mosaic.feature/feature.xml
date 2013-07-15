@@ -40,7 +40,14 @@
    </requires>
 
    <plugin
-         id="org.polymap.atlas"
+         id="org.polymap.mosaic"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.polymap.mosaic.api"
          download-size="0"
          install-size="0"
          version="0.0.0"
