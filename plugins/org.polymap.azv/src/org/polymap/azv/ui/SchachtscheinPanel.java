@@ -266,7 +266,7 @@ public class SchachtscheinPanel
             submitBtn.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected( SelectionEvent ev ) {
                     try {
-                        site.doSubmit( null );
+                        site.submitEditor();
                         AzvRepository.instance().commitChanges();
                         getContext().closePanel();
                     }
