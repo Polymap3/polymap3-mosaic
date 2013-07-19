@@ -15,6 +15,10 @@
 package org.polymap.azv;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTracker;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,12 +47,34 @@ public class AZVPlugin
         return instance;
     }
 
+
     // instance *******************************************
+
+    private ServiceTracker          httpServiceTracker;
+    
 
     @Override
     public void start( BundleContext context ) throws Exception {
         super.start( context );
         instance = this;
+        
+        // register HTTP resource
+        httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
+            public Object addingService( ServiceReference reference ) {
+                HttpService httpService = (HttpService)super.addingService( reference );                
+                if (httpService != null) {
+                    try {
+                        httpService.registerResources( "/azvres", "/resources", null );
+                    }
+                    catch (NamespaceException e) {
+                        throw new RuntimeException( e );
+                    }
+                }
+                return httpService;
+            }
+        };
+        httpServiceTracker.open();
+
     }
 
     @Override

@@ -79,7 +79,7 @@ public class StartPanel
 
     private static Log log = LogFactory.getLog( StartPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "azvstart" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "start" );
 
     /** Just for convenience, same as <code>getSite().toolkit()</code>. */
     private IPanelToolkit                   tk;

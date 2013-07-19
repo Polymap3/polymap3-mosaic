@@ -26,5 +26,23 @@
             class="org.polymap.azv.model.AzvRepositoryAssembler">
       </assembler>
    </extension>
+   <extension
+         point="org.eclipse.rap.ui.branding">
+      <branding
+            body="resources/html/body.html"
+            defaultEntrypointId="org.polymap.rhei.batik.entrypoint"
+            id="org.polymap.azv.branding"
+            servletName="azv"
+            themeId="org.polymap.rhei.batik.theme"
+            title="GKU">
+         <additionalHeaders>
+            <link
+                  href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700"
+                  rel="stylesheet"
+                  type="text/css">
+            </link>
+         </additionalHeaders>
+      </branding>
+   </extension>
 
 </plugin>
