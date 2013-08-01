@@ -27,11 +27,15 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.rwt.lifecycle.UICallBack;
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.window.ApplicationWindow;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
@@ -70,13 +74,18 @@ abstract class DesktopAppWindow
 
     @Override
     protected Control createContents( Composite parent ) {
+        Composite contents = (Composite)super.createContents( parent );
+        contents.setLayout( new FormLayout() );
+
         // statusLine
         setStatus( "Status..." );
-        Control statusLine = getStatusLineManager().getControl();
+        Composite statusLine = (Composite)getStatusLineManager().getControl();
         statusLine.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-status"  );
-
-        Composite contents = new Composite( parent, SWT.NONE );
-        contents.setLayout( new FormLayout() );
+        statusLine.setBackground( null );
+        for (Control child : statusLine.getChildren()) {
+            child.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-status"  );
+            child.setBackground( null );
+        }
 
         // navi
         Composite navi = fillNavigationArea( contents );
@@ -107,14 +116,19 @@ abstract class DesktopAppWindow
     public void setStatus( IStatus status ) {
         assert status != null;
         switch (status.getSeverity()) {
+            case IStatus.OK: {
+                getStatusLineManager().setErrorMessage( null ); 
+                getStatusLineManager().setMessage( null );
+                break;
+            }
             case IStatus.ERROR: {
                 getStatusLineManager().setErrorMessage( 
-                        AtlasPlugin.instance().imageForName( "icons/errorstate.gif" ), status.getMessage() );
+                        AtlasPlugin.instance().imageForName( "resources/icons/errorstate.gif" ), status.getMessage() );
                 break;
             }
             case IStatus.WARNING: {
                 getStatusLineManager().setMessage( 
-                        AtlasPlugin.instance().imageForName( "icons/warningstate.gif" ), status.getMessage() );
+                        AtlasPlugin.instance().imageForName( "resources/icons/warningstate.gif" ), status.getMessage() );
                 break;
             }
             default: {
@@ -130,17 +144,61 @@ abstract class DesktopAppWindow
         shell.setText( "Mosaic" );
         shell.setTouchEnabled( true );
 
-        Listener resizeListener = new Listener() {
+//        shell.setMaximized( true );
+
+        final Listener resizeListener = new Listener() {
+            private Rectangle   prev;
             public void handleEvent( Event ev ) {
                 Rectangle bounds = Display.getCurrent().getBounds();
-                shell.setBounds( 0, 60, bounds.width, bounds.height - 60 );
+                if (!bounds.equals( prev )) {
+                    log.info( "layout..." );
+                    shell.setBounds( 0, 60, bounds.width, bounds.height - 60 );
+                    shell.layout( true );
+                    prev = bounds;
+                }
             }
         };
         resizeListener.handleEvent( null );
-        Display.getCurrent().addListener( SWT.Resize, resizeListener );
+//        Display.getCurrent().addListener( SWT.Resize, resizeListener );
+
+//        new Job( "Display bounds refresher" ) {
+//            protected IStatus run( IProgressMonitor monitor ) {
+//                shell.getDisplay().asyncExec( new Runnable() {
+//                    public void run() {
+//                        resizeListener.handleEvent( null );
+//                    }
+//                });
+//                this.schedule( 1000 );
+//                return Status.OK_STATUS;
+//            }
+//        }.schedule( 1000 );
+        
+//        delayedRefresh( shell );
     }
 
+    private int refreshCount = 1;
+    
+    public void delayedRefresh( final Shell shell ) {
+        final Shell s = shell != null ? shell : getShell();
+        UICallBack.activate( "layout" );
+        Job job = new Job( "Layout" ) {
+            protected IStatus run( IProgressMonitor monitor ) {
+                s.getDisplay().asyncExec( new Runnable() {
+                    public void run() {
+                        log.info( "layout..." );
+                        Rectangle bounds = Display.getCurrent().getBounds();
+                        int random = refreshCount++ % 3;
+                        s.setBounds( 0, 60, bounds.width, bounds.height - 60 - random );
+                    }
+                });
+                return Status.OK_STATUS;
+            }
+        };
+        //job.setUser( true );
+        job.schedule( 1000 );
+    }
 
+    
     @Override
     protected int getShellStyle() {
         // no border, no title

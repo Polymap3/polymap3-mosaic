@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.rwt.RWT;
 import org.eclipse.rwt.graphics.Graphics;
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
@@ -59,11 +60,21 @@ public class DesktopToolkit
 
     @Override
     public Label createLabel( Composite parent, String text, int... styles ) {
-        Label control = adapt( new Label( parent, stylebits( styles ) ), false, false );
+        Label result = adapt( new Label( parent, stylebits( styles ) ), false, false );
         if (text != null) {
-            control.setText( text );
+            result.setText( text );
         }
-        return control;
+        return result;
+    }
+
+    @Override
+    public Label createFlowText( Composite parent, String text, int... styles ) {
+        Label result = adapt( new Label( parent, stylebits( styles ) | SWT.WRAP ), false, false );
+        if (text != null) {
+            result.setText( text );
+        }
+        result.setData( RWT.MARKUP_ENABLED, Boolean.TRUE );
+        return result;
     }
 
     @Override

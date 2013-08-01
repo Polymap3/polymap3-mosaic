@@ -58,6 +58,8 @@ public interface IPanelSite {
 
     public String getTitle();
 
+    public void layout( boolean changed );
+
 //    /**
 //     * Registers the given {@link EventHandler event handler}.
 //     *

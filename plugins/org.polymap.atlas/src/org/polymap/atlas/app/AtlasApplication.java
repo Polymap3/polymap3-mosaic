@@ -26,7 +26,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 

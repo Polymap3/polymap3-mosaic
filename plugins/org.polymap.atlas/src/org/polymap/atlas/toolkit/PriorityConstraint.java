@@ -14,8 +14,8 @@
  */
 package org.polymap.atlas.toolkit;
 
-import org.polymap.atlas.internal.ConstraintLayout.LayoutSolution;
 import org.polymap.atlas.internal.cp.PercentScore;
+import org.polymap.atlas.toolkit.ConstraintLayout.LayoutSolution;
 
 /**
  * The priority of an element inside a container. Higher priorities are displayed

@@ -35,6 +35,7 @@ import org.eclipse.rwt.lifecycle.WidgetUtil;
 import org.eclipse.ui.forms.widgets.Section;
 
 import org.polymap.atlas.toolkit.ConstraintData;
+import org.polymap.atlas.toolkit.ConstraintLayout;
 import org.polymap.atlas.toolkit.ILayoutElement;
 import org.polymap.atlas.toolkit.IPanelSection;
 import org.polymap.atlas.toolkit.LayoutConstraint;
@@ -57,6 +58,7 @@ class DesktopPanelSection
     
     
     public void dispose() {
+        control.dispose();
     }
 
     
@@ -86,13 +88,31 @@ class DesktopPanelSection
         //control.getTextClient().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section-client"  );
         //control.getDescriptionControl().setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CUSTOM_VARIANT_VALUE + "-section"  );
                 
-        Composite client = tk.adapt( new Composite( control, tk.stylebits( SWT.NO_FOCUS ) ) );
+        Composite client = tk.adapt( new Composite( control, SWT.NO_FOCUS /*| SWT.BORDER*/ | tk.stylebits( styles ) ) );
 
-        //client.setLayout( new ConstraintLayout() );
-        client.setLayout( new PanelSectionLayout() );
+        ConstraintLayout clientLayout = new ConstraintLayout();
+        client.setLayout( clientLayout );
+        //client.setLayout( new PanelSectionLayout() );
         control.setClient( client );
         
         level = getParentPanel() != null ? getParentPanel().getLevel()+1 : 0;
+
+        assert level >=0 && level <= 2 : "Section levels out of range: " + level;
+        switch (level) {
+            case 0:
+                clientLayout.spacing = 40;
+                clientLayout.marginWidth = 40;
+                break;
+            case 1:
+                clientLayout.spacing = 10;
+                clientLayout.marginWidth = 0;
+                break;
+        }
+        clientLayout.marginHeight = 0;
+
+//        int spacing = (2 - level) * 20;
+//        clientLayout.marginWidth = level == 0 ? 30 : 0; //spacing;
+//        clientLayout.spacing = spacing;
     }
 
     

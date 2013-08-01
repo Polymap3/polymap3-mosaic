@@ -21,11 +21,11 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console -consolelog -data ${env_var:HOME}/servers/workspace-mosaic"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dosgi.noShutdown=true -Declipse.ignoreApp=true -server -XX:+TieredCompilation -verbosegc -Xmx512m -XX:+UseG1GC -XX:MaxPermSize=128m -XX:NewRatio=4 -ea -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:SoftRefLRUPolicyMSPerMB=1000 -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog -Dorg.eclipse.rwt.compression=true"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dosgi.noShutdown=true -Declipse.ignoreApp=true -server -XX:+TieredCompilation -Xmx512m -XX:+UseG1GC -XX:MaxPermSize=128m -XX:NewRatio=4 -ea -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:SoftRefLRUPolicyMSPerMB=1000 -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog -Dorg.eclipse.rwt.compression=true"/>
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${env_var:HOME}/servers/workspace-mosaic"/>
 <stringAttribute key="org.eclipse.rap.launch.browserMode" value="EXTERNAL"/>
 <stringAttribute key="org.eclipse.rap.launch.contextpath" value=""/>
-<stringAttribute key="org.eclipse.rap.launch.dataLocation" value="${env_var:HOME}/servers/workspace-mosaic"/>
+<stringAttribute key="org.eclipse.rap.launch.dataLocation" value="/Users/zet/Projekte-Eclipse/mosaic/Workspaces"/>
 <stringAttribute key="org.eclipse.rap.launch.entryPoint" value="default"/>
 <stringAttribute key="org.eclipse.rap.launch.libraryVariant" value="STANDARD"/>
 <stringAttribute key="org.eclipse.rap.launch.logLevel" value="OFF"/>

@@ -97,7 +97,7 @@ public class AzvRepositoryAssembler
         moduleRoot.mkdir();
 
         domainModule.addServices( LuceneEntityStoreService.class )
-                .setMetaInfo( new LuceneEntityStoreInfo( moduleRoot ) )
+                .setMetaInfo( new LuceneEntityStoreInfo( /*moduleRoot*/ ) )
                 .instantiateOnStartup()
                 .identifiedBy( "lucene-repository" );
 

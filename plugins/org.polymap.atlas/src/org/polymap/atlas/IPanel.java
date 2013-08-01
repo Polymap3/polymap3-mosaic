@@ -46,7 +46,7 @@ public interface IPanel {
     /**
      * Creates the UI elements of this panel. 
      * <p/>
-     * By default {@link FillLayout} is used for the <code>panelBody</code>. This can
+     * By default {@link FillLayout} is set for the <code>panelBody</code>. This can
      * be changed as needed.
      * 
      * @param panelBody The parent of the UI elements to create.

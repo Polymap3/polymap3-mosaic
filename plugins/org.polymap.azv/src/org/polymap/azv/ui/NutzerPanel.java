@@ -32,6 +32,11 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.IAppContext;
+import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.app.DefaultFormPanel;
 import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
 import org.polymap.rhei.data.entityfeature.ValuePropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
@@ -42,11 +47,6 @@ import org.polymap.rhei.field.StringFormField.Style;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.form.IFormEditorToolkit;
 
-import org.polymap.atlas.ContextProperty;
-import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IPanelSite;
-import org.polymap.atlas.PanelIdentifier;
-import org.polymap.atlas.app.DefaultFormPanel;
 import org.polymap.azv.model.Nutzer;
 import org.polymap.azv.model.PersonValue;
 

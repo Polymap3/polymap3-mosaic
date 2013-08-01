@@ -20,18 +20,29 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.qi4j.api.unitofwork.NoSuchEntityException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.UserPrincipal;
+import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.DefaultPanel;
+import org.polymap.rhei.batik.IAppContext;
+import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.app.FormContainer;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldListener;
@@ -39,14 +50,6 @@ import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.StringFormField.Style;
 import org.polymap.rhei.form.IFormEditorPageSite;
 
-import org.polymap.atlas.ContextProperty;
-import org.polymap.atlas.DefaultPanel;
-import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IPanelSite;
-import org.polymap.atlas.PanelIdentifier;
-import org.polymap.atlas.app.FormContainer;
-import org.polymap.atlas.toolkit.IPanelSection;
-import org.polymap.atlas.toolkit.IPanelToolkit;
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Nutzer;
@@ -127,6 +130,8 @@ public class LoginPanel
 
         private IFormEditorPageSite              formSite;
         
+        private IFormFieldListener               fieldListener;
+        
         
         public LoginForm( ContextProperty<Nutzer> nutzer, ContextProperty<UserPrincipal> user ) {
             this.nutzer = nutzer;
@@ -138,6 +143,7 @@ public class LoginPanel
         public void createFormContent( IFormEditorPageSite site ) {
             formSite = site;
             Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
             // username
             new FormFieldBuilder( body, new PlainValuePropertyAdapter( "username", username ) )
                     .setField( new StringFormField() ).create().setFocus();
@@ -153,18 +159,15 @@ public class LoginPanel
             });
             
             // listener
-            site.addFieldListener( new IFormFieldListener() {
+            site.addFieldListener( fieldListener = new IFormFieldListener() {
                 public void fieldChange( FormFieldEvent ev ) {
-                    if (ev.getFieldName().equals( "username" ) ) {
+                    if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "username" ) ) {
                         username = ev.getNewValue();
                     }
-                    else if (ev.getFieldName().equals( "password" ) ) {
+                    else if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "password" ) ) {
                         password = ev.getNewValue();
                     }
-                    else {
-                        throw new IllegalStateException( "Unknown form field: " + ev.getFieldName() );
-                    }
-                    if (loginBtn != null) {
+                    if (loginBtn != null && !loginBtn.isDisposed()) {
                         loginBtn.setEnabled( username.length() > 0 && password.length() > 0 );
                     }
                 }
@@ -198,13 +201,13 @@ public class LoginPanel
                 log.info( "Login: no Nutzer found for name: " + name );
             }
             
-            // check
-            if (user.get() != null || nutzer.get() != null) {
-                formSite.clearFields();
-                loginBtn.dispose();
-                
-                formSite.getToolkit().createLabel( formSite.getPageBody(), user.get().getName() );
-            }
+//            // check
+//            if (user.get() != null || nutzer.get() != null) {
+//                formSite.getPageBody().dispose();
+//                loginBtn.dispose();
+//                
+//                formSite.getToolkit().createLabel( formSite.getPageBody(), user.get().getName() );
+//            }
         }
     }        
         

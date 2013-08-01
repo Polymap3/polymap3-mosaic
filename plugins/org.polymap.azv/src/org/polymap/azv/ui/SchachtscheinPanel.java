@@ -17,29 +17,51 @@ package org.polymap.azv.ui;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.ui.forms.widgets.Section;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.ui.ColumnLayoutFactory;
-import org.polymap.core.ui.FormDataFactory;
-import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.IAppContext;
+import org.polymap.rhei.batik.IPanel;
+import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.app.BatikApplication;
+import org.polymap.rhei.batik.app.DefaultFormPanel;
+import org.polymap.rhei.batik.app.FormContainer;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.data.entityfeature.PlainValuePropertyAdapter;
 import org.polymap.rhei.data.entityfeature.PropertyAdapter;
+import org.polymap.rhei.field.FormFieldEvent;
+import org.polymap.rhei.field.IFormFieldLabel;
+import org.polymap.rhei.field.IFormFieldListener;
+import org.polymap.rhei.field.StringFormField;
+import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
-import org.polymap.rhei.form.IFormEditorToolkit;
 
-import org.polymap.atlas.ContextProperty;
-import org.polymap.atlas.IAppContext;
-import org.polymap.atlas.IPanel;
-import org.polymap.atlas.IPanelSite;
-import org.polymap.atlas.PanelIdentifier;
-import org.polymap.atlas.app.DefaultFormPanel;
-import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Schachtschein;
+import org.polymap.openlayers.rap.widget.OpenLayersWidget;
+import org.polymap.openlayers.rap.widget.base_types.Bounds;
+import org.polymap.openlayers.rap.widget.base_types.Projection;
+import org.polymap.openlayers.rap.widget.controls.LayerSwitcherControl;
+import org.polymap.openlayers.rap.widget.controls.MousePositionControl;
+import org.polymap.openlayers.rap.widget.controls.NavigationControl;
+import org.polymap.openlayers.rap.widget.controls.ScaleControl;
+import org.polymap.openlayers.rap.widget.controls.ScaleLineControl;
+import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
 /**
  *
@@ -56,7 +78,13 @@ public class SchachtscheinPanel
 
     private ContextProperty<Schachtschein>  entity;
 
-    private IFormEditorToolkit              tk;
+    private IPanelToolkit                   tk;
+    
+    private IPanelSection                   baseSection, mapSection, geoSection;
+
+    private OpenLayersWidget                olwidget;
+
+    public Button submitBtn;
     
 
     @Override
@@ -80,30 +108,198 @@ public class SchachtscheinPanel
     @Override
     public void createFormContent( IFormEditorPageSite pageSite ) {
         getSite().setTitle( "Schachtschein" );
-        tk = pageSite.getToolkit();
-        Composite parent = pageSite.getPageBody();
-        parent.setLayout( FormLayoutFactory.defaults().margins( DEFAULTS_SPACING ).create() );
+        tk = getSite().toolkit();
+        
+        IPanelSection contents = tk.createPanelSection( pageSite.getPageBody(), null );
 
-        Composite contents = tk.createComposite( parent );
-        contents.setLayoutData( FormDataFactory.offset( 0 ).left( 25 ).right( 75 ).width( 500 ).create() );
-        contents.setLayout( FormLayoutFactory.defaults().spacing( DEFAULTS_SPACING*2 ).create() );
+        // welcomeSection
+        IPanelSection welcomeSection = tk.createPanelSection( contents, "Schachtschein" );
+        welcomeSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        String msg = "Das Antragsverfahren Schachtschein ist Voraussetzung für die Durchführung von Baumaßnahmen. "
+                + "Die Beantragung kann direkt hier im Portal erfolgen. Schachtscheine sind eine tolle Sache. Jeder sollte einen haben!";
+        Label l = tk.createFlowText( welcomeSection.getBody(), msg/*, SWT.BORDER*/ );
+        l.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
 
-        getSite().setStatus( new Status( IStatus.WARNING, AZVPlugin.ID, "Es fehlen noch Eingaben..." ) );
+        // baseSection
+        baseSection = tk.createPanelSection( contents, "Basisdaten" );
+        baseSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+//        Label l1 = tk.createFlowText( baseSection.getBody(), "Schachtschein." );
+//        l1.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+//        
+//        String msg = "Das Antragsverfahren Schachtschein ist Voraussetzung für die Durchführung von Baumaßnahmen. "
+//                + "Die Beantragung kann direkt hier im Portal erfolgen. Schachtscheine sind eine tolle Sache. Jeder sollte einen haben!";
+//        Label l = tk.createFlowText( baseSection.getBody(), msg, SWT.BORDER );
+//        l.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        new BasedataForm().createContents( baseSection );
 
-        Composite base = createBaseSection( contents );
-        base.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
+        // geoSection
+        geoSection = tk.createPanelSection( contents, "Geodaten" );
+        geoSection.getControl().setLayoutData( new ConstraintData( /*new PriorityConstraint( 1, 1 ),*/ new MinWidthConstraint( 400, 1 ) ) );
+        msg = "Upload von Shapefile oder DXF.";
+        l = tk.createLabel( geoSection.getBody(), msg );
+        l.setLayoutData( new ConstraintData( new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        new UploadForm().createContents( geoSection );
+
+        // mapSection
+        mapSection = tk.createPanelSection( contents, "Ort", SWT.BORDER );
+        Composite body = mapSection.getBody();
+        body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).create() );
+
+        // map widget
+        olwidget = new OpenLayersWidget( body, SWT.MULTI | SWT.WRAP, "openlayers/full/OpenLayers-2.12.1.js" );
+        olwidget.setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 420 ) );
+
+        String srs = "EPSG:4326";
+        Projection proj = new Projection( srs );
+        String units = srs.equals( "EPSG:4326" ) ? "degrees" : "m";
+        float maxResolution = srs.equals( "EPSG:4326" ) ? (360/256) : 500000;
+        Bounds maxExtent = new Bounds( 12.80, 53.00, 14.30, 54.50 );
+        //Bounds maxExtent = new Bounds( 3358000, 5916000, 3456000, 5986000 );
+        olwidget.createMap( proj, proj, units, maxExtent, maxResolution );
+        
+//        OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
+        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
+        osm.setIsBaseLayer( true );
+        olwidget.getMap().addLayer( osm );
+        olwidget.getMap().addControl( new NavigationControl() );
+        olwidget.getMap().addControl( new LayerSwitcherControl() );
+        olwidget.getMap().addControl( new MousePositionControl() );
+        olwidget.getMap().addControl( new ScaleLineControl() );
+        olwidget.getMap().addControl( new ScaleControl() );
+
+        olwidget.getMap().zoomToExtent( maxExtent, true );
+        olwidget.getMap().zoomTo( 9 );
     }
 
+    
+    /**
+     * 
+     */
+    public static class UploadForm
+            extends FormContainer {
 
-    protected Composite createBaseSection( Composite parent ) {
-        Section section = getSite().toolkit().createSection( parent, "Basisdaten", Section.TITLE_BAR );
-        Composite client = (Composite)section.getClient();
-        client.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).create() );
+        private IFormFieldListener      fieldListener;
+        
+        @Override
+        public void createFormContent( final IFormEditorPageSite site ) {
+            Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
-        new FormFieldBuilder( client, new PropertyAdapter( entity.get().beschreibung() ) ).create().setFocus();
-        new FormFieldBuilder( client, new PropertyAdapter( entity.get().bemerkungen() ) ).create();
+            // upload field
+            new FormFieldBuilder( body, new PlainValuePropertyAdapter( "upload", null ) )
+                    .setField( new StringFormField() ).create().setFocus();
+        }
+    }
+    
+    
+    /**
+     * 
+     */
+    public static class AddressSearchForm
+            extends FormContainer {
 
-        return section;
+        private IFormFieldListener      fieldListener;
+        
+        @Override
+        public void createFormContent( final IFormEditorPageSite site ) {
+            Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
+            // search field
+            new FormFieldBuilder( body, new PlainValuePropertyAdapter( "search", null ) )
+                    .setField( new StringFormField() ).create().setFocus();
+            // btn
+            final Button okBtn = site.getToolkit().createButton( body, "ANZEIGEN", SWT.PUSH );
+            okBtn.setEnabled( false );
+            okBtn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    //log.info( "Suchstring: " + site.getFieldValue( "search" ) );
+                }
+            });
+            
+            // listener
+            site.addFieldListener( fieldListener = new IFormFieldListener() {
+                public void fieldChange( FormFieldEvent ev ) {
+                    if (ev.getEventCode() == VALUE_CHANGE && okBtn != null) {
+                        okBtn.setEnabled( site.isValid() );
+                    }
+                }
+            });
+        }
+    }
+    
+    
+    /**
+     * 
+     */
+    public class BasedataForm
+            extends FormContainer {
+
+        private IFormFieldListener          fieldListener;
+
+        @Override
+        public void createFormContent( final IFormEditorPageSite site ) {
+            Composite body = site.getPageBody();
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
+
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().beschreibung() ) )
+                    .setValidator( new NotNullValidator() ).create().setFocus();
+            //new FormFieldBuilder( body, new PropertyAdapter( entity.get().antragsteller() ) ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().startDate() ) )
+                    .setLabel( "Beginn" ).setToolTipText( "Geplanter Beginn der Arbeiten" ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().endDate() ) )
+                    .setLabel( "Ende" ).setToolTipText( "Geplantes Ende der Arbeiten" ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().bemerkungen() ) )
+                    .setField( new TextFormField() ).create()
+                    .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );
+            
+            // address
+            Composite plzLine = site.getToolkit().createComposite( body );
+            plzLine.setLayout( new FillLayout( SWT.HORIZONTAL ) );
+            new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().plz() ) )
+                    .setValidator( new NotNullValidator() ).setLabel( "PLZ/Ort" ).setToolTipText( "Postleitzahl der Baumaßnahme" ).create();
+            new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().ort() ) )
+                    .setValidator( new NotNullValidator() ).setLabel( IFormFieldLabel.NO_LABEL ).setToolTipText( "Ort der Baumaßnahme" ).create();
+            new FormFieldBuilder( body, new PropertyAdapter( entity.get().strasse() ) )
+                    .setValidator( new NotNullValidator() ).setLabel( "Strasse" ).setToolTipText( "Adresse der Baumaßnahme" ).create();
+
+            submitBtn = site.getToolkit().createButton( body, "BEANTRAGEN", SWT.PUSH );
+            submitBtn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    try {
+                        site.submitEditor();
+                        AzvRepository.instance().commitChanges();
+                        getContext().closePanel();
+                    }
+                    catch (Exception e) {
+                        BatikApplication.handleError( "Vorgang konnte nicht angelegt werden.", e );
+                    }
+                }
+            });
+            
+            // address listener
+            site.addFieldListener( fieldListener = new IFormFieldListener() {
+                public void fieldChange( FormFieldEvent ev ) {
+                    if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "ort" )) {
+                        if (ev.getNewValue().equals( "Anklam" )) {
+                            olwidget.getMap().setCenter( 13.70, 53.85 );
+                            olwidget.getMap().zoomTo( 13 );
+                        }
+                        else if (ev.getNewValue().equals( "Friedland" )) {
+                            olwidget.getMap().setCenter( 13.54, 53.66 );
+                            olwidget.getMap().zoomTo( 13 );
+                        }
+                        else if (ev.getNewValue().equals( "Jarmen" )) {
+                            olwidget.getMap().setCenter( 13.33, 53.92 );
+                            olwidget.getMap().zoomTo( 13 );
+                        }
+                        else {
+                            log.info( "unbekannter Ort: " + ev.getNewValue() );
+                        }
+                    }
+                }
+            });
+            activateStatusAdapter( getSite() );
+        }
     }
 
 }
