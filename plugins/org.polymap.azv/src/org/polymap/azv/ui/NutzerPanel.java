@@ -52,7 +52,7 @@ import org.polymap.azv.model.PersonValue;
 
 /**
  * 
- *
+ * @deprecated
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class NutzerPanel

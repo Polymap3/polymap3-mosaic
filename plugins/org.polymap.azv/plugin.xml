@@ -12,10 +12,6 @@
             id="org.polymap.azv.SchachtscheinPanel">
       </panel>
       <panel
-            class="org.polymap.azv.ui.LoginPanel"
-            id="org.polymap.azv.LoginPanel">
-      </panel>
-      <panel
             class="org.polymap.azv.ui.NutzerPanel"
             id="org.polymap.azv.NutzerPanel">
       </panel>

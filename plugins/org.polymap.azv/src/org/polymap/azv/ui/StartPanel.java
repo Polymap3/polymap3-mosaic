@@ -33,7 +33,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.rwt.RWT;
 
 import org.eclipse.ui.forms.widgets.Section;
@@ -62,11 +61,11 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.um.ui.LoginPanel;
+import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 
 import org.polymap.azv.model.AzvRepository;
-import org.polymap.azv.model.Nutzer;
 import org.polymap.azv.model.Schachtschein;
-import org.polymap.azv.ui.LoginPanel.LoginForm;
 
 /**
  *
@@ -86,9 +85,6 @@ public class StartPanel
     
     /** Set by the {@link LoginPanel}. */
     private ContextProperty<UserPrincipal>  user;
-    
-    /** Set by the {@link LoginPanel}. */
-    private ContextProperty<Nutzer>         nutzer;
     
     //@Context(scope=AZVPlugin.PROPERTY_SCOPE)
     private ContextProperty<Entity>         entity;
@@ -117,8 +113,7 @@ public class StartPanel
 
     
     protected boolean isAuthenticatedUser() {
-        return user.get() != null ||
-                nutzer.get() != null && nutzer.get().authentifiziert().get();
+        return user.get() != null; // ||  nutzer.get() != null && nutzer.get().authentifiziert().get();
     }
 
     
@@ -178,7 +173,7 @@ public class StartPanel
         loginSection = tk.createPanelSection( parent, "Anmelden" );
         loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
         
-        LoginForm loginForm = new LoginPanel.LoginForm( nutzer, user ) {
+        LoginForm loginForm = new LoginPanel.LoginForm( getContext(), getSite(), user ) {
             @Override
             protected void login( String name, String passwd ) {
                 super.login( username, passwd );
@@ -189,7 +184,8 @@ public class StartPanel
                 getSite().layout( true );
             }
         };
-        loginForm.createContents( loginSection );
+        loginForm.setShowRegisterLink( true );
+        loginForm.createContents( loginSection );        
     }
 
     

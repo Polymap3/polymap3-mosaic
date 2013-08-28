@@ -31,6 +31,7 @@ import org.polymap.core.qi4j.event.PropertyChangeSupport;
 /**
  * A 'Person'. 
  *
+ * @deprecated
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 @Concerns( {
