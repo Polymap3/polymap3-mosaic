@@ -53,8 +53,8 @@ public interface Schachtschein
     @UseDefaults
     Property<Integer>           antragStatus();
 
-    @Optional
-    Property<PersonValue>       antragsteller();
+//    @Optional
+//    Property<PersonValue>       antragsteller();
 
     /** Maßnahmestart */
     @Optional

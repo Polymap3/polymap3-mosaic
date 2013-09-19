@@ -24,8 +24,6 @@ import org.qi4j.api.query.grammar.BooleanExpression;
 import org.qi4j.api.service.ServiceReference;
 import org.qi4j.api.unitofwork.ConcurrentEntityModificationException;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
-import org.qi4j.api.value.ValueBuilder;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.polymap.core.model.CompletionException;
@@ -148,21 +146,6 @@ public class AzvRepository
             public void create( Schachtschein prototype ) throws Exception {
             }
         });
-    }
-
-
-    public Nutzer newNutzer() {
-        try {
-            return newEntity( Nutzer.class, null, new EntityCreator<Nutzer>() {
-                public void create( Nutzer prototype ) throws Exception {
-                    ValueBuilder<PersonValue> builder = newValueBuilder( PersonValue.class );
-                    prototype.person().set( builder.newInstance() ); 
-                }
-            });
-        }
-        catch (Exception e) {
-            throw new RuntimeException( e );
-        }
     }
 
 }
