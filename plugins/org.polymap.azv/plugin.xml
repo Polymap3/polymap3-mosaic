@@ -36,5 +36,12 @@
          </additionalHeaders>
       </branding>
    </extension>
+   <extension
+         point="org.polymap.core.operation.concerns">
+      <concern
+            class="org.polymap.azv.NewUserOperationConcern"
+            id="org.polymap.azv.NewUserOperationConcern">
+      </concern>
+   </extension>
 
 </plugin>

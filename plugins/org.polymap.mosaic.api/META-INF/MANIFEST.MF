@@ -18,3 +18,4 @@ Bundle-ClassPath: lib/commons-codec-1.2.jar,
  lib/slf4j-api-1.5.3.jar,
  lib/slf4j-simple-1.5.3.jar,
  .
+Export-Package: org.polymap.mosaic.api

@@ -33,11 +33,14 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.rwt.RWT;
 
 import org.eclipse.ui.forms.widgets.Section;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.model.Entity;
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.entity.EntityStateEvent;
 import org.polymap.core.runtime.entity.IEntityStateListener;
 import org.polymap.core.runtime.event.EventFilter;
@@ -64,6 +67,8 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.ui.LoginPanel;
 import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 
+import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Schachtschein;
 
@@ -79,6 +84,8 @@ public class StartPanel
     private static Log log = LogFactory.getLog( StartPanel.class );
 
     public static final PanelIdentifier ID = new PanelIdentifier( "start" );
+
+    public static final IMessages       i18n = Messages.forPrefix( "StartPanel" );
 
     /** Just for convenience, same as <code>getSite().toolkit()</code>. */
     private IPanelToolkit                   tk;
@@ -119,7 +126,7 @@ public class StartPanel
     
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "LOGIN" );
+        getSite().setTitle( i18n.get( "title" ) );
 
         contents = tk.createPanelSection( parent, null );
         contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
@@ -159,29 +166,31 @@ public class StartPanel
     
     
     protected void createWelcomeSection( ILayoutContainer parent ) {
-        welcomeSection = tk.createPanelSection( parent, "Willkommen im Web-Portal der GKU" );
+        welcomeSection = tk.createPanelSection( parent, i18n.get( "welcomeTitle" ) );
         //welcomeSection.getBody().setLayout( ColumnLayoutFactory.defaults().margins( 10, 10 ).create() );
         //welcomeSection.getBody().setLayout( new FillLayout() );
-        String msg = "Sie können verschiedene Vorgänge auslösen und Anträge stellen. Sie werden dann durch weitere Eingaben geführt. "
-                + "Außerdem können Sie den Stand von bereits ausgelösten Vorgängen hier überprüfen.";
-        tk.createLabel( welcomeSection.getBody(), msg, SWT.WRAP )
-                .setData( RWT.MARKUP_ENABLED, Boolean.TRUE );
+        tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) );
     }
 
     
     protected void createLoginSection( ILayoutContainer parent ) {
-        loginSection = tk.createPanelSection( parent, "Anmelden" );
+        loginSection = tk.createPanelSection( parent, i18n.get( "loginTitle" ) );
         loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
         
         LoginForm loginForm = new LoginPanel.LoginForm( getContext(), getSite(), user ) {
             @Override
-            protected void login( String name, String passwd ) {
-                super.login( username, passwd );
-                
-                loginSection.dispose();
-                createCasesSection( contents );
-                contents.getBody().layout( true );
-                getSite().layout( true );
+            protected boolean login( String name, String passwd ) {
+                if (super.login( name, passwd )) {
+                    loginSection.dispose();
+                    createCasesSection( contents );
+                    contents.getBody().layout( true );
+                    getSite().layout( true );
+                    return true;
+                }
+                else {
+                    getSite().setStatus( new Status( IStatus.ERROR, AZVPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
+                    return false;
+                }
             }
         };
         loginForm.setShowRegisterLink( true );
