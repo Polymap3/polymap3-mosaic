@@ -30,11 +30,11 @@ import org.polymap.core.operation.OperationInfo;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.operations.NewUserOperation;
 
-import org.polymap.mosaic.api.MosaicCase;
-import org.polymap.mosaic.api.MosaicRemoteServer;
+import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
 
 /**
- * 
+ * Intercepts {@link NewUserOperation} and creates a new Mosaic case for it. 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -54,13 +54,23 @@ public class NewUserOperationConcern
                 public IStatus execute( IProgressMonitor monitor, IAdaptable _info ) throws ExecutionException {
                     // call upstream
                     IStatus result = info.next().execute( monitor, _info );
-                    
+                    if (!result.isOK()) {
+                        return result;
+                    }
                     try {
-                        MosaicRemoteServer mosaic = MosaicRemoteServer.instance();
                         User user = ((NewUserOperation)op).getUser();
-                        MosaicCase newCase = mosaic.createCase( "Neuer Nutzer: " + user.name().get(), "Ein neuer Nutzer wurde angelegt. Authentizität und Rechte müssen bestätigt werden." );
-                        // FIXME set default permissions 
-                        newCase.store();
+                        
+                        MosaicRepository2 repo = MosaicRepository2.instance();
+                        IMosaicCase newCase = repo.newCase( "Neuer Nutzer: " + user.name().get(),
+                                "Ein neuer Nutzer wurde angelegt. Authentizität und Rechte müssen bestätigt werden." );
+                        newCase.addNature( "Nutzer anlegen" );
+                        newCase.put( "user", user.username().get() );
+                        repo.commitChanges();
+                        
+//                        MosaicRemoteServer mosaic = MosaicRemoteServer.instance();
+//                      MosaicCase newCase = mosaic.createCase( "Neuer Nutzer: " + user.name().get(), "Ein neuer Nutzer wurde angelegt. Authentizität und Rechte müssen bestätigt werden." );
+//                        // FIXME set default permissions 
+//                        newCase.store();
                         
                         return result;
                     }

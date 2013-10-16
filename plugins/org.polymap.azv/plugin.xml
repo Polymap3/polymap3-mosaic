@@ -43,5 +43,14 @@
             id="org.polymap.azv.NewUserOperationConcern">
       </concern>
    </extension>
+   <extension
+         point="org.polymap.mosaic.ui.caseActions">
+      <caseAction
+            class="org.polymap.azv.ui.NutzerFreigabeCaseAction"
+            description="Rechte des Nutzers festlegen"
+            id="org.polymap.azv.ui.NutzerFreigabeCaseAction"
+            name="Freigabe">
+      </caseAction>
+   </extension>
 
 </plugin>

@@ -9,9 +9,11 @@ Require-Bundle: org.eclipse.rap.ui;bundle-version="1.5.0",
  org.polymap.rhei.form;bundle-version="2.0.0",
  org.polymap.rhei.data;bundle-version="2.0.0",
  org.polymap.core.model;bundle-version="3.2.0",
+ org.polymap.core.data;bundle-version="3.2.0",
  org.polymap.openlayers.rap.widget;bundle-version="1.0.0",
  org.polymap.rhei.batik;bundle-version="2.1.0",
  org.polymap.rhei.um;bundle-version="2.1.0",
- org.polymap.mosaic.api;bundle-version="1.0.0"
+ org.polymap.mosaic;bundle-version="1.0.0",
+ org.polymap.mosaic.ui;bundle-version="1.0.0"
 Bundle-Activator: org.polymap.azv.AZVPlugin
 Bundle-ActivationPolicy: lazy
