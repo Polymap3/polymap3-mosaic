@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright 2013, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2013, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -16,6 +16,7 @@ package org.polymap.mosaic.server.model;
 
 import org.qi4j.api.common.Optional;
 import org.qi4j.api.common.UseDefaults;
+import org.qi4j.api.concern.Concerns;
 import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.entity.association.ManyAssociation;
 import org.qi4j.api.mixin.Mixins;
@@ -26,6 +27,9 @@ import com.google.common.collect.Iterables;
 
 import org.polymap.core.qi4j.QiEntity;
 import org.polymap.core.qi4j.event.ModelChangeSupport;
+import org.polymap.core.qi4j.security.ACL;
+import org.polymap.core.qi4j.security.ACLCheckConcern;
+import org.polymap.core.qi4j.security.ACLFilterConcern;
 
 import org.polymap.rhei.data.model.JsonState;
 
@@ -34,14 +38,19 @@ import org.polymap.rhei.data.model.JsonState;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
+@Concerns( {
+    ACLCheckConcern.class, 
+    ACLFilterConcern.class 
+})
 @Mixins({
     MosaicCase.Mixin.class,
     QiEntity.Mixin.class,
     ModelChangeSupport.Mixin.class,
-    JsonState.Mixin.class
+    JsonState.Mixin.class,
+    ACL.Mixin.class
 })
 public interface MosaicCase
-        extends IMosaicCase, JsonState, ModelChangeSupport, QiEntity, EntityComposite {
+        extends IMosaicCase, JsonState, ACL, ModelChangeSupport, QiEntity, EntityComposite {
 
     public Property<String> name();
 

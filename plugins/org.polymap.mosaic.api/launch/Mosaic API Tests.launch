@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
-<stringAttribute key="bad_container_name" value="/org.polymap.mosaic/launc"/>
+<stringAttribute key="bad_container_name" value="/org.polymap.mosaic.ap/launch"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/org.polymap.mosaic.api"/>
 </listAttribute>
