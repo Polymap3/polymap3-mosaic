@@ -18,6 +18,18 @@ public class MosaicUiPlugin
 
 	/* The scope of context properties used in this bundle. */
     public static final String          CONTEXT_PROPERTY_SCOPE = ID;
+
+    public static final String          ROLE_SCHACHTSCHEIN = "Schachtschein beantragen";
+    public static final String          ROLE_MA = "Interner Sachbearbeiter";
+    
+    public static final String          CSS_PREFIX = "mosaic-case-";
+    public static final String          CSS_SUBMIT = CSS_PREFIX + "submit";
+    public static final String          CSS_DISCARD = CSS_PREFIX + "discard";
+    public static final String          CSS_STATUS_SECTION = CSS_PREFIX + "status";
+    public static final String          CSS_ACTION_SECTION_ACTIVE = CSS_PREFIX + "action-active";
+    public static final String          CSS_ACTION_SECTION_DEACTIVE = CSS_PREFIX + "action-deactive";
+    public static final String          CSS_TOOLBAR_SECTION = CSS_PREFIX + "toolbar";
+    public static final String          CSS_CONTENT_SECTION = CSS_PREFIX + "content";
     
     public static final FilterFactory2  ff = CommonFactoryFinder.getFilterFactory2( null );
 

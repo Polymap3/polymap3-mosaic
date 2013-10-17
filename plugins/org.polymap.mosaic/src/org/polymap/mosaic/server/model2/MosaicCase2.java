@@ -17,6 +17,8 @@ package org.polymap.mosaic.server.model2;
 import java.util.Collection;
 import java.util.List;
 
+import java.beans.PropertyChangeEvent;
+
 import javax.annotation.Nullable;
 
 import org.opengis.filter.Filter;
@@ -35,6 +37,7 @@ import org.polymap.core.model2.NameInStore;
 import org.polymap.core.model2.Property;
 import org.polymap.core.model2.store.feature.SRS;
 import org.polymap.core.project.IMap;
+import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
@@ -164,6 +167,9 @@ public class MosaicCase2
     public void addEvent( IMosaicCaseEvent event ) {
         ((MosaicCaseEvent2)event).caseId.set( getId() );
 //        eventIds.add( event.getId() );
+        
+        PropertyChangeEvent ev = new PropertyChangeEvent( this, "events", null, event );
+        EventManager.instance().publish( ev );
     }
 
     @Override

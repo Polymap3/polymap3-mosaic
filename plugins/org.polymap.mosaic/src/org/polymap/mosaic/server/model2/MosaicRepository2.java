@@ -257,6 +257,11 @@ public class MosaicRepository2
     }
 
     
+    public <T extends Entity> T entityForState( Class<T> type, Object state ) {
+        return uow.entityForState( type, state );
+    }
+
+    
     public <T extends Entity> Query<T> query( Class<T> type, Filter filter ) {
         return uow.query( type, filter );
     }
@@ -311,6 +316,12 @@ public class MosaicRepository2
         });
     }
 
+    
+    public void closeCase( IMosaicCase mcase ) {
+        IMosaicCaseEvent closed = newCaseEvent( (MosaicCase2)mcase, "Vorgang abgeschlossen", "Dem Nutzer wurden folgende Rechte zugeteilt: ...", IMosaicCaseEvent.TYPE_CLOSED );
+        mcase.addEvent( closed );    
+    }
+    
     
     public <T extends Entity> T newEntity( Class<T> type, String id, final EntityCreator creator ) {
         return uow.createEntity( type, id, new ValueInitializer<T>() {

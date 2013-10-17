@@ -14,6 +14,9 @@
  */
 package org.polymap.azv.ui;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,10 +27,10 @@ import com.google.common.collect.Iterables;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
-
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
@@ -42,6 +45,7 @@ import org.polymap.rhei.um.ui.PersonForm;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
@@ -115,21 +119,52 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void createContents( Composite parent ) {
-        UserRepository um = UserRepository.instance();
-        parent.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).create() );
-        site.toolkit().createButton( parent, null, SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
+        final UserRepository um = UserRepository.instance();
+        
+        Composite root = site.toolkit().createComposite( parent );
+        root.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).columns( 2, 2 ).create() );
+        
+        // left section
+        Composite left = site.toolkit().createComposite( root );
+        left.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).columns( 1, 1 ).create() );
+        Set<String> groups = new HashSet( um.groupsOf( user ) );
+        Button btn = site.toolkit().createButton( left, "Schachtschein", SWT.CHECK );
+        btn.setSelection( groups.contains( MosaicUiPlugin.ROLE_SCHACHTSCHEIN ) );
+        btn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent ev ) {
+                um.asignGroup( user, MosaicUiPlugin.ROLE_SCHACHTSCHEIN );
+            }
+        });
+        site.toolkit().createButton( left, "Leitungsauskunft", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 //
             }
         });
-        site.toolkit().createButton( parent, "Leitungsauskunft", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
+        site.toolkit().createButton( left, "Dienstbarkeiten", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 //
             }
         });
-        site.toolkit().createButton( parent, "Dienstbarkeiten", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
+        site.toolkit().createButton( left, "Bedarfsgerechte Entsorgung", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 //
+            }
+        });
+        site.toolkit().createButton( left, "Hydrantentauskunft", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent ev ) {
+                //
+            }
+        });
+
+        // right section
+        Composite right = site.toolkit().createComposite( root );
+        right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).create() );
+        btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
+        btn.setSelection( groups.contains( MosaicUiPlugin.ROLE_MA ) );
+        btn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent ev ) {
+                log.info( "ev: " + ev );
+                um.asignGroup( user, MosaicUiPlugin.ROLE_MA );
             }
         });
     }
@@ -139,6 +174,17 @@ public class NutzerFreigabeCaseAction
     public void submit() {
         UserRepository um = UserRepository.instance();
         um.commitChanges();
+        
+        MosaicRepository2 mosaic = MosaicRepository2.instance();
+        mosaic.closeCase( mcase.get() );
+        mosaic.commitChanges();
+    }
+
+
+    @Override
+    public void discard() {
+        UserRepository um = UserRepository.instance();
+        um.revertChanges();
     }
     
 }

@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
+import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
@@ -42,6 +43,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableViewer;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
+import org.polymap.core.data.ui.featuretable.SimpleFeatureTableElement;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
@@ -114,12 +116,22 @@ public class CasesTableViewer
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
                 public String getText( Object elm ) {
-                    return "OFFEN";
-//                    switch (((IMosaicCase)elm).antragStatus().get()) {
-//                        case 0: return "OFFEN";
-//                        case 1: return "ERLEDIGT";
-//                        default: return "Hmmm...";
-//                    }
+                    Feature feature = ((SimpleFeatureTableElement)elm).feature();
+                    MosaicCase2 mcase = repo.entityForState( MosaicCase2.class, feature );
+                    List<IMosaicCaseEvent> events = ImmutableList.copyOf( mcase.getEvents() );
+                    if (events.size() == 1) {
+                        return "NEU";
+                    }
+                    else {
+                        IMosaicCaseEvent last = events.get( events.size()-1 );
+                        log.info( "event type: " +  last.getEventType() );
+                        if (last.getEventType().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
+                            return "ERLEDIGT";                            
+                        }
+                        else {
+                            return "OFFEN";
+                        }
+                    }
                 }
                 @Override
                 public Color getBackground( Object elm ) {

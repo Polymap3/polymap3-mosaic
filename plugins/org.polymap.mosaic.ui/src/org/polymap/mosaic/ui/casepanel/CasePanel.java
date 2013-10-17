@@ -86,6 +86,8 @@ public class CasePanel
 
     /** The action that currently has an open action section. */ 
     protected CaseActionHolder              activeAction;
+
+    private Composite contentSection;
     
     
     /**
@@ -159,9 +161,10 @@ public class CasePanel
         // action area
         actionSection = tk.createComposite( panelBody );
         actionSection.setLayoutData( FormDataFactory.filled().top( toolbarSection ).bottom( toolbarSection, 30 ).create() );
+        actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_DEACTIVE );
         
         // content area
-        Composite contentSection = tk.createComposite( panelBody );
+        contentSection = tk.createComposite( panelBody );
         contentSection.setLayoutData( FormDataFactory.filled().top( actionSection ).bottom( 100 ).create() );
         createContentSection( contentSection );
     }
@@ -175,8 +178,10 @@ public class CasePanel
         actionSection.setLayout( new FillLayout() );
         if (holder != null) {
             try {
+                actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
                 ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 300 );
                 holder.caseAction.createContents( actionSection );
+                contentSection.setEnabled( false );
             }
             catch (Throwable e) {
                 log.warn( "", e );
@@ -184,7 +189,9 @@ public class CasePanel
         }
         // remove action area
         else {
+            actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_DEACTIVE );
             ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 30 );
+            contentSection.setEnabled( true );
         }
         actionSection.getParent().layout( true );
     }
@@ -195,7 +202,8 @@ public class CasePanel
         layout.marginWidth = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         //layout.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         body.setLayout( layout );
-        body.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-panel-form" );
+        //body.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-panel-form" );
+        body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_STATUS_SECTION );
 
         CaseStatus status = new CaseStatus();
         for (CaseActionHolder holder: caseActions) {
@@ -217,8 +225,10 @@ public class CasePanel
     
     protected void createToolbarSection( Composite body ) {
         body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
-        
+        body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
+
         submitBtn = tk.createButton( body, "OK", SWT.PUSH );
+        submitBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
         submitBtn.setLayoutData( FormDataFactory.filled().right( -1 ).create() );
         submitBtn.setEnabled( false );
         submitBtn.setToolTipText( "Aktion abschließen und Änderungen übernehmen" );
@@ -231,6 +241,7 @@ public class CasePanel
             }
         });
         discardBtn = tk.createButton( body, "...", SWT.PUSH );
+        submitBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );
         discardBtn.setLayoutData( FormDataFactory.filled().left( submitBtn ).right( -1 ).create() );
         discardBtn.setEnabled( false );
         discardBtn.setToolTipText( "Änderungen verwerfen" );
@@ -279,6 +290,7 @@ public class CasePanel
     
     
     protected void createContentSection( Composite body ) {
+        body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_CONTENT_SECTION );
         body.setLayout( new ConstraintLayout() );
         for (CaseActionHolder holder: caseActions) {
             try {

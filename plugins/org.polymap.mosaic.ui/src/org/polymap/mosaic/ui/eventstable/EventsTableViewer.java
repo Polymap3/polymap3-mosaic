@@ -19,6 +19,8 @@ import static org.polymap.mosaic.ui.MosaicUiPlugin.*;
 import java.util.Arrays;
 import java.util.List;
 
+import java.beans.PropertyChangeEvent;
+
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.FeatureType;
@@ -39,6 +41,9 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableViewer;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
@@ -72,6 +77,12 @@ public class EventsTableViewer
         super( parent, /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ SWT.NONE );
         this.mcase = mcase;
 
+        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+            public boolean apply( PropertyChangeEvent input ) {
+                return input.getSource() == EventsTableViewer.this.mcase;
+            }
+        });
+        
         this.repo = MosaicRepository2.instance();
         this.baseFilter = ff.equals( ff.property( "caseId" ), ff.literal( mcase.getId() ) );
         
@@ -89,6 +100,19 @@ public class EventsTableViewer
         setContent( fs, baseFilter );
     }
 
+    
+    @Override
+    public void dispose() {
+        EventManager.instance().unsubscribe( this );
+        super.dispose();
+    }
+
+
+    @EventHandler(display=true)
+    protected void caseChanged( PropertyChangeEvent ev ) {
+        refresh();        
+    }
+    
     
     public List<IMosaicCaseEvent> getSelected() {
         return ImmutableList.copyOf( Iterables.transform( Arrays.asList( getSelectedElements() ), new EventFinder() ) );
