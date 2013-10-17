@@ -83,7 +83,9 @@ public class MosaicRemoteServer {
             fsManager.init();
 
             rootUri = System.getProperty( PROP_ROOT_URI );
-            assert rootUri != null;
+            if (rootUri == null) {
+                throw new IllegalStateException( "System property is missing: " + PROP_ROOT_URI + " (allows to set the WebDAV URL of the remote server, i.e. webdav://admin:login@localhost:10080/webdav/Mosaic)" );
+            }
 
             allCasesFolder = fsManager.resolveFile( Joiner.on( "/" ).join( rootUri, FOLDER_CASES ) );
         }

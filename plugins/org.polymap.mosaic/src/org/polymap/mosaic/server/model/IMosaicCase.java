@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright 2013, Polymap GmbH. All rights reserved.
+ * Copyright (C) 2013, Polymap GmbH. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -14,25 +14,38 @@
  */
 package org.polymap.mosaic.server.model;
 
-import org.polymap.core.model.Entity;
+import java.util.List;
 
-import org.polymap.rhei.data.model.JsonState;
+import org.polymap.core.project.IMap;
 
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public interface IMosaicCase
-        extends Entity, JsonState {
+public interface IMosaicCase {
+
+    public String getId();
 
     public String getName();
 
     public String getDescription();
 
-//    public IMosaicCaseEvent created();
+    public List<String> getNatures();
+    
+    public void addNature( String nature );
+    
+    public String put( String key, String value );
+    
+    public String get( String key );
     
     /** First event is the creation event. */
-    public Iterable<IMosaicCaseEvent> getEvents();
+    public Iterable<? extends IMosaicCaseEvent> getEvents();
+
+    public void addEvent( IMosaicCaseEvent event );
+
+    public IMap getMetaDataMap();
+
+    public IMap getDataMap();
 
 }

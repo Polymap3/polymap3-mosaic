@@ -1,6 +1,6 @@
 /*
  * polymap.org
- * Copyright 2013, Polymap GmbH. All rights reserved.
+ * Copyright (C) 2013, Polymap GmbH. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -17,10 +17,12 @@ package org.polymap.azv.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opengis.filter.Filter;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.qi4j.api.query.Query;
+import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -29,24 +31,30 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.rwt.RWT;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 
 import org.eclipse.ui.forms.widgets.Section;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.model.Entity;
-import org.polymap.core.runtime.entity.EntityStateEvent;
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.entity.IEntityStateListener;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.UserPrincipal;
+import org.polymap.core.ui.FormDataFactory;
 
 import org.polymap.rhei.batik.BatikPlugin;
+import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.IAppContext;
@@ -62,11 +70,16 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.um.ui.LoginPanel;
+import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 
+import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
-import org.polymap.azv.model.Nutzer;
-import org.polymap.azv.model.Schachtschein;
-import org.polymap.azv.ui.LoginPanel.LoginForm;
+import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.ui.MosaicUiPlugin;
+import org.polymap.mosaic.ui.casepanel.CasePanel;
+import org.polymap.mosaic.ui.casestable.CasesTableViewer;
 
 /**
  *
@@ -79,7 +92,9 @@ public class StartPanel
 
     private static Log log = LogFactory.getLog( StartPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "azvstart" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "start" );
+
+    public static final IMessages       i18n = Messages.forPrefix( "StartPanel" );
 
     /** Just for convenience, same as <code>getSite().toolkit()</code>. */
     private IPanelToolkit                   tk;
@@ -87,11 +102,11 @@ public class StartPanel
     /** Set by the {@link LoginPanel}. */
     private ContextProperty<UserPrincipal>  user;
     
-    /** Set by the {@link LoginPanel}. */
-    private ContextProperty<Nutzer>         nutzer;
-    
     //@Context(scope=AZVPlugin.PROPERTY_SCOPE)
     private ContextProperty<Entity>         entity;
+
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<IMosaicCase>    mcase;
 
     private List<Control>                   actionBtns = new ArrayList();
 
@@ -101,6 +116,8 @@ public class StartPanel
 
     private CasesTableViewer                casesViewer;
     
+    private IEntityStateListener            casesListener;
+
     
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
@@ -117,14 +134,13 @@ public class StartPanel
 
     
     protected boolean isAuthenticatedUser() {
-        return user.get() != null ||
-                nutzer.get() != null && nutzer.get().authentifiziert().get();
+        return user.get() != null; // ||  nutzer.get() != null && nutzer.get().authentifiziert().get();
     }
 
     
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "LOGIN" );
+        getSite().setTitle( i18n.get( "title" ) );
 
         contents = tk.createPanelSection( parent, null );
         contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
@@ -164,71 +180,84 @@ public class StartPanel
     
     
     protected void createWelcomeSection( ILayoutContainer parent ) {
-        welcomeSection = tk.createPanelSection( parent, "Willkommen im Web-Portal der GKU" );
+        welcomeSection = tk.createPanelSection( parent, i18n.get( "welcomeTitle" ) );
         //welcomeSection.getBody().setLayout( ColumnLayoutFactory.defaults().margins( 10, 10 ).create() );
         //welcomeSection.getBody().setLayout( new FillLayout() );
-        String msg = "Sie können verschiedene Vorgänge auslösen und Anträge stellen. Sie werden dann durch weitere Eingaben geführt. "
-                + "Außerdem können Sie den Stand von bereits ausgelösten Vorgängen hier überprüfen.";
-        tk.createLabel( welcomeSection.getBody(), msg, SWT.WRAP )
-                .setData( RWT.MARKUP_ENABLED, Boolean.TRUE );
+        tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) );
     }
 
     
     protected void createLoginSection( ILayoutContainer parent ) {
-        loginSection = tk.createPanelSection( parent, "Anmelden" );
+        loginSection = tk.createPanelSection( parent, i18n.get( "loginTitle" ) );
         loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
         
-        LoginForm loginForm = new LoginPanel.LoginForm( nutzer, user ) {
+        LoginForm loginForm = new LoginPanel.LoginForm( getContext(), getSite(), user ) {
             @Override
-            protected void login( String name, String passwd ) {
-                super.login( username, passwd );
-                
-                loginSection.dispose();
-                createCasesSection( contents );
-                contents.getBody().layout( true );
-                getSite().layout( true );
+            protected boolean login( String name, String passwd ) {
+                if (super.login( name, passwd )) {
+                    loginSection.dispose();
+                    createCasesSection( contents );
+                    contents.getBody().layout( true );
+                    getSite().layout( true );
+                    return true;
+                }
+                else {
+                    getSite().setStatus( new Status( IStatus.ERROR, AZVPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
+                    return false;
+                }
             }
         };
-        loginForm.createContents( loginSection );
+        loginForm.setShowRegisterLink( true );
+        loginForm.createContents( loginSection );        
     }
 
     
-    private IEntityStateListener casesListener;
-
     protected void createCasesSection( IPanelSection parent ) {
         casesSection = tk.createPanelSection( parent, "Aktuelle Vorgänge" );
-        casesSection.getControl().setLayoutData( new ConstraintData( 
-                new PriorityConstraint( 2, 1 ) ) );
+        casesSection.getControl().setLayoutData( 
+                new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
 
-        casesSection.getBody().setLayout( new FillLayout() );
+        casesSection.getBody().setLayout( new FormLayout() );
         
-        final Query<Schachtschein> elms = AzvRepository.instance().findEntities( Schachtschein.class, null, 0, -1 );
-        if (elms.count() == 0) {
-            tk.createLabel( casesSection.getBody(), "Keine aktuellen Vorgänge." );
-        } 
-        else {
-            casesViewer = new CasesTableViewer( casesSection.getBody(), elms );
-        }
+//        MosaicRepository2 repo = MosaicRepository2.instance();
+//        repo.query( )
+//        if (elms.count() == 0) {
+//            tk.createLabel( casesSection.getBody(), "Keine aktuellen Vorgänge." );
+//        } 
+//        else {
+            casesViewer = new CasesTableViewer( casesSection.getBody(), Filter.INCLUDE, SWT.NONE );
+            casesViewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).create() );
             
-        AzvRepository.instance().addEntityListener( casesListener = new IEntityStateListener() {
-            public void modelChanged( EntityStateEvent ev ) {
-                casesSection.getBody().getDisplay().asyncExec( new Runnable() {
-                    public void run() {
-                        if (elms.count() == 0) {
-                            tk.createLabel( casesSection.getBody(), "Keine Vorgänge." );
-                        } 
-                        else if (casesViewer == null) {
-                            casesSection.getBody().getChildren()[0].dispose();
-                            casesViewer = new CasesTableViewer( casesSection.getBody(), elms );
-                        }
-                        else {
-                            casesViewer.refresh();
-                            contents.getBody().layout( true );
-                        }
-                    }
-                });
-            }
-        });
+            casesViewer.addDoubleClickListener( new IDoubleClickListener() {
+                public void doubleClick( DoubleClickEvent ev ) {
+                    IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                    log.info( "CASE: " + sel );
+                    mcase.set( sel );
+                    getContext().openPanel( CasePanel.ID );
+                }
+            });
+
+//        }
+            
+//        AzvRepository.instance().addEntityListener( casesListener = new IEntityStateListener() {
+//            public void modelChanged( EntityStateEvent ev ) {
+//                casesSection.getBody().getDisplay().asyncExec( new Runnable() {
+//                    public void run() {
+//                        if (elms.count() == 0) {
+//                            tk.createLabel( casesSection.getBody(), "Keine Vorgänge." );
+//                        } 
+//                        else if (casesViewer == null) {
+//                            casesSection.getBody().getChildren()[0].dispose();
+//                            casesViewer = new CasesTableViewer( casesSection.getBody(), elms );
+//                        }
+//                        else {
+//                            casesViewer.refresh();
+//                            contents.getBody().layout( true );
+//                        }
+//                    }
+//                });
+//            }
+//        });
     }
     
     

@@ -68,7 +68,7 @@ public interface MosaicCaseEvent
         }
 
         @Override
-        public Date getTime() {
+        public Date getTimestamp() {
             return time().get();
         }
     }

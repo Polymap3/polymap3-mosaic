@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright 2013, Polymap GmbH. All rights reserved.
+ * Copyright (C) 2013, Polymap GmbH. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -20,26 +20,11 @@ import java.util.Map;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.commons.codec.binary.Base64;
+import java.io.OutputStream;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.polymap.core.runtime.recordstore.IRecordState;
-import org.polymap.core.runtime.recordstore.RecordQuery;
-import org.polymap.core.runtime.recordstore.ResultSet;
-import org.polymap.core.runtime.recordstore.lucene.LuceneRecordQuery;
-import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
-
 import org.polymap.service.fs.spi.BadRequestException;
 import org.polymap.service.fs.spi.DefaultContentFolder;
 import org.polymap.service.fs.spi.IContentFile;
@@ -48,9 +33,10 @@ import org.polymap.service.fs.spi.IContentProvider;
 import org.polymap.service.fs.spi.IContentPutable;
 import org.polymap.service.fs.spi.IMakeFolder;
 import org.polymap.service.fs.spi.NotAuthorizedException;
+import org.polymap.service.fs.spi.Range;
 
-import org.polymap.mosaic.server.model.MosaicCase;
-import org.polymap.mosaic.server.model.MosaicRepository;
+import org.polymap.mosaic.server.model2.MosaicCase2;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
 
 /**
  * 
@@ -63,7 +49,7 @@ public class MosaicCasesFolder
 
     private static Log log = LogFactory.getLog( MosaicCasesFolder.class );
     
-    private Query           query = new TermQuery( new Term( "type", MosaicCase.class.getName() ) );
+//    private Query           query = new TermQuery( new Term( "type", MosaicCase.class.getName() ) );
     
     private int             firstResult = 0;
     
@@ -86,46 +72,49 @@ public class MosaicCasesFolder
         assert requestParams != null;
         assert requestPath != null;
         try {
-            MosaicRepository repo = MosaicRepository.instance();
-            LuceneRecordStore recordStore = repo.recordStore();
+            MosaicRepository2 repo = MosaicRepository2.instance();
+//            LuceneRecordStore recordStore = repo.recordStore();
 
             // query in request params
             String queryParam = requestParams.get( MosaicContentProvider.QUERY_PARAM );
-            Query luceneQuery = queryParam != null ? expandQuery( query, queryParam ) : query;
-            String firstResultParam = requestParams.get( MosaicContentProvider.FIRSTRESULT_PARAM );
-            String maxResultsParam = requestParams.get( MosaicContentProvider.MAXRESULTS_PARAM );
-
-            log.info( "LUCENE: " + luceneQuery );
-            RecordQuery recordQuery = new LuceneRecordQuery( recordStore, luceneQuery );
-            
-            recordQuery.setFirstResult( firstResultParam != null
-                    ? Integer.parseInt( firstResultParam ) : firstResult );
-            
-            recordQuery.setMaxResults( maxResultsParam != null 
-                    ? Integer.parseInt( maxResultsParam ) : maxResults );
-            
-            ResultSet rs = recordStore.find( recordQuery );
+            if (queryParam != null) {
+                throw new RuntimeException( "Query on MosaicCases folder is not implemented." );
+            }
+//            Query luceneQuery = queryParam != null ? expandQuery( query, queryParam ) : query;
+//            String firstResultParam = requestParams.get( MosaicContentProvider.FIRSTRESULT_PARAM );
+//            String maxResultsParam = requestParams.get( MosaicContentProvider.MAXRESULTS_PARAM );
+//
+//            log.info( "LUCENE: " + luceneQuery );
+//            RecordQuery recordQuery = new LuceneRecordQuery( recordStore, luceneQuery );
+//            
+//            recordQuery.setFirstResult( firstResultParam != null
+//                    ? Integer.parseInt( firstResultParam ) : firstResult );
+//            
+//            recordQuery.setMaxResults( maxResultsParam != null 
+//                    ? Integer.parseInt( maxResultsParam ) : maxResults );
+//            
+//            ResultSet rs = recordStore.find( recordQuery );
             
             // find entities
             List<IContentFolder> result = new ArrayList();
-            for (IRecordState state : rs) {
-                MosaicCase entity = repo.findEntity( MosaicCase.class, (String)state.id() );
+            for (MosaicCase2 entity : repo.query( MosaicCase2.class, null ).execute()) {
                 result.add( new MosaicCaseFolder( entity.getName(), getPath(), getProvider(), entity ) ); 
             }
             
-            // query via child node
-            IPath path = Path.fromOSString( requestPath );
-            if (path.segmentCount() > getPath().segmentCount() + 1) {
-                // XXX +1 for the leading /webdav segment
-                String nextSegment = path.segment( getPath().segmentCount() + 1 );
-                if (nextSegment.startsWith( "search" )) {
-                    MosaicCasesFolder searchFolder = new MosaicCasesFolder( nextSegment, getPath(), getProvider() );
-                    String base64 = nextSegment.substring( 7 );
-                    String searchString = new String( Base64.decodeBase64( base64.getBytes( MosaicContentProvider.ENCODING ) ) );
-                    searchFolder.query = searchFolder.expandQuery( query, searchString );
-                    result.add( searchFolder );
-                }
-            }
+//            // query via child node
+//            IPath path = Path.fromOSString( requestPath );
+//            if (path.segmentCount() > getPath().segmentCount() + 1) {
+//                // XXX +1 for the leading /webdav segment
+//                String nextSegment = path.segment( getPath().segmentCount() + 1 );
+//                if (nextSegment.startsWith( "search" )) {
+//                    MosaicCasesFolder searchFolder = new MosaicCasesFolder( nextSegment, getPath(), getProvider() );
+//                    String base64 = nextSegment.substring( 7 );
+//                    // XXX URLEncode?
+//                    String searchString = new String( Base64.decodeBase64( base64.getBytes( MosaicContentProvider.ENCODING ) ) );
+//                    searchFolder.query = searchFolder.expandQuery( query, searchString );
+//                    result.add( searchFolder );
+//                }
+//            }
             
             return result;
         }
@@ -135,17 +124,16 @@ public class MosaicCasesFolder
     }
 
     
-    @SuppressWarnings("hiding")
-    protected Query expandQuery( Query query, String luceneQueryString ) throws Exception {
-        Query filterQuery = new QueryParser( 
-                LuceneRecordStore.VERSION, "name", new WhitespaceAnalyzer( LuceneRecordStore.VERSION ) )
-                .parse( luceneQueryString );
-
-        BooleanQuery result = new BooleanQuery();
-        result.add( query, BooleanClause.Occur.MUST );
-        result.add( filterQuery, BooleanClause.Occur.MUST );
-        return result;
-    }
+//    protected Query expandQuery( Query query, String luceneQueryString ) throws Exception {
+//        Query filterQuery = new QueryParser( 
+//                LuceneRecordStore.VERSION, "name", new WhitespaceAnalyzer( LuceneRecordStore.VERSION ) )
+//                .parse( luceneQueryString );
+//
+//        BooleanQuery result = new BooleanQuery();
+//        result.add( query, BooleanClause.Occur.MUST );
+//        result.add( filterQuery, BooleanClause.Occur.MUST );
+//        return result;
+//    }
     
     
     @Override
@@ -162,6 +150,19 @@ public class MosaicCasesFolder
         MosaicCaseFolder result = new MosaicCaseFolder( newName, getParentPath(), getProvider() );
         result.create();
         return result;
+    }
+
+
+    @Override
+    public void sendDescription( OutputStream out, Range range, Map<String, String> params, String contentType )
+            throws IOException {
+        if (contentType.contains( "json" )) {
+            // TODO encode MosaicCases as JSON
+            throw new RuntimeException( "Encoding MosaicCases as JSON is not yet implemented." );
+        }
+        else {
+            super.sendDescription( out, range, params, contentType );
+        }
     }
 
 }

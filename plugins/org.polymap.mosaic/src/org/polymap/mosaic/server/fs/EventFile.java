@@ -90,7 +90,7 @@ public class EventFile
 
     @Override
     public Date getModifiedDate() {
-        return getSource().getTime();
+        return getSource().getTimestamp();
     }
 
     @Override

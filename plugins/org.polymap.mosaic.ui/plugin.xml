@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.polymap.mosaic.ui.caseActions" name="Case Actions" schema="schema/org.polymap.mosaic.ui.caseActions.exsd"/>
+   <extension
+         point="org.polymap.rhei.batik.panels">
+      <panel
+            class="org.polymap.mosaic.ui.casepanel.CasePanel"
+            id="org.polymap.mosaic.ui.CasePanel">
+      </panel>
+   </extension>
+
+</plugin>

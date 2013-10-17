@@ -11,20 +11,46 @@
             class="org.polymap.azv.ui.SchachtscheinPanel"
             id="org.polymap.azv.SchachtscheinPanel">
       </panel>
-      <panel
-            class="org.polymap.azv.ui.LoginPanel"
-            id="org.polymap.azv.LoginPanel">
-      </panel>
-      <panel
-            class="org.polymap.azv.ui.NutzerPanel"
-            id="org.polymap.azv.NutzerPanel">
-      </panel>
    </extension>
    <extension
          point="org.polymap.core.model.moduleAssemblers">
       <assembler
             class="org.polymap.azv.model.AzvRepositoryAssembler">
       </assembler>
+   </extension>
+   <extension
+         point="org.eclipse.rap.ui.branding">
+      <branding
+            body="resources/html/body.html"
+            defaultEntrypointId="org.polymap.rhei.batik.entrypoint"
+            id="org.polymap.azv.branding"
+            servletName="azv"
+            themeId="org.polymap.rhei.batik.theme"
+            title="GKU">
+         <additionalHeaders>
+            <link
+                  href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700"
+                  rel="stylesheet"
+                  type="text/css">
+            </link>
+         </additionalHeaders>
+      </branding>
+   </extension>
+   <extension
+         point="org.polymap.core.operation.concerns">
+      <concern
+            class="org.polymap.azv.NewUserOperationConcern"
+            id="org.polymap.azv.NewUserOperationConcern">
+      </concern>
+   </extension>
+   <extension
+         point="org.polymap.mosaic.ui.caseActions">
+      <caseAction
+            class="org.polymap.azv.ui.NutzerFreigabeCaseAction"
+            description="Rechte des Nutzers festlegen"
+            id="org.polymap.azv.ui.NutzerFreigabeCaseAction"
+            name="Freigabe">
+      </caseAction>
    </extension>
 
 </plugin>

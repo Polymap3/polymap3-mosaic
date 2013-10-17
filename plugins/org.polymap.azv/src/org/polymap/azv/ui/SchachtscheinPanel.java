@@ -262,6 +262,7 @@ public class SchachtscheinPanel
             new FormFieldBuilder( body, new PropertyAdapter( entity.get().strasse() ) )
                     .setValidator( new NotNullValidator() ).setLabel( "Strasse" ).setToolTipText( "Adresse der Baumaßnahme" ).create();
 
+            // submit
             submitBtn = site.getToolkit().createButton( body, "BEANTRAGEN", SWT.PUSH );
             submitBtn.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected( SelectionEvent ev ) {

@@ -41,14 +41,15 @@ import org.polymap.azv.model.Schachtschein;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class CasesTableViewer
+public class SchachtscheinTableViewer
         extends TableViewer {
 
-    private static Log log = LogFactory.getLog( CasesTableViewer.class );
+    private static Log log = LogFactory.getLog( SchachtscheinTableViewer.class );
     
     private Iterable<Schachtschein>     elms;
 
-    public CasesTableViewer( Composite parent, Iterable<Schachtschein> elms ) {
+    
+    public SchachtscheinTableViewer( Composite parent, Iterable<Schachtschein> elms ) {
         super( parent, /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ SWT.NONE );
 
         this.elms = elms;

@@ -2,12 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.polymap.core.model.moduleAssemblers">
-      <assembler
-            class="org.polymap.mosaic.server.model.MosaicRepositoryAssembler">
-      </assembler>
-   </extension>
-   <extension
          point="org.polymap.service.fs.contentProviders">
       <contentProvider
             class="org.polymap.mosaic.server.fs.MosaicContentProvider"
