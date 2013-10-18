@@ -23,7 +23,8 @@ import java.util.Date;
  */
 public interface IMosaicCaseEvent {
 
-    public static final String      TYPE_CREATED = "_created_";
+    public static final String      TYPE_NEW = "_created_";
+    public static final String      TYPE_OPEN = "_open_";
     public static final String      TYPE_CLOSED = "_closed_";
     
     public String getId();

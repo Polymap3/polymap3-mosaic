@@ -37,6 +37,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -52,6 +53,7 @@ import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicCaseEvent2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
+import org.polymap.mosaic.ui.MosaicUiPlugin;
 
 /**
  * 
@@ -91,11 +93,11 @@ public class EventsTableViewer
         
         fs = repo.featureSource( IMosaicCaseEvent.class );
         schema = fs.getSchema();
+        //prop = schema.getDescriptor( new NameImpl( "", "type" ) );
+        addColumn( new StatusColumn().setWeight( 1, 60 ).setHeader( "Art" ) );
+        
         PropertyDescriptor prop = schema.getDescriptor( new NameImpl( "", "name" ) );
         addColumn( new NameColumn( prop ).setWeight( 2, 60 ) );
-        
-        prop = schema.getDescriptor( new NameImpl( "", "type" ) );
-        addColumn( new DefaultFeatureTableColumn( prop ).setWeight( 1, 60 ).setHeader( "Art" ) );
         
         prop = schema.getDescriptor( new NameImpl( "", "timestamp" ) );
         addColumn( new DateColumn( prop ).setWeight( 1, 60 ) );
@@ -136,6 +138,66 @@ public class EventsTableViewer
             return repo.entity( MosaicCaseEvent2.class, input.fid() );
         }
     };
+
+    
+    /**
+     * 
+     */
+    class StatusColumn
+            extends DefaultFeatureTableColumn {
+
+        public StatusColumn() {
+            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            setHeader( "" );
+            
+            setLabelProvider( new ColumnLabelProvider() {
+                @Override
+                public String getText( Object elm ) {
+                    IMosaicCaseEvent event = new EventFinder().apply( (IFeatureTableElement)elm );
+                    String type = event.getEventType();
+                    if (IMosaicCaseEvent.TYPE_NEW.equals( type )) {
+                        return "ANGELEGT";
+                    }
+                    else if (IMosaicCaseEvent.TYPE_OPEN.equals( type )) {
+                        return "OFFEN";
+                    }
+                    else if (IMosaicCaseEvent.TYPE_CLOSED.equals( type )) {
+                        return "ERLEDIGT";
+                    }
+                    else {
+                        return type;
+                    }
+                }
+                @Override
+                public Color getBackground( Object elm ) {
+                    IMosaicCaseEvent event = new EventFinder().apply( (IFeatureTableElement)elm );
+                    String type = event.getEventType();
+                    if (IMosaicCaseEvent.TYPE_NEW.equals( type )) {
+                        return MosaicUiPlugin.COLOR_NEW.get();
+                    }
+                    else if (IMosaicCaseEvent.TYPE_OPEN.equals( type )) {
+                        return MosaicUiPlugin.COLOR_OPEN.get();
+                    }
+                    else if (IMosaicCaseEvent.TYPE_CLOSED.equals( type )) {
+                        return MosaicUiPlugin.COLOR_CLOSED.get();
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                @Override
+                public Color getForeground( Object elm ) {
+                    return MosaicUiPlugin.COLOR_STATUS_FOREGROUND.get();                
+                }
+//                @Override
+//                public Font getFont( Object element ) {
+//                    FontData[] defaultFont = getTable().getFont().getFontData();
+//                    FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
+//                    return Graphics.getFont( bold );
+//                }
+            });
+        }
+    }
 
     
     /**
