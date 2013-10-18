@@ -14,12 +14,13 @@
  */
 package org.polymap.mosaic.ui.eventstable;
 
-import static org.polymap.mosaic.ui.MosaicUiPlugin.*;
+import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
 
 import java.util.Arrays;
 import java.util.List;
 
 import java.beans.PropertyChangeEvent;
+import java.io.IOException;
 
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
@@ -34,10 +35,12 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableViewer;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
@@ -89,7 +92,7 @@ public class EventsTableViewer
         fs = repo.featureSource( IMosaicCaseEvent.class );
         schema = fs.getSchema();
         PropertyDescriptor prop = schema.getDescriptor( new NameImpl( "", "name" ) );
-        addColumn( new DefaultFeatureTableColumn( prop ).setWeight( 2, 60 ) );
+        addColumn( new NameColumn( prop ).setWeight( 2, 60 ) );
         
         prop = schema.getDescriptor( new NameImpl( "", "type" ) );
         addColumn( new DefaultFeatureTableColumn( prop ).setWeight( 1, 60 ).setHeader( "Art" ) );
@@ -97,7 +100,13 @@ public class EventsTableViewer
         prop = schema.getDescriptor( new NameImpl( "", "timestamp" ) );
         addColumn( new DateColumn( prop ).setWeight( 1, 60 ) );
         
-        setContent( fs, baseFilter );
+        try {
+            // supress deferred loading to fix "empty table" issue
+            setContent( fs.getFeatures( baseFilter ) );
+        }
+        catch (IOException e) {
+            throw new RuntimeException( e );
+        }
     }
 
     
@@ -127,6 +136,30 @@ public class EventsTableViewer
             return repo.entity( MosaicCaseEvent2.class, input.fid() );
         }
     };
+
+    
+    /**
+     * 
+     */
+    class NameColumn
+            extends DefaultFeatureTableColumn {
+
+        public NameColumn( final PropertyDescriptor prop ) {
+            super( prop );
+            setHeader( "Bezeichnung" );
+            setLabelProvider( new ColumnLabelProvider() {
+                @Override
+                public String getText( Object elm ) {
+                    return ((IFeatureTableElement)elm).getValue( prop.getName().getLocalPart() ).toString();
+                }
+                @Override
+                public String getToolTipText( Object elm ) {
+                    IMosaicCaseEvent event = new EventFinder().apply( (IFeatureTableElement)elm );
+                    return event != null ? event.getDescription() : null;
+                }
+            });
+        }
+    }
 
     
     /**

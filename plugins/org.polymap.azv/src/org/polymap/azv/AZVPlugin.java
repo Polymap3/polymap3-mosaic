@@ -40,6 +40,22 @@ public class AZVPlugin
     /* The property scope of the AZV plugin. */
     public static final String      PROPERTY_SCOPE = ID; 
 
+    public static final String      ROLE_SCHACHTSCHEIN = "Schachtschein beantragen";
+    public static final String      ROLE_LEITUNGSAUSKUNFT = "Leitungsauskunft";
+    public static final String      ROLE_DIENSTBARKEITEN = "Dienstbarkeiten";
+    public static final String      ROLE_HYDRANTEN = "Hydranten";
+    public static final String      ROLE_WASSERQUALITAET = "Wasserqualität";
+    public static final String      ROLE_ENTSORGUNG = "Bedarfsgerechte Entsorgung";
+    public static final String      ROLE_MA = "Interner Sachbearbeiter";
+
+    public static final String      CASE_SCHACHTSCHEIN = "Schachtschein beantragen";
+    public static final String      CASE_LEITUNGSAUSKUNFT = "Leitungsauskunft";
+    public static final String      CASE_DIENSTBARKEITEN = "Dienstbarkeiten";
+    public static final String      CASE_HYDRANTEN = "Hydranten";
+    public static final String      CASE_WASSERQUALITAET = "Wasserqualität";
+    public static final String      CASE_ENTSORGUNG = "Bedarfsgerechte Entsorgung";
+    public static final String      CASE_NUTZER = "Nutzer anlegen";
+
     private static AZVPlugin        instance;
 
     public static AZVPlugin instance() {

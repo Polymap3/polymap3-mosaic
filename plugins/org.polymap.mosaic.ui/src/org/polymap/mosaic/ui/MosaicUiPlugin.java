@@ -19,9 +19,6 @@ public class MosaicUiPlugin
 	/* The scope of context properties used in this bundle. */
     public static final String          CONTEXT_PROPERTY_SCOPE = ID;
 
-    public static final String          ROLE_SCHACHTSCHEIN = "Schachtschein beantragen";
-    public static final String          ROLE_MA = "Interner Sachbearbeiter";
-    
     public static final String          CSS_PREFIX = "mosaic-case-";
     public static final String          CSS_SUBMIT = CSS_PREFIX + "submit";
     public static final String          CSS_DISCARD = CSS_PREFIX + "discard";
