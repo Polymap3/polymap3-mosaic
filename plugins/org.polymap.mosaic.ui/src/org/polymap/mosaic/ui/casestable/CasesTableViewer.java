@@ -15,11 +15,13 @@
 package org.polymap.mosaic.ui.casestable;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+import java.io.IOException;
 
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
-import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
@@ -29,6 +31,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.eclipse.swt.SWT;
@@ -43,8 +47,6 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableViewer;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
-import org.polymap.core.data.ui.featuretable.SimpleFeatureTableElement;
-
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicCase2;
@@ -82,11 +84,32 @@ public class CasesTableViewer
         addColumn( new StatusColumn() );
         PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "", "name" ) );
         addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 2, 100 ) );
+        addColumn( new NatureColumn() );
         addColumn( new DateColumn() );
         
-        setContent( fs, baseFilter );
+        try {
+            // supress deferred loading to fix "empty table" issue
+            setContent( fs.getFeatures( baseFilter ) );
+        }
+        catch (IOException e) {
+            throw new RuntimeException( e );
+        }
     }
 
+    
+    public IMosaicCase entity( String fid ) {
+        return repo.entity( MosaicCase2.class, fid );    
+    }
+    
+    
+    public Collection<String> propertyNames() {
+        return Collections2.transform( schema.getDescriptors(), new Function<PropertyDescriptor,String>() {
+            public String apply( PropertyDescriptor input ) {
+                return input.getName().getLocalPart();
+            }
+        });
+    }
+    
     
     public List<IMosaicCase> getSelected() {
         return ImmutableList.copyOf( Iterables.transform( Arrays.asList( getSelectedElements() ), new CaseFinder() ) );
@@ -116,8 +139,8 @@ public class CasesTableViewer
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
                 public String getText( Object elm ) {
-                    Feature feature = ((SimpleFeatureTableElement)elm).feature();
-                    MosaicCase2 mcase = repo.entityForState( MosaicCase2.class, feature );
+                    String fid = ((IFeatureTableElement)elm).fid();
+                    MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
                     List<IMosaicCaseEvent> events = ImmutableList.copyOf( mcase.getEvents() );
                     if (events.size() == 1) {
                         return "NEU";
@@ -173,6 +196,27 @@ public class CasesTableViewer
                     IMosaicCase mc = new CaseFinder().apply( (IFeatureTableElement)elm );
                     IMosaicCaseEvent event = Iterables.getFirst( mc.getEvents(), null );
                     return event != null ? df.format( event.getTimestamp() ) : "?";
+                }
+            });
+        }
+    }
+
+    
+    /**
+     * 
+     */
+    class NatureColumn
+            extends DefaultFeatureTableColumn {
+
+        public NatureColumn() {
+            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            setWeight( 1, 80 );
+            setHeader( "Art" );
+            setLabelProvider( new ColumnLabelProvider() {
+                @Override
+                public String getText( Object elm ) {
+                    IMosaicCase mc = new CaseFinder().apply( (IFeatureTableElement)elm );
+                    return Joiner.on( ", " ).join( mc.getNatures() );
                 }
             });
         }

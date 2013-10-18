@@ -14,7 +14,10 @@
  */
 package org.polymap.azv.ui;
 
+import static org.polymap.azv.AZVPlugin.*;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.time.FastDateFormat;
@@ -23,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -31,6 +35,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
+
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
@@ -41,8 +46,8 @@ import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
-import org.polymap.rhei.um.ui.PersonForm;
 
+import org.polymap.azv.AZVPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -76,10 +81,11 @@ public class NutzerFreigabeCaseAction
     @Override
     public boolean init( IPanelSite _site, IAppContext _context ) {
         this.site = _site;
-        log.info( "CASE:" + mcase.get() );
-        if (mcase.get() != null) {
+        IMosaicCase mycase = mcase.get();
+        log.info( "CASE:" + mycase );
+        if (mycase != null && mycase.getNatures().contains( CASE_NUTZER )) {
             // user data
-            String username = mcase.get().get( "user" );
+            String username = mycase.get( "user" );
             user = UserRepository.instance().findUser( username );
             return true;
         }
@@ -104,12 +110,6 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        IPanelSection personSection = site.toolkit().createPanelSection( parent, "Nutzerdaten" );
-        personSection.addConstraint( new PriorityConstraint( 10, 10 ) );
-        PersonForm personForm = new PersonForm( site, user );
-        personForm.createContents( personSection );
-        personSection.getBody().setEnabled( false );
-
         // events table
         IPanelSection eventsSection = site.toolkit().createPanelSection( parent, "Ereignisse" );
         eventsSection.addConstraint( new PriorityConstraint( 0, 10 ) );
@@ -128,43 +128,34 @@ public class NutzerFreigabeCaseAction
         Composite left = site.toolkit().createComposite( root );
         left.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).columns( 1, 1 ).create() );
         Set<String> groups = new HashSet( um.groupsOf( user ) );
-        Button btn = site.toolkit().createButton( left, "Schachtschein", SWT.CHECK );
-        btn.setSelection( groups.contains( MosaicUiPlugin.ROLE_SCHACHTSCHEIN ) );
-        btn.addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                um.asignGroup( user, MosaicUiPlugin.ROLE_SCHACHTSCHEIN );
-            }
-        });
-        site.toolkit().createButton( left, "Leitungsauskunft", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                //
-            }
-        });
-        site.toolkit().createButton( left, "Dienstbarkeiten", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                //
-            }
-        });
-        site.toolkit().createButton( left, "Bedarfsgerechte Entsorgung", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                //
-            }
-        });
-        site.toolkit().createButton( left, "Hydrantentauskunft", SWT.CHECK ).addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                //
-            }
-        });
+
+        List<String> roles = Lists.newArrayList( 
+                ROLE_SCHACHTSCHEIN, ROLE_LEITUNGSAUSKUNFT, ROLE_DIENSTBARKEITEN,
+                ROLE_ENTSORGUNG, ROLE_HYDRANTEN, ROLE_WASSERQUALITAET
+                );
+        for (final String role : roles) {
+            final Button btn = site.toolkit().createButton( left, role, SWT.CHECK );
+            btn.setSelection( groups.contains( role ) );
+            btn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    if (btn.getSelection()) {
+                        um.asignGroup( user, role );
+                    } else {
+                        um.resignGroup( user, role );
+                    }
+                }
+            });
+        }
 
         // right section
         Composite right = site.toolkit().createComposite( root );
         right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).create() );
-        btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
-        btn.setSelection( groups.contains( MosaicUiPlugin.ROLE_MA ) );
+        Button btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
+        btn.setSelection( groups.contains( AZVPlugin.ROLE_MA ) );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 log.info( "ev: " + ev );
-                um.asignGroup( user, MosaicUiPlugin.ROLE_MA );
+                um.asignGroup( user, AZVPlugin.ROLE_MA );
             }
         });
     }

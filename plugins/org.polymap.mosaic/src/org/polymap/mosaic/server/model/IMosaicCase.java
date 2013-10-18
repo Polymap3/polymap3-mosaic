@@ -14,7 +14,8 @@
  */
 package org.polymap.mosaic.server.model;
 
-import java.util.List;
+
+import java.util.Set;
 
 import org.polymap.core.project.IMap;
 
@@ -31,7 +32,7 @@ public interface IMosaicCase {
 
     public String getDescription();
 
-    public List<String> getNatures();
+    public Set<String> getNatures();
     
     public void addNature( String nature );
     

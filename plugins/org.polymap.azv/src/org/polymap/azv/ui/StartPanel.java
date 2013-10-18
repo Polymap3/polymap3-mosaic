@@ -16,6 +16,7 @@ package org.polymap.azv.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.opengis.filter.Filter;
 
@@ -31,27 +32,33 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.forms.widgets.Section;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
+import org.polymap.core.data.ui.featuretable.FeatureTableSearchField;
+import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
 import org.polymap.core.model.Entity;
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.entity.IEntityStateListener;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
@@ -214,50 +221,50 @@ public class StartPanel
     
     protected void createCasesSection( IPanelSection parent ) {
         casesSection = tk.createPanelSection( parent, "Aktuelle Vorgänge" );
-        casesSection.getControl().setLayoutData( 
-                new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
-
-        casesSection.getBody().setLayout( new FormLayout() );
+        casesSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
+        casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
-//        MosaicRepository2 repo = MosaicRepository2.instance();
-//        repo.query( )
-//        if (elms.count() == 0) {
-//            tk.createLabel( casesSection.getBody(), "Keine aktuellen Vorgänge." );
-//        } 
-//        else {
-            casesViewer = new CasesTableViewer( casesSection.getBody(), Filter.INCLUDE, SWT.NONE );
-            casesViewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).create() );
-            
-            casesViewer.addDoubleClickListener( new IDoubleClickListener() {
-                public void doubleClick( DoubleClickEvent ev ) {
-                    IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
-                    log.info( "CASE: " + sel );
-                    mcase.set( sel );
-                    getContext().openPanel( CasePanel.ID );
-                }
-            });
+        casesViewer = new CasesTableViewer( casesSection.getBody(), Filter.INCLUDE, SWT.NONE );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 200 ).create() );
+        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
+            public void doubleClick( DoubleClickEvent ev ) {
+                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                log.info( "CASE: " + sel );
+                mcase.set( sel );
+                getContext().openPanel( CasePanel.ID );
+            }
+        });
 
-//        }
-            
-//        AzvRepository.instance().addEntityListener( casesListener = new IEntityStateListener() {
-//            public void modelChanged( EntityStateEvent ev ) {
-//                casesSection.getBody().getDisplay().asyncExec( new Runnable() {
-//                    public void run() {
-//                        if (elms.count() == 0) {
-//                            tk.createLabel( casesSection.getBody(), "Keine Vorgänge." );
-//                        } 
-//                        else if (casesViewer == null) {
-//                            casesSection.getBody().getChildren()[0].dispose();
-//                            casesViewer = new CasesTableViewer( casesSection.getBody(), elms );
-//                        }
-//                        else {
-//                            casesViewer.refresh();
-//                            contents.getBody().layout( true );
-//                        }
-//                    }
-//                });
-//            }
-//        });
+        // filterBar
+        FeatureTableFilterBar filterBar = new FeatureTableFilterBar( casesViewer, casesSection.getBody() );
+        filterBar.getControl().setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).right( 50 ).create() );
+        
+        if (SecurityUtils.isUserInGroup( AZVPlugin.ROLE_MA )) {
+            filterBar.add( new ViewerFilter() {
+                public boolean select( Viewer viewer, Object parentElm, Object elm ) {
+                    Set<String> natures = casesViewer.entity( ((IFeatureTableElement)elm).fid() ).getNatures();
+                    return natures.contains( AZVPlugin.CASE_NUTZER ); 
+                }
+            })
+            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/search.png" ) )
+            .setTooltip( "Neue Kunden filtern" );
+        }
+        
+        if (SecurityUtils.isUserInGroup( AZVPlugin.ROLE_SCHACHTSCHEIN )) {
+            filterBar.add( new ViewerFilter() {
+                public boolean select( Viewer viewer, Object parentElm, Object elm ) {
+                    Set<String> natures = casesViewer.entity( ((IFeatureTableElement)elm).fid() ).getNatures();
+                    return natures.contains( AZVPlugin.CASE_SCHACHTSCHEIN ); 
+                }
+            })
+            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/letter.png" ) )
+            .setTooltip( "Schachtscheinanträge filtern" );
+        }
+        
+        // searchField
+        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), 
+                casesViewer.propertyNames() );
+        searchField.getControl().setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
     }
     
     

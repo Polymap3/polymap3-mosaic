@@ -241,7 +241,7 @@ public class CasePanel
             }
         });
         discardBtn = tk.createButton( body, "...", SWT.PUSH );
-        submitBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );
+        discardBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );
         discardBtn.setLayoutData( FormDataFactory.filled().left( submitBtn ).right( -1 ).create() );
         discardBtn.setEnabled( false );
         discardBtn.setToolTipText( "Änderungen verwerfen" );

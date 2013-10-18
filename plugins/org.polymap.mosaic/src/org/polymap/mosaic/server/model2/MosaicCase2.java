@@ -15,7 +15,7 @@
 package org.polymap.mosaic.server.model2;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 import java.beans.PropertyChangeEvent;
 
@@ -26,7 +26,7 @@ import org.opengis.filter.FilterFactory2;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.Point;
 
@@ -107,8 +107,8 @@ public class MosaicCase2
     }
 
     @Override
-    public List<String> getNatures() {
-        return ImmutableList.copyOf( Splitter.on( ',' ).split( natures.get() ) );
+    public Set<String> getNatures() {
+        return ImmutableSet.copyOf( Splitter.on( ',' ).split( natures.get() ) );
     }
 
     @Override

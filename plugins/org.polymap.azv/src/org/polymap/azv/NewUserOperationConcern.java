@@ -63,7 +63,7 @@ public class NewUserOperationConcern
                         MosaicRepository2 repo = MosaicRepository2.instance();
                         IMosaicCase newCase = repo.newCase( "Neuer Nutzer: " + user.name().get(),
                                 "Ein neuer Nutzer wurde angelegt. Authentizität und Rechte müssen bestätigt werden." );
-                        newCase.addNature( "Nutzer anlegen" );
+                        newCase.addNature( AZVPlugin.CASE_NUTZER );
                         newCase.put( "user", user.username().get() );
                         repo.commitChanges();
                         

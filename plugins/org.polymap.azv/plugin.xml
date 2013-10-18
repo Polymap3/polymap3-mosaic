@@ -51,6 +51,12 @@
             id="org.polymap.azv.ui.NutzerFreigabeCaseAction"
             name="Freigabe">
       </caseAction>
+      <caseAction
+            class="org.polymap.azv.ui.NutzerAnVorgangCaseAction"
+            description="Den Kunden für diesen Vorgang auswählen"
+            id="org.polymap.azv.NutzerAnVorgangCaseAction"
+            name="Kunde wählen">
+      </caseAction>
    </extension>
 
 </plugin>
