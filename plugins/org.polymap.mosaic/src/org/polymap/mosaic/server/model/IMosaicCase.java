@@ -44,6 +44,10 @@ public interface IMosaicCase {
     public Iterable<? extends IMosaicCaseEvent> getEvents();
 
     public void addEvent( IMosaicCaseEvent event );
+    
+//    public void addDocument( IMosaicDocument doc );
+//
+//    public Iterable<IMosaicDocument> getDocuments();
 
     public IMap getMetaDataMap();
 

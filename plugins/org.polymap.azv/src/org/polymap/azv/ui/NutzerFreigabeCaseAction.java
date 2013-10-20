@@ -14,7 +14,13 @@
  */
 package org.polymap.azv.ui;
 
-import static org.polymap.azv.AZVPlugin.*;
+import static org.polymap.azv.AZVPlugin.CASE_NUTZER;
+import static org.polymap.azv.AZVPlugin.ROLE_DIENSTBARKEITEN;
+import static org.polymap.azv.AZVPlugin.ROLE_ENTSORGUNG;
+import static org.polymap.azv.AZVPlugin.ROLE_HYDRANTEN;
+import static org.polymap.azv.AZVPlugin.ROLE_LEITUNGSAUSKUNFT;
+import static org.polymap.azv.AZVPlugin.ROLE_SCHACHTSCHEIN;
+import static org.polymap.azv.AZVPlugin.ROLE_WASSERQUALITAET;
 
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +43,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.action.Action;
 
 import org.polymap.core.ui.ColumnLayoutFactory;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
@@ -113,7 +121,9 @@ public class NutzerFreigabeCaseAction
         // events table
         IPanelSection eventsSection = site.toolkit().createPanelSection( parent, "Ereignisse" );
         eventsSection.addConstraint( new PriorityConstraint( 0, 10 ) );
-        EventsTableViewer eventsViewer = new EventsTableViewer( eventsSection.getBody(), mcase.get(), SWT.NONE );
+        eventsSection.getBody().setLayout( FormLayoutFactory.defaults().create() );
+        EventsTableViewer viewer = new EventsTableViewer( eventsSection.getBody(), mcase.get(), SWT.NONE );
+        viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
     }
 
 

@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Joiner;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.polymap.core.security.SecurityUtils;
@@ -109,6 +110,7 @@ public class NutzerAnVorgangCaseAction
     public void fillContentArea( Composite parent ) {
         personSection = site.toolkit().createPanelSection( parent, "Nutzerdaten" );
         personSection.addConstraint( new PriorityConstraint( 1, 10 ) );
+        personSection.getBody().setLayout( new FillLayout() );
         
         if (user != null) {
             PersonForm personForm = new PersonForm( site, user );

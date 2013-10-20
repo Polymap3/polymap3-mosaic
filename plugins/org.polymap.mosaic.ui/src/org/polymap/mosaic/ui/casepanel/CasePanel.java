@@ -28,7 +28,6 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.action.Action;
@@ -125,11 +124,11 @@ public class CasePanel
 
     @Override
     public void createContents( Composite panelBody ) {
-        getSite().setTitle( "Vorgang: ???" );
+        getSite().setTitle( "Vorgang: " + mcase.get() != null ? mcase.get().getName() : "" );
         this.tk = getSite().toolkit();
         int margins = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         int spacing = getSite().getLayoutPreference( LAYOUT_SPACING_KEY );
-        panelBody.setLayout( FormLayoutFactory.defaults().margins( margins ).spacing( spacing ).create() );
+        panelBody.setLayout( FormLayoutFactory.defaults().margins( margins+10, 0 ).spacing( spacing ).create() );
 
         // init caseActions
         for (CaseActionExtension ext : CaseActionExtension.all()) {
@@ -199,7 +198,7 @@ public class CasePanel
     
     protected void createStatusSection( Composite body ) {
         FillLayout layout = new FillLayout();
-        layout.marginWidth = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        //layout.marginWidth = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         //layout.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         body.setLayout( layout );
         //body.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-panel-form" );
@@ -247,10 +246,7 @@ public class CasePanel
         discardBtn.setToolTipText( "Änderungen verwerfen" );
         discardBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
-                activeAction.caseAction.discard();
-                updateActionSection( null );
-                submitBtn.setEnabled( false );
-                discardBtn.setEnabled( false );
+                discardActiveAction();
             }
         });
         
@@ -263,7 +259,7 @@ public class CasePanel
             
             holder.caseAction.fillAction( action );
             
-            holder.btn = tk.createButton( body, action.getText(), SWT.PUSH );
+            holder.btn = tk.createButton( body, action.getText(), SWT.TOGGLE );
             holder.btn.setToolTipText( action.getToolTipText() );
             holder.btn.setEnabled( action.isEnabled() );
             
@@ -274,14 +270,18 @@ public class CasePanel
             holder.btn.setLayoutData( layoutData.create() );
             holder.btn.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected( SelectionEvent e ) {
-                    log.info( " ---> " + action.getText() );
-                    activeAction = holder;
-                    holder.btn.setSelection( true );
-                    
-                    submitBtn.setEnabled( true );
-                    discardBtn.setEnabled( true );
-                    
-                    updateActionSection( holder );
+                    if (holder.btn.getSelection()) {
+                        activeAction = holder;
+                        holder.btn.setSelection( true );
+
+                        submitBtn.setEnabled( true );
+                        discardBtn.setEnabled( true );
+
+                        updateActionSection( holder );
+                    }
+                    else {
+                        discardActiveAction();
+                    }
                 }
             });
             prev = holder.btn;
@@ -289,9 +289,22 @@ public class CasePanel
     }
     
     
+    private void discardActiveAction() {
+        activeAction.caseAction.discard();
+        activeAction.btn.setSelection( false );
+        updateActionSection( null );
+        submitBtn.setEnabled( false );
+        discardBtn.setEnabled( false );
+    }
+    
+    
     protected void createContentSection( Composite body ) {
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_CONTENT_SECTION );
-        body.setLayout( new ConstraintLayout() );
+        ConstraintLayout layout = new ConstraintLayout();
+        layout.marginWidth = 0;
+        layout.marginHeight = 20;
+        layout.spacing = 40;
+        body.setLayout( layout );
         for (CaseActionHolder holder: caseActions) {
             try {
                 holder.caseAction.fillContentArea( body );

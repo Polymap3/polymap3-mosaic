@@ -55,7 +55,12 @@
             class="org.polymap.azv.ui.NutzerAnVorgangCaseAction"
             description="Den Kunden für diesen Vorgang auswählen"
             id="org.polymap.azv.NutzerAnVorgangCaseAction"
-            name="Kunde wählen">
+            name="Kunden wählen">
+      </caseAction>
+      <caseAction
+            class="org.polymap.azv.ui.DokumenteCaseAction"
+            id="org.polymap.azv.DokumentCaseAction"
+            name="Dokumente anhängen">
       </caseAction>
    </extension>
 

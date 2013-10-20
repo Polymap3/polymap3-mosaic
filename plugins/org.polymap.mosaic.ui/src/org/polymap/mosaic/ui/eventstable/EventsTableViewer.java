@@ -175,14 +175,11 @@ public class EventsTableViewer
                     if (IMosaicCaseEvent.TYPE_NEW.equals( type )) {
                         return MosaicUiPlugin.COLOR_NEW.get();
                     }
-                    else if (IMosaicCaseEvent.TYPE_OPEN.equals( type )) {
-                        return MosaicUiPlugin.COLOR_OPEN.get();
-                    }
                     else if (IMosaicCaseEvent.TYPE_CLOSED.equals( type )) {
                         return MosaicUiPlugin.COLOR_CLOSED.get();
                     }
                     else {
-                        return null;
+                        return MosaicUiPlugin.COLOR_OPEN.get();
                     }
                 }
                 @Override

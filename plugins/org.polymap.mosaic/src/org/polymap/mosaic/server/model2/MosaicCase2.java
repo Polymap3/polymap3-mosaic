@@ -41,6 +41,7 @@ import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
+import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model2.MosaicRepository2.EntityCreator;
 
 /**
@@ -71,17 +72,6 @@ public class MosaicCase2
     @Defaults
     public Property<String>             natures;
 
-//    @Nullable 
-//    @Defaults
-//    public Property<Date>               created;
-//
-//    @Nullable 
-//    @Defaults
-//    public Property<Date>               lastModified;
-
-//    @Nullable
-//    public Property<MosaicCaseEvent2>   created;
-//    
 //    /** First event is the creation event. */
 //    @Defaults
 //    public CollectionProperty<String>   eventIds;
@@ -89,6 +79,8 @@ public class MosaicCase2
     protected Property<String>          metaDataMapId;
 
     protected Property<String>          dataMapId;
+    
+    protected Property<String>          documentsDir;
     
     
     @Override

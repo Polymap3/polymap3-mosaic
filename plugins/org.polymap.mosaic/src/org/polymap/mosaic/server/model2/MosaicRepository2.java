@@ -14,9 +14,12 @@
  */
 package org.polymap.mosaic.server.model2;
 
+import java.util.Arrays;
 import java.util.Date;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import org.geotools.data.DataAccess;
 import org.geotools.data.FeatureSource;
@@ -27,6 +30,11 @@ import org.opengis.filter.FilterFactory2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.impl.StandardFileSystemManager;
+
+import com.google.common.collect.Iterables;
 
 import org.polymap.core.data.feature.recordstore.LuceneQueryDialect;
 import org.polymap.core.data.feature.recordstore.RDataStore;
@@ -39,8 +47,10 @@ import org.polymap.core.model2.store.feature.FeatureStoreAdapter;
 import org.polymap.core.runtime.SessionSingleton;
 import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
 
+import org.polymap.mosaic.server.document.SimpleFilesystemMapper;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
+import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.project.MosaicProjectRepository;
 
 /**
@@ -67,6 +77,12 @@ public class MosaicRepository2
     
     /** The repo for {@link Entity Entities} modelling the metadata of cases. */
     private static EntityRepository     repo;
+
+    private static StandardFileSystemManager    fsManager;
+    
+    private static FileObject           documentsRoot;
+
+    private static SimpleFilesystemMapper documentsNameMapper;
 
 //    /** {@link IService} based on the local {@link #datastore}. */
 //    private static RServiceImpl         service;
@@ -102,6 +118,24 @@ public class MosaicRepository2
                     .setEntities( new Class[] {MosaicCase2.class, MosaicCaseEvent2.class, MosaicCaseKeyValue.class} )
                     .create();
             
+            // Documents store
+            fsManager = new StandardFileSystemManager();
+            URL config = MosaicRepository2.class.getResource( "vfs_config.xml" );
+            //URL config = MosaicApiPlugin.context().getBundle().getResource( "vfs_config.xml" );
+            fsManager.setConfiguration( config );
+            fsManager.init();
+
+            String rootUri = "file:///tmp/mosaic-documents";
+//            rootUri = System.getProperty( PROP_ROOT_URI );
+//            if (rootUri == null) {
+//                throw new IllegalStateException( "System property is missing: " + PROP_ROOT_URI + " (allows to set the WebDAV URL of the remote server, i.e. webdav://admin:login@localhost:10080/webdav/Mosaic)" );
+//            }
+            documentsRoot = fsManager.resolveFile( rootUri );
+            documentsNameMapper = new SimpleFilesystemMapper();
+            for (FileObject child : documentsRoot.getChildren()) {
+                log.info( "DOCUMENTS: " + child );
+            }
+
 //            // IService and IGeoResource for MosaicCase/Event
 //            service = new RServiceImpl( RServiceExtension.toURL( "Mosaic" ), null ) {
 //                protected RDataStore getDS() throws IOException {
@@ -290,7 +324,7 @@ public class MosaicRepository2
                     prototype.description.set( name );
                 }
 
-                IMosaicCaseEvent created = newCaseEvent( prototype, "Angelegt", "Der Vorgang wurde angelegt.", IMosaicCaseEvent.TYPE_CREATED );
+                IMosaicCaseEvent created = newCaseEvent( prototype, "Angelegt", "Der Vorgang wurde angelegt.", IMosaicCaseEvent.TYPE_NEW );
                 prototype.addEvent( created );
 
 //                // metaData project
@@ -322,7 +356,32 @@ public class MosaicRepository2
         mcase.addEvent( closed );    
     }
     
+
+    public IMosaicDocument newDocument( IMosaicCase mcase, String name ) {
+        try {
+            String path = documentsNameMapper.documentPath( mcase, name );
+            FileObject file = documentsRoot.resolveFile( path );
+            return new MosaicDocument( file );
+        }
+        catch (FileSystemException e) {
+            throw new RuntimeException( e );
+        }
+    }
+
     
+    public Iterable<IMosaicDocument> documents( IMosaicCase mcase ) {
+        try {
+            String path = documentsNameMapper.documentPath( mcase, null );
+            FileObject dir = documentsRoot.resolveFile( path );
+            dir.createFolder();
+            return Iterables.transform( Arrays.asList( dir.getChildren() ), MosaicDocument.toDocument );
+        }
+        catch (FileSystemException e) {
+            throw new RuntimeException( e );
+        }
+    }
+
+
     public <T extends Entity> T newEntity( Class<T> type, String id, final EntityCreator creator ) {
         return uow.createEntity( type, id, new ValueInitializer<T>() {
             public T initialize( T value ) throws Exception {

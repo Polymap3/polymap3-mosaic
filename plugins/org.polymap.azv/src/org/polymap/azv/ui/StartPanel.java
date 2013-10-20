@@ -82,7 +82,6 @@ import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.AzvRepository;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CasePanel;
@@ -313,8 +312,8 @@ public class StartPanel
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
-                    entity.set( AzvRepository.instance().newSchachtschein() );
-                    getContext().openPanel( SchachtscheinPanel.ID );
+                    mcase.set( null );
+                    getContext().openPanel( CasePanel.ID );
                 }
                 catch (Exception e) {
                     BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
