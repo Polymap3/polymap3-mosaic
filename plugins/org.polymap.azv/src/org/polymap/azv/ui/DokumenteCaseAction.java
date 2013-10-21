@@ -14,8 +14,6 @@
  */
 package org.polymap.azv.ui;
 
-import java.util.Comparator;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -24,20 +22,18 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.deferred.DeferredContentProvider;
-import org.eclipse.jface.viewers.deferred.SetModel;
-
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -50,8 +46,6 @@ import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-import org.polymap.rhei.um.User;
-
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model2.MosaicCase2;
@@ -84,9 +78,9 @@ public class DokumenteCaseAction
 
     private TableViewer                     viewer;
 
-    private SetModel                        model;
+//    private SetModel                        model;
 
-    private Display display;
+    private Display                         display;
 
     
     @Override
@@ -127,8 +121,6 @@ public class DokumenteCaseAction
             IOUtils.closeQuietly( out );
         }
 
-        model.addAll( new IMosaicDocument[] { doc } );
-
         repo.newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
                 ", Typ: " + doc.getContentType() +
                 ", Größe: " + doc.getSize(), "Dokument angelegt"  );
@@ -136,6 +128,9 @@ public class DokumenteCaseAction
         
         display.asyncExec( new Runnable() {
             public void run() {
+                //model.addAll( new IMosaicDocument[] { doc } );
+
+                viewer.refresh();
                 // close action area
             }
         });
@@ -149,7 +144,7 @@ public class DokumenteCaseAction
         section.getBody().setLayout( FormLayoutFactory.defaults().create() );
         
         // viewer
-        viewer = new TableViewer( section.getBody(), SWT.VIRTUAL /*| SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );
+        viewer = new TableViewer( section.getBody(), SWT.NONE /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
 
         viewer.getTable().setLinesVisible( true );
@@ -179,13 +174,22 @@ public class DokumenteCaseAction
         });
         layout.addColumnData( new ColumnWeightData( 1, 60, true ) );            
 
-        viewer.setContentProvider( new DeferredContentProvider( new Comparator<User>() {
-            public int compare( User o1, User o2 ) {
-                return 0;
+        viewer.setContentProvider( new ArrayContentProvider() {
+            public Object[] getElements( Object input ) {
+                return Iterables.toArray( repo.documents( mcase.get() ), Object.class );
             }
-        }));
-        viewer.setInput( model = new SetModel() );
-        model.addAll( ImmutableList.copyOf( repo.documents( mcase.get() ) ) );
+        });
+        viewer.setInput( mcase.get() );
+        
+
+//        viewer.setContentProvider( new DeferredContentProvider( new Comparator<User>() {
+//            public int compare( User o1, User o2 ) {
+//                return 0;
+//            }
+//        }));
+//        List<IMosaicDocument> documents = ImmutableList.copyOf( repo.documents( mcase.get() ) );
+//        viewer.setInput( model = new SetModel() );
+//        model.addAll( documents );
     }
     
 }

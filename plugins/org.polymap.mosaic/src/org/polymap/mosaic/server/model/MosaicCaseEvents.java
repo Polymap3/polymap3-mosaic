@@ -46,7 +46,12 @@ public class MosaicCaseEvents {
         }
         else {
             IMosaicCaseEvent last = events.get( events.size()-1 );
-            return last.getEventType();
+            if (last.getEventType() == IMosaicCaseEvent.TYPE_CLOSED) {
+                return IMosaicCaseEvent.TYPE_CLOSED;
+            }
+            else {
+                return IMosaicCaseEvent.TYPE_OPEN;                
+            }
         }
     
     }

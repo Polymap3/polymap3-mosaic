@@ -44,6 +44,7 @@ import org.polymap.core.model2.runtime.Query;
 import org.polymap.core.model2.runtime.UnitOfWork;
 import org.polymap.core.model2.runtime.ValueInitializer;
 import org.polymap.core.model2.store.feature.FeatureStoreAdapter;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.SessionSingleton;
 import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
 
@@ -99,8 +100,9 @@ public class MosaicRepository2
         try {
             // persistence: workspace / Lucene
             if (dataDir != null) {
-                dataDir.mkdir();
-                lucenestore = new LuceneRecordStore( dataDir, clean );
+                File luceneDir = new File( dataDir, "org.polymap.mosaic.data" );
+                luceneDir.mkdir();
+                lucenestore = new LuceneRecordStore( luceneDir, clean );
             }
             else {
                 lucenestore = new LuceneRecordStore();
@@ -121,16 +123,18 @@ public class MosaicRepository2
             // Documents store
             fsManager = new StandardFileSystemManager();
             URL config = MosaicRepository2.class.getResource( "vfs_config.xml" );
-            //URL config = MosaicApiPlugin.context().getBundle().getResource( "vfs_config.xml" );
             fsManager.setConfiguration( config );
             fsManager.init();
 
-            String rootUri = "file:///tmp/mosaic-documents";
+            String rootUri = dataDir != null
+                    ? "file://" + dataDir.getAbsolutePath() + "/org.polymap.mosaic.documents"
+                    : "file:///tmp/org.polymap.mosaic.documents";
 //            rootUri = System.getProperty( PROP_ROOT_URI );
 //            if (rootUri == null) {
 //                throw new IllegalStateException( "System property is missing: " + PROP_ROOT_URI + " (allows to set the WebDAV URL of the remote server, i.e. webdav://admin:login@localhost:10080/webdav/Mosaic)" );
 //            }
             documentsRoot = fsManager.resolveFile( rootUri );
+            documentsRoot.createFolder();
             documentsNameMapper = new SimpleFilesystemMapper();
             for (FileObject child : documentsRoot.getChildren()) {
                 log.info( "DOCUMENTS: " + child );
@@ -222,8 +226,24 @@ public class MosaicRepository2
         if (repo == null) {
             synchronized (initlock) {
                 if (repo == null) {
-                    File dataDir = new File( "/home/falko/servers/workspace-mosaic/data" ); // Polymap.getDataDir();
-                    init( new File( dataDir, "org.polymap.mosaic.data" ), false );
+                    File dataDir = null;
+                    try {
+                        dataDir = Polymap.getDataDir();
+                    }
+                    catch (Exception e) {
+                        log.warn( "No Eclipse workbench -> trying env variable: MOSAIC_WORKSPACE_HOME" );
+                        String env = System.getenv( "MOSAIC_WORKSPACE_HOME" );
+                        if (env != null) {
+                            dataDir = new File( env );
+                        }
+                        
+                    }
+                    if (dataDir != null) {
+                        init( dataDir, false );
+                    }
+                    else {
+                        throw new RuntimeException( "No Workbench and no environment variable specified for Mosaic worspace." );
+                    }
                 }
             }
         }

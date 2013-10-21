@@ -147,14 +147,11 @@ public class CasesTableViewer
                     if (IMosaicCaseEvent.TYPE_NEW.equals( status )) {
                         return "NEU";
                     }
-                    else if (IMosaicCaseEvent.TYPE_OPEN.equals( status )) {
-                        return "OFFEN";
-                    }
                     else if (IMosaicCaseEvent.TYPE_CLOSED.equals( status )) {
                         return "ERLEDIGT";
                     }
                     else {
-                        return null;
+                        return "OFFEN";
                     }
                 }
                 @Override
@@ -165,14 +162,11 @@ public class CasesTableViewer
                     if (IMosaicCaseEvent.TYPE_NEW.equals( status )) {
                         return MosaicUiPlugin.COLOR_NEW.get();
                     }
-                    else if (IMosaicCaseEvent.TYPE_OPEN.equals( status )) {
-                        return MosaicUiPlugin.COLOR_OPEN.get();
-                    }
                     else if (IMosaicCaseEvent.TYPE_CLOSED.equals( status )) {
                         return MosaicUiPlugin.COLOR_CLOSED.get();
                     }
                     else {
-                        return null;
+                        return MosaicUiPlugin.COLOR_OPEN.get();
                     }
                 }
                 @Override
