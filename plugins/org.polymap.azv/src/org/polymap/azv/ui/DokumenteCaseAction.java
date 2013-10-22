@@ -68,7 +68,8 @@ public class DokumenteCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
     
-    private MosaicRepository2               repo;
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<MosaicRepository2> repo;
 
     private IPanelSite                      site;
 
@@ -87,8 +88,7 @@ public class DokumenteCaseAction
     public boolean init( IPanelSite _site, IAppContext _context ) {
         this.site = _site;
         this.context = _context;
-        this.repo = MosaicRepository2.instance();
-        return true;
+        return mcase.get() != null && repo.get() != null;
     }
 
 
@@ -108,7 +108,7 @@ public class DokumenteCaseAction
     public void uploadStarted( String name, String contentType, InputStream in )
             throws Exception {
         log.info( "received: " + name );
-        IMosaicDocument doc = repo.newDocument( mcase.get(), name );
+        IMosaicDocument doc = repo.get().newDocument( mcase.get(), name );
         OutputStream out = null;
         try {
             IOUtils.copy( in, out = doc.getOutputStream() );
@@ -121,10 +121,10 @@ public class DokumenteCaseAction
             IOUtils.closeQuietly( out );
         }
 
-        repo.newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
+        repo.get().newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
                 ", Typ: " + doc.getContentType() +
                 ", Größe: " + doc.getSize(), "Dokument angelegt"  );
-        repo.commitChanges();
+        repo.get().commitChanges();
         
         display.asyncExec( new Runnable() {
             public void run() {
@@ -176,7 +176,7 @@ public class DokumenteCaseAction
 
         viewer.setContentProvider( new ArrayContentProvider() {
             public Object[] getElements( Object input ) {
-                return Iterables.toArray( repo.documents( mcase.get() ), Object.class );
+                return Iterables.toArray( repo.get().documents( mcase.get() ), Object.class );
             }
         });
         viewer.setInput( mcase.get() );

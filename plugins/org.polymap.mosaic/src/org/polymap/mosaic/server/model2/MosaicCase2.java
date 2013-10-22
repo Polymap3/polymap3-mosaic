@@ -41,7 +41,6 @@ import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
-import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model2.MosaicRepository2.EntityCreator;
 
 /**
@@ -117,7 +116,7 @@ public class MosaicCase2
     @Override
     public String put( final String key, final String value ) {
         // FIXME check if key already exists
-        MosaicRepository2 repo = MosaicRepository2.instance();
+        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
         repo.newEntity( MosaicCaseKeyValue.class, null, new EntityCreator<MosaicCaseKeyValue>() {
             public void create( MosaicCaseKeyValue prototype ) throws Exception {
                 prototype.caseId.set( getId() );
@@ -130,7 +129,7 @@ public class MosaicCase2
 
     @Override
     public String get( String key ) {
-        MosaicRepository2 repo = MosaicRepository2.instance();
+        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
         FilterFactory2 ff = MosaicRepository2.ff;
         Filter filter = ff.and(
                 ff.equals( ff.property( "key" ), ff.literal( key ) ),
@@ -142,7 +141,7 @@ public class MosaicCase2
 
     @Override
     public Iterable<? extends IMosaicCaseEvent> getEvents() {
-        MosaicRepository2 repo = MosaicRepository2.instance();
+        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
         FilterFactory2 ff = MosaicRepository2.ff;
         Filter filter = ff.equals( ff.property( "caseId" ), ff.literal( getId() ) );
         return repo.query( MosaicCaseEvent2.class, filter ).execute();
@@ -166,12 +165,14 @@ public class MosaicCase2
 
     @Override
     public IMap getMetaDataMap() {
-        return MosaicRepository2.instance().projectRepo().findEntity( IMap.class, metaDataMapId.get() );
+        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
+        return repo.projectRepo().findEntity( IMap.class, metaDataMapId.get() );
     }
     
     @Override
     public IMap getDataMap() {
-        return MosaicRepository2.instance().projectRepo().findEntity( IMap.class, dataMapId.get() );
+        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
+        return repo.projectRepo().findEntity( IMap.class, dataMapId.get() );
     }
     
 }

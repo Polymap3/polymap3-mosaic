@@ -16,6 +16,7 @@ package org.polymap.mosaic.server.model2;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,8 @@ import org.polymap.core.model2.runtime.Query;
 import org.polymap.core.model2.runtime.UnitOfWork;
 import org.polymap.core.model2.runtime.ValueInitializer;
 import org.polymap.core.model2.store.feature.FeatureStoreAdapter;
+import org.polymap.core.runtime.ConcurrentReferenceHashMap;
+import org.polymap.core.runtime.ConcurrentReferenceHashMap.ReferenceType;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.SessionSingleton;
 import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
@@ -64,26 +67,32 @@ public class MosaicRepository2
 
     private static Log log = LogFactory.getLog( MosaicRepository2.class );
     
-    public static final String          NAMESPACE = "http://polymap.org/mosaic";
+    public static final String              NAMESPACE = "http://polymap.org/mosaic";
 
-    public static final FilterFactory2  ff = CommonFactoryFinder.getFilterFactory2( null );
+    public static final FilterFactory2      ff = CommonFactoryFinder.getFilterFactory2( null );
 
-    private static final Object         initlock = new Object();
+    private static final Object             initlock = new Object();
     
     /** The backend store for features of data and metadata. */
-    private static LuceneRecordStore    lucenestore;
+    private static LuceneRecordStore        lucenestore;
 
     /** {@link DataAccess} based on the local {@link #lucenestore}. */
-    private static RDataStore           datastore;
+    private static RDataStore               datastore;
     
     /** The repo for {@link Entity Entities} modelling the metadata of cases. */
-    private static EntityRepository     repo;
+    private static EntityRepository         repo;
+    
+    /**
+     * Allows entities to find the associated {@link MosaicRepository2} from their
+     * UnitOfWork. 
+     */
+    private static Map<UnitOfWork,MosaicRepository2> sessions = new ConcurrentReferenceHashMap( 32, ReferenceType.WEAK, ReferenceType.WEAK );
 
     private static StandardFileSystemManager    fsManager;
     
-    private static FileObject           documentsRoot;
+    private static FileObject               documentsRoot;
 
-    private static SimpleFilesystemMapper documentsNameMapper;
+    private static SimpleFilesystemMapper   documentsNameMapper;
 
 //    /** {@link IService} based on the local {@link #datastore}. */
 //    private static RServiceImpl         service;
@@ -91,6 +100,11 @@ public class MosaicRepository2
 //    private static Map<Class<? extends Entity>,RGeoResource> geores;
 //    
 //    private static MosaicProjectRepositoryAssembler projectAssempler;
+    
+    
+    static MosaicRepository2 session( UnitOfWork uow ) {
+        return sessions.get( uow );
+    }
     
     
     /**
@@ -219,10 +233,10 @@ public class MosaicRepository2
     
     
     /**
-     * The repository for the current user session.
+     * Finds data dir from in Workspace or from environment variable and call
+     * {@link #init(File, boolean)}.
      */
-    public static final MosaicRepository2 instance() {
-        // initilaized?
+    public static void init() {
         if (repo == null) {
             synchronized (initlock) {
                 if (repo == null) {
@@ -247,9 +261,25 @@ public class MosaicRepository2
                 }
             }
         }
-        return instance( MosaicRepository2.class );
     }
 
+    /**
+     * Creates a new session associated to an {@link UnitOfWork}.
+     * @return Newly created session instance;
+     */
+    public static MosaicRepository2 newInstance() {
+        init();
+        return new MosaicRepository2();
+    }
+    
+    /**
+     * The instance of the current user SessionContext.
+     */
+    public static MosaicRepository2 instance() {
+        init();
+        return instance( MosaicRepository2.class );
+    }
+    
     
     // instance *******************************************
     
@@ -262,8 +292,9 @@ public class MosaicRepository2
 //    private MosaicProjectRepository projectRepo;
     
     
-    protected MosaicRepository2() throws Exception {        
+    protected MosaicRepository2() {        
         uow = repo.newUnitOfWork();
+        sessions.put( uow, this );
 //        projectRepo = new MosaicProjectRepository( projectAssempler );
         
 //        // test/default entries
@@ -416,6 +447,17 @@ public class MosaicRepository2
         try {
             //projectRepo().commitChanges();
             uow.commit();
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
+    
+    
+    public void rollbackChanges() {
+        try {
+            //projectRepo().rollbackChanges();
+            uow.rollback();
         }
         catch (Exception e) {
             throw new RuntimeException( e );

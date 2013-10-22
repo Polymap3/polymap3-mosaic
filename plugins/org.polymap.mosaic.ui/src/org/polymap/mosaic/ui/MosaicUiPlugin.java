@@ -37,9 +37,10 @@ public class MosaicUiPlugin
     public static final String          CSS_CONTENT_SECTION = CSS_PREFIX + "content";
 
     /** Mosaic case state: NEW */
-    public static final Lazy<Color>     COLOR_NEW = new PlainLazyInit( new ColorSupplier( 110, 176, 46 ) );
+    public static final Lazy<Color>     COLOR_NEW = new PlainLazyInit( new ColorSupplier( 188, 166, 0 ) );
+    public static final Lazy<Color>     COLOR_CLOSED = new PlainLazyInit( new ColorSupplier( 110, 176, 46 ) );
     public static final Lazy<Color>     COLOR_OPEN = new PlainLazyInit( new ColorSupplier( 255, 204, 0 ) );
-    public static final Lazy<Color>     COLOR_CLOSED = new PlainLazyInit( new ColorSupplier( 211, 37, 22 ) );
+    public static final Lazy<Color>     COLOR_RED = new PlainLazyInit( new ColorSupplier( 211, 37, 22 ) );
     public static final Lazy<Color>     COLOR_STATUS_FOREGROUND = new PlainLazyInit( new ColorSupplier( 255, 255, 255 ) );
 
     public static final FilterFactory2  ff = CommonFactoryFinder.getFilterFactory2( null );

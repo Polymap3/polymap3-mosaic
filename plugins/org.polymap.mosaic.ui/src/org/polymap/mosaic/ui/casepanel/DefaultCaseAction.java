@@ -16,7 +16,7 @@ package org.polymap.mosaic.ui.casepanel;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 
 import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanelSite;
@@ -35,7 +35,11 @@ public class DefaultCaseAction
     }
 
     @Override
-    public void fillAction( Action action ) {
+    public void dispose() {
+    }
+
+    @Override
+    public void fillAction( IAction action ) {
     }
 
     @Override

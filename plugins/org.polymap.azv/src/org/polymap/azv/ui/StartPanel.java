@@ -83,6 +83,7 @@ import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CasePanel;
 import org.polymap.mosaic.ui.casestable.CasesTableViewer;
@@ -114,6 +115,9 @@ public class StartPanel
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
 
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<MosaicRepository2> repo;
+
     private List<Control>                   actionBtns = new ArrayList();
 
     private IPanelSection                   contents;
@@ -128,8 +132,12 @@ public class StartPanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        this.tk = site.toolkit();
-        return site.getPath().size() == 1;
+        if (site.getPath().size() == 1) {
+            this.tk = site.toolkit();
+            this.repo.set( MosaicRepository2.instance() );
+            return true;
+        }
+        return false;
     }
 
 
@@ -223,7 +231,7 @@ public class StartPanel
         casesSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
-        casesViewer = new CasesTableViewer( casesSection.getBody(), Filter.INCLUDE, SWT.NONE );
+        casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), Filter.INCLUDE, SWT.NONE );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 200 ).width( 400 ).create() );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
@@ -312,7 +320,11 @@ public class StartPanel
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
-                    mcase.set( null );
+                    // create new case; commit/rollback inside CaseAction
+                    IMosaicCase newCase = repo.get().newCase( "Schachtschein", "" );
+                    newCase.addNature( AZVPlugin.CASE_SCHACHTSCHEIN );
+                    //newCase.put( "user", user.get().username().get() );
+                    mcase.set( newCase );
                     getContext().openPanel( CasePanel.ID );
                 }
                 catch (Exception e) {

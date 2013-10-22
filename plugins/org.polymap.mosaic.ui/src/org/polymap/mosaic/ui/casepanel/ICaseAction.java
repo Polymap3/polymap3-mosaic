@@ -16,7 +16,7 @@ package org.polymap.mosaic.ui.casepanel;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.IAppContext;
@@ -38,7 +38,18 @@ public interface ICaseAction {
      */
     public boolean init( IPanelSite site, IAppContext context );
     
-    public void fillAction( Action action );
+    public void dispose();
+    
+    /**
+     * The action is displayed in the toolbar of the {@link CasePanel}. By default
+     * the name, description and icon is initialized with the values specified in the
+     * extension. This method allows to adjust these settings.
+     * <p/>
+     * If name and icon is set to null then there is no visible button in the toolbar.
+     * 
+     * @param action
+     */
+    public void fillAction( IAction action );
 
     /**
      * Provide content for the status area of the case panel. Priority of the entries

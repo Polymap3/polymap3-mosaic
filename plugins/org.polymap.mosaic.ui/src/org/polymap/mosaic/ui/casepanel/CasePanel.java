@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -86,7 +87,7 @@ public class CasePanel
     /** The action that currently has an open action section. */ 
     protected CaseActionHolder              activeAction;
 
-    private Composite contentSection;
+    private Composite                       contentSection;
     
     
     /**
@@ -113,6 +114,15 @@ public class CasePanel
         super.init( site, context );
         log.info( "CASE: " + mcase.get() );
         return false;
+    }
+
+
+    @Override
+    public void dispose() {
+        for (CaseActionHolder holder : caseActions) {
+            holder.caseAction.dispose();
+        }
+        caseActions.clear();
     }
 
 
@@ -259,39 +269,50 @@ public class CasePanel
             
             holder.caseAction.fillAction( action );
             
-            holder.btn = tk.createButton( body, action.getText(), SWT.TOGGLE );
-            holder.btn.setToolTipText( action.getToolTipText() );
-            holder.btn.setEnabled( action.isEnabled() );
-            
-            FormDataFactory layoutData = FormDataFactory.filled().right( -1 );
-            if (prev != null) {
-                layoutData.left( prev );
-            }
-            holder.btn.setLayoutData( layoutData.create() );
-            holder.btn.addSelectionListener( new SelectionAdapter() {
-                public void widgetSelected( SelectionEvent e ) {
-                    if (holder.btn.getSelection()) {
-                        activeAction = holder;
-                        holder.btn.setSelection( true );
-
-                        submitBtn.setEnabled( true );
-                        discardBtn.setEnabled( true );
-
-                        updateActionSection( holder );
-                    }
-                    else {
-                        discardActiveAction();
-                    }
+            if (action.getText() != null || action.getImageDescriptor() != null) {
+                holder.btn = tk.createButton( body, action.getText(), SWT.TOGGLE );
+                holder.btn.setToolTipText( action.getToolTipText() );
+                holder.btn.setEnabled( action.isEnabled() );
+                ImageDescriptor icon = action.getImageDescriptor();
+                if (icon != null) {
+                    holder.btn.setImage( MosaicUiPlugin.getDefault().images().image( icon, icon.toString() ) );
                 }
-            });
-            prev = holder.btn;
+                if (holder.ext.isCaseChangeAction()) {
+                    holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
+                }
+
+                FormDataFactory layoutData = FormDataFactory.filled().right( -1 );
+                if (prev != null) {
+                    layoutData.left( prev );
+                }
+                holder.btn.setLayoutData( layoutData.create() );
+                holder.btn.addSelectionListener( new SelectionAdapter() {
+                    public void widgetSelected( SelectionEvent e ) {
+                        if (holder.btn.getSelection()) {
+                            activeAction = holder;
+                            holder.btn.setSelection( true );
+
+                            submitBtn.setEnabled( true );
+                            discardBtn.setEnabled( true );
+
+                            updateActionSection( holder );
+                        }
+                        else {
+                            discardActiveAction();
+                        }
+                    }
+                });
+                prev = holder.btn;
+            }
         }
     }
     
     
     private void discardActiveAction() {
         activeAction.caseAction.discard();
-        activeAction.btn.setSelection( false );
+        if (activeAction.btn != null) {
+            activeAction.btn.setSelection( false );
+        }
         updateActionSection( null );
         submitBtn.setEnabled( false );
         discardBtn.setEnabled( false );

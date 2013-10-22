@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -86,8 +87,28 @@ class CaseActionExtension {
     }
     
     public ImageDescriptor getIcon() {
-        String res = elm.getAttribute( "icon" );
-        return res != null ? MosaicUiPlugin.getDefault().images().imageDescriptor( res ) : null;
+        String path = elm.getAttribute( "icon" );
+        if (path == null) {
+            return null;
+        }
+        
+        String contributor = elm.getDeclaringExtension().getContributor().getName();
+//        Bundle bundle = Platform.getBundle( contributor );
+//        String pluginId = bundle.getSymbolicName();
+        
+        ImageRegistry images = MosaicUiPlugin.getDefault().getImageRegistry();
+        String key = contributor + "." + path;
+        ImageDescriptor result = images.getDescriptor( key );
+        if (result == null) {
+            result = MosaicUiPlugin.imageDescriptorFromPlugin( contributor, path );
+            images.put( key, result );
+        }
+        return result;
     }
     
+    public boolean isCaseChangeAction() {
+        String result = elm.getAttribute( "icon" );
+        return result != null ? Boolean.parseBoolean( result ) : false;
+        
+    }
 }

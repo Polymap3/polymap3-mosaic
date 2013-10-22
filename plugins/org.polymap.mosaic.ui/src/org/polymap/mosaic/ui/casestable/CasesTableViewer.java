@@ -74,16 +74,16 @@ public class CasesTableViewer
     private FeatureType             schema;
     
     
-    public CasesTableViewer( Composite parent, Filter baseFilter, int style ) {
+    public CasesTableViewer( Composite parent, MosaicRepository2 repo, Filter baseFilter, int style ) {
         super( parent, /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ SWT.NONE );
 
-        this.repo = MosaicRepository2.instance();
+        this.repo = repo;
         this.baseFilter = baseFilter != null ? baseFilter : Filter.INCLUDE;
         
         fs = repo.featureSource( IMosaicCase.class );
         schema = fs.getSchema();
         addColumn( new StatusColumn() );
-        PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "", "name" ) );
+        PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "name" ) );
         addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 2, 100 ) );
         addColumn( new NatureColumn() );
         addColumn( new DateColumn() );
@@ -134,7 +134,7 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public StatusColumn() {
-            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "" );
             
@@ -191,7 +191,7 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public DateColumn() {
-            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "Angelegt am" );
             setLabelProvider( new ColumnLabelProvider() {
@@ -213,7 +213,7 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public NatureColumn() {
-            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "Art" );
             setLabelProvider( new ColumnLabelProvider() {

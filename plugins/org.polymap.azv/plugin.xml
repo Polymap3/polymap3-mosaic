@@ -46,6 +46,7 @@
    <extension
          point="org.polymap.mosaic.ui.caseActions">
       <caseAction
+            caseStateChange="true"
             class="org.polymap.azv.ui.NutzerFreigabeCaseAction"
             description="Rechte des Nutzers festlegen"
             id="org.polymap.azv.ui.NutzerFreigabeCaseAction"
@@ -59,8 +60,20 @@
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.DokumenteCaseAction"
+            icon="resources/icons/letters.png"
             id="org.polymap.azv.DokumentCaseAction"
             name="Dokumente anhängen">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.SchachtscheinAntragCaseAction"
+            icon="resources/icons/letter.png"
+            id="org.polymap.azv.SchachtscheinCaseAction"
+            name="Schachtschein beantragen">
+      </caseAction>
+      <caseAction
+            class="org.polymap.azv.ui.EreignisseCaseAction"
+            id="org.polymap.azv.EreignisseCaseAction">
       </caseAction>
    </extension>
 

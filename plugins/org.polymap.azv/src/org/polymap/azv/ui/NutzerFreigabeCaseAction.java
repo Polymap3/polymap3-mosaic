@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import org.eclipse.swt.SWT;
@@ -40,30 +39,23 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 
 import org.polymap.core.ui.ColumnLayoutFactory;
-import org.polymap.core.ui.FormDataFactory;
-import org.polymap.core.ui.FormLayoutFactory;
-
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanelSite;
-import org.polymap.rhei.batik.toolkit.IPanelSection;
-import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 
 import org.polymap.azv.AZVPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
-import org.polymap.mosaic.ui.eventstable.EventsTableViewer;
 
 /**
  * 
@@ -83,6 +75,9 @@ public class NutzerFreigabeCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
 
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<MosaicRepository2> repo;
+    
     private User                            user;
 
     
@@ -97,33 +92,19 @@ public class NutzerFreigabeCaseAction
             user = UserRepository.instance().findUser( username );
             return true;
         }
-        return true;
+        return false;
     }
 
 
     @Override
     public void fillStatus( CaseStatus status ) {
-        status.put( "Vorgang", mcase.get().getName(), 100 );
-        IMosaicCaseEvent created = Iterables.getFirst( mcase.get().getEvents(), null );
-        status.put( "Angelegt am", df.format( created.getTimestamp() ), 99 );
-        status.put( "Name", Joiner.on( " " ).skipNulls().join( user.salutation().get(), user.firstname().get(), user.name().get() ), 98  );
+        status.put( "Neuer Nutzer (Kunde)", Joiner.on( " " ).skipNulls().join( user.salutation().get(), user.firstname().get(), user.name().get() ), 98  );
     }
 
 
     @Override
-    public void fillAction( Action action ) {
+    public void fillAction( IAction action ) {
         // keep default settings
-    }
-
-
-    @Override
-    public void fillContentArea( Composite parent ) {
-        // events table
-        IPanelSection eventsSection = site.toolkit().createPanelSection( parent, "Ereignisse" );
-        eventsSection.addConstraint( new PriorityConstraint( 0, 10 ) );
-        eventsSection.getBody().setLayout( FormLayoutFactory.defaults().create() );
-        EventsTableViewer viewer = new EventsTableViewer( eventsSection.getBody(), mcase.get(), SWT.NONE );
-        viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
     }
 
 
@@ -176,7 +157,7 @@ public class NutzerFreigabeCaseAction
         UserRepository um = UserRepository.instance();
         um.commitChanges();
         
-        MosaicRepository2 mosaic = MosaicRepository2.instance();
+        MosaicRepository2 mosaic = repo.get();
         mosaic.closeCase( mcase.get() );
         mosaic.commitChanges();
     }
