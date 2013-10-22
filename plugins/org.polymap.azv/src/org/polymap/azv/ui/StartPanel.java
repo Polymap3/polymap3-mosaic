@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.rwt.lifecycle.WidgetUtil;
+
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.Viewer;
@@ -253,8 +255,8 @@ public class StartPanel
                     return natures.contains( AZVPlugin.CASE_NUTZER ); 
                 }
             })
-            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/search.png" ) )
-            .setTooltip( "Neue Kunden filtern" );
+            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/users.png" ) )
+            .setTooltip( "Kundenänträge anzeigen" );
         }
         
         if (SecurityUtils.isUserInGroup( AZVPlugin.ROLE_SCHACHTSCHEIN )) {
@@ -265,13 +267,19 @@ public class StartPanel
                 }
             })
             .setIcon( BatikPlugin.instance().imageForName( "resources/icons/letter.png" ) )
-            .setTooltip( "Schachtscheinanträge filtern" );
+            .setTooltip( "Schachtscheinanträge anzeigen" );
         }
         
         // searchField
-        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), 
-                casesViewer.propertyNames() );
-        searchField.getControl().setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), casesViewer.propertyNames() );
+        Composite searchCtrl = searchField.getControl();
+        searchCtrl.setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+        for (Control child : searchCtrl.getChildren()) {
+            if (child instanceof Button) {
+                ((Button)child).setImage( BatikPlugin.instance().imageForName( "resources/icons/close.png" ) );
+                ((Button)child).setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );                
+            }
+        }
     }
     
     

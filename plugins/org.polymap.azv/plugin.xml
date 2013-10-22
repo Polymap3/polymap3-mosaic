@@ -55,19 +55,19 @@
       <caseAction
             class="org.polymap.azv.ui.NutzerAnVorgangCaseAction"
             description="Den Kunden für diesen Vorgang auswählen"
+            icon="resources/icons/user.png"
             id="org.polymap.azv.NutzerAnVorgangCaseAction"
             name="Kunden wählen">
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.DokumenteCaseAction"
-            icon="resources/icons/letters.png"
+            icon="resources/icons/attachment.png"
             id="org.polymap.azv.DokumentCaseAction"
             name="Dokumente anhängen">
       </caseAction>
       <caseAction
             caseStateChange="true"
             class="org.polymap.azv.ui.SchachtscheinAntragCaseAction"
-            icon="resources/icons/letter.png"
             id="org.polymap.azv.SchachtscheinCaseAction"
             name="Schachtschein beantragen">
       </caseAction>

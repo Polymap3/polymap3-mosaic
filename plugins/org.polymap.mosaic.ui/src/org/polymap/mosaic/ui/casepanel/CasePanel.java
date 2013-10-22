@@ -36,6 +36,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.DefaultPanel;
@@ -236,11 +237,12 @@ public class CasePanel
         body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
 
-        submitBtn = tk.createButton( body, "OK", SWT.PUSH );
+        submitBtn = tk.createButton( body, null, SWT.PUSH );
         submitBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
         submitBtn.setLayoutData( FormDataFactory.filled().right( -1 ).create() );
         submitBtn.setEnabled( false );
         submitBtn.setToolTipText( "Aktion abschließen und Änderungen übernehmen" );
+        submitBtn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
         submitBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 activeAction.caseAction.submit();
@@ -249,11 +251,12 @@ public class CasePanel
                 discardBtn.setEnabled( false );
             }
         });
-        discardBtn = tk.createButton( body, "...", SWT.PUSH );
+        discardBtn = tk.createButton( body, null, SWT.PUSH );
         discardBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );
         discardBtn.setLayoutData( FormDataFactory.filled().left( submitBtn ).right( -1 ).create() );
         discardBtn.setEnabled( false );
         discardBtn.setToolTipText( "Änderungen verwerfen" );
+        discardBtn.setImage( BatikPlugin.instance().imageForName( "resources/icons/close.png" ) );
         discardBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 discardActiveAction();
@@ -279,6 +282,9 @@ public class CasePanel
                 }
                 if (holder.ext.isCaseChangeAction()) {
                     holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
+                    if (icon == null) {
+                        holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
+                    }
                 }
 
                 FormDataFactory layoutData = FormDataFactory.filled().right( -1 );

@@ -107,7 +107,7 @@ class CaseActionExtension {
     }
     
     public boolean isCaseChangeAction() {
-        String result = elm.getAttribute( "icon" );
+        String result = elm.getAttribute( "caseStateChange" );
         return result != null ? Boolean.parseBoolean( result ) : false;
         
     }
