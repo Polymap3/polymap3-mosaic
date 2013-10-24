@@ -29,8 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
@@ -96,8 +94,6 @@ public class EventsTableViewer
         
         // suppress deferred loading to fix "empty table" issue
         Iterable<? extends IMosaicCaseEvent> events = mcase.getEvents();
-        log.info( "events: " + Lists.newArrayList( events ) );
-        log.info( "events: " + Lists.newArrayList( events ) );
 
         //            FeatureCollection fc = fs.getFeatures( baseFilter );
         //            log.info( "events 2: " + Iterators.toString( fc.iterator() ) );
@@ -116,7 +112,8 @@ public class EventsTableViewer
 
     @EventHandler(display=true)
     protected void caseChanged( PropertyChangeEvent ev ) {
-        refresh();        
+        Iterable<? extends IMosaicCaseEvent> events = mcase.getEvents();
+        setInput( events );
     }
     
     

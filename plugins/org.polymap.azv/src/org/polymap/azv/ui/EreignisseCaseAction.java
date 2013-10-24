@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.Iterables;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -29,10 +30,9 @@ import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -40,6 +40,7 @@ import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
+import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 import org.polymap.mosaic.ui.eventstable.EventsTableViewer;
 
 /**
@@ -55,19 +56,30 @@ public class EreignisseCaseAction
 
     private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
     
-    private IPanelSite                      site;
+    private ICaseActionSite                 site;
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
+
+    private EventsTableViewer               viewer;
     
     
     @Override
-    public boolean init( IPanelSite _site, IAppContext _context ) {
+    public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         return mcase.get() != null && repo.get() != null;
+    }
+
+
+    @Override
+    public void dispose() {
+        if (viewer != null) {
+            viewer.dispose();
+            viewer = null;
+        }
     }
 
 
@@ -90,7 +102,7 @@ public class EreignisseCaseAction
         IPanelSection eventsSection = site.toolkit().createPanelSection( parent, "Ereignisse" );
         eventsSection.addConstraint( new PriorityConstraint( 0, 10 ) );
         eventsSection.getBody().setLayout( FormLayoutFactory.defaults().create() );
-        EventsTableViewer viewer = new EventsTableViewer( eventsSection.getBody(), repo.get(), mcase.get(), SWT.NONE );
+        viewer = new EventsTableViewer( eventsSection.getBody(), repo.get(), mcase.get(), SWT.NONE );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
     }
 

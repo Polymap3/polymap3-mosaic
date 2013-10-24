@@ -30,7 +30,11 @@ public interface IMosaicCase {
 
     public String getName();
 
+    public void setName( String value );
+
     public String getDescription();
+    
+    public void setDescription( String value );
 
     public Set<String> getNatures();
     

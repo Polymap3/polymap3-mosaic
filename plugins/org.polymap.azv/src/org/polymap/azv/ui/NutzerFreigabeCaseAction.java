@@ -41,21 +41,23 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IAction;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.ui.ColumnLayoutFactory;
+
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 
 import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
+import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 
 /**
  * 
@@ -70,7 +72,10 @@ public class NutzerFreigabeCaseAction
 
     private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
     
-    private IPanelSite                      site;
+    public static final IMessages       i18n = Messages.forPrefix( "NutzerFreigabe" );
+
+    
+    private ICaseActionSite                 site;
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -82,7 +87,7 @@ public class NutzerFreigabeCaseAction
 
     
     @Override
-    public boolean init( IPanelSite _site, IAppContext _context ) {
+    public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         IMosaicCase mycase = mcase.get();
         log.info( "CASE:" + mycase );
@@ -98,7 +103,7 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void fillStatus( CaseStatus status ) {
-        status.put( "Neuer Nutzer (Kunde)", Joiner.on( " " ).skipNulls().join( user.salutation().get(), user.firstname().get(), user.name().get() ), 98  );
+        status.put( i18n.get( "status" ), Joiner.on( " " ).skipNulls().join( user.salutation().get(), user.firstname().get(), user.name().get() ), 98  );
     }
 
 
@@ -153,7 +158,7 @@ public class NutzerFreigabeCaseAction
 
 
     @Override
-    public void submit() {
+    public void submit() throws Exception {
         UserRepository um = UserRepository.instance();
         um.commitChanges();
         

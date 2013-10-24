@@ -367,12 +367,12 @@ public class MosaicRepository2
 
     
     public IMosaicCase newCase( final String name, final String description, String... natures ) {
-        assert name != null && name.length() > 0;
+        //assert name != null && name.length() > 0;
         return newEntity( MosaicCase2.class, null, new EntityCreator<MosaicCase2>() {
             public void create( MosaicCase2 prototype ) throws Exception {
                 prototype.name.set( name );
                 if (description != null) {
-                    prototype.description.set( name );
+                    prototype.description.set( description );
                 }
 
                 IMosaicCaseEvent created = newCaseEvent( prototype, "Angelegt", "Der Vorgang wurde angelegt.", IMosaicCaseEvent.TYPE_NEW );
@@ -412,7 +412,13 @@ public class MosaicRepository2
         try {
             String path = documentsNameMapper.documentPath( mcase, name );
             FileObject file = documentsRoot.resolveFile( path );
-            return new MosaicDocument( file );
+            MosaicDocument doc = new MosaicDocument( file );
+            
+            newCaseEvent( (MosaicCase2)mcase, doc.getName(), "Ein neues Dokument wurde angelegt: " + doc.getName() 
+                    /*+ ", Typ: " + doc.getContentType()
+                    + ", Größe: " + doc.getSize()*/, "Dokument angelegt"  );
+            
+            return doc;
         }
         catch (FileSystemException e) {
             throw new RuntimeException( e );

@@ -28,11 +28,14 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
@@ -44,12 +47,12 @@ import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.ConstraintLayout;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
-import org.polymap.mosaic.ui.casepanel.CaseStatus.Entry;
 
 /**
  * The general case panel. Actually business logic is provided via the
@@ -89,25 +92,8 @@ public class CasePanel
     protected CaseActionHolder              activeAction;
 
     private Composite                       contentSection;
-    
-    
-    /**
-     * 
-     */
-    class CaseActionHolder
-            implements Comparable<CaseActionHolder> {
-        
-        public CaseActionExtension      ext;
-        public ICaseAction              caseAction;
-        public Action                   action;
-        public Button                   btn;
-        
-        @Override
-        public int compareTo( CaseActionHolder rhs ) {
-            int result = ext.getPriority() - rhs.ext.getPriority();
-            return result != 0 ? result : hashCode() - rhs.hashCode();
-        }
-    }
+
+    private CaseStatusViewer                statusViewer;
     
     
     @Override
@@ -120,10 +106,17 @@ public class CasePanel
 
     @Override
     public void dispose() {
+        if (activeAction != null) {
+            discardActiveAction();
+        }
         for (CaseActionHolder holder : caseActions) {
             holder.caseAction.dispose();
         }
         caseActions.clear();
+        if (statusViewer != null) {
+            statusViewer.dispose();
+            statusViewer = null;
+        }
     }
 
 
@@ -146,10 +139,11 @@ public class CasePanel
             try {
                 ICaseAction caseAction = ext.newInstance();
                 getContext().propagate( caseAction );
-                if (caseAction.init( getSite(), getContext() )) {
-                    CaseActionHolder holder = new CaseActionHolder();
-                    holder.ext = ext;
-                    holder.caseAction = caseAction;
+
+                CaseActionHolder holder = new CaseActionHolder( ext, caseAction );
+                CaseActionSite actionSite = new CaseActionSite( holder );
+                
+                if (caseAction.init( actionSite )) {
                     caseActions.add( holder );
                 }
             }
@@ -185,11 +179,13 @@ public class CasePanel
             child.dispose();
         }
         // create action area
-        actionSection.setLayout( new FillLayout() );
+        FillLayout fill = new FillLayout( SWT.HORIZONTAL );
+        fill.spacing = fill.marginWidth = fill.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        actionSection.setLayout( fill );
         if (holder != null) {
             try {
                 actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
-                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 300 );
+                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 380 );
                 holder.caseAction.createContents( actionSection );
                 contentSection.setEnabled( false );
             }
@@ -210,26 +206,21 @@ public class CasePanel
     protected void createStatusSection( Composite body ) {
         FillLayout layout = new FillLayout();
         //layout.marginWidth = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
-        //layout.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        layout.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        layout.marginHeight -= 6;
         body.setLayout( layout );
-        //body.setData( WidgetUtil.CUSTOM_VARIANT, "atlas-panel-form" );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_STATUS_SECTION );
 
-        CaseStatus status = new CaseStatus();
+        statusViewer = new CaseStatusViewer( getSite() );
         for (CaseActionHolder holder: caseActions) {
             try {
-                holder.caseAction.fillStatus( status );
+                holder.caseAction.fillStatus( statusViewer.status );
             }
             catch (Throwable e) {
                 log.warn( "", e );
             }
         }
-        StringBuilder buf = new StringBuilder( 1024 );
-        for (Entry entry : status.entries()) {
-            buf.append( buf.length() > 0 ? " | " : "" );
-            buf.append( entry.getKey() ).append( ": " ).append( "<strong>" ).append( entry.getValue() ).append( "</strong>" );
-        }
-        tk.createFlowText( body, buf.toString() );
+        statusViewer.createContents( body );
     }
     
     
@@ -245,10 +236,7 @@ public class CasePanel
         submitBtn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
         submitBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
-                activeAction.caseAction.submit();
-                updateActionSection( null );
-                submitBtn.setEnabled( false );
-                discardBtn.setEnabled( false );
+                submitActiveAction();
             }
         });
         discardBtn = tk.createButton( body, null, SWT.PUSH );
@@ -295,13 +283,7 @@ public class CasePanel
                 holder.btn.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( SelectionEvent e ) {
                         if (holder.btn.getSelection()) {
-                            activeAction = holder;
-                            holder.btn.setSelection( true );
-
-                            submitBtn.setEnabled( true );
-                            discardBtn.setEnabled( true );
-
-                            updateActionSection( holder );
+                            activateAction( holder );
                         }
                         else {
                             discardActiveAction();
@@ -313,12 +295,45 @@ public class CasePanel
         }
     }
     
+
+    private void activateAction( CaseActionHolder holder ) {
+        if (activeAction != null) {
+            discardActiveAction();
+        }
+        activeAction = holder;
+        holder.btn.setSelection( true );
+
+        submitBtn.setEnabled( true );
+        discardBtn.setEnabled( true );
+
+        updateActionSection( holder );
+        holder.updateEnabled();
+    }
+    
+
+    private void submitActiveAction() {
+        try {
+            activeAction.caseAction.submit();
+            if (activeAction.btn != null) {
+                activeAction.btn.setSelection( false );
+            }
+            activeAction = null;
+            updateActionSection( null );
+            submitBtn.setEnabled( false );
+            discardBtn.setEnabled( false );
+        }
+        catch (Exception e) {
+            BatikApplication.handleError( "Die Änderungen konnten nicht korrekt übernommen werden.", e );
+        }
+    }
+    
     
     private void discardActiveAction() {
         activeAction.caseAction.discard();
-        if (activeAction.btn != null) {
+        if (activeAction.btn != null && !activeAction.btn.isDisposed()) {
             activeAction.btn.setSelection( false );
         }
+        activeAction = null;
         updateActionSection( null );
         submitBtn.setEnabled( false );
         discardBtn.setEnabled( false );
@@ -340,6 +355,112 @@ public class CasePanel
                 log.warn( "Exception while fillContentArea()", e );
             }
         }
+    }
+    
+    
+    /**
+     * 
+     */
+    class CaseActionHolder
+            implements Comparable<CaseActionHolder> {
+        
+        public CaseActionExtension  ext;
+        public ICaseAction          caseAction;
+        public Action               action;
+        public Button               btn;
+        protected boolean           valid = true, dirty = true;
+        
+        protected CaseActionHolder( CaseActionExtension ext, ICaseAction caseAction ) {
+            this.ext = ext;
+            this.caseAction = caseAction;
+        }
+
+        protected void updateEnabled() {
+            if (submitBtn != null && !submitBtn.isDisposed()) {
+                submitBtn.setEnabled( dirty && valid );            
+                discardBtn.setEnabled( dirty );
+            }
+        }
+        
+        @Override
+        public int compareTo( CaseActionHolder rhs ) {
+            int result = ext.getPriority() - rhs.ext.getPriority();
+            return result != 0 ? result : hashCode() - rhs.hashCode();
+        }
+    }
+
+
+    /**
+     * 
+     */
+    class CaseActionSite
+            implements ICaseActionSite {
+
+        protected CaseActionHolder  holder;
+        
+        public CaseActionSite( CaseActionHolder holder ) {
+            assert holder != null;
+            this.holder = holder;
+        }
+
+        @Override
+        public IPanelSite getPanelSite() {
+            return CasePanel.this.getSite();
+        }
+
+        @Override
+        public IAppContext getContext() {
+            return CasePanel.this.getContext();
+        }
+
+        @Override
+        public void setDirty( boolean dirty ) {
+            holder.dirty = dirty;
+            holder.updateEnabled();
+        }
+
+        @Override
+        public void setValid( boolean valid ) {
+            holder.valid = valid;
+            holder.updateEnabled();
+        }
+
+        @Override
+        public String getActionId() {
+            return holder.ext.getId();
+        }
+
+        @Override
+        public IPanelToolkit toolkit() {
+            return getSite().toolkit();
+        }
+
+        @Override
+        public void activateCaseAction( String actionId ) {
+            assert actionId != null;
+            for (final CaseActionHolder elm: caseActions) {
+                if (elm.ext.getId().equals( actionId )) {
+                    activateAction( elm );
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public void addListener( Object annotated ) {
+            EventManager.instance().subscribe( annotated, new EventFilter<CaseActionEvent>() {
+                public boolean apply( CaseActionEvent input ) {
+                    // XXX Auto-generated method stub
+                    throw new RuntimeException( "not yet implemented." );
+                }
+            });
+        }
+        
+        @Override
+        public boolean removeListener( Object annotated ) {
+            return EventManager.instance().unsubscribe( annotated );
+        }
+        
     }
     
 }

@@ -290,6 +290,7 @@ public class StartPanel
         createActionButton( body, "Wasserqualität", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
                 BatikPlugin.instance().imageForName( "resources/icons/waterdrop.png" ),
+                null,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -299,6 +300,7 @@ public class StartPanel
         actionBtns.add( createActionButton( body, "Entsorgung", 
                 "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
                 BatikPlugin.instance().imageForName( "resources/icons/truck.png" ),
+                AZVPlugin.ROLE_ENTSORGUNG,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -307,6 +309,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
                 BatikPlugin.instance().imageForName( "resources/icons/fire.png" ),
+                AZVPlugin.ROLE_HYDRANTEN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -316,20 +319,22 @@ public class StartPanel
         actionBtns.add( createActionButton( body, "Leitungsauskunft", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
                 BatikPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
+                AZVPlugin.ROLE_LEITUNGSAUSKUNFT,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Schachtscheine", 
-                "Antrag für Schachtscheine",
+        actionBtns.add( createActionButton( body, "Schachtschein", 
+                "Antrag für einen Schachtschein",
                 BatikPlugin.instance().imageForName( "resources/icons/letter.png" ),
+                AZVPlugin.ROLE_SCHACHTSCHEIN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
                     // create new case; commit/rollback inside CaseAction
-                    IMosaicCase newCase = repo.get().newCase( "Schachtschein", "" );
+                    IMosaicCase newCase = repo.get().newCase( "", "" );
                     newCase.addNature( AZVPlugin.CASE_SCHACHTSCHEIN );
                     //newCase.put( "user", user.get().username().get() );
                     mcase.set( newCase );
@@ -343,6 +348,7 @@ public class StartPanel
         actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
                 BatikPlugin.instance().imageForName( "resources/icons/letters.png" ),
+                AZVPlugin.ROLE_DIENSTBARKEITEN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -350,12 +356,13 @@ public class StartPanel
             }
         }));
         for (Control btn : actionBtns) {
-            btn.setEnabled( isAuthenticatedUser() );
+            btn.setEnabled( btn.isEnabled() && isAuthenticatedUser() );
         }
         return section;
     }
 
-    protected Control createActionButton( Composite client, String title, String tooltip, Image image, final SelectionListener l ) {
+    
+    protected Control createActionButton( Composite client, String title, String tooltip, Image image, String role, final SelectionListener l ) {
         Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT, SWT.FLAT );
         result.setToolTipText( tooltip );
         result.setImage( image );
@@ -370,6 +377,9 @@ public class StartPanel
                 l.widgetSelected( null );
             }
         });
+        if (role != null) {
+            result.setEnabled( SecurityUtils.isUserInGroup( role ) );
+        }
         return result;
     }
 }

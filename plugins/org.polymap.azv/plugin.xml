@@ -72,8 +72,18 @@
             name="Schachtschein beantragen">
       </caseAction>
       <caseAction
+            class="org.polymap.azv.ui.SchachtscheinStartCaseAction"
+            description="Bezeichnung und Ort der Maßnahme"
+            id="org.polymap.azv.SchachtscheinStartCaseAction"
+            name="Maßnahme">
+      </caseAction>
+      <caseAction
             class="org.polymap.azv.ui.EreignisseCaseAction"
             id="org.polymap.azv.EreignisseCaseAction">
+      </caseAction>
+      <caseAction
+            class="org.polymap.azv.ui.KarteCaseAction"
+            id="org.polymap.azv.KarteCaseAction">
       </caseAction>
    </extension>
 

@@ -34,25 +34,26 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
-import org.polymap.core.ui.upload.Upload;
 import org.polymap.core.ui.upload.IUploadHandler;
+import org.polymap.core.ui.upload.Upload;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+
+import org.polymap.azv.AZVPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicDocument;
-import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
+import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 
 /**
  * Dokumente hochladen an Vorgang.
@@ -71,9 +72,7 @@ public class DokumenteCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
 
-    private IPanelSite                      site;
-
-    private IAppContext                     context;
+    private ICaseActionSite                 site;
 
     private IPanelSection                   personSection;
 
@@ -85,10 +84,10 @@ public class DokumenteCaseAction
 
     
     @Override
-    public boolean init( IPanelSite _site, IAppContext _context ) {
+    public boolean init( ICaseActionSite _site ) {
         this.site = _site;
-        this.context = _context;
-        return mcase.get() != null && repo.get() != null;
+        return mcase.get() != null && repo.get() != null
+                && !mcase.get().getNatures().contains( AZVPlugin.CASE_NUTZER );
     }
 
 
@@ -121,9 +120,9 @@ public class DokumenteCaseAction
             IOUtils.closeQuietly( out );
         }
 
-        repo.get().newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
-                ", Typ: " + doc.getContentType() +
-                ", Größe: " + doc.getSize(), "Dokument angelegt"  );
+//        repo.get().newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
+//                ", Typ: " + doc.getContentType() +
+//                ", Größe: " + doc.getSize(), "Dokument angelegt"  );
         repo.get().commitChanges();
         
         display.asyncExec( new Runnable() {

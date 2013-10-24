@@ -78,6 +78,10 @@ class CaseActionExtension {
         return result != null ? Integer.parseInt( result ) : 0; 
     }
 
+    public String getId() {
+        return elm.getAttribute( "id" );
+    }
+    
     public String getName() {
         return elm.getAttribute( "name" );
     }

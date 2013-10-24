@@ -37,7 +37,7 @@ public class SimpleFilesystemMapper
 
     @Override
     public String documentPath( IMosaicCase mcase, String name ) {
-        return Joiner.on( "/").skipNulls().join( normalize( mcase.getName() ), normalize( name ) );
+        return Joiner.on( "/").skipNulls().join( normalize( mcase.getId() ), normalize( name ) );
     }
     
     

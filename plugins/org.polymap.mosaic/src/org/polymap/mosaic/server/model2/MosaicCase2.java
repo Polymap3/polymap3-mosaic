@@ -81,6 +81,10 @@ public class MosaicCase2
     
     protected Property<String>          documentsDir;
     
+
+    protected MosaicRepository2 repo() {
+        return MosaicRepository2.session( context.getUnitOfWork() );
+    }
     
     @Override
     public String getId() {
@@ -93,8 +97,20 @@ public class MosaicCase2
     }
 
     @Override
+    public void setName( String value ) {
+        name.set( value );
+        repo().newCaseEvent( this, "Name: " + value, "Der Name wurde geändert auf: " + value, "Wert"  );
+    }
+
+    @Override
     public String getDescription() {
         return description.get();
+    }
+
+    @Override
+    public void setDescription( String value ) {
+        description.set( value );
+        repo().newCaseEvent( this, "Beschreibung: " + value, "Die Beschreibung wurde geändert auf: " + value, "Wert"  );
     }
 
     @Override
@@ -111,25 +127,37 @@ public class MosaicCase2
         else if (!Iterables.contains( getNatures(), nature )) {
             natures.set( Joiner.on( ',' ).join( natures.get(), nature ) );
         }
+        repo().newCaseEvent( this, "Natur: " + nature, "Der Natur des Vorgangs wurde gesetzt auf: " + natures.get(), "Wert"  );
     }
 
     @Override
     public String put( final String key, final String value ) {
-        // FIXME check if key already exists
-        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
-        repo.newEntity( MosaicCaseKeyValue.class, null, new EntityCreator<MosaicCaseKeyValue>() {
-            public void create( MosaicCaseKeyValue prototype ) throws Exception {
-                prototype.caseId.set( getId() );
-                prototype.key.set( key );
-                prototype.value.set( value );
-            }
-        });
+        final MosaicRepository2 repo = repo();
+        MosaicCaseKeyValue current = getKeyValue( key );
+        if (current != null) {
+            current.value.set( value );
+            
+            repo.newCaseEvent( this, "Wert: " + value, 
+                    "Der Wert \"" + key + "\" wurde geändert auf: " + value, "Wert"  );
+        }
+        else {
+            repo.newEntity( MosaicCaseKeyValue.class, null, new EntityCreator<MosaicCaseKeyValue>() {
+                public void create( MosaicCaseKeyValue prototype ) throws Exception {
+                    prototype.caseId.set( getId() );
+                    prototype.key.set( key );
+                    prototype.value.set( value );
+
+                    repo.newCaseEvent( MosaicCase2.this, "Neuer Wert: " + value, 
+                            "Der Wert \"" + key + "\" wurde angelegt mit: " + value, "Wert"  );
+                }
+            });
+        }
         return null;
     }
 
     @Override
     public String get( String key ) {
-        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
+        MosaicRepository2 repo = repo();
         FilterFactory2 ff = MosaicRepository2.ff;
         Filter filter = ff.and(
                 ff.equals( ff.property( "key" ), ff.literal( key ) ),
@@ -139,6 +167,17 @@ public class MosaicCase2
         return result.size() == 1 ? Iterables.getOnlyElement( result, null ).value.get() : null;
     }
 
+    protected MosaicCaseKeyValue getKeyValue( String key ) {
+        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
+        FilterFactory2 ff = MosaicRepository2.ff;
+        Filter filter = ff.and(
+                ff.equals( ff.property( "key" ), ff.literal( key ) ),
+                ff.equals( ff.property( "caseId" ), ff.literal( getId() ) ) );
+        Collection<MosaicCaseKeyValue> result = repo.query( MosaicCaseKeyValue.class, filter ).maxResults( 2 ).execute();
+        assert result.size() < 2;
+        return result.size() == 1 ? Iterables.getOnlyElement( result, null ) : null;
+    }
+    
     @Override
     public Iterable<? extends IMosaicCaseEvent> getEvents() {
         MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
