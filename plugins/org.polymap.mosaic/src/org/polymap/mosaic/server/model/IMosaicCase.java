@@ -14,7 +14,7 @@
  */
 package org.polymap.mosaic.server.model;
 
-
+import java.util.Date;
 import java.util.Set;
 
 import org.polymap.core.project.IMap;
@@ -35,6 +35,12 @@ public interface IMosaicCase {
     public String getDescription();
     
     public void setDescription( String value );
+
+    public Date getCreated();
+
+    public Date getLastModified();
+
+    public String getStatus();
 
     public Set<String> getNatures();
     

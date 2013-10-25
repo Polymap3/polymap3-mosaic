@@ -36,18 +36,20 @@ import com.google.common.collect.Lists;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.action.IAction;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.ui.PersonForm;
 
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.Messages;
@@ -108,8 +110,22 @@ public class NutzerFreigabeCaseAction
 
 
     @Override
-    public void fillAction( IAction action ) {
-        // keep default settings
+    public void fillContentArea( Composite parent ) {
+        IPanelSection personSection = site.toolkit().createPanelSection( parent, "Nutzerdaten" );
+        personSection.addConstraint( new PriorityConstraint( 1, 10 ) );
+        personSection.getBody().setLayout( new FillLayout() );
+        
+        String username = mcase.get().get( "user" );
+        User umuser = UserRepository.instance().findUser( username );
+        if (umuser != null) {
+            PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
+            personForm.createContents( personSection );
+            personSection.getBody().setEnabled( false );            
+        }
+        else {
+            site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen" )
+                    .setData( "no_user_yet", Boolean.TRUE );
+        }
     }
 
 

@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 
 import org.geotools.data.FeatureSource;
@@ -45,10 +46,12 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableViewer;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
-import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -90,11 +93,30 @@ public class CasesTableViewer
         
         try {
             // supress deferred loading to fix "empty table" issue
-            setContent( fs.getFeatures( baseFilter ) );
+            setContent( fs.getFeatures( this.baseFilter ) );
         }
         catch (IOException e) {
             throw new RuntimeException( e );
         }
+        
+        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+            public boolean apply( PropertyChangeEvent input ) {
+                return input.getSource() instanceof IMosaicCase;
+            }
+        });
+    }
+
+    
+    @Override
+    public void dispose() {
+        EventManager.instance().unsubscribe( this );
+        super.dispose();
+    }
+
+    
+    @EventHandler(display=true)
+    protected void caseChanged( PropertyChangeEvent ev ) {
+        refresh( true );
     }
 
     
@@ -143,7 +165,7 @@ public class CasesTableViewer
                 public String getText( Object elm ) {
                     String fid = ((IFeatureTableElement)elm).fid();
                     MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
-                    String status = MosaicCaseEvents.caseStatus( mcase );
+                    String status = mcase.getStatus();  //MosaicCaseEvents.caseStatus( mcase );
                     if (IMosaicCaseEvent.TYPE_NEW.equals( status )) {
                         return "NEU";
                     }
@@ -158,7 +180,7 @@ public class CasesTableViewer
                 public Color getBackground( Object elm ) {
                     String fid = ((IFeatureTableElement)elm).fid();
                     MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
-                    String status = MosaicCaseEvents.caseStatus( mcase );
+                    String status = mcase.getStatus();  //MosaicCaseEvents.caseStatus( mcase );
                     if (IMosaicCaseEvent.TYPE_NEW.equals( status )) {
                         return MosaicUiPlugin.COLOR_NEW.get();
                     }
@@ -197,9 +219,9 @@ public class CasesTableViewer
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
                 public String getText( Object elm ) {
-                    IMosaicCase mc = new CaseFinder().apply( (IFeatureTableElement)elm );
-                    IMosaicCaseEvent event = Iterables.getFirst( mc.getEvents(), null );
-                    return event != null ? df.format( event.getTimestamp() ) : "?";
+                    IMosaicCase mcase = new CaseFinder().apply( (IFeatureTableElement)elm );
+                    //IMosaicCaseEvent event = Iterables.getFirst( mc.getEvents(), null );
+                    return df.format( mcase.getCreated() );
                 }
             });
         }

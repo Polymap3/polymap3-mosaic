@@ -15,6 +15,7 @@
 package org.polymap.mosaic.server.model2;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 
 import java.beans.PropertyChangeEvent;
@@ -30,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.Point;
 
+import org.polymap.core.model2.DefaultValue;
 import org.polymap.core.model2.Defaults;
 import org.polymap.core.model2.Description;
 import org.polymap.core.model2.Entity;
@@ -70,6 +72,17 @@ public class MosaicCase2
     @Nullable
     @Defaults
     public Property<String>             natures;
+    
+    @Defaults
+    public Property<Date>               created;
+
+    @Defaults
+    public Property<Date>               lastModified;
+    
+    /** One of: {@link IMosaicCaseEvent#TYPE_OPEN}, {@link IMosaicCaseEvent#TYPE_CLOSED} */
+    @DefaultValue(IMosaicCaseEvent.TYPE_OPEN)
+    public Property<String>             status;
+
 
 //    /** First event is the creation event. */
 //    @Defaults
@@ -114,6 +127,21 @@ public class MosaicCase2
     }
 
     @Override
+    public Date getCreated() {
+        return created.get();
+    }
+
+    @Override
+    public Date getLastModified() {
+        return lastModified.get();
+    }
+
+    @Override
+    public String getStatus() {
+        return status.get();
+    }
+
+    @Override
     public Set<String> getNatures() {
         return ImmutableSet.copyOf( Splitter.on( ',' ).split( natures.get() ) );
     }
@@ -127,7 +155,8 @@ public class MosaicCase2
         else if (!Iterables.contains( getNatures(), nature )) {
             natures.set( Joiner.on( ',' ).join( natures.get(), nature ) );
         }
-        repo().newCaseEvent( this, "Natur: " + nature, "Der Natur des Vorgangs wurde gesetzt auf: " + natures.get(), "Wert"  );
+        // XXX No event. This is done mostly before case is created. Not important for user?
+        //repo().newCaseEvent( this, "Natur: " + nature, "Der Natur des Vorgangs wurde gesetzt auf: " + natures.get(), "Wert"  );
     }
 
     @Override
@@ -198,6 +227,7 @@ public class MosaicCase2
         ((MosaicCaseEvent2)event).caseId.set( getId() );
 //        eventIds.add( event.getId() );
         
+        lastModified.set( new Date() );
         PropertyChangeEvent ev = new PropertyChangeEvent( this, "events", null, event );
         EventManager.instance().publish( ev );
     }

@@ -82,7 +82,8 @@ public class NutzerAnVorgangCaseAction
     @Override
     public boolean init( ICaseActionSite _site ) {
         if (mcase.get() != null && repo.get() != null
-                && SecurityUtils.isUserInGroup( AZVPlugin.ROLE_MA )) {
+                && SecurityUtils.isUserInGroup( AZVPlugin.ROLE_MA )
+                && !mcase.get().getNatures().contains( AZVPlugin.CASE_NUTZER )) {
             
             this.site = _site;
             String username = mcase.get().get( "user" );

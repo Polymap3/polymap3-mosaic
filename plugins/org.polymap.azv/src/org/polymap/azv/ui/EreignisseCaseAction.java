@@ -18,8 +18,6 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.collect.Iterables;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -34,7 +32,6 @@ import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
@@ -91,8 +88,8 @@ public class EreignisseCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         status.put( "Vorgang", mcase.get().getName(), 100 );
-        IMosaicCaseEvent created = Iterables.getFirst( mcase.get().getEvents(), null );
-        status.put( "Angelegt am", df.format( created.getTimestamp() ), 99 );
+        //IMosaicCaseEvent created = Iterables.getFirst( mcase.get().getEvents(), null );
+        status.put( "Angelegt am", df.format( mcase.get().getCreated() ), 99 );
     }
 
 
