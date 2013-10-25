@@ -375,6 +375,10 @@ public class MosaicRepository2
                     prototype.description.set( description );
                 }
 
+                Date now = new Date();
+                prototype.created.set( now );
+                prototype.lastModified.set( now );
+                prototype.status.set( IMosaicCaseEvent.TYPE_OPEN );
                 IMosaicCaseEvent created = newCaseEvent( prototype, "Angelegt", "Der Vorgang wurde angelegt.", IMosaicCaseEvent.TYPE_NEW );
                 prototype.addEvent( created );
 
@@ -404,7 +408,10 @@ public class MosaicRepository2
     
     public void closeCase( IMosaicCase mcase ) {
         IMosaicCaseEvent closed = newCaseEvent( (MosaicCase2)mcase, "Vorgang abgeschlossen", "Dem Nutzer wurden folgende Rechte zugeteilt: ...", IMosaicCaseEvent.TYPE_CLOSED );
-        mcase.addEvent( closed );    
+        mcase.addEvent( closed );
+        
+        ((MosaicCase2)mcase).lastModified.set( new Date() );
+        ((MosaicCase2)mcase).status.set( IMosaicCaseEvent.TYPE_CLOSED );
     }
     
 
@@ -414,6 +421,7 @@ public class MosaicRepository2
             FileObject file = documentsRoot.resolveFile( path );
             MosaicDocument doc = new MosaicDocument( file );
             
+            ((MosaicCase2)mcase).lastModified.set( new Date() );
             newCaseEvent( (MosaicCase2)mcase, doc.getName(), "Ein neues Dokument wurde angelegt: " + doc.getName() 
                     /*+ ", Typ: " + doc.getContentType()
                     + ", Größe: " + doc.getSize()*/, "Dokument angelegt"  );

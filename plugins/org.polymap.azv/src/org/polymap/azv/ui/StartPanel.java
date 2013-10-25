@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.opengis.filter.Filter;
-
+import org.opengis.filter.FilterFactory2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -85,6 +85,7 @@ import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CasePanel;
@@ -224,6 +225,8 @@ public class StartPanel
             }
         };
         loginForm.setShowRegisterLink( true );
+        loginForm.setShowStoreCheck( true );
+        loginForm.setShowLostLink( true );
         loginForm.createContents( loginSection );        
     }
 
@@ -233,7 +236,9 @@ public class StartPanel
         casesSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
-        casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), Filter.INCLUDE, SWT.NONE );
+        FilterFactory2 ff = MosaicUiPlugin.ff;
+        Filter notClosed = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
+        casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), notClosed, SWT.NONE );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 200 ).width( 400 ).create() );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
@@ -255,7 +260,7 @@ public class StartPanel
                     return natures.contains( AZVPlugin.CASE_NUTZER ); 
                 }
             })
-            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/users.png" ) )
+            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/users-filter.png" ) )
             .setTooltip( "Kundenänträge anzeigen" );
         }
         
@@ -266,7 +271,7 @@ public class StartPanel
                     return natures.contains( AZVPlugin.CASE_SCHACHTSCHEIN ); 
                 }
             })
-            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/letter.png" ) )
+            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/letter-filter.png" ) )
             .setTooltip( "Schachtscheinanträge anzeigen" );
         }
         
