@@ -14,12 +14,19 @@
  */
 package org.polymap.mosaic.ui.casepanel;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.ImmutableSortedSet;
+
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventManager;
 
 /**
  * Represents the elements of the status section of an {@link CasePanel}.
@@ -30,7 +37,7 @@ public class CaseStatus {
 
     private static Log log = LogFactory.getLog( CaseStatus.class );
     
-    private List<Entry>         entries = new ArrayList();
+    private Map<String,Entry>           entries = new HashMap();
     
     
     public static class Entry
@@ -56,17 +63,54 @@ public class CaseStatus {
         }
     }
     
+    public void addListener( PropertyChangeListener listener ) {
+        EventManager.instance().subscribe( listener, new EventFilter<PropertyChangeEvent>() {
+            public boolean apply( PropertyChangeEvent input ) {
+                return input.getSource() == CaseStatus.this;
+            }
+        });
+    }
+    
+    public boolean removeListener( PropertyChangeListener listener ) {
+        return EventManager.instance().unsubscribe( listener );
+    }
     
     public boolean put( String key, String value, int priority ) {
-        // FIXME no key check yet
-        return entries.add( new Entry( key, value, priority ) );
+        Entry found = entries.get( key );
+        boolean result;
+        if (found != null) {
+            found.priority = priority;
+            found.value = value;
+            result = false;
+        }
+        else {
+            entries.put( key, new Entry( key, value, priority ) );
+            result = true;
+        }
+        EventManager.instance().publish( new PropertyChangeEvent( this, key, null, value ) );
+        return result;
+    }
+    
+    public boolean put( String key, String value ) {
+        Entry found = entries.get( key );
+        boolean result;
+        if (found != null) {
+            found.value = value;
+            result = false;
+        }
+        else {
+            entries.put( key, new Entry( key, value, 100 ) );
+            result = true;
+        }
+        EventManager.instance().publish( new PropertyChangeEvent( this, key, null, value ) );
+        return result;
     }
     
     /**
      * Sorted entries of this status instance.
      */
     public Iterable<Entry> entries() {
-        return ImmutableSortedSet.copyOf( entries );
+        return ImmutableSortedSet.copyOf( entries.values() );
     }
 
 //    public Set<String> keys() {

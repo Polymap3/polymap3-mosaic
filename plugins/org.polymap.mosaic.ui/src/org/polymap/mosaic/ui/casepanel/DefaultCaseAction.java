@@ -16,10 +16,7 @@ package org.polymap.mosaic.ui.casepanel;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.action.Action;
-
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.IPanelSite;
+import org.eclipse.jface.action.IAction;
 
 /**
  * Provides default, no-op implementation of all methods. 
@@ -30,12 +27,16 @@ public class DefaultCaseAction
         implements ICaseAction {
 
     @Override
-    public boolean init( IPanelSite site, IAppContext context ) {
+    public boolean init( ICaseActionSite site ) {
         return false;
     }
 
     @Override
-    public void fillAction( Action action ) {
+    public void dispose() {
+    }
+
+    @Override
+    public void fillAction( IAction action ) {
     }
 
     @Override
@@ -51,11 +52,21 @@ public class DefaultCaseAction
     }
 
     @Override
-    public void submit() {
+    public void submit() throws Exception {
     }
 
     @Override
     public void discard() {
     }
     
+//    @Override
+//    public boolean isDirty() {
+//        return false;
+//    }
+//
+//    @Override
+//    public boolean isValid() {
+//        return true;
+//    }
+
 }

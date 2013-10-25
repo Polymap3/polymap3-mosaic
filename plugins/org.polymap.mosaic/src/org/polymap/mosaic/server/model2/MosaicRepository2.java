@@ -14,9 +14,13 @@
  */
 package org.polymap.mosaic.server.model2;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import org.geotools.data.DataAccess;
 import org.geotools.data.FeatureSource;
@@ -27,6 +31,11 @@ import org.opengis.filter.FilterFactory2;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.impl.StandardFileSystemManager;
+
+import com.google.common.collect.Iterables;
 
 import org.polymap.core.data.feature.recordstore.LuceneQueryDialect;
 import org.polymap.core.data.feature.recordstore.RDataStore;
@@ -36,11 +45,16 @@ import org.polymap.core.model2.runtime.Query;
 import org.polymap.core.model2.runtime.UnitOfWork;
 import org.polymap.core.model2.runtime.ValueInitializer;
 import org.polymap.core.model2.store.feature.FeatureStoreAdapter;
+import org.polymap.core.runtime.ConcurrentReferenceHashMap;
+import org.polymap.core.runtime.ConcurrentReferenceHashMap.ReferenceType;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.SessionSingleton;
 import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
 
+import org.polymap.mosaic.server.document.SimpleFilesystemMapper;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
+import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.project.MosaicProjectRepository;
 
 /**
@@ -53,20 +67,32 @@ public class MosaicRepository2
 
     private static Log log = LogFactory.getLog( MosaicRepository2.class );
     
-    public static final String          NAMESPACE = "http://polymap.org/mosaic";
+    public static final String              NAMESPACE = "http://polymap.org/mosaic";
 
-    public static final FilterFactory2  ff = CommonFactoryFinder.getFilterFactory2( null );
+    public static final FilterFactory2      ff = CommonFactoryFinder.getFilterFactory2( null );
 
-    private static final Object         initlock = new Object();
+    private static final Object             initlock = new Object();
     
     /** The backend store for features of data and metadata. */
-    private static LuceneRecordStore    lucenestore;
+    private static LuceneRecordStore        lucenestore;
 
     /** {@link DataAccess} based on the local {@link #lucenestore}. */
-    private static RDataStore           datastore;
+    private static RDataStore               datastore;
     
     /** The repo for {@link Entity Entities} modelling the metadata of cases. */
-    private static EntityRepository     repo;
+    private static EntityRepository         repo;
+    
+    /**
+     * Allows entities to find the associated {@link MosaicRepository2} from their
+     * UnitOfWork. 
+     */
+    private static Map<UnitOfWork,MosaicRepository2> sessions = new ConcurrentReferenceHashMap( 32, ReferenceType.WEAK, ReferenceType.WEAK );
+
+    private static StandardFileSystemManager    fsManager;
+    
+    private static FileObject               documentsRoot;
+
+    private static SimpleFilesystemMapper   documentsNameMapper;
 
 //    /** {@link IService} based on the local {@link #datastore}. */
 //    private static RServiceImpl         service;
@@ -76,6 +102,11 @@ public class MosaicRepository2
 //    private static MosaicProjectRepositoryAssembler projectAssempler;
     
     
+    static MosaicRepository2 session( UnitOfWork uow ) {
+        return sessions.get( uow );
+    }
+    
+    
     /**
      * Initialize global, underlying store and EntityRepository.
      */
@@ -83,8 +114,9 @@ public class MosaicRepository2
         try {
             // persistence: workspace / Lucene
             if (dataDir != null) {
-                dataDir.mkdir();
-                lucenestore = new LuceneRecordStore( dataDir, clean );
+                File luceneDir = new File( dataDir, "org.polymap.mosaic.data" );
+                luceneDir.mkdir();
+                lucenestore = new LuceneRecordStore( luceneDir, clean );
             }
             else {
                 lucenestore = new LuceneRecordStore();
@@ -102,6 +134,26 @@ public class MosaicRepository2
                     .setEntities( new Class[] {MosaicCase2.class, MosaicCaseEvent2.class, MosaicCaseKeyValue.class} )
                     .create();
             
+            // Documents store
+            fsManager = new StandardFileSystemManager();
+            URL config = MosaicRepository2.class.getResource( "vfs_config.xml" );
+            fsManager.setConfiguration( config );
+            fsManager.init();
+
+            String rootUri = dataDir != null
+                    ? "file://" + dataDir.getAbsolutePath() + "/org.polymap.mosaic.documents"
+                    : "file:///tmp/org.polymap.mosaic.documents";
+//            rootUri = System.getProperty( PROP_ROOT_URI );
+//            if (rootUri == null) {
+//                throw new IllegalStateException( "System property is missing: " + PROP_ROOT_URI + " (allows to set the WebDAV URL of the remote server, i.e. webdav://admin:login@localhost:10080/webdav/Mosaic)" );
+//            }
+            documentsRoot = fsManager.resolveFile( rootUri );
+            documentsRoot.createFolder();
+            documentsNameMapper = new SimpleFilesystemMapper();
+            for (FileObject child : documentsRoot.getChildren()) {
+                log.info( "DOCUMENTS: " + child );
+            }
+
 //            // IService and IGeoResource for MosaicCase/Event
 //            service = new RServiceImpl( RServiceExtension.toURL( "Mosaic" ), null ) {
 //                protected RDataStore getDS() throws IOException {
@@ -181,21 +233,53 @@ public class MosaicRepository2
     
     
     /**
-     * The repository for the current user session.
+     * Finds data dir from in Workspace or from environment variable and call
+     * {@link #init(File, boolean)}.
      */
-    public static final MosaicRepository2 instance() {
-        // initilaized?
+    public static void init() {
         if (repo == null) {
             synchronized (initlock) {
                 if (repo == null) {
-                    File dataDir = new File( "/home/falko/servers/workspace-mosaic/data" ); // Polymap.getDataDir();
-                    init( new File( dataDir, "org.polymap.mosaic.data" ), false );
+                    File dataDir = null;
+                    try {
+                        dataDir = Polymap.getDataDir();
+                    }
+                    catch (Exception e) {
+                        log.warn( "No Eclipse workbench -> trying env variable: MOSAIC_WORKSPACE_HOME" );
+                        String env = System.getenv( "MOSAIC_WORKSPACE_HOME" );
+                        if (env != null) {
+                            dataDir = new File( env );
+                        }
+                        
+                    }
+                    if (dataDir != null) {
+                        init( dataDir, false );
+                    }
+                    else {
+                        throw new RuntimeException( "No Workbench and no environment variable specified for Mosaic worspace." );
+                    }
                 }
             }
         }
-        return instance( MosaicRepository2.class );
     }
 
+    /**
+     * Creates a new session associated to an {@link UnitOfWork}.
+     * @return Newly created session instance;
+     */
+    public static MosaicRepository2 newInstance() {
+        init();
+        return new MosaicRepository2();
+    }
+    
+    /**
+     * The instance of the current user SessionContext.
+     */
+    public static MosaicRepository2 instance() {
+        init();
+        return instance( MosaicRepository2.class );
+    }
+    
     
     // instance *******************************************
     
@@ -208,8 +292,9 @@ public class MosaicRepository2
 //    private MosaicProjectRepository projectRepo;
     
     
-    protected MosaicRepository2() throws Exception {        
+    protected MosaicRepository2() {        
         uow = repo.newUnitOfWork();
+        sessions.put( uow, this );
 //        projectRepo = new MosaicProjectRepository( projectAssempler );
         
 //        // test/default entries
@@ -282,15 +367,15 @@ public class MosaicRepository2
 
     
     public IMosaicCase newCase( final String name, final String description, String... natures ) {
-        assert name != null && name.length() > 0;
+        //assert name != null && name.length() > 0;
         return newEntity( MosaicCase2.class, null, new EntityCreator<MosaicCase2>() {
             public void create( MosaicCase2 prototype ) throws Exception {
                 prototype.name.set( name );
                 if (description != null) {
-                    prototype.description.set( name );
+                    prototype.description.set( description );
                 }
 
-                IMosaicCaseEvent created = newCaseEvent( prototype, "Angelegt", "Der Vorgang wurde angelegt.", IMosaicCaseEvent.TYPE_CREATED );
+                IMosaicCaseEvent created = newCaseEvent( prototype, "Angelegt", "Der Vorgang wurde angelegt.", IMosaicCaseEvent.TYPE_NEW );
                 prototype.addEvent( created );
 
 //                // metaData project
@@ -322,7 +407,38 @@ public class MosaicRepository2
         mcase.addEvent( closed );    
     }
     
+
+    public IMosaicDocument newDocument( IMosaicCase mcase, String name ) {
+        try {
+            String path = documentsNameMapper.documentPath( mcase, name );
+            FileObject file = documentsRoot.resolveFile( path );
+            MosaicDocument doc = new MosaicDocument( file );
+            
+            newCaseEvent( (MosaicCase2)mcase, doc.getName(), "Ein neues Dokument wurde angelegt: " + doc.getName() 
+                    /*+ ", Typ: " + doc.getContentType()
+                    + ", Größe: " + doc.getSize()*/, "Dokument angelegt"  );
+            
+            return doc;
+        }
+        catch (FileSystemException e) {
+            throw new RuntimeException( e );
+        }
+    }
+
     
+    public Iterable<IMosaicDocument> documents( IMosaicCase mcase ) {
+        try {
+            String path = documentsNameMapper.documentPath( mcase, null );
+            FileObject dir = documentsRoot.resolveFile( path );
+            dir.createFolder();
+            return Iterables.transform( Arrays.asList( dir.getChildren() ), MosaicDocument.toDocument );
+        }
+        catch (FileSystemException e) {
+            throw new RuntimeException( e );
+        }
+    }
+
+
     public <T extends Entity> T newEntity( Class<T> type, String id, final EntityCreator creator ) {
         return uow.createEntity( type, id, new ValueInitializer<T>() {
             public T initialize( T value ) throws Exception {
@@ -337,6 +453,17 @@ public class MosaicRepository2
         try {
             //projectRepo().commitChanges();
             uow.commit();
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
+    
+    
+    public void rollbackChanges() {
+        try {
+            //projectRepo().rollbackChanges();
+            uow.rollback();
         }
         catch (Exception e) {
             throw new RuntimeException( e );

@@ -48,7 +48,7 @@ public class AZVPlugin
     public static final String      ROLE_ENTSORGUNG = "Bedarfsgerechte Entsorgung";
     public static final String      ROLE_MA = "Interner Sachbearbeiter";
 
-    public static final String      CASE_SCHACHTSCHEIN = "Schachtschein beantragen";
+    public static final String      CASE_SCHACHTSCHEIN = "Schachtschein";
     public static final String      CASE_LEITUNGSAUSKUNFT = "Leitungsauskunft";
     public static final String      CASE_DIENSTBARKEITEN = "Dienstbarkeiten";
     public static final String      CASE_HYDRANTEN = "Hydranten";

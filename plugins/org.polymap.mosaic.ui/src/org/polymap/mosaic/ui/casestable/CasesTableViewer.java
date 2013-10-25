@@ -35,22 +35,23 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.rwt.graphics.Graphics;
-
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableViewer;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
+
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
+import org.polymap.mosaic.ui.MosaicUiPlugin;
 
 /**
  * 
@@ -73,16 +74,16 @@ public class CasesTableViewer
     private FeatureType             schema;
     
     
-    public CasesTableViewer( Composite parent, Filter baseFilter, int style ) {
+    public CasesTableViewer( Composite parent, MosaicRepository2 repo, Filter baseFilter, int style ) {
         super( parent, /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ SWT.NONE );
 
-        this.repo = MosaicRepository2.instance();
+        this.repo = repo;
         this.baseFilter = baseFilter != null ? baseFilter : Filter.INCLUDE;
         
         fs = repo.featureSource( IMosaicCase.class );
         schema = fs.getSchema();
         addColumn( new StatusColumn() );
-        PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "", "name" ) );
+        PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "name" ) );
         addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 2, 100 ) );
         addColumn( new NatureColumn() );
         addColumn( new DateColumn() );
@@ -133,48 +134,51 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public StatusColumn() {
-            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "" );
+            
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
                 public String getText( Object elm ) {
                     String fid = ((IFeatureTableElement)elm).fid();
                     MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
-                    List<IMosaicCaseEvent> events = ImmutableList.copyOf( mcase.getEvents() );
-                    if (events.size() == 1) {
+                    String status = MosaicCaseEvents.caseStatus( mcase );
+                    if (IMosaicCaseEvent.TYPE_NEW.equals( status )) {
                         return "NEU";
                     }
+                    else if (IMosaicCaseEvent.TYPE_CLOSED.equals( status )) {
+                        return "ERLEDIGT";
+                    }
                     else {
-                        IMosaicCaseEvent last = events.get( events.size()-1 );
-                        log.info( "event type: " +  last.getEventType() );
-                        if (last.getEventType().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
-                            return "ERLEDIGT";                            
-                        }
-                        else {
-                            return "OFFEN";
-                        }
+                        return "OFFEN";
                     }
                 }
                 @Override
                 public Color getBackground( Object elm ) {
-                    return Graphics.getColor( 0x6e, 0x20, 0xbe );
-//                    switch (((IMosaicCase)elm).antragStatus().get()) {
-//                        case 0: return Graphics.getColor( 0xff, 0xcc, 0x00 );
-//                        case 1: return Graphics.getColor( 0x6e, 0x20, 0xbe );
-//                        default: return Graphics.getColor( 0xf0, 0xf0, 0xf0 );
-//                    }
+                    String fid = ((IFeatureTableElement)elm).fid();
+                    MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
+                    String status = MosaicCaseEvents.caseStatus( mcase );
+                    if (IMosaicCaseEvent.TYPE_NEW.equals( status )) {
+                        return MosaicUiPlugin.COLOR_NEW.get();
+                    }
+                    else if (IMosaicCaseEvent.TYPE_CLOSED.equals( status )) {
+                        return MosaicUiPlugin.COLOR_CLOSED.get();
+                    }
+                    else {
+                        return MosaicUiPlugin.COLOR_OPEN.get();
+                    }
                 }
                 @Override
                 public Color getForeground( Object elm ) {
-                    return Graphics.getColor( 0xff, 0xff, 0xff );                
+                    return MosaicUiPlugin.COLOR_STATUS_FOREGROUND.get();                
                 }
-                @Override
-                public Font getFont( Object element ) {
-                    FontData[] defaultFont = getTable().getFont().getFontData();
-                    FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
-                    return Graphics.getFont( bold );
-                }
+//                @Override
+//                public Font getFont( Object element ) {
+//                    FontData[] defaultFont = getTable().getFont().getFontData();
+//                    FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
+//                    return Graphics.getFont( bold );
+//                }
             });
         }
     }
@@ -187,7 +191,7 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public DateColumn() {
-            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "Angelegt am" );
             setLabelProvider( new ColumnLabelProvider() {
@@ -209,7 +213,7 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public NatureColumn() {
-            super( schema.getDescriptor( new NameImpl( "", "name" ) ) );
+            super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "Art" );
             setLabelProvider( new ColumnLabelProvider() {

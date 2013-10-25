@@ -14,13 +14,12 @@
  */
 package org.polymap.mosaic.ui.casepanel;
 
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.IPanelSite;
 
 /**
  * Contribution to a case {@link CasePanel panel}.
@@ -36,14 +35,27 @@ public interface ICaseAction {
      * 
      * @return False if the action should not be shown for the given case.
      */
-    public boolean init( IPanelSite site, IAppContext context );
+    public boolean init( ICaseActionSite site );
     
-    public void fillAction( Action action );
+    public void dispose();
+    
+    /**
+     * The action is displayed in the toolbar of the {@link CasePanel}. By default
+     * the name, description and icon is initialized with the values specified in the
+     * extension. This method allows to adjust these settings.
+     * <p/>
+     * If name and icon is set to null then there is no visible button in the toolbar.
+     * 
+     * @param action
+     */
+    public void fillAction( IAction action );
 
     /**
      * Provide content for the status area of the case panel. Priority of the entries
      * should be 'around' 100. Less important entries should have a priority smaller
      * than 100.
+     * <p/>
+     * Changes to the status object are reflected in the UI.
      * 
      * @param status The status object to fill.
      */
@@ -56,9 +68,13 @@ public interface ICaseAction {
      */
     public void fillContentArea( Composite parent );
     
+    
     /**
      * Creates the UI of the action area.
-     *
+     * <p/>
+     * Parent has {@link FillLayout} layout manager set. This can be changed. Margins
+     * and spacing should be transfered to new layout manager.
+     * 
      * @param parent
      */
     public void createContents( Composite parent );
@@ -66,8 +82,9 @@ public interface ICaseAction {
     /**
      * Submit the changes made by the UI elements created by
      * {@link #createContents(Composite)}.
+     * @throws Exception XXX
      */
-    public void submit();
+    public void submit() throws Exception;
 
     /**
      * Discard changes made by the UI elements created by

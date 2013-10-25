@@ -66,7 +66,7 @@ public class Model2Test {
         
         // init RAM dir
         MosaicRepository2.init( null, false );
-        repo = MosaicRepository2.instance();
+        repo = MosaicRepository2.newInstance();
     }
 
     @AfterClass

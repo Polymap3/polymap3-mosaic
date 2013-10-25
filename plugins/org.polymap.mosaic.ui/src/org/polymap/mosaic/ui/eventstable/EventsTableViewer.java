@@ -14,20 +14,14 @@
  */
 package org.polymap.mosaic.ui.eventstable;
 
-import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
-
 import java.util.Arrays;
 import java.util.List;
 
 import java.beans.PropertyChangeEvent;
-import java.io.IOException;
-
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
-import org.opengis.filter.Filter;
-
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,8 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -52,6 +46,8 @@ import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicCaseEvent2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
+import org.polymap.mosaic.ui.CompositesFeatureContentProvider;
+import org.polymap.mosaic.ui.MosaicUiPlugin;
 
 /**
  * 
@@ -69,16 +65,15 @@ public class EventsTableViewer
     
     private IMosaicCase             mcase;
     
-    private Filter                  baseFilter;
-
-    private FeatureSource           fs;
+//    private FeatureSource           fs;
 
     private FeatureType             schema;
     
     
-    public EventsTableViewer( Composite parent, IMosaicCase mcase, int style ) {
+    public EventsTableViewer( Composite parent, MosaicRepository2 repo, IMosaicCase mcase, int style ) {
         super( parent, /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ SWT.NONE );
         this.mcase = mcase;
+        this.repo = repo;
 
         EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
             public boolean apply( PropertyChangeEvent input ) {
@@ -86,27 +81,25 @@ public class EventsTableViewer
             }
         });
         
-        this.repo = MosaicRepository2.instance();
-        this.baseFilter = ff.equals( ff.property( "caseId" ), ff.literal( mcase.getId() ) );
-        
-        fs = repo.featureSource( IMosaicCaseEvent.class );
+        FeatureSource fs = repo.featureSource( IMosaicCaseEvent.class );
         schema = fs.getSchema();
-        PropertyDescriptor prop = schema.getDescriptor( new NameImpl( "", "name" ) );
+        //prop = schema.getDescriptor( new NameImpl( "", "type" ) );
+        addColumn( new StatusColumn().setWeight( 1, 60 ).setHeader( "Art" ) );
+        
+        PropertyDescriptor prop = schema.getDescriptor( new NameImpl( "name" ) );
         addColumn( new NameColumn( prop ).setWeight( 2, 60 ) );
         
-        prop = schema.getDescriptor( new NameImpl( "", "type" ) );
-        addColumn( new DefaultFeatureTableColumn( prop ).setWeight( 1, 60 ).setHeader( "Art" ) );
-        
-        prop = schema.getDescriptor( new NameImpl( "", "timestamp" ) );
+        prop = schema.getDescriptor( new NameImpl( "timestamp" ) );
         addColumn( new DateColumn( prop ).setWeight( 1, 60 ) );
         
-        try {
-            // supress deferred loading to fix "empty table" issue
-            setContent( fs.getFeatures( baseFilter ) );
-        }
-        catch (IOException e) {
-            throw new RuntimeException( e );
-        }
+        // suppress deferred loading to fix "empty table" issue
+        Iterable<? extends IMosaicCaseEvent> events = mcase.getEvents();
+
+        //            FeatureCollection fc = fs.getFeatures( baseFilter );
+        //            log.info( "events 2: " + Iterators.toString( fc.iterator() ) );
+
+        setContent( new CompositesFeatureContentProvider( (Iterable<? extends org.polymap.core.model2.Composite>)events ) );
+        setInput( events );
     }
 
     
@@ -119,7 +112,8 @@ public class EventsTableViewer
 
     @EventHandler(display=true)
     protected void caseChanged( PropertyChangeEvent ev ) {
-        refresh();        
+        Iterable<? extends IMosaicCaseEvent> events = mcase.getEvents();
+        setInput( events );
     }
     
     
@@ -136,6 +130,63 @@ public class EventsTableViewer
             return repo.entity( MosaicCaseEvent2.class, input.fid() );
         }
     };
+
+    
+    /**
+     * 
+     */
+    class StatusColumn
+            extends DefaultFeatureTableColumn {
+
+        public StatusColumn() {
+            super( schema.getDescriptor( new NameImpl( "name" ) ) );
+            setHeader( "" );
+            
+            setLabelProvider( new ColumnLabelProvider() {
+                @Override
+                public String getText( Object elm ) {
+                    IMosaicCaseEvent event = new EventFinder().apply( (IFeatureTableElement)elm );
+                    String type = event.getEventType();
+                    if (IMosaicCaseEvent.TYPE_NEW.equals( type )) {
+                        return "ANGELEGT";
+                    }
+                    else if (IMosaicCaseEvent.TYPE_OPEN.equals( type )) {
+                        return "OFFEN";
+                    }
+                    else if (IMosaicCaseEvent.TYPE_CLOSED.equals( type )) {
+                        return "ERLEDIGT";
+                    }
+                    else {
+                        return type;
+                    }
+                }
+                @Override
+                public Color getBackground( Object elm ) {
+                    IMosaicCaseEvent event = new EventFinder().apply( (IFeatureTableElement)elm );
+                    String type = event.getEventType();
+                    if (IMosaicCaseEvent.TYPE_NEW.equals( type )) {
+                        return MosaicUiPlugin.COLOR_NEW.get();
+                    }
+                    else if (IMosaicCaseEvent.TYPE_CLOSED.equals( type )) {
+                        return MosaicUiPlugin.COLOR_CLOSED.get();
+                    }
+                    else {
+                        return MosaicUiPlugin.COLOR_OPEN.get();
+                    }
+                }
+                @Override
+                public Color getForeground( Object elm ) {
+                    return MosaicUiPlugin.COLOR_STATUS_FOREGROUND.get();                
+                }
+//                @Override
+//                public Font getFont( Object element ) {
+//                    FontData[] defaultFont = getTable().getFont().getFontData();
+//                    FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
+//                    return Graphics.getFont( bold );
+//                }
+            });
+        }
+    }
 
     
     /**

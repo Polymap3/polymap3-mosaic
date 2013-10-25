@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.rwt.lifecycle.WidgetUtil;
+
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.Viewer;
@@ -82,8 +84,8 @@ import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 
 import org.polymap.azv.AZVPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.AzvRepository;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CasePanel;
 import org.polymap.mosaic.ui.casestable.CasesTableViewer;
@@ -115,6 +117,9 @@ public class StartPanel
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
 
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<MosaicRepository2> repo;
+
     private List<Control>                   actionBtns = new ArrayList();
 
     private IPanelSection                   contents;
@@ -129,8 +134,12 @@ public class StartPanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        this.tk = site.toolkit();
-        return site.getPath().size() == 1;
+        if (site.getPath().size() == 1) {
+            this.tk = site.toolkit();
+            this.repo.set( MosaicRepository2.instance() );
+            return true;
+        }
+        return false;
     }
 
 
@@ -224,8 +233,8 @@ public class StartPanel
         casesSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 2, 1 ) ) );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
-        casesViewer = new CasesTableViewer( casesSection.getBody(), Filter.INCLUDE, SWT.NONE );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 200 ).create() );
+        casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), Filter.INCLUDE, SWT.NONE );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 200 ).width( 400 ).create() );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
@@ -246,8 +255,8 @@ public class StartPanel
                     return natures.contains( AZVPlugin.CASE_NUTZER ); 
                 }
             })
-            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/search.png" ) )
-            .setTooltip( "Neue Kunden filtern" );
+            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/users.png" ) )
+            .setTooltip( "Kundenänträge anzeigen" );
         }
         
         if (SecurityUtils.isUserInGroup( AZVPlugin.ROLE_SCHACHTSCHEIN )) {
@@ -258,13 +267,19 @@ public class StartPanel
                 }
             })
             .setIcon( BatikPlugin.instance().imageForName( "resources/icons/letter.png" ) )
-            .setTooltip( "Schachtscheinanträge filtern" );
+            .setTooltip( "Schachtscheinanträge anzeigen" );
         }
         
         // searchField
-        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), 
-                casesViewer.propertyNames() );
-        searchField.getControl().setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), casesViewer.propertyNames() );
+        Composite searchCtrl = searchField.getControl();
+        searchCtrl.setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+        for (Control child : searchCtrl.getChildren()) {
+            if (child instanceof Button) {
+                ((Button)child).setImage( BatikPlugin.instance().imageForName( "resources/icons/close.png" ) );
+                ((Button)child).setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );                
+            }
+        }
     }
     
     
@@ -275,6 +290,7 @@ public class StartPanel
         createActionButton( body, "Wasserqualität", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
                 BatikPlugin.instance().imageForName( "resources/icons/waterdrop.png" ),
+                null,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -284,6 +300,7 @@ public class StartPanel
         actionBtns.add( createActionButton( body, "Entsorgung", 
                 "Verwaltung und Organisation der bedarfsgerechten Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
                 BatikPlugin.instance().imageForName( "resources/icons/truck.png" ),
+                AZVPlugin.ROLE_ENTSORGUNG,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -292,6 +309,7 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
                 BatikPlugin.instance().imageForName( "resources/icons/fire.png" ),
+                AZVPlugin.ROLE_HYDRANTEN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -301,20 +319,26 @@ public class StartPanel
         actionBtns.add( createActionButton( body, "Leitungsauskunft", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
                 BatikPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
+                AZVPlugin.ROLE_LEITUNGSAUSKUNFT,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
                 throw new RuntimeException( "not yet implemented." );
             }
         }));
-        actionBtns.add( createActionButton( body, "Schachtscheine", 
-                "Antrag für Schachtscheine",
+        actionBtns.add( createActionButton( body, "Schachtschein", 
+                "Antrag für einen Schachtschein",
                 BatikPlugin.instance().imageForName( "resources/icons/letter.png" ),
+                AZVPlugin.ROLE_SCHACHTSCHEIN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
-                    entity.set( AzvRepository.instance().newSchachtschein() );
-                    getContext().openPanel( SchachtscheinPanel.ID );
+                    // create new case; commit/rollback inside CaseAction
+                    IMosaicCase newCase = repo.get().newCase( "", "" );
+                    newCase.addNature( AZVPlugin.CASE_SCHACHTSCHEIN );
+                    //newCase.put( "user", user.get().username().get() );
+                    mcase.set( newCase );
+                    getContext().openPanel( CasePanel.ID );
                 }
                 catch (Exception e) {
                     BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
@@ -324,6 +348,7 @@ public class StartPanel
         actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
                 BatikPlugin.instance().imageForName( "resources/icons/letters.png" ),
+                AZVPlugin.ROLE_DIENSTBARKEITEN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 // XXX Auto-generated method stub
@@ -331,12 +356,13 @@ public class StartPanel
             }
         }));
         for (Control btn : actionBtns) {
-            btn.setEnabled( isAuthenticatedUser() );
+            btn.setEnabled( btn.isEnabled() && isAuthenticatedUser() );
         }
         return section;
     }
 
-    protected Control createActionButton( Composite client, String title, String tooltip, Image image, final SelectionListener l ) {
+    
+    protected Control createActionButton( Composite client, String title, String tooltip, Image image, String role, final SelectionListener l ) {
         Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT, SWT.FLAT );
         result.setToolTipText( tooltip );
         result.setImage( image );
@@ -351,6 +377,9 @@ public class StartPanel
                 l.widgetSelected( null );
             }
         });
+        if (role != null) {
+            result.setEnabled( SecurityUtils.isUserInGroup( role ) );
+        }
         return result;
     }
 }
