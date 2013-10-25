@@ -262,6 +262,7 @@ public class CasePanel
             
             if (action.getText() != null || action.getImageDescriptor() != null) {
                 holder.btn = tk.createButton( body, action.getText(), SWT.TOGGLE );
+                holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
                 holder.btn.setToolTipText( action.getToolTipText() );
                 holder.btn.setEnabled( action.isEnabled() );
                 ImageDescriptor icon = action.getImageDescriptor();
