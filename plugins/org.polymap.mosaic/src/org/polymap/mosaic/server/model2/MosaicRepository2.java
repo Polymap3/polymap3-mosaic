@@ -406,8 +406,8 @@ public class MosaicRepository2
     }
 
     
-    public void closeCase( IMosaicCase mcase ) {
-        IMosaicCaseEvent closed = newCaseEvent( (MosaicCase2)mcase, "Vorgang abgeschlossen", "Dem Nutzer wurden folgende Rechte zugeteilt: ...", IMosaicCaseEvent.TYPE_CLOSED );
+    public void closeCase( IMosaicCase mcase, String eventName, String eventDescription ) {
+        IMosaicCaseEvent closed = newCaseEvent( (MosaicCase2)mcase, eventName, eventDescription, IMosaicCaseEvent.TYPE_CLOSED );
         mcase.addEvent( closed );
         
         ((MosaicCase2)mcase).lastModified.set( new Date() );

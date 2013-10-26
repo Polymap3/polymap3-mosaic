@@ -29,6 +29,8 @@ import java.util.Set;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.SimpleEmail;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -49,6 +51,7 @@ import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.email.EmailService;
 import org.polymap.rhei.um.ui.PersonForm;
 
 import org.polymap.azv.AZVPlugin;
@@ -179,8 +182,16 @@ public class NutzerFreigabeCaseAction
         um.commitChanges();
         
         MosaicRepository2 mosaic = repo.get();
-        mosaic.closeCase( mcase.get() );
+        mosaic.closeCase( mcase.get(), "Freigabe", "Dem Nutzer erhält die Rechte: " + um.groupsOf( user ) );
         mosaic.commitChanges();
+        
+        String salu = user.salutation().get() != null ? user.salutation().get() : "";
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+        Email email = new SimpleEmail()
+                .addTo( user.email().get() )
+                .setSubject( i18n.get( "emailSubject") )
+                .setMsg( i18n.get( "email", header, um.groupsOf( user ) ) );
+        EmailService.instance().send( email );
     }
 
 
