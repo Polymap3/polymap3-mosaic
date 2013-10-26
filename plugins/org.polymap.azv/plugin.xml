@@ -8,8 +8,8 @@
             id="org.polymap.azv.StartPanel">
       </panel>
       <panel
-            class="org.polymap.azv.ui.SchachtscheinPanel"
-            id="org.polymap.azv.SchachtscheinPanel">
+            class="org.polymap.azv.ui.UsersTablePanel"
+            id="org.polymap.azv.UserTablePanel">
       </panel>
    </extension>
    <extension
