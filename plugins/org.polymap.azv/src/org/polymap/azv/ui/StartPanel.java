@@ -142,6 +142,7 @@ public class StartPanel
         if (site.getPath().size() == 1) {
             this.tk = site.toolkit();
             this.repo.set( MosaicRepository2.instance() );
+            site.setTitle( i18n.get( "title" ) );
             return true;
         }
         return false;
@@ -161,8 +162,6 @@ public class StartPanel
     
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( i18n.get( "title" ) );
-
         contents = tk.createPanelSection( parent, null );
         contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
                 .addConstraint( new MaxWidthConstraint( 800, 1 ) );
@@ -222,6 +221,7 @@ public class StartPanel
                     getSite().layout( true );
                 
                     // adjust context: username and preferences
+                    getSite().setTitle( i18n.get( "titleLoggedIn" ) );
                     User umuser = UserRepository.instance().findUser( name );
                     getContext().setUserName( umuser != null ? umuser.name().get() : name );
                     getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
@@ -291,7 +291,8 @@ public class StartPanel
         // searchField
         FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), casesViewer.propertyNames() );
         Composite searchCtrl = searchField.getControl();
-        searchCtrl.setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+        searchCtrl.setLayoutData( FormDataFactory.filled()
+                .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
         for (Control child : searchCtrl.getChildren()) {
             if (child instanceof Button) {
                 ((Button)child).setImage( BatikPlugin.instance().imageForName( "resources/icons/close.png" ) );
