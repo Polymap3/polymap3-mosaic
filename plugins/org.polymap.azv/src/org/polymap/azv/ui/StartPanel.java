@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.Viewer;
@@ -79,7 +80,10 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.um.User;
+import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.LoginPanel;
+import org.polymap.rhei.um.ui.UserSettingsPanel;
 import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 
 import org.polymap.azv.AZVPlugin;
@@ -216,6 +220,15 @@ public class StartPanel
                     createCasesSection( contents );
                     contents.getBody().layout( true );
                     getSite().layout( true );
+                
+                    // adjust context: username and preferences
+                    User umuser = UserRepository.instance().findUser( name );
+                    getContext().setUserName( umuser != null ? umuser.name().get() : name );
+                    getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
+                        public void run() {
+                            getContext().openPanel( UserSettingsPanel.ID );
+                        }
+                    });
                     return true;
                 }
                 else {

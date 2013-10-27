@@ -54,7 +54,7 @@ public class AZVPlugin
     public static final String      CASE_HYDRANTEN = "Hydranten";
     public static final String      CASE_WASSERQUALITAET = "Wasserqualität";
     public static final String      CASE_ENTSORGUNG = "Bedarfsgerechte Entsorgung";
-    public static final String      CASE_NUTZER = "Nutzer anlegen";
+    public static final String      CASE_NUTZER = "Neuer Nutzer";
 
     private static AZVPlugin        instance;
 
