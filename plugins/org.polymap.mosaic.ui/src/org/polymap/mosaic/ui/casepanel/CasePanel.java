@@ -99,7 +99,6 @@ public class CasePanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        log.info( "CASE: " + mcase.get() );
         return false;
     }
 

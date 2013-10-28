@@ -255,7 +255,7 @@ public class StartPanel
         FilterFactory2 ff = MosaicUiPlugin.ff;
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
         casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 250 ).width( 400 ).create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 300 ).width( 400 ).create() );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
