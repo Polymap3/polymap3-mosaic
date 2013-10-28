@@ -185,7 +185,7 @@ public class CasePanel
         if (holder != null) {
             try {
                 actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
-                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 380 );
+                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 350 );
                 holder.caseAction.createContents( actionSection );
                 contentSection.setEnabled( false );
             }

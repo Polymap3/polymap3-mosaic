@@ -57,7 +57,7 @@ import org.polymap.rhei.um.ui.LoginPanel;
 import org.polymap.rhei.um.ui.PersonForm;
 import org.polymap.rhei.um.ui.UsersTableViewer;
 
-import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 
@@ -117,7 +117,7 @@ public class UsersTablePanel
 
     @EventHandler
     protected void userLoggedIn( PropertyAccessEvent ev ) {
-        if (SecurityUtils.isUserInGroup( AZVPlugin.ROLE_MA )) {
+        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
             getSite().setTitle( "Nutzer/Kunden" );
         }
     }

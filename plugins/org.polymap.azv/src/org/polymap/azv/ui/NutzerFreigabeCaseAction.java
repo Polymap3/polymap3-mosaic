@@ -14,13 +14,13 @@
  */
 package org.polymap.azv.ui;
 
-import static org.polymap.azv.AZVPlugin.CASE_NUTZER;
-import static org.polymap.azv.AZVPlugin.ROLE_DIENSTBARKEITEN;
-import static org.polymap.azv.AZVPlugin.ROLE_ENTSORGUNG;
-import static org.polymap.azv.AZVPlugin.ROLE_HYDRANTEN;
-import static org.polymap.azv.AZVPlugin.ROLE_LEITUNGSAUSKUNFT;
-import static org.polymap.azv.AZVPlugin.ROLE_SCHACHTSCHEIN;
-import static org.polymap.azv.AZVPlugin.ROLE_WASSERQUALITAET;
+import static org.polymap.azv.AzvPlugin.CASE_NUTZER;
+import static org.polymap.azv.AzvPlugin.ROLE_DIENSTBARKEITEN;
+import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
+import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
+import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
+import static org.polymap.azv.AzvPlugin.ROLE_SCHACHTSCHEIN;
+import static org.polymap.azv.AzvPlugin.ROLE_WASSERQUALITAET;
 
 import java.util.HashSet;
 import java.util.List;
@@ -54,7 +54,7 @@ import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.email.EmailService;
 import org.polymap.rhei.um.ui.PersonForm;
 
-import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -115,7 +115,7 @@ public class NutzerFreigabeCaseAction
     @Override
     public void fillContentArea( Composite parent ) {
         IPanelSection personSection = site.toolkit().createPanelSection( parent, "Nutzerdaten" );
-        personSection.addConstraint( new PriorityConstraint( 1, 10 ) );
+        personSection.addConstraint( new PriorityConstraint( 1 ) );
         personSection.getBody().setLayout( new FillLayout() );
         
         String username = mcase.get().get( "user" );
@@ -166,11 +166,11 @@ public class NutzerFreigabeCaseAction
         Composite right = site.toolkit().createComposite( root );
         right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).create() );
         Button btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
-        btn.setSelection( groups.contains( AZVPlugin.ROLE_MA ) );
+        btn.setSelection( groups.contains( AzvPlugin.ROLE_MA ) );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 log.info( "ev: " + ev );
-                um.asignGroup( user, AZVPlugin.ROLE_MA );
+                um.asignGroup( user, AzvPlugin.ROLE_MA );
             }
         });
     }
@@ -187,8 +187,9 @@ public class NutzerFreigabeCaseAction
         
         String salu = user.salutation().get() != null ? user.salutation().get() : "";
         String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
-        Email email = new SimpleEmail()
-                .addTo( user.email().get() )
+        Email email = new SimpleEmail();
+        email.setCharset( "ISO-8859-1" );
+        email.addTo( user.email().get() )
                 .setSubject( i18n.get( "emailSubject") )
                 .setMsg( i18n.get( "email", header, um.groupsOf( user ) ) );
         EmailService.instance().send( email );

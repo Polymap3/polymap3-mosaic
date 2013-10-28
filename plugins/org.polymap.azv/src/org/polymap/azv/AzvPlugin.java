@@ -30,10 +30,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class AZVPlugin
+public class AzvPlugin
         extends AbstractUIPlugin {
 
-    private static Log log = LogFactory.getLog( AZVPlugin.class );
+    private static Log log = LogFactory.getLog( AzvPlugin.class );
 
     public static final String      ID = "org.polymap.azv";
     
@@ -56,9 +56,9 @@ public class AZVPlugin
     public static final String      CASE_ENTSORGUNG = "Bedarfsgerechte Entsorgung";
     public static final String      CASE_NUTZER = "Neuer Nutzer";
 
-    private static AZVPlugin        instance;
+    private static AzvPlugin        instance;
 
-    public static AZVPlugin instance() {
+    public static AzvPlugin instance() {
         assert instance != null;
         return instance;
     }
