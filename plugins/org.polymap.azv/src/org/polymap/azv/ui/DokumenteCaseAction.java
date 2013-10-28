@@ -19,25 +19,35 @@ import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.rwt.widgets.ExternalBrowser;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 
+import org.polymap.core.data.operation.DownloadServiceHandler;
+import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
+import org.polymap.core.ui.SelectionAdapter;
 import org.polymap.core.ui.upload.IUploadHandler;
 import org.polymap.core.ui.upload.Upload;
 
@@ -46,7 +56,8 @@ import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
-import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -65,6 +76,10 @@ public class DokumenteCaseAction
         implements ICaseAction, IUploadHandler {
 
     private static Log log = LogFactory.getLog( DokumenteCaseAction.class );
+
+    private static final IMessages      i18n = Messages.forPrefix( "Dokumente" );
+    
+    private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -87,17 +102,23 @@ public class DokumenteCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         return mcase.get() != null && repo.get() != null
-                && !mcase.get().getNatures().contains( AZVPlugin.CASE_NUTZER );
+                && !mcase.get().getNatures().contains( AzvPlugin.CASE_NUTZER );
     }
 
 
     @Override
     public void createContents( Composite parent ) {
-        Composite area = new Composite( parent, SWT.NONE );
-        area.setLayout( FormLayoutFactory.defaults().margins( 40 ).create() );
+        FillLayout playout = (FillLayout)parent.getLayout();
+        playout.marginWidth *= 2;      
+        playout.spacing *= 2;      
+
+        site.toolkit().createFlowText( parent , i18n.get( "welcomeText" ) );
+
+        Composite formContainer = site.toolkit().createComposite( parent );
+        formContainer.setLayout( FormLayoutFactory.defaults().margins( 40 ).create() );
         
-        Upload upload = new Upload( area, SWT.NONE );
-        upload.setLayoutData( FormDataFactory.filled().bottom( -1 ).right( 50 ).create() );
+        Upload upload = new Upload( formContainer, SWT.NONE );
+        upload.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
         upload.setHandler( this );
         display = Polymap.getSessionDisplay();
     }
@@ -139,7 +160,7 @@ public class DokumenteCaseAction
     @Override
     public void fillContentArea( Composite parent ) {
         IPanelSection section = site.toolkit().createPanelSection( parent, "Dokumente" );
-        section.addConstraint( new PriorityConstraint( 10, 10 ) );
+        section.addConstraint( new PriorityConstraint( 1 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().create() );
         
         // viewer
@@ -162,6 +183,17 @@ public class DokumenteCaseAction
         });
         layout.addColumnData( new ColumnWeightData( 2, 100, true ) );            
 
+        // date column
+        vcolumn = new TableViewerColumn( viewer, SWT.CENTER );
+        vcolumn.getColumn().setResizable( true );
+        vcolumn.getColumn().setText( "Änderung" );
+        vcolumn.setLabelProvider( new ColumnLabelProvider() {
+            public String getText( Object elm ) {
+                return df.format( ((IMosaicDocument)elm).getLastModified() );
+            }
+        });
+        layout.addColumnData( new ColumnWeightData( 2, 100, true ) );            
+
         // size column
         vcolumn = new TableViewerColumn( viewer, SWT.RIGHT );
         vcolumn.getColumn().setResizable( true );
@@ -180,6 +212,31 @@ public class DokumenteCaseAction
         });
         viewer.setInput( mcase.get() );
         
+        viewer.addDoubleClickListener( new IDoubleClickListener() {
+            public void doubleClick( DoubleClickEvent ev ) {
+                final IMosaicDocument selected = new SelectionAdapter( ev.getSelection() ).first( IMosaicDocument.class );
+                String url = DownloadServiceHandler.registerContent( new ContentProvider() {
+                    @Override
+                    public InputStream getInputStream() throws Exception {
+                        return selected.getInputStream();
+                    }
+                    @Override
+                    public String getFilename() {
+                        return selected.getName();
+                    }
+                    @Override
+                    public String getContentType() {
+                        return selected.getContentType();
+                    }
+                    @Override
+                    public boolean done( boolean success ) {
+                        return true;
+                    }
+                });
+                ExternalBrowser.open( "download_window", url,
+                        ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
+            }
+        });
 
 //        viewer.setContentProvider( new DeferredContentProvider( new Comparator<User>() {
 //            public int compare( User o1, User o2 ) {
