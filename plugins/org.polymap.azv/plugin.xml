@@ -11,6 +11,10 @@
             class="org.polymap.azv.ui.UsersTablePanel"
             id="org.polymap.azv.UserTablePanel">
       </panel>
+      <panel
+            class="org.polymap.azv.ui.WasserQualiPanel"
+            id="org.polymap.azv.WasserQualiPanel">
+      </panel>
    </extension>
    <extension
          point="org.polymap.core.model.moduleAssemblers">

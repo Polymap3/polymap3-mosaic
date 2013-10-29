@@ -91,6 +91,7 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -280,6 +281,7 @@ public class StartPanel
         
         AzvPermissions permissions = AzvPermissions.instance();
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
+            // Registrierungen
             filterBar.add( new ViewerFilter() {
                 public boolean select( Viewer viewer, Object parentElm, Object elm ) {
                     Set<String> natures = casesViewer.entity( ((IFeatureTableElement)elm).fid() ).getNatures();
@@ -287,7 +289,17 @@ public class StartPanel
                 }
             })
             .setIcon( BatikPlugin.instance().imageForName( "resources/icons/users-filter.png" ) )
-            .setTooltip( "Kundenänträge anzeigen" );
+            .setTooltip( "Kundenregistrierungen anzeigen" );
+
+            // Beantragt
+            filterBar.add( new ViewerFilter() {
+                public boolean select( Viewer viewer, Object parentElm, Object elm ) {
+                    IMosaicCase candidate = casesViewer.entity( ((IFeatureTableElement)elm).fid() );
+                    return Iterables.find( candidate.getEvents(), MosaicCaseEvents.contains( "Beantragt" ), null ) != null;
+                }
+            })
+            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/filter.png" ) )
+            .setTooltip( "Vollständige Anträge abzeigen" );
         }
         
         addFilter( filterBar, AzvPlugin.ROLE_SCHACHTSCHEIN, AzvPlugin.CASE_SCHACHTSCHEIN, "Schachtscheinanträge anzeigen", "resources/icons/letter-filter.png" );
@@ -334,8 +346,7 @@ public class StartPanel
                 null,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
-                // XXX Auto-generated method stub
-                throw new RuntimeException( "not yet implemented." );
+                getContext().openPanel( WasserQualiPanel.ID );
             }
         });
         actionBtns.add( createActionButton( body, "Entsorgung", 
