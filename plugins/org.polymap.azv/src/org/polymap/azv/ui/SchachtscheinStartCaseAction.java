@@ -16,6 +16,7 @@ package org.polymap.azv.ui;
 
 import org.opengis.feature.Property;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,7 +48,7 @@ import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.LoginPanel;
 
-import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -90,9 +91,12 @@ public class SchachtscheinStartCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
-                && mcase.get().getNatures().contains( AZVPlugin.CASE_SCHACHTSCHEIN )) {
+                && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
             
-            if (!SecurityUtils.isUserInGroup( AZVPlugin.ROLE_MA )) {
+            // wenn Kunde und noch kein Name gesetzt ist
+            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
+                    && mcase.get().getName().length() == 0) {
+                
                 User umuser = UserRepository.instance().findUser( sessionUser.get().getName() );
                 setUserOnCase( umuser );
                 // open action
@@ -111,7 +115,7 @@ public class SchachtscheinStartCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
-        caseStatus.put( "Laufende Nr.", mcase.get().getId() );
+        caseStatus.put( "Laufende Nr.", StringUtils.substringAfterLast( mcase.get().getId(), "-" ) );
     }
 
 
@@ -124,6 +128,7 @@ public class SchachtscheinStartCaseAction
             username = sessionUser.get().getName();
             User umuser = UserRepository.instance().findUser( username );
             setUserOnCase( umuser );
+            mcase.get().put( "user", username );
         }
 
         FillLayout playout = (FillLayout)parent.getLayout();

@@ -103,6 +103,13 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="priority" type="string">
+            <annotation>
+               <documentation>
+                  The priority of this action. This is used to sort entries in the toolbar. Default value is 0. Helper actions should have priority &lt; 0.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

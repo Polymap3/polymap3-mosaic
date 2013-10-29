@@ -166,8 +166,8 @@ public class MosaicCase2
         if (current != null) {
             current.value.set( value );
             
-            repo.newCaseEvent( this, "Wert: " + value, 
-                    "Der Wert \"" + key + "\" wurde geändert auf: " + value, "Wert"  );
+//            repo.newCaseEvent( this, "Wert: " + value, 
+//                    "Der Wert \"" + key + "\" wurde geändert auf: " + value, "Wert"  );
         }
         else {
             repo.newEntity( MosaicCaseKeyValue.class, null, new EntityCreator<MosaicCaseKeyValue>() {
@@ -176,8 +176,8 @@ public class MosaicCase2
                     prototype.key.set( key );
                     prototype.value.set( value );
 
-                    repo.newCaseEvent( MosaicCase2.this, "Neuer Wert: " + value, 
-                            "Der Wert \"" + key + "\" wurde angelegt mit: " + value, "Wert"  );
+//                    repo.newCaseEvent( MosaicCase2.this, "Neuer Wert: " + value, 
+//                            "Der Wert \"" + key + "\" wurde angelegt mit: " + value, "Wert"  );
                 }
             });
         }

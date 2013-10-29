@@ -99,7 +99,6 @@ public class CasePanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        log.info( "CASE: " + mcase.get() );
         return false;
     }
 
@@ -185,7 +184,7 @@ public class CasePanel
         if (holder != null) {
             try {
                 actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
-                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 380 );
+                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 350 );
                 holder.caseAction.createContents( actionSection );
                 contentSection.setEnabled( false );
             }
@@ -306,6 +305,11 @@ public class CasePanel
 
         submitBtn.setEnabled( true );
         discardBtn.setEnabled( true );
+        for (CaseActionHolder elm : caseActions) {
+            if (elm != holder && elm.btn != null) {
+                elm.btn.setEnabled( false );
+            }
+        }
 
         updateActionSection( holder );
         holder.updateEnabled();
@@ -322,6 +326,11 @@ public class CasePanel
             updateActionSection( null );
             submitBtn.setEnabled( false );
             discardBtn.setEnabled( false );
+            for (CaseActionHolder elm : caseActions) {
+                if (elm.btn != null) {
+                    elm.btn.setEnabled( true );
+                }
+            }
         }
         catch (Exception e) {
             BatikApplication.handleError( "Die Änderungen konnten nicht korrekt übernommen werden.", e );
@@ -338,6 +347,11 @@ public class CasePanel
         updateActionSection( null );
         submitBtn.setEnabled( false );
         discardBtn.setEnabled( false );
+        for (CaseActionHolder elm : caseActions) {
+            if (elm.btn != null) {
+                elm.btn.setEnabled( true );
+            }
+        }
     }
     
     
@@ -386,7 +400,7 @@ public class CasePanel
         @Override
         public int compareTo( CaseActionHolder rhs ) {
             int result = ext.getPriority() - rhs.ext.getPriority();
-            return result != 0 ? result : hashCode() - rhs.hashCode();
+            return result != 0 ? result : ext.getId().compareTo( rhs.ext.getId() );
         }
     }
 

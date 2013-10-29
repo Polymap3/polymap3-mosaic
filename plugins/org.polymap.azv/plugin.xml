@@ -8,8 +8,8 @@
             id="org.polymap.azv.StartPanel">
       </panel>
       <panel
-            class="org.polymap.azv.ui.SchachtscheinPanel"
-            id="org.polymap.azv.SchachtscheinPanel">
+            class="org.polymap.azv.ui.UsersTablePanel"
+            id="org.polymap.azv.UserTablePanel">
       </panel>
    </extension>
    <extension
@@ -69,13 +69,16 @@
             caseStateChange="true"
             class="org.polymap.azv.ui.SchachtscheinAntragCaseAction"
             id="org.polymap.azv.SchachtscheinCaseAction"
-            name="Schachtschein beantragen">
+            name="Schachtschein beantragen"
+            priority="10">
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.SchachtscheinStartCaseAction"
             description="Bezeichnung und Ort der Maßnahme"
+            icon="resources/icons/letter.png"
             id="org.polymap.azv.SchachtscheinStartCaseAction"
-            name="Maßnahme">
+            name="Maßnahme"
+            priority="9">
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.EreignisseCaseAction"

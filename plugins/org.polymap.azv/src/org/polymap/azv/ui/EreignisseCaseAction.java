@@ -97,7 +97,7 @@ public class EreignisseCaseAction
     public void fillContentArea( Composite parent ) {
         // events table
         IPanelSection eventsSection = site.toolkit().createPanelSection( parent, "Ereignisse" );
-        eventsSection.addConstraint( new PriorityConstraint( 0, 10 ) );
+        eventsSection.addConstraint( new PriorityConstraint( 0 ) );
         eventsSection.getBody().setLayout( FormLayoutFactory.defaults().create() );
         viewer = new EventsTableViewer( eventsSection.getBody(), repo.get(), mcase.get(), SWT.NONE );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );

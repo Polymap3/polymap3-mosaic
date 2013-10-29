@@ -114,15 +114,15 @@ public class SchachtscheinPanel
 
         // welcomeSection
         IPanelSection welcomeSection = tk.createPanelSection( contents, "Schachtschein" );
-        welcomeSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        welcomeSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1 ), new MinWidthConstraint( 400, 1 ) ) );
         String msg = "Das Antragsverfahren Schachtschein ist Voraussetzung für die Durchführung von Baumaßnahmen. "
                 + "Die Beantragung kann direkt hier im Portal erfolgen. Schachtscheine sind eine tolle Sache. Jeder sollte einen haben!";
         Label l = tk.createFlowText( welcomeSection.getBody(), msg/*, SWT.BORDER*/ );
-        l.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        l.setLayoutData( new ConstraintData( new PriorityConstraint( 0 ), new MinWidthConstraint( 400, 1 ) ) );
 
         // baseSection
         baseSection = tk.createPanelSection( contents, "Basisdaten" );
-        baseSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        baseSection.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 1 ), new MinWidthConstraint( 400, 1 ) ) );
 //        Label l1 = tk.createFlowText( baseSection.getBody(), "Schachtschein." );
 //        l1.setLayoutData( new ConstraintData( new PriorityConstraint( 0, 1 ), new MinWidthConstraint( 400, 1 ) ) );
 //        
@@ -137,7 +137,7 @@ public class SchachtscheinPanel
         geoSection.getControl().setLayoutData( new ConstraintData( /*new PriorityConstraint( 1, 1 ),*/ new MinWidthConstraint( 400, 1 ) ) );
         msg = "Upload von Shapefile oder DXF.";
         l = tk.createLabel( geoSection.getBody(), msg );
-        l.setLayoutData( new ConstraintData( new PriorityConstraint( 3, 1 ), new MinWidthConstraint( 400, 1 ) ) );
+        l.setLayoutData( new ConstraintData( new PriorityConstraint( 3 ), new MinWidthConstraint( 400, 1 ) ) );
         new UploadForm().createContents( geoSection );
 
         // mapSection

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.polymap.mosaic.feature"
-      label="Mosaic Activity Server"
+      label="Mosaic Activity Framework"
       version="1.0.0.qualifier"
       provider-name="Polymap GmbH">
 
@@ -48,6 +48,20 @@
 
    <plugin
          id="org.polymap.mosaic.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.polymap.mosaic.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.polymap.azv"
          download-size="0"
          install-size="0"
          version="0.0.0"

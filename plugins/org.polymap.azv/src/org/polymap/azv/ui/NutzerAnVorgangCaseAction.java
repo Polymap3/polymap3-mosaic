@@ -42,7 +42,7 @@ import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.PersonForm;
 import org.polymap.rhei.um.ui.UsersTableViewer;
 
-import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -82,8 +82,8 @@ public class NutzerAnVorgangCaseAction
     @Override
     public boolean init( ICaseActionSite _site ) {
         if (mcase.get() != null && repo.get() != null
-                && SecurityUtils.isUserInGroup( AZVPlugin.ROLE_MA )
-                && !mcase.get().getNatures().contains( AZVPlugin.CASE_NUTZER )) {
+                && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
+                && !mcase.get().getNatures().contains( AzvPlugin.CASE_NUTZER )) {
             
             this.site = _site;
             String username = mcase.get().get( "user" );
@@ -154,7 +154,7 @@ public class NutzerAnVorgangCaseAction
     @Override
     public void fillContentArea( Composite parent ) {
         personSection = site.toolkit().createPanelSection( parent, "Nutzerdaten" );
-        personSection.addConstraint( new PriorityConstraint( 1, 10 ) );
+        personSection.addConstraint( new PriorityConstraint( 1 ) );
         personSection.getBody().setLayout( new FillLayout() );
         
         if (umuser != null) {

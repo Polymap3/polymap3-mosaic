@@ -27,7 +27,7 @@ import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.PanelChangeEvent;
 
-import org.polymap.azv.AZVPlugin;
+import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -59,7 +59,7 @@ public class SchachtscheinAntragCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
-                && mcase.get().getNatures().contains( AZVPlugin.CASE_SCHACHTSCHEIN )) {
+                && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
             // panel events
             site.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
                 public boolean apply( PanelChangeEvent input ) {
