@@ -37,6 +37,8 @@ public class CaseStatus {
 
     private static Log log = LogFactory.getLog( CaseStatus.class );
     
+    public static final int             DEFAULT_PRIORITY = 0;
+    
     private Map<String,Entry>           entries = new HashMap();
     
     
@@ -99,7 +101,7 @@ public class CaseStatus {
             result = false;
         }
         else {
-            entries.put( key, new Entry( key, value, 100 ) );
+            entries.put( key, new Entry( key, value, DEFAULT_PRIORITY ) );
             result = true;
         }
         EventManager.instance().publish( new PropertyChangeEvent( this, key, null, value ) );

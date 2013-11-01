@@ -17,6 +17,7 @@ package org.polymap.azv.ui;
 import org.opengis.feature.Property;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -71,6 +72,8 @@ public class SchachtscheinStartCaseAction
 
     public static final IMessages       i18n = Messages.forPrefix( "SchachtscheinStart" );
 
+    private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
+
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
 
@@ -115,7 +118,10 @@ public class SchachtscheinStartCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
-        caseStatus.put( "Laufende Nr.", StringUtils.substringAfterLast( mcase.get().getId(), "-" ) );
+        String id = mcase.get().getId();
+        status.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
+        status.put( "Vorgang", mcase.get().getName(), 100 );
+        status.put( "Angelegt am", df.format( mcase.get().getCreated() ), 99 );
     }
 
 

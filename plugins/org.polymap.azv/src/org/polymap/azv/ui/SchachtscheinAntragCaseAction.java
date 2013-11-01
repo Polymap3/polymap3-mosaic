@@ -19,16 +19,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.jface.action.IAction;
 
-import org.polymap.core.runtime.event.EventFilter;
-import org.polymap.core.runtime.event.EventHandler;
-
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.PanelChangeEvent;
-
 import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
@@ -54,37 +49,39 @@ public class SchachtscheinAntragCaseAction
 
     private ICaseActionSite                     site;
 
+    private IAction                             action;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
-            // panel events
-            site.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
-                public boolean apply( PanelChangeEvent input ) {
-                    return input.getSource().getSite().getPath().equals( site.getPanelSite().getPath() );
-                }
-            });
             return true;
         }
         return false;
     }
 
+    
     @Override
-    public void dispose() {
-        repo.get().rollbackChanges();
-        site.getContext().removeEventHandler( this );
+    public void fillAction( @SuppressWarnings("hiding") IAction action ) {
+        this.action = action;
+        updateEnabled();        
+    }
+    
+    
+    @Override
+    public void submit() throws Exception {
+        repo.get().newCaseEvent( (MosaicCase2)mcase.get(), "Beantragt", "", "Beantragt" );
+        repo.get().commitChanges();
     }
 
-    @EventHandler
-    protected void panelChanged( PanelChangeEvent ev ) {
-        log.info( "panelChanged: " + ev );
-    }
 
-    @Override
-    public void fillAction( IAction action ) {
+    protected void updateEnabled() {
         action.setEnabled( false );
+        if (mcase.get().getName().length() > 0 && mcase.get().get( "point" ) != null) {
+            action.setEnabled( true );
+        }
     }
     
 }

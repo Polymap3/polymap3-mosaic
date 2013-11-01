@@ -34,6 +34,12 @@ public interface ICaseActionSite {
     
     public IAppContext getContext();
     
+    /**
+     * False specifies that no default submit/discard buttons should
+     * be generated.
+     */
+    public void setShowSubmitDiscardButtons( boolean show );
+    
     public void setDirty( boolean dirty );
     
     public void setValid( boolean valid );
