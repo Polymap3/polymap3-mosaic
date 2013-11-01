@@ -363,9 +363,16 @@ public class StartPanel
                 BatikPlugin.instance().imageForName( "resources/icons/fire.png" ),
                 AzvPlugin.ROLE_HYDRANTEN,
                 new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e ) {
-                // XXX Auto-generated method stub
-                throw new RuntimeException( "not yet implemented." );
+            public void widgetSelected( SelectionEvent ev ) {
+                try {
+                    IMosaicCase newCase = repo.get().newCase( "Hydrantenauskunft", "" );
+                    newCase.addNature( AzvPlugin.CASE_HYDRANTEN );
+                    mcase.set( newCase );
+                    getContext().openPanel( CasePanel.ID );
+                }
+                catch (Exception e) {
+                    BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                }
             }
         }));
         actionBtns.add( createActionButton( body, "Schachtschein", 

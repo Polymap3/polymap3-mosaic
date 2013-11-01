@@ -92,6 +92,13 @@
             class="org.polymap.azv.ui.KarteCaseAction"
             id="org.polymap.azv.KarteCaseAction">
       </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.HydrantenCaseAction"
+            icon="resources/icons/fire.png"
+            id="org.polymap.azv.HydrantenCaseAction"
+            name="Hydrantenauskunft">
+      </caseAction>
    </extension>
 
 </plugin>

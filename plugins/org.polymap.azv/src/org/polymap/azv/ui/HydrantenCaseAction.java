@@ -14,6 +14,7 @@
  */
 package org.polymap.azv.ui;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,21 +32,22 @@ import org.eclipse.rwt.graphics.Graphics;
 import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
-import org.polymap.core.runtime.IMessages;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.BatikPlugin;
-import org.polymap.rhei.batik.DefaultPanel;
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.IPanel;
-import org.polymap.rhei.batik.IPanelSite;
-import org.polymap.rhei.batik.PanelIdentifier;
-import org.polymap.rhei.batik.toolkit.IPanelSection;
-import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.ContextProperty;
 
-import org.polymap.azv.Messages;
+import org.polymap.azv.AzvPlugin;
+import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
+import org.polymap.mosaic.ui.MosaicUiPlugin;
+import org.polymap.mosaic.ui.casepanel.CaseStatus;
+import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
+import org.polymap.mosaic.ui.casepanel.ICaseAction;
+import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
 import org.polymap.openlayers.rap.widget.base_types.Bounds;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
@@ -59,49 +61,62 @@ import org.polymap.openlayers.rap.widget.controls.ScaleControl;
 import org.polymap.openlayers.rap.widget.controls.ScaleLineControl;
 import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
+
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class WasserQualiPanel
-        extends DefaultPanel
-        implements IPanel {
+public class HydrantenCaseAction
+        extends DefaultCaseAction
+        implements ICaseAction {
 
-    private static Log log = LogFactory.getLog( WasserQualiPanel.class );
+    private static Log log = LogFactory.getLog( HydrantenCaseAction.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "WasserQuali" );
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<IMosaicCase>        mcase;
 
-    public static final IMessages       i18n = Messages.forPrefix( "WasserQualiPanel" );
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<MosaicRepository2>  repo;
 
-    private OpenLayersWidget olwidget;
+    private ICaseActionSite                     site;
 
+    private OpenLayersWidget                    olwidget;
 
+    
     @Override
-    public boolean init( IPanelSite site, IAppContext context ) {
-        super.init( site, context );
-        site.setTitle( "Wasserhärten und -Qualitäten" );
+    public boolean init( ICaseActionSite _site ) {
+        this.site = _site;
+        if (mcase.get() != null && repo.get() != null
+                && mcase.get().getNatures().contains( AzvPlugin.CASE_HYDRANTEN )) {
+            // open action
+            Polymap.getSessionDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    site.activateCaseAction( site.getActionId() );
+                }
+            });
+            return true;
+        }
         return false;
     }
 
     
     @Override
-    public PanelIdentifier id() {
-        return ID;
+    public void fillStatus( CaseStatus status ) {
+        CaseStatus caseStatus = status;
+        String id = mcase.get().getId();
+        caseStatus.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
     }
 
-
+    
     @Override
-    public void createContents( Composite panelBody ) {
-        IPanelSection contents = getSite().toolkit().createPanelSection( panelBody, null );  //"Wasserhärten und -Qualitäten" );
-        contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
-                .addConstraint( new MaxWidthConstraint( 800, 1 ) );
-        Composite body = contents.getBody();
+    public void createContents( Composite parent ) {
+        Composite body = parent;
         //body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
-        body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 20 ).create() );
+        body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 5 ).create() );
 
         // toolbar
-        Composite toolbar = getSite().toolkit().createComposite( body );
+        Composite toolbar = site.toolkit().createComposite( body );
         toolbar.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
         
         // map widget
@@ -132,16 +147,11 @@ public class WasserQualiPanel
         dop.setBuffer( 0 );
         map.addLayer( dop );
 
-        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasserquali" );
-        wasser.setIsBaseLayer( false );
-        wasser.setVisibility( true );
-        map.addLayer( wasser );
-        
         WMSLayer hydranten = new WMSLayer( "Hydranten", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Hydranten" );
         hydranten.setIsBaseLayer( false );
-        hydranten.setVisibility( false );
+        hydranten.setVisibility( true );
         map.addLayer( hydranten );
-
+        
         map.addControl( new NavigationControl() );
         map.addControl( new PanZoomBarControl() );
         map.addControl( new LayerSwitcherControl() );
@@ -151,16 +161,16 @@ public class WasserQualiPanel
 
         map.zoomToExtent( maxExtent, true );
         map.zoomTo( 10 );
-
-        // after olwidget is initialized
-        createToolbar( toolbar );        
+        
+        // after olwidget is created
+        createToolbar( toolbar );
     }
 
     
     protected void createToolbar( Composite toolbar ) {
         toolbar.setLayout( RowLayoutFactory.fillDefaults().fill( true ).create() );
         
-        Button btn = getSite().toolkit().createButton( toolbar, null, SWT.PUSH );
+        Button btn = site.toolkit().createButton( toolbar, null, SWT.PUSH );
         btn.setToolTipText( "Gesamte Karte darstellen" );
         btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/house-org.png" ) );
         btn.setEnabled( true );
@@ -172,7 +182,7 @@ public class WasserQualiPanel
             }
         });
 
-        final Text searchTxt = getSite().toolkit().createText( toolbar, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
+        final Text searchTxt = site.toolkit().createText( toolbar, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
         searchTxt.setLayoutData( RowDataFactory.swtDefaults().hint( 320, SWT.DEFAULT ).create() );
         //searchTxt.setLayoutData( FormDataFactory.filled().right( clearBtn ).create() );
 
@@ -210,24 +220,6 @@ public class WasserQualiPanel
 //                }
 //            }
 //        });
-        
-//        final DrawFeatureMapAction drawFeatureAction = new DrawFeatureMapAction( 
-//                site, olwidget.getMap(), vectorLayer, DrawFeatureControl.HANDLER_POINT );
-//        drawFeatureAction.fill( toolbar );
-//        drawFeatureAction.addListener( new PropertyChangeListener() {
-//            @EventHandler(display=true)
-//            public void propertyChange( PropertyChangeEvent ev ) {
-//                Feature feature = (Feature)ev.getNewValue();
-//                Point point = (Point)feature.getDefaultGeometryProperty().getValue();
-//                String wkt = new WKTWriter().write( point );
-//                mcase.get().put( "point", wkt );
-//                repo.get().commitChanges();
-//                
-//                site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
-//                
-//                drawFeatureAction.deactivate();
-//            }
-//        });
     }
-
+    
 }

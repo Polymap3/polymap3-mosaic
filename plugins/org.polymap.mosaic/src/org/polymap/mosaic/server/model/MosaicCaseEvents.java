@@ -19,6 +19,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -29,6 +30,15 @@ import com.google.common.collect.ImmutableList;
 public class MosaicCaseEvents {
 
     private static Log log = LogFactory.getLog( MosaicCaseEvents.class );
+    
+    
+    public static Predicate<IMosaicCaseEvent> contains( final String eventType ) {
+        return new Predicate<IMosaicCaseEvent>() {
+            public boolean apply( IMosaicCaseEvent input ) {
+                return input.getEventType().equals( eventType );
+            }
+        };
+    }
     
     
     /**
