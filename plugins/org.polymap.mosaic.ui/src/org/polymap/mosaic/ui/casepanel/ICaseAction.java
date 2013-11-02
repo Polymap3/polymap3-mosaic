@@ -70,7 +70,9 @@ public interface ICaseAction {
     
     
     /**
-     * Creates the UI of the action area.
+     * Creates the UI of the action area. If this method does not generate children
+     * under parent then {@link #submit()} is immediatelly called if the user clicks
+     * this action.
      * <p/>
      * Parent has {@link FillLayout} layout manager set. This can be changed. Margins
      * and spacing should be transfered to new layout manager.

@@ -20,6 +20,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,6 +37,8 @@ public class AzvPlugin
     private static Log log = LogFactory.getLog( AzvPlugin.class );
 
     public static final String      ID = "org.polymap.azv";
+
+    public static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
     
     /* The property scope of the AZV plugin. */
     public static final String      PROPERTY_SCOPE = ID; 
@@ -45,7 +48,7 @@ public class AzvPlugin
     public static final String      ROLE_DIENSTBARKEITEN = "Dienstbarkeiten";
     public static final String      ROLE_HYDRANTEN = "Hydranten";
     public static final String      ROLE_WASSERQUALITAET = "Wasserqualität";
-    public static final String      ROLE_ENTSORGUNG = "Bedarfsgerechte Entsorgung";
+    public static final String      ROLE_ENTSORGUNG = "Entsorgung";
     public static final String      ROLE_MA = "Interner Sachbearbeiter";
 
     public static final String      CASE_SCHACHTSCHEIN = "Schachtschein";
@@ -53,8 +56,12 @@ public class AzvPlugin
     public static final String      CASE_DIENSTBARKEITEN = "Dienstbarkeiten";
     public static final String      CASE_HYDRANTEN = "Hydranten";
     public static final String      CASE_WASSERQUALITAET = "Wasserqualität";
-    public static final String      CASE_ENTSORGUNG = "Bedarfsgerechte Entsorgung";
+    public static final String      CASE_ENTSORGUNG = "Entsorgung";
     public static final String      CASE_NUTZER = "Neuer Nutzer";
+
+    public static final String      EVENT_TYPE_BEANTRAGT = "Beantragt";
+    public static final String      EVENT_TYPE_TERMINIERT = "Terminiert";
+    
 
     private static AzvPlugin        instance;
 

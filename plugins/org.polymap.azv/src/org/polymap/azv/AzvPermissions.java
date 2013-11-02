@@ -70,6 +70,12 @@ public class AzvPermissions
     }
 
     
+    public User getUser() {
+        checkPrincipal();
+        return user;
+    }
+
+
     /**
      * Subject can be:
      * <ul>

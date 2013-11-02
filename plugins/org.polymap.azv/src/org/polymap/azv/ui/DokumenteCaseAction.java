@@ -102,12 +102,14 @@ public class DokumenteCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         return mcase.get() != null && repo.get() != null
-                && !mcase.get().getNatures().contains( AzvPlugin.CASE_NUTZER );
+                && (mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT ));
     }
 
 
     @Override
     public void createContents( Composite parent ) {
+        site.setShowSubmitDiscardButtons( false );
         FillLayout playout = (FillLayout)parent.getLayout();
         playout.marginWidth *= 2;      
         playout.spacing *= 2;      

@@ -12,11 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.schachtschein;
 
 import org.opengis.feature.Property;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -50,6 +51,7 @@ import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.ui.NotNullValidator;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -70,6 +72,8 @@ public class SchachtscheinStartCaseAction
     private static Log log = LogFactory.getLog( SchachtscheinStartCaseAction.class );
 
     public static final IMessages       i18n = Messages.forPrefix( "SchachtscheinStart" );
+
+    private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -115,7 +119,10 @@ public class SchachtscheinStartCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
-        caseStatus.put( "Laufende Nr.", StringUtils.substringAfterLast( mcase.get().getId(), "-" ) );
+        String id = mcase.get().getId();
+        status.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
+        status.put( "Vorgang", mcase.get().getName(), 100 );
+        status.put( "Angelegt am", df.format( mcase.get().getCreated() ), 99 );
     }
 
 

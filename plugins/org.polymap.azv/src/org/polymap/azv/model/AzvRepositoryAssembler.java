@@ -80,7 +80,7 @@ public class AzvRepositoryAssembler
         LayerAssembly domainLayer = _app.layerAssembly( "application-layer" );
         ModuleAssembly domainModule = domainLayer.moduleAssembly( "azv-module" );
         domainModule.addEntities(
-                Schachtschein.class
+                Entsorgungsliste.class
         );
 //        domainModule.addValues(
 //                PersonValue.class
@@ -90,13 +90,11 @@ public class AzvRepositoryAssembler
 //        );
 
         // persistence: workspace/Lucene
-        File root = new File( Polymap.getWorkspacePath().toFile(), "data" );
-
-        File moduleRoot = new File( root, "org.polymap.azv" );
+        File moduleRoot = new File( Polymap.getDataDir(), "org.polymap.azv" );
         moduleRoot.mkdir();
 
         domainModule.addServices( LuceneEntityStoreService.class )
-                .setMetaInfo( new LuceneEntityStoreInfo( /*moduleRoot*/ ) )
+                .setMetaInfo( new LuceneEntityStoreInfo( moduleRoot ) )
                 .instantiateOnStartup()
                 .identifiedBy( "lucene-repository" );
 

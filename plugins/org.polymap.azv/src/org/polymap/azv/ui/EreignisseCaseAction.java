@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IAction;
 
+import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
@@ -31,6 +32,7 @@ import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
+import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -67,7 +69,8 @@ public class EreignisseCaseAction
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
-        return mcase.get() != null && repo.get() != null;
+        return mcase.get() != null && repo.get() != null
+                && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA );
     }
 
 

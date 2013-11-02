@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.schachtschein;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +53,7 @@ import org.polymap.rhei.form.IFormEditorPageSite;
 
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Schachtschein;
+import org.polymap.azv.ui.NotNullValidator;
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
 import org.polymap.openlayers.rap.widget.base_types.Bounds;
 import org.polymap.openlayers.rap.widget.base_types.Projection;
@@ -65,7 +66,7 @@ import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
 /**
  *
- *
+ * @deprecated
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class SchachtscheinPanel

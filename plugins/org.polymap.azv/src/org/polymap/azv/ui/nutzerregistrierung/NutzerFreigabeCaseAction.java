@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.nutzerregistrierung;
 
 import static org.polymap.azv.AzvPlugin.CASE_NUTZER;
 import static org.polymap.azv.AzvPlugin.ROLE_DIENSTBARKEITEN;

@@ -17,17 +17,11 @@ package org.polymap.azv.ui;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.jface.action.IAction;
-
-import org.polymap.core.runtime.event.EventFilter;
-import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.security.SecurityUtils;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.batik.IAppContext;
-import org.polymap.rhei.batik.PanelChangeEvent;
 
-import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -40,51 +34,36 @@ import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class SchachtscheinAntragCaseAction
+public class CloseCaseAction
         extends DefaultCaseAction
         implements ICaseAction {
 
-    private static Log log = LogFactory.getLog( SchachtscheinAntragCaseAction.class );
+    private static Log log = LogFactory.getLog( CloseCaseAction.class );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
-    private ContextProperty<IMosaicCase>        mcase;
-
+    private ContextProperty<IMosaicCase>    mcase;
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
-    private ContextProperty<MosaicRepository2>  repo;
+    private ContextProperty<MosaicRepository2> repo;
 
-    private ICaseActionSite                     site;
+    private ICaseActionSite                 site;
 
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
-                && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
-            // panel events
-            site.getContext().addEventHandler( this, new EventFilter<PanelChangeEvent>() {
-                public boolean apply( PanelChangeEvent input ) {
-                    return input.getSource().getSite().getPath().equals( site.getPanelSite().getPath() );
-                }
-            });
+                && SecurityUtils.isAdmin()) {
             return true;
         }
         return false;
     }
 
-    @Override
-    public void dispose() {
-        repo.get().rollbackChanges();
-        site.getContext().removeEventHandler( this );
-    }
-
-    @EventHandler
-    protected void panelChanged( PanelChangeEvent ev ) {
-        log.info( "panelChanged: " + ev );
-    }
 
     @Override
-    public void fillAction( IAction action ) {
-        action.setEnabled( false );
+    public void submit() throws Exception {
+        repo.get().closeCase( mcase.get(), "Abgebrochen", "Der Vorgang wurde erfolglos abgebrochen" );
+        repo.get().commitChanges();
     }
     
 }

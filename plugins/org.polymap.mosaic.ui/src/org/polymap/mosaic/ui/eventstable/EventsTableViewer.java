@@ -112,8 +112,10 @@ public class EventsTableViewer
 
     @EventHandler(display=true)
     protected void caseChanged( PropertyChangeEvent ev ) {
-        Iterable<? extends IMosaicCaseEvent> events = mcase.getEvents();
-        setInput( events );
+        if (!getControl().isDisposed()) {
+            Iterable<? extends IMosaicCaseEvent> events = mcase.getEvents();
+            setInput( events );
+        }
     }
     
     
