@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.hydranten;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

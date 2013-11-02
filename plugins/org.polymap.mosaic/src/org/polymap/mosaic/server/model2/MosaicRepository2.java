@@ -352,7 +352,7 @@ public class MosaicRepository2
     }
 
 
-    public IMosaicCaseEvent newCaseEvent( final MosaicCase2 mcase, final String name, final String description, final String eventType) {
+    public IMosaicCaseEvent newCaseEvent( final IMosaicCase mcase, final String name, final String description, final String eventType) {
        return newEntity( MosaicCaseEvent2.class, null, new EntityCreator<MosaicCaseEvent2>() {
            public void create( MosaicCaseEvent2 prototype ) throws Exception {
                prototype.name.set( name );
@@ -407,7 +407,7 @@ public class MosaicRepository2
 
     
     public void closeCase( IMosaicCase mcase, String eventName, String eventDescription ) {
-        IMosaicCaseEvent closed = newCaseEvent( (MosaicCase2)mcase, eventName, eventDescription, IMosaicCaseEvent.TYPE_CLOSED );
+        IMosaicCaseEvent closed = newCaseEvent( mcase, eventName, eventDescription, IMosaicCaseEvent.TYPE_CLOSED );
         mcase.addEvent( closed );
         
         ((MosaicCase2)mcase).lastModified.set( new Date() );
@@ -422,7 +422,7 @@ public class MosaicRepository2
             MosaicDocument doc = new MosaicDocument( file );
             
             ((MosaicCase2)mcase).lastModified.set( new Date() );
-            newCaseEvent( (MosaicCase2)mcase, doc.getName(), "Ein neues Dokument wurde angelegt: " + doc.getName() 
+            newCaseEvent( mcase, doc.getName(), "Ein neues Dokument wurde angelegt: " + doc.getName() 
                     /*+ ", Typ: " + doc.getContentType()
                     + ", Größe: " + doc.getSize()*/, "Dokument angelegt"  );
             

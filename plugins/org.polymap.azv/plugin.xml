@@ -12,8 +12,16 @@
             id="org.polymap.azv.UserTablePanel">
       </panel>
       <panel
-            class="org.polymap.azv.ui.WasserQualiPanel"
+            class="org.polymap.azv.ui.wasserquali.WasserQualiPanel"
             id="org.polymap.azv.WasserQualiPanel">
+      </panel>
+      <panel
+            class="org.polymap.azv.ui.entsorgung.EntsorgungsListenPanel"
+            id="org.polymap.azv.EntsorgungsListenPanel">
+      </panel>
+      <panel
+            class="org.polymap.azv.ui.LayoutTestPanel"
+            id="org.polymap.azv.LayoutTestPanel">
       </panel>
    </extension>
    <extension
@@ -51,7 +59,7 @@
          point="org.polymap.mosaic.ui.caseActions">
       <caseAction
             caseStateChange="true"
-            class="org.polymap.azv.ui.NutzerFreigabeCaseAction"
+            class="org.polymap.azv.ui.nutzerregistrierung.NutzerFreigabeCaseAction"
             description="Rechte des Nutzers festlegen"
             id="org.polymap.azv.ui.NutzerFreigabeCaseAction"
             name="Freigabe">
@@ -71,13 +79,13 @@
       </caseAction>
       <caseAction
             caseStateChange="true"
-            class="org.polymap.azv.ui.SchachtscheinAntragCaseAction"
+            class="org.polymap.azv.ui.schachtschein.SchachtscheinAntragCaseAction"
             id="org.polymap.azv.SchachtscheinCaseAction"
             name="Schachtschein beantragen"
             priority="10">
       </caseAction>
       <caseAction
-            class="org.polymap.azv.ui.SchachtscheinStartCaseAction"
+            class="org.polymap.azv.ui.schachtschein.SchachtscheinStartCaseAction"
             description="Bezeichnung und Ort der Maßnahme"
             icon="resources/icons/letter.png"
             id="org.polymap.azv.SchachtscheinStartCaseAction"
@@ -94,10 +102,34 @@
       </caseAction>
       <caseAction
             caseStateChange="true"
-            class="org.polymap.azv.ui.HydrantenCaseAction"
+            class="org.polymap.azv.ui.hydranten.HydrantenCaseAction"
             icon="resources/icons/fire.png"
             id="org.polymap.azv.HydrantenCaseAction"
             name="Hydrantenauskunft">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.entsorgung.EntsorgungCaseAction"
+            description="Termin festlegen und Entsorgung beantragen"
+            id="org.polymap.azv.EntsorgungCaseAction"
+            name="Entsorgung beantragen"
+            priority="100">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.entsorgung.EntsorgungFreigabeCaseAction"
+            description="Diesem Antrag einen Termin zuordnen"
+            id="org.polymap.azv.EntsorgungFreigabeCaseAction"
+            name="Termin zuordnen"
+            priority="120">
+      </caseAction>
+      <caseAction
+            class="org.polymap.azv.ui.CloseCaseAction"
+            description="Vorgang erfolglos schließen und archivieren"
+            icon="resources/icons/close.png"
+            id="org.polymap.azv.CloseCaseAction"
+            name="Schließen"
+            priority="1000">
       </caseAction>
    </extension>
 

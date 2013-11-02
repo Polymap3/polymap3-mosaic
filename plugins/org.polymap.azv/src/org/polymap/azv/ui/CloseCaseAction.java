@@ -17,13 +17,12 @@ package org.polymap.azv.ui;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.jface.action.IAction;
+import org.polymap.core.security.SecurityUtils;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.azv.AzvPlugin;
+
 import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
@@ -35,53 +34,36 @@ import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class SchachtscheinAntragCaseAction
+public class CloseCaseAction
         extends DefaultCaseAction
         implements ICaseAction {
 
-    private static Log log = LogFactory.getLog( SchachtscheinAntragCaseAction.class );
+    private static Log log = LogFactory.getLog( CloseCaseAction.class );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
-    private ContextProperty<IMosaicCase>        mcase;
-
+    private ContextProperty<IMosaicCase>    mcase;
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
-    private ContextProperty<MosaicRepository2>  repo;
+    private ContextProperty<MosaicRepository2> repo;
 
-    private ICaseActionSite                     site;
-
-    private IAction                             action;
+    private ICaseActionSite                 site;
 
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
-                && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
+                && SecurityUtils.isAdmin()) {
             return true;
         }
         return false;
     }
 
-    
-    @Override
-    public void fillAction( @SuppressWarnings("hiding") IAction action ) {
-        this.action = action;
-        updateEnabled();        
-    }
-    
-    
+
     @Override
     public void submit() throws Exception {
-        repo.get().newCaseEvent( (MosaicCase2)mcase.get(), "Beantragt", "", "Beantragt" );
+        repo.get().closeCase( mcase.get(), "Abgebrochen", "Der Vorgang wurde erfolglos abgebrochen" );
         repo.get().commitChanges();
-    }
-
-
-    protected void updateEnabled() {
-        action.setEnabled( false );
-        if (mcase.get().getName().length() > 0 && mcase.get().get( "point" ) != null) {
-            action.setEnabled( true );
-        }
     }
     
 }

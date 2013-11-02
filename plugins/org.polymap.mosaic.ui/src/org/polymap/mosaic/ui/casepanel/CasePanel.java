@@ -186,7 +186,16 @@ public class CasePanel
                 actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
                 ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 350 );
                 holder.caseAction.createContents( actionSection );
-                contentSection.setEnabled( false );
+                if (actionSection.getChildren().length > 0) {
+                    contentSection.setEnabled( false );
+                }
+                // no children -> submit immediatelly
+                else {
+                    actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_DEACTIVE );
+                    ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 30 );
+                    
+                    submitActiveAction();
+                }
             }
             catch (Throwable e) {
                 log.warn( "", e );

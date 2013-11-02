@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.schachtschein;
 
 import org.opengis.feature.Property;
 
@@ -51,6 +51,7 @@ import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.ui.NotNullValidator;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
