@@ -105,7 +105,7 @@ public class EntsorgungFreigabeCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        status.put( "Liste", "" );
+        //status.put( "Liste", "" );
     }
 
 
@@ -119,7 +119,7 @@ public class EntsorgungFreigabeCaseAction
             listen.put( liste.name().get(), liste );
         }
         
-        list = site.toolkit().createList( parent, SWT.SINGLE );
+        list = site.toolkit().createList( parent, SWT.SINGLE, SWT.BORDER );
         list.setItems( Iterables.toArray( listen.keySet(), String.class ) );
         list.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {

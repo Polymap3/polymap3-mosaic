@@ -78,6 +78,8 @@ public class CaseStatus {
     }
     
     public boolean put( String key, String value, int priority ) {
+        value = value != null ? value : "";
+        
         Entry found = entries.get( key );
         boolean result;
         if (found != null) {
