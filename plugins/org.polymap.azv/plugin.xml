@@ -8,7 +8,7 @@
             id="org.polymap.azv.StartPanel">
       </panel>
       <panel
-            class="org.polymap.azv.ui.UsersTablePanel"
+            class="org.polymap.azv.ui.nutzerregistrierung.UsersTablePanel"
             id="org.polymap.azv.UserTablePanel">
       </panel>
       <panel
@@ -22,6 +22,10 @@
       <panel
             class="org.polymap.azv.ui.LayoutTestPanel"
             id="org.polymap.azv.LayoutTestPanel">
+      </panel>
+      <panel
+            class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftPanel"
+            id="org.polymap.azv.LeitungsauskunftPanel">
       </panel>
    </extension>
    <extension

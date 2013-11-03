@@ -45,6 +45,7 @@ public class AzvPlugin
 
     public static final String      ROLE_SCHACHTSCHEIN = "Schachtschein beantragen";
     public static final String      ROLE_LEITUNGSAUSKUNFT = "Leitungsauskunft";
+    public static final String      ROLE_LEITUNGSAUSKUNFT2 = "Leitungsauskunft (vertrauenswürdig)";
     public static final String      ROLE_DIENSTBARKEITEN = "Dienstbarkeiten";
     public static final String      ROLE_HYDRANTEN = "Hydranten";
     public static final String      ROLE_WASSERQUALITAET = "Wasserqualität";

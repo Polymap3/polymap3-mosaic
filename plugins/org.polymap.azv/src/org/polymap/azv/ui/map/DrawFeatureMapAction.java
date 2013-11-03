@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.map;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,8 @@ import org.eclipse.jface.action.ContributionItem;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventManager;
 
-import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
+import org.polymap.rhei.batik.IPanelSite;
+
 import org.polymap.openlayers.rap.widget.base.OpenLayersEventListener;
 import org.polymap.openlayers.rap.widget.base.OpenLayersObject;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
@@ -60,7 +61,7 @@ public class DrawFeatureMapAction
 
     private static Log log = LogFactory.getLog( DrawFeatureMapAction.class );
     
-    private ICaseActionSite         site;
+    private IPanelSite              site;
     
     private OpenLayersMap           map;
     
@@ -75,9 +76,9 @@ public class DrawFeatureMapAction
     private Button                  btn;
 
     
-    public DrawFeatureMapAction( ICaseActionSite site, OpenLayersMap map, VectorLayer vectorLayer, String handler ) {
-        this.site = site;
-        this.map = map;
+    public DrawFeatureMapAction( MapViewer viewer, VectorLayer vectorLayer, String handler ) {
+        this.site = viewer.getPanelSite();
+        this.map = viewer.getMap();
         this.vectorLayer = vectorLayer;
         this.isVectorLayerCreated = vectorLayer == null;
         this.handler = handler;

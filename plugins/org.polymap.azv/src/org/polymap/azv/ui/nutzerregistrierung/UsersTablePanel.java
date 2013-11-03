@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.nutzerregistrierung;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,10 +91,10 @@ public class UsersTablePanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
+        this.tk = site.toolkit();
+        this.umrepo = UserRepository.instance();
+
         if (site.getPath().size() == 1 ) {
-            this.tk = site.toolkit();
-            this.umrepo = UserRepository.instance();
-            
             // wait for user to log in
             user.addListener( this, new EventFilter<PropertyAccessEvent>() {
                 public boolean apply( PropertyAccessEvent input ) {
