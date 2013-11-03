@@ -15,8 +15,6 @@
 package org.polymap.azv.ui;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import org.opengis.feature.Feature;
 
 import org.apache.commons.logging.Log;
@@ -84,17 +82,22 @@ public class KarteCaseAction
 
     private VectorLayer                     vectorLayer;
 
+    private DrawFeatureMapAction drawFeatureAction;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         return mcase.get() != null && repo.get() != null
-                && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN );
+                && (mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT ));
     }
 
 
     @Override
     public void dispose() {
+        drawFeatureAction.removeListener( this );
+        drawFeatureAction.dispose();
         mapViewer.dispose();
     }
 
@@ -173,23 +176,25 @@ public class KarteCaseAction
     protected void createToolbar( Composite parent ) {
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
 
-        final DrawFeatureMapAction drawFeatureAction = new DrawFeatureMapAction( 
+        drawFeatureAction = new DrawFeatureMapAction( 
                 mapViewer, vectorLayer, DrawFeatureControl.HANDLER_POINT );
-        drawFeatureAction.addListener( new PropertyChangeListener() {
-            @EventHandler(display=true)
-            public void propertyChange( PropertyChangeEvent ev ) {
-                Feature feature = (Feature)ev.getNewValue();
-                Point point = (Point)feature.getDefaultGeometryProperty().getValue();
-                String wkt = new WKTWriter().write( point );
-                mcase.get().put( "point", wkt );
-                repo.get().commitChanges();
-                
-                site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
-                
-                drawFeatureAction.deactivate();
-            }
-        });
+
+        drawFeatureAction.addListener( this );
         mapViewer.addToolbarItem( drawFeatureAction );
+    }
+
+    
+    @EventHandler(display=true)
+    protected void featureAdded( PropertyChangeEvent ev ) {
+        Feature feature = (Feature)ev.getNewValue();
+        Point point = (Point)feature.getDefaultGeometryProperty().getValue();
+        String wkt = new WKTWriter().write( point );
+        mcase.get().put( "point", wkt );
+        repo.get().commitChanges();
+        
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
+        
+        drawFeatureAction.deactivate();
     }
     
 }

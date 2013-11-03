@@ -84,7 +84,6 @@ import org.polymap.rhei.um.ui.LoginPanel;
 import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 import org.polymap.rhei.um.ui.UserSettingsPanel;
 
-import org.polymap.azv.AzvPermissions;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
@@ -204,7 +203,7 @@ public class StartPanel
     protected void handleEvent( PropertyAccessEvent ev ) {
         for (Control btn : actionBtns) {
             String role = (String)btn.getData( "role" );
-            btn.setEnabled( AzvPermissions.instance().check( role ) );
+            btn.setEnabled( role == null || SecurityUtils.isUserInGroup( role ) );
         }
     }
     
@@ -410,7 +409,7 @@ public class StartPanel
             }
         });
         if (role != null) {
-            result.setEnabled( AzvPermissions.instance().check( role ) );
+            result.setEnabled( SecurityUtils.isUserInGroup( role ) );
             result.setData( "role", role );
         }
         return result;

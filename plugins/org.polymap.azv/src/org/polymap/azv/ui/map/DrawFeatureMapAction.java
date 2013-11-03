@@ -106,7 +106,7 @@ public class DrawFeatureMapAction
     @Override
     public void fill( Composite parent ) {
         btn = site.toolkit().createButton( parent, "Ort markieren", SWT.TOGGLE );
-        btn.setToolTipText( "Ort der Maßnahme einzeichnen" );
+        btn.setToolTipText( "Ort der Maßnahme per Klick in die Karte einzeichnen" );
         //btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/location.png" ) );
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {
