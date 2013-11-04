@@ -32,7 +32,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventManager;
@@ -244,22 +247,16 @@ public class CasePanel
             action.setImageDescriptor( holder.ext.getIcon() );
             
             holder.caseAction.fillAction( action );
+         
+            action.addPropertyChangeListener( new IPropertyChangeListener() {
+                public void propertyChange( PropertyChangeEvent event ) {
+                    fillToolbarBtn( holder, action );                    
+                }
+            });
             
             if (action.getText() != null || action.getImageDescriptor() != null) {
                 holder.btn = tk.createButton( body, action.getText(), SWT.TOGGLE );
-                holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
-                holder.btn.setToolTipText( action.getToolTipText() );
-                holder.btn.setEnabled( action.isEnabled() );
-                ImageDescriptor icon = action.getImageDescriptor();
-                if (icon != null) {
-                    holder.btn.setImage( MosaicUiPlugin.getDefault().images().image( icon, icon.toString() ) );
-                }
-                if (holder.ext.isCaseChangeAction()) {
-                    holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
-                    if (icon == null) {
-                        holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
-                    }
-                }
+                fillToolbarBtn( holder, action );
 
                 FormDataFactory layoutData = FormDataFactory.filled().right( -1 );
                 if (prev != null) {
@@ -280,7 +277,25 @@ public class CasePanel
             }
         }
     }
+
     
+    private void fillToolbarBtn( CaseActionHolder holder, IAction action ) {
+        if (action.getText() != null || action.getImageDescriptor() != null) {
+            holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
+            holder.btn.setToolTipText( action.getToolTipText() );
+            holder.btn.setEnabled( action.isEnabled() );
+            ImageDescriptor icon = action.getImageDescriptor();
+            if (icon != null) {
+                holder.btn.setImage( MosaicUiPlugin.getDefault().images().image( icon, icon.toString() ) );
+            }
+            if (holder.ext.isCaseChangeAction()) {
+                holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
+                if (icon == null) {
+                    holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
+                }
+            }
+        }
+    }
 
     private void activateAction( CaseActionHolder holder ) {
         if (activeAction != null) {

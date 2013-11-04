@@ -56,6 +56,7 @@ import org.polymap.core.runtime.entity.IEntityStateListener;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -83,11 +84,11 @@ import org.polymap.rhei.um.ui.LoginPanel;
 import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 import org.polymap.rhei.um.ui.UserSettingsPanel;
 
-import org.polymap.azv.AzvPermissions;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftCasesDecorator;
+import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftPanel;
 import org.polymap.azv.ui.nutzerregistrierung.NutzerCasesDecorator;
 import org.polymap.azv.ui.schachtschein.SchachtscheinCasesDecorator;
 import org.polymap.azv.ui.wasserquali.WasserQualiPanel;
@@ -202,7 +203,7 @@ public class StartPanel
     protected void handleEvent( PropertyAccessEvent ev ) {
         for (Control btn : actionBtns) {
             String role = (String)btn.getData( "role" );
-            btn.setEnabled( AzvPermissions.instance().check( role ) );
+            btn.setEnabled( role == null || SecurityUtils.isUserInGroup( role ) );
         }
     }
     
@@ -369,20 +370,31 @@ public class StartPanel
                 BatikPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
                 AzvPlugin.ROLE_LEITUNGSAUSKUNFT,
                 new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e ) {
-                // XXX Auto-generated method stub
-                throw new RuntimeException( "not yet implemented." );
+            public void widgetSelected( SelectionEvent ev ) {
+                if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_LEITUNGSAUSKUNFT2 )) {
+                    getContext().openPanel( LeitungsauskunftPanel.ID );
+                }
+                else {
+                    try {
+                        // create new case; commit/rollback inside CaseAction
+                        IMosaicCase newCase = repo.get().newCase( "", "" );
+                        newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
+                        //newCase.put( "user", user.get().username().get() );
+                        mcase.set( newCase );
+                        getContext().openPanel( CasePanel.ID );
+                    }
+                    catch (Exception e) {
+                        BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                    }
+                }
             }
         }));
-//        for (Control btn : actionBtns) {
-//            btn.setEnabled( btn.isEnabled() && isAuthenticatedUser() );
-//        }
         return section;
     }
 
     
     private Control createActionButton( Composite client, String title, String tooltip, Image image, String role, final SelectionListener l ) {
-        Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT, SWT.FLAT );
+        Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT );
         result.setToolTipText( tooltip );
         result.setImage( image );
         //result.setLayoutData( RowDataFactory.swtDefaults().create() );
@@ -397,7 +409,7 @@ public class StartPanel
             }
         });
         if (role != null) {
-            result.setEnabled( AzvPermissions.instance().check( role ) );
+            result.setEnabled( SecurityUtils.isUserInGroup( role ) );
             result.setData( "role", role );
         }
         return result;

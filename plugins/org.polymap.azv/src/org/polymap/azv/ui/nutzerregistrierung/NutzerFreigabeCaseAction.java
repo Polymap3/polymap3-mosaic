@@ -19,8 +19,8 @@ import static org.polymap.azv.AzvPlugin.ROLE_DIENSTBARKEITEN;
 import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
 import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
+import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT2;
 import static org.polymap.azv.AzvPlugin.ROLE_SCHACHTSCHEIN;
-import static org.polymap.azv.AzvPlugin.ROLE_WASSERQUALITAET;
 
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import org.polymap.core.runtime.IMessages;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
@@ -75,7 +76,7 @@ public class NutzerFreigabeCaseAction
 
     private static Log log = LogFactory.getLog( NutzerFreigabeCaseAction.class );
 
-    private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
+    private static final FastDateFormat df = AzvPlugin.df;
     
     public static final IMessages       i18n = Messages.forPrefix( "NutzerFreigabe" );
 
@@ -99,7 +100,14 @@ public class NutzerFreigabeCaseAction
         if (mycase != null && mycase.getNatures().contains( CASE_NUTZER )) {
             // user data
             String username = mycase.get( "user" );
-            user = UserRepository.instance().findUser( username );
+            UserRepository um = UserRepository.instance();
+            user = um.findUser( username );
+            // open action
+            Polymap.getSessionDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    site.activateCaseAction( site.getActionId() );
+                }
+            });
             return true;
         }
         return false;
@@ -134,19 +142,22 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void createContents( Composite parent ) {
+        ((FillLayout)parent.getLayout()).marginWidth *= 2;
+
+        // welcome
+        Composite welcome = site.toolkit().createComposite( parent );
+        site.toolkit().createFlowText( welcome, i18n.get( "welcomeTxt", UsersTablePanel.ID ) );
+        
         final UserRepository um = UserRepository.instance();
         
-        Composite root = site.toolkit().createComposite( parent );
-        root.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).columns( 2, 2 ).create() );
-        
         // left section
-        Composite left = site.toolkit().createComposite( root );
-        left.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).columns( 1, 1 ).create() );
+        Composite left = site.toolkit().createComposite( parent, SWT.BORDER );
+        left.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).columns( 1, 1 ).create() );
         Set<String> groups = new HashSet( um.groupsOf( user ) );
 
         List<String> roles = Lists.newArrayList( 
-                ROLE_SCHACHTSCHEIN, ROLE_LEITUNGSAUSKUNFT, ROLE_DIENSTBARKEITEN,
-                ROLE_ENTSORGUNG, ROLE_HYDRANTEN, ROLE_WASSERQUALITAET
+                ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN,
+                ROLE_DIENSTBARKEITEN, ROLE_ENTSORGUNG, ROLE_HYDRANTEN
                 );
         for (final String role : roles) {
             final Button btn = site.toolkit().createButton( left, role, SWT.CHECK );
@@ -163,8 +174,8 @@ public class NutzerFreigabeCaseAction
         }
 
         // right section
-        Composite right = site.toolkit().createComposite( root );
-        right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 0 ).spacing( 5 ).create() );
+        Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
+        right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).create() );
         Button btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
         btn.setSelection( groups.contains( AzvPlugin.ROLE_MA ) );
         btn.addSelectionListener( new SelectionAdapter() {

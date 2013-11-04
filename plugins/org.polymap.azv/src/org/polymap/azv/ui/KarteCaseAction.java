@@ -15,8 +15,6 @@
 package org.polymap.azv.ui;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import org.opengis.feature.Feature;
 
 import org.apache.commons.logging.Log;
@@ -28,12 +26,7 @@ import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
@@ -43,32 +36,24 @@ import org.eclipse.core.runtime.Status;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
-import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.ui.map.DrawFeatureMapAction;
+import org.polymap.azv.ui.map.HomeMapAction;
+import org.polymap.azv.ui.map.MapViewer;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
-import org.polymap.openlayers.rap.widget.OpenLayersWidget;
-import org.polymap.openlayers.rap.widget.base_types.Bounds;
-import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
-import org.polymap.openlayers.rap.widget.base_types.Projection;
-import org.polymap.openlayers.rap.widget.base_types.Size;
 import org.polymap.openlayers.rap.widget.base_types.Style;
 import org.polymap.openlayers.rap.widget.base_types.StyleMap;
 import org.polymap.openlayers.rap.widget.controls.DrawFeatureControl;
-import org.polymap.openlayers.rap.widget.controls.LayerSwitcherControl;
-import org.polymap.openlayers.rap.widget.controls.MousePositionControl;
-import org.polymap.openlayers.rap.widget.controls.NavigationControl;
-import org.polymap.openlayers.rap.widget.controls.ScaleControl;
-import org.polymap.openlayers.rap.widget.controls.ScaleLineControl;
 import org.polymap.openlayers.rap.widget.features.VectorFeature;
 import org.polymap.openlayers.rap.widget.geometry.PointGeometry;
 import org.polymap.openlayers.rap.widget.layers.VectorLayer;
@@ -93,26 +78,27 @@ public class KarteCaseAction
 
     private ICaseActionSite                 site;
 
-    private OpenLayersWidget                olwidget;
+    private MapViewer                       mapViewer;
 
     private VectorLayer                     vectorLayer;
+
+    private DrawFeatureMapAction drawFeatureAction;
 
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         return mcase.get() != null && repo.get() != null
-                && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN );
+                && (mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT ));
     }
 
 
     @Override
     public void dispose() {
-        if (olwidget != null) {
-            olwidget.getMap().dispose();
-            olwidget.dispose();
-            olwidget = null;
-        }
+        drawFeatureAction.removeListener( this );
+        drawFeatureAction.dispose();
+        mapViewer.dispose();
     }
 
 
@@ -125,56 +111,21 @@ public class KarteCaseAction
         body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
 
         // map widget
-        olwidget = new OpenLayersWidget( body, SWT.MULTI | SWT.WRAP | SWT.BORDER, "openlayers/full/OpenLayers-2.12.1.js" );
-        olwidget.setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 450 ) );
-
-        String srs = "EPSG:25833";
-        Projection proj = new Projection( srs );
-        String units = srs.equals( "EPSG:4326" ) ? "degrees" : "m";
-        float maxResolution = srs.equals( "EPSG:4326" ) ? (360/256) : 125000;
-        //Bounds maxExtent = new Bounds( 12.80, 53.00, 14.30, 54.50 );
-        Bounds maxExtent = new Bounds( 330000, 5872837.393586, 477000, 6078174.895021 );
-        olwidget.createMap( proj, proj, units, maxExtent, maxResolution );
-        OpenLayersMap map = olwidget.getMap();
-        
-        //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
-        //WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
-        WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
-        topo.setIsBaseLayer( true );
-        topo.setTileSize( new Size( 600, 600 ) );
-        topo.setBuffer( 0 );
-        map.addLayer( topo );
-
-        WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
-        dop.setIsBaseLayer( true );
-        dop.setTileSize( new Size( 400, 400 ) );
-        dop.setBuffer( 0 );
-        map.addLayer( dop );
+        mapViewer = new MapViewer();
+        mapViewer.createContents( body, site.getPanelSite() );
+        mapViewer.getControl().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 500 ) );
 
         WMSLayer alk = new WMSLayer( "ALK", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-ALK" );
-        alk.setIsBaseLayer( false );
         alk.setVisibility( false );
-        map.addLayer( alk );
+        mapViewer.addLayer( alk );
         
         WMSLayer kanal = new WMSLayer( "Kanal", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Kanal" );
-        kanal.setIsBaseLayer( false );
         kanal.setVisibility( false );
-        map.addLayer( kanal );
+        mapViewer.addLayer( kanal );
         
         WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
-        wasser.setIsBaseLayer( false );
         wasser.setVisibility( false );
-        map.addLayer( wasser );
-        
-        map.addControl( new NavigationControl() );
-        //map.addControl( new PanZoomBarControl() );
-        map.addControl( new LayerSwitcherControl() );
-        map.addControl( new MousePositionControl() );
-        map.addControl( new ScaleLineControl() );
-        map.addControl( new ScaleControl() );
-
-        map.zoomToExtent( maxExtent, true );
-        map.zoomTo( 9 );
+        mapViewer.addLayer( wasser );
         
         // vector layer
         vectorLayer = new VectorLayer( "Markierung" );
@@ -191,7 +142,7 @@ public class KarteCaseAction
         styleMap.setIntentStyle( "default", standard );
         vectorLayer.setStyleMap( styleMap );
         
-        map.addLayer( vectorLayer );
+        mapViewer.addLayer( vectorLayer );
         
         // check if mcase has point
         drawMCasePoint();
@@ -212,8 +163,8 @@ public class KarteCaseAction
                 vectorLayer.addFeatures( vectorFeature );
                 //vectorLayer.redraw();
 
-                olwidget.getMap().setCenter( p.getX(), p.getY() );
-                olwidget.getMap().zoomTo( 15 );
+                mapViewer.getMap().setCenter( p.getX(), p.getY() );
+                mapViewer.getMap().zoomTo( 15 );
             }
             catch (ParseException e) {
                 log.warn( "", e );
@@ -223,38 +174,27 @@ public class KarteCaseAction
     
     
     protected void createToolbar( Composite parent ) {
-        Composite toolbar = site.toolkit().createComposite( parent );
-        toolbar.setLayout( RowLayoutFactory.fillDefaults().fill( true ).create() );
-        
-        Button btn = site.toolkit().createButton( toolbar, null, SWT.PUSH );
-        btn.setToolTipText( "Gesamte Karte darstellen" );
-        btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/house-org.png" ) );
-        btn.setEnabled( true );
-        btn.addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                Bounds maxExtent = olwidget.getMap().getMaxExtent();
-                olwidget.getMap().zoomToExtent( maxExtent, true );
-                olwidget.getMap().zoomTo( 9 );
-            }
-        });
+        mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
 
-        final DrawFeatureMapAction drawFeatureAction = new DrawFeatureMapAction( 
-                site, olwidget.getMap(), vectorLayer, DrawFeatureControl.HANDLER_POINT );
-        drawFeatureAction.fill( toolbar );
-        drawFeatureAction.addListener( new PropertyChangeListener() {
-            @EventHandler(display=true)
-            public void propertyChange( PropertyChangeEvent ev ) {
-                Feature feature = (Feature)ev.getNewValue();
-                Point point = (Point)feature.getDefaultGeometryProperty().getValue();
-                String wkt = new WKTWriter().write( point );
-                mcase.get().put( "point", wkt );
-                repo.get().commitChanges();
-                
-                site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
-                
-                drawFeatureAction.deactivate();
-            }
-        });
+        drawFeatureAction = new DrawFeatureMapAction( 
+                mapViewer, vectorLayer, DrawFeatureControl.HANDLER_POINT );
+
+        drawFeatureAction.addListener( this );
+        mapViewer.addToolbarItem( drawFeatureAction );
+    }
+
+    
+    @EventHandler(display=true)
+    protected void featureAdded( PropertyChangeEvent ev ) {
+        Feature feature = (Feature)ev.getNewValue();
+        Point point = (Point)feature.getDefaultGeometryProperty().getValue();
+        String wkt = new WKTWriter().write( point );
+        mcase.get().put( "point", wkt );
+        repo.get().commitChanges();
+        
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
+        
+        drawFeatureAction.deactivate();
     }
     
 }

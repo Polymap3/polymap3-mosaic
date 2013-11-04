@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui;
+package org.polymap.azv.ui.nutzerregistrierung;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +40,7 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.IAppContext;
@@ -77,6 +78,7 @@ public class UsersTablePanel
     public static final IMessages       i18n = Messages.forPrefix( "UsersTablePanel" );
 
     /** Set by the {@link LoginPanel}. */
+    @Context(scope="org.polymap.azv.ui")
     private ContextProperty<UserPrincipal>  user;
     
     private IPanelToolkit               tk;
@@ -91,10 +93,10 @@ public class UsersTablePanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
+        this.tk = site.toolkit();
+        this.umrepo = UserRepository.instance();
+
         if (site.getPath().size() == 1 ) {
-            this.tk = site.toolkit();
-            this.umrepo = UserRepository.instance();
-            
             // wait for user to log in
             user.addListener( this, new EventFilter<PropertyAccessEvent>() {
                 public boolean apply( PropertyAccessEvent input ) {

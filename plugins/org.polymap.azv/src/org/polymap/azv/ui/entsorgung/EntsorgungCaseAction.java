@@ -109,8 +109,8 @@ public class EntsorgungCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        status.put( "Entsorgung", "[Geben Sie einen Adresse an]", 10 );
-        status.put( "Termin", "[Geben Sie einen Termin an]", 0 );
+        //status.put( "Entsorgung", "[Geben Sie einen Adresse an]", 10 );
+        status.put( "Termin", mcase.get().get( "termin" ), 0 );
     }
 
 
@@ -241,8 +241,8 @@ public class EntsorgungCaseAction
                     else if (ev.getFieldName().equals( "street" )) {
                         street = ev.getNewValue();
                     }
-                    caseStatus.put( "Entsorgung", Joiner.on( " " ).skipNulls().join( 
-                            street, number, city ) );
+//                    caseStatus.put( "Entsorgung", Joiner.on( " " ).skipNulls().join( 
+//                            street, number, city ) );
                 }
             });
             activateStatusAdapter( site.getPanelSite() );

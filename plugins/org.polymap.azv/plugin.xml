@@ -8,7 +8,7 @@
             id="org.polymap.azv.StartPanel">
       </panel>
       <panel
-            class="org.polymap.azv.ui.UsersTablePanel"
+            class="org.polymap.azv.ui.nutzerregistrierung.UsersTablePanel"
             id="org.polymap.azv.UserTablePanel">
       </panel>
       <panel
@@ -22,6 +22,10 @@
       <panel
             class="org.polymap.azv.ui.LayoutTestPanel"
             id="org.polymap.azv.LayoutTestPanel">
+      </panel>
+      <panel
+            class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftPanel"
+            id="org.polymap.azv.LeitungsauskunftPanel">
       </panel>
    </extension>
    <extension
@@ -128,8 +132,21 @@
             description="Vorgang erfolglos schließen und archivieren"
             icon="resources/icons/close.png"
             id="org.polymap.azv.CloseCaseAction"
-            name="Schließen"
             priority="1000">
+      </caseAction>
+      <caseAction
+            class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftStartCaseAction"
+            description="Bezeichnung und Ort der Maßnahme"
+            icon="resources/icons/pipelines.png"
+            id="org.polymap.azv.caseAction1"
+            name="Maßnahme">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftAntragCaseAction"
+            id="org.polymap.azv.LeitungsauskunftAntragCaseAction"
+            name="Leitungsauskunft beantragen"
+            priority="10">
       </caseAction>
    </extension>
 

@@ -53,7 +53,7 @@ public class EntsorgungCasesDecorator
         else {
             viewer.addFilter( new CasesViewerFilter() {
                 protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
-                    return !apply( _viewer, mcase );
+                    return !EntsorgungCasesDecorator.this.apply( _viewer, mcase );
                 }
             });
         }
