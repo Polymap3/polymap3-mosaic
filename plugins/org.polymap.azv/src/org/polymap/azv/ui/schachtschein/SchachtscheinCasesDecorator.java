@@ -48,7 +48,8 @@ public class SchachtscheinCasesDecorator
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_SCHACHTSCHEIN )) {
             filterBar.add( this )
                     .setIcon( BatikPlugin.instance().imageForName( "resources/icons/letter-filter.png" ) )
-                    .setTooltip( "Schachtscheinanträge anzeigen" );            
+                    .setTooltip( "Schachtscheinanträge anzeigen" )            
+                    .setGroup( "azv" );
         }
         else {
             viewer.addFilter( new CasesViewerFilter() {

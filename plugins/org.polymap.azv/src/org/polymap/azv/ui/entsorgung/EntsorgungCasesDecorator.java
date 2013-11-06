@@ -21,7 +21,6 @@ import com.google.common.collect.Iterables;
 
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
 import org.polymap.core.security.SecurityUtils;
-
 import org.polymap.rhei.batik.BatikPlugin;
 
 import org.polymap.azv.AzvPlugin;
@@ -48,7 +47,8 @@ public class EntsorgungCasesDecorator
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_ENTSORGUNG )) {
             filterBar.add( this )
                     .setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) )
-                    .setTooltip( "Entsorgungsanträge anzeigen" );            
+                    .setTooltip( "Entsorgungsanträge anzeigen" )
+                    .setGroup( "azv" );
         }
         else {
             viewer.addFilter( new CasesViewerFilter() {
