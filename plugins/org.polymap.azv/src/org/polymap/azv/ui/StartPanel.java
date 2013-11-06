@@ -231,11 +231,13 @@ public class StartPanel
                     getSite().setTitle( i18n.get( "titleLoggedIn" ) );
                     User umuser = UserRepository.instance().findUser( name );
                     getContext().setUserName( umuser != null ? umuser.name().get() : name );
-                    getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
-                        public void run() {
-                            getContext().openPanel( UserSettingsPanel.ID );
-                        }
-                    });
+                    if (!SecurityUtils.isAdmin()) {
+                        getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
+                            public void run() {
+                                getContext().openPanel( UserSettingsPanel.ID );
+                            }
+                        });
+                    }
                     return true;
                 }
                 else {
