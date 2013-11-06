@@ -134,7 +134,7 @@ public class CasePanel
         this.tk = getSite().toolkit();
         int margins = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         int spacing = getSite().getLayoutPreference( LAYOUT_SPACING_KEY );
-        panelBody.setLayout( FormLayoutFactory.defaults().margins( margins+10, 0 ).spacing( spacing ).create() );
+        panelBody.setLayout( FormLayoutFactory.defaults().margins( margins+10, 0 )/*.spacing( spacing )*/.create() );
 
         // init caseActions
         for (CaseActionExtension ext : CaseActionExtension.all()) {
@@ -155,7 +155,7 @@ public class CasePanel
         }
         
         // status area
-        Composite statusSection = tk.createComposite( panelBody );
+        Composite statusSection = tk.createComposite( panelBody, SWT.BORDER );
         statusSection.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
         createStatusSection( statusSection );
 
