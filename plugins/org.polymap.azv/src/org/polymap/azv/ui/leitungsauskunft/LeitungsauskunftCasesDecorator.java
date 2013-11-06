@@ -19,7 +19,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
 import org.polymap.core.security.SecurityUtils;
-
 import org.polymap.rhei.batik.BatikPlugin;
 
 import org.polymap.azv.AzvPlugin;
@@ -45,7 +44,8 @@ public class LeitungsauskunftCasesDecorator
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_LEITUNGSAUSKUNFT )) {
             filterBar.add( this )
                     .setIcon( BatikPlugin.instance().imageForName( "resources/icons/pipelines-filter.png" ) )
-                    .setTooltip( "Leitungsauskünfte anzeigen" );            
+                    .setTooltip( "Leitungsauskünfte anzeigen" )
+                    .setGroup( "azv" );
         }
         else {
             viewer.addFilter( new CasesViewerFilter() {

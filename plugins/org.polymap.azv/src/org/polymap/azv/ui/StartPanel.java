@@ -37,8 +37,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.rwt.lifecycle.WidgetUtil;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -150,7 +148,8 @@ public class StartPanel
             this.tk = site.toolkit();
             this.repo.set( MosaicRepository2.instance() );
             site.setTitle( i18n.get( "title" ) );
-            
+            site.setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
+
             casesViewerDecorators.add( context.propagate( new MitarbeiterCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new NutzerCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new SchachtscheinCasesDecorator() ) );
@@ -229,13 +228,17 @@ public class StartPanel
                 
                     // adjust context: username and preferences
                     getSite().setTitle( i18n.get( "titleLoggedIn" ) );
+                    getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
+                    
                     User umuser = UserRepository.instance().findUser( name );
                     getContext().setUserName( umuser != null ? umuser.name().get() : name );
-                    getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
-                        public void run() {
-                            getContext().openPanel( UserSettingsPanel.ID );
-                        }
-                    });
+                    if (!SecurityUtils.isAdmin()) {
+                        getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
+                            public void run() {
+                                getContext().openPanel( UserSettingsPanel.ID );
+                            }
+                        });
+                    }
                     return true;
                 }
                 else {
@@ -285,12 +288,13 @@ public class StartPanel
         Composite searchCtrl = searchField.getControl();
         searchCtrl.setLayoutData( FormDataFactory.filled()
                 .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
-        for (Control child : searchCtrl.getChildren()) {
-            if (child instanceof Button) {
-                ((Button)child).setImage( BatikPlugin.instance().imageForName( "resources/icons/close.png" ) );
-                ((Button)child).setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );                
-            }
-        }
+        
+//        for (Control child : searchCtrl.getChildren()) {
+//            if (child instanceof Button) {
+//                ((Button)child).setImage( BatikPlugin.instance().imageForName( "resources/icons/close.png" ) );
+//                ((Button)child).setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );                
+//            }
+//        }
     }
     
     

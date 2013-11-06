@@ -21,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
 import org.polymap.core.security.SecurityUtils;
-
 import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
@@ -54,7 +53,8 @@ public class NutzerCasesDecorator
                 }
             })
             .setIcon( BatikPlugin.instance().imageForName( "resources/icons/users-filter.png" ) )
-            .setTooltip( "Kundenregistrierungen anzeigen" );
+            .setTooltip( "Kundenregistrierungen anzeigen" )
+            .setGroup( "azv" );
         }
     }
     
