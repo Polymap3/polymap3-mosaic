@@ -40,6 +40,7 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.DefaultPanel;
@@ -117,10 +118,11 @@ public class UsersTablePanel
     }
 
 
-    @EventHandler
+    @EventHandler(display=true)
     protected void userLoggedIn( PropertyAccessEvent ev ) {
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
             getSite().setTitle( "Nutzer/Kunden" );
+            getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/users-filter.png" ) );
         }
     }
 

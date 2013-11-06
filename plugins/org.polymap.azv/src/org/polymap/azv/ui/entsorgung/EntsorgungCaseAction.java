@@ -30,6 +30,8 @@ import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.ui.ColumnLayoutFactory;
+
+import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.app.FormContainer;
@@ -111,6 +113,8 @@ public class EntsorgungCaseAction
         this.caseStatus = status;
         //status.put( "Entsorgung", "[Geben Sie einen Adresse an]", 10 );
         status.put( "Termin", mcase.get().get( "termin" ), 0 );
+
+        site.getPanelSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
     }
 
 

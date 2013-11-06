@@ -61,6 +61,7 @@ import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.DefaultPanel;
@@ -166,6 +167,7 @@ public class EntsorgungsListenPanel
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_ENTSORGUNG )) {
             getSite().setTitle( "Entsorgungslisten" );
+            getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
         }
     }
 

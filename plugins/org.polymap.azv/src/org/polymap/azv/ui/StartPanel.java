@@ -150,7 +150,8 @@ public class StartPanel
             this.tk = site.toolkit();
             this.repo.set( MosaicRepository2.instance() );
             site.setTitle( i18n.get( "title" ) );
-            
+            site.setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
+
             casesViewerDecorators.add( context.propagate( new MitarbeiterCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new NutzerCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new SchachtscheinCasesDecorator() ) );
@@ -229,6 +230,8 @@ public class StartPanel
                 
                     // adjust context: username and preferences
                     getSite().setTitle( i18n.get( "titleLoggedIn" ) );
+                    getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
+                    
                     User umuser = UserRepository.instance().findUser( name );
                     getContext().setUserName( umuser != null ? umuser.name().get() : name );
                     if (!SecurityUtils.isAdmin()) {

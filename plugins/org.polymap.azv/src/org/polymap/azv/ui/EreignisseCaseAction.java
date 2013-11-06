@@ -18,20 +18,11 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.jface.action.IAction;
 
 import org.polymap.core.security.SecurityUtils;
-import org.polymap.core.ui.FormDataFactory;
-import org.polymap.core.ui.FormLayoutFactory;
-
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.batik.toolkit.IPanelSection;
-import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-
 import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -96,14 +87,14 @@ public class EreignisseCaseAction
     }
 
 
-    @Override
-    public void fillContentArea( Composite parent ) {
-        // events table
-        IPanelSection eventsSection = site.toolkit().createPanelSection( parent, "Ereignisse" );
-        eventsSection.addConstraint( new PriorityConstraint( 0 ) );
-        eventsSection.getBody().setLayout( FormLayoutFactory.defaults().create() );
-        viewer = new EventsTableViewer( eventsSection.getBody(), repo.get(), mcase.get(), SWT.NONE );
-        viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
-    }
+//    @Override
+//    public void fillContentArea( Composite parent ) {
+//        // events table
+//        IPanelSection eventsSection = site.toolkit().createPanelSection( parent, "Ereignisse" );
+//        eventsSection.addConstraint( new PriorityConstraint( 0 ) );
+//        eventsSection.getBody().setLayout( FormLayoutFactory.defaults().create() );
+//        viewer = new EventsTableViewer( eventsSection.getBody(), repo.get(), mcase.get(), SWT.NONE );
+//        viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
+//    }
 
 }
