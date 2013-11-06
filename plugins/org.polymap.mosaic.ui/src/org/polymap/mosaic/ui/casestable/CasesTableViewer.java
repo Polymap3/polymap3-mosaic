@@ -159,6 +159,7 @@ public class CasesTableViewer
             super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "" );
+            setAlign( SWT.CENTER );
             
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
@@ -216,6 +217,7 @@ public class CasesTableViewer
             super( schema.getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 1, 80 );
             setHeader( "Angelegt am" );
+            setAlign( SWT.RIGHT );
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
                 public String getText( Object elm ) {
