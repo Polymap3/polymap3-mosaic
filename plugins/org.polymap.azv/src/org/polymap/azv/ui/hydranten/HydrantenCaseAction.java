@@ -172,7 +172,7 @@ public class HydrantenCaseAction
         
         Button btn = site.toolkit().createButton( toolbar, null, SWT.PUSH );
         btn.setToolTipText( "Gesamte Karte darstellen" );
-        btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/house-org.png" ) );
+        btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/expand.png" ) );
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
