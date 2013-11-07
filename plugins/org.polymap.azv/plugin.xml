@@ -79,7 +79,8 @@
             class="org.polymap.azv.ui.DokumenteCaseAction"
             icon="resources/icons/attachment.png"
             id="org.polymap.azv.DokumentCaseAction"
-            name="Dokumente anhängen">
+            name="Dokumente anhängen"
+            priority="-10">
       </caseAction>
       <caseAction
             caseStateChange="true"
@@ -139,7 +140,8 @@
             description="Bezeichnung und Ort der Maßnahme"
             icon="resources/icons/pipelines.png"
             id="org.polymap.azv.caseAction1"
-            name="Maßnahme">
+            name="Maßnahme"
+            priority="-20">
       </caseAction>
       <caseAction
             caseStateChange="true"

@@ -134,7 +134,7 @@ public class CasePanel
         this.tk = getSite().toolkit();
         int margins = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         int spacing = getSite().getLayoutPreference( LAYOUT_SPACING_KEY );
-        panelBody.setLayout( FormLayoutFactory.defaults().margins( margins+10, 0 ).spacing( spacing ).create() );
+        panelBody.setLayout( FormLayoutFactory.defaults().margins( margins+10, 0 ).create() );
 
         // init caseActions
         for (CaseActionExtension ext : CaseActionExtension.all()) {
@@ -161,7 +161,7 @@ public class CasePanel
 
         // toolbar
         toolbarSection = tk.createComposite( panelBody );
-        toolbarSection.setLayoutData( FormDataFactory.filled().top( statusSection ).height( 30 ).bottom( -1 ).create() );
+        toolbarSection.setLayoutData( FormDataFactory.filled().top( statusSection, spacing ).height( 30 ).bottom( -1 ).create() );
         createToolbarSection( toolbarSection );
         
         // action area
