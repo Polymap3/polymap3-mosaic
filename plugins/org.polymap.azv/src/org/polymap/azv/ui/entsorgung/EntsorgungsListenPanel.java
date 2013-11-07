@@ -16,10 +16,9 @@ package org.polymap.azv.ui.entsorgung;
 
 import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.List;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -68,6 +67,7 @@ import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelChangeEvent;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.app.BatikApplication;
@@ -112,6 +112,10 @@ public class EntsorgungsListenPanel
     private AzvRepository                       azvRepo = AzvRepository.instance();
 
     private IPanelSection                       contents;
+
+    private List<CasesTableViewer>              casesViewers = new ArrayList();
+
+    private Object panelListener;
     
     
     @Override
@@ -182,6 +186,21 @@ public class EntsorgungsListenPanel
         for (Entsorgungsliste liste : listen) {
             createListenSection( contents.getBody(), liste );
         }
+        
+        panelListener = new Object() {
+            @EventHandler(display=true)
+            protected void panelActivated( PanelChangeEvent ev ) {
+                for (CasesTableViewer viewer : casesViewers) {
+                    viewer.refresh();
+                }
+            }
+        };
+        getContext().addEventHandler( panelListener, new EventFilter<PanelChangeEvent>() {
+            public boolean apply( PanelChangeEvent input ) {
+                return input.getSource() == EntsorgungsListenPanel.this
+                        && input.getType() == PanelChangeEvent.TYPE.ACTIVATING;
+            }
+        });
     }
     
     
@@ -234,13 +253,14 @@ public class EntsorgungsListenPanel
 //            }
 //        });
         // filter liste
-        final Set<String> ids = new HashSet( liste.mcaseIds().get() );
         casesViewer.addFilter( new CasesViewerFilter() {
             protected boolean apply( CasesTableViewer viewer, IMosaicCase mcase ) {
-                // beantragte + in liste                 
-                return ids.contains( mcase.getId() );
+                // beantragte + in liste
+                // no cache this may change as the liste changes
+                return liste.mcaseIds().get().contains( mcase.getId() );
             }
         });
+        casesViewers.add( casesViewer );
     }
 
 

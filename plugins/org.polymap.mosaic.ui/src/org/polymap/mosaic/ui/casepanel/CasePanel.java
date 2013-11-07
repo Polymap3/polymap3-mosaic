@@ -345,10 +345,10 @@ public class CasePanel
         try {
             activeAction.caseAction.submit();
             
-//            if (activeAction.btn != null) {
-//                activeAction.btn.setSelection( false );
-//            }
-//            activeAction = null;
+            if (activeAction.btn != null) {
+                activeAction.btn.setSelection( false );
+            }
+            activeAction = null;
             updateActionSection( null );
 //            if (submitBtn != null) {
 //                submitBtn.dispose();

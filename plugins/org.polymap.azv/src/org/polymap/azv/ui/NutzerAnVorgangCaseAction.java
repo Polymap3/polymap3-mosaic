@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -29,9 +30,12 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.Context;
@@ -41,9 +45,11 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.PersonForm;
+import org.polymap.rhei.um.ui.RegisterPanel;
 import org.polymap.rhei.um.ui.UsersTableViewer;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -62,6 +68,8 @@ public class NutzerAnVorgangCaseAction
         implements ICaseAction {
 
     private static Log log = LogFactory.getLog( NutzerAnVorgangCaseAction.class );
+
+    public static final IMessages       i18n = Messages.forPrefix( "NutzerAnVorgang" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -126,9 +134,16 @@ public class NutzerAnVorgangCaseAction
     @Override
     public void createContents( Composite parent ) {
         FillLayout layout = (FillLayout)parent.getLayout();
-        layout.marginWidth = layout.marginHeight = layout.marginWidth / 2;
+        //layout.marginWidth = layout.marginHeight = layout.marginWidth / 2;
         
-        viewer = new UsersTableViewer( parent, UserRepository.instance().find( User.class, null ), SWT.NONE );
+        Composite welcome = site.toolkit().createComposite( parent );
+        site.toolkit().createFlowText( welcome, i18n.get( "welcomeMsg", RegisterPanel.ID ) );
+        
+        Composite formContainer = site.toolkit().createComposite( parent );
+        formContainer.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
+        
+        viewer = new UsersTableViewer( formContainer, UserRepository.instance().find( User.class, null ), SWT.NONE );
+        viewer.getControl().setLayoutData( FormDataFactory.filled().bottom( -1 ).height( 240 ).create() );
         viewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
                 site.setValid( !ev.getSelection().isEmpty() );
@@ -138,6 +153,9 @@ public class NutzerAnVorgangCaseAction
             public void doubleClick( DoubleClickEvent event ) {
             }
         });
+        
+        Button submitBtn = site.createSubmit( formContainer, "Kunden auswählen" );
+        submitBtn.setLayoutData( FormDataFactory.filled().top( viewer.getControl() ).height( 28 ).create() );
     }
 
     

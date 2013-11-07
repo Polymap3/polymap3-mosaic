@@ -15,7 +15,6 @@
 package org.polymap.azv.ui.nutzerregistrierung;
 
 import static org.polymap.azv.AzvPlugin.CASE_NUTZER;
-import static org.polymap.azv.AzvPlugin.ROLE_DIENSTBARKEITEN;
 import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
 import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
@@ -157,7 +156,7 @@ public class NutzerFreigabeCaseAction
 
         List<String> roles = Lists.newArrayList( 
                 ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN,
-                ROLE_DIENSTBARKEITEN, ROLE_ENTSORGUNG, ROLE_HYDRANTEN
+                ROLE_ENTSORGUNG, ROLE_HYDRANTEN
                 );
         for (final String role : roles) {
             final Button btn = site.toolkit().createButton( left, role, SWT.CHECK );
@@ -172,6 +171,8 @@ public class NutzerFreigabeCaseAction
                 }
             });
         }
+        
+        site.createSubmit( left, "Ok" );
 
         // right section
         Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
@@ -204,6 +205,12 @@ public class NutzerFreigabeCaseAction
                 .setSubject( i18n.get( "emailSubject") )
                 .setMsg( i18n.get( "email", header, um.groupsOf( user ) ) );
         EmailService.instance().send( email );
+        
+        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+            public void run() {
+                site.getContext().closePanel();
+            }
+        });
     }
 
 

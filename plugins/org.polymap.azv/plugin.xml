@@ -62,7 +62,7 @@
    <extension
          point="org.polymap.mosaic.ui.caseActions">
       <caseAction
-            caseStateChange="true"
+            caseStateChange="false"
             class="org.polymap.azv.ui.nutzerregistrierung.NutzerFreigabeCaseAction"
             description="Rechte des Nutzers festlegen"
             id="org.polymap.azv.ui.NutzerFreigabeCaseAction"
