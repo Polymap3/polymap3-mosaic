@@ -344,6 +344,7 @@ public class CasePanel
     private void submitActiveAction() {
         try {
             activeAction.caseAction.submit();
+            
 //            if (activeAction.btn != null) {
 //                activeAction.btn.setSelection( false );
 //            }
@@ -368,10 +369,11 @@ public class CasePanel
     
     private void discardActiveAction() {
         activeAction.caseAction.discard();
-//        if (activeAction.btn != null && !activeAction.btn.isDisposed()) {
-//            activeAction.btn.setSelection( false );
-//        }
-//        activeAction = null;
+
+        if (activeAction.btn != null && !activeAction.btn.isDisposed()) {
+            activeAction.btn.setSelection( false );
+        }
+        activeAction = null;
         updateActionSection( null );
 //        if (submitBtn != null) {
 //            submitBtn.dispose();

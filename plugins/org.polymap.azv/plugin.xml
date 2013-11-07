@@ -116,6 +116,7 @@
             caseStateChange="false"
             class="org.polymap.azv.ui.entsorgung.EntsorgungCaseAction"
             description="Termin festlegen und Entsorgung beantragen"
+            icon="resources/icons/truck-filter.png"
             id="org.polymap.azv.EntsorgungCaseAction"
             name="Entsorgung beantragen"
             priority="100">
