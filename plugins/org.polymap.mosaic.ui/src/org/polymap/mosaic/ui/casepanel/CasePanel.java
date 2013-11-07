@@ -344,21 +344,21 @@ public class CasePanel
     private void submitActiveAction() {
         try {
             activeAction.caseAction.submit();
-            if (activeAction.btn != null) {
-                activeAction.btn.setSelection( false );
-            }
-            activeAction = null;
+//            if (activeAction.btn != null) {
+//                activeAction.btn.setSelection( false );
+//            }
+//            activeAction = null;
             updateActionSection( null );
-            if (submitBtn != null) {
-                submitBtn.dispose();
-                discardBtn.dispose();
-                submitBtn = discardBtn = null;
-            }
-            for (CaseActionHolder elm : caseActions) {
-                if (elm.btn != null) {
-                    elm.btn.setEnabled( true );
-                }
-            }
+//            if (submitBtn != null) {
+//                submitBtn.dispose();
+//                discardBtn.dispose();
+//                submitBtn = discardBtn = null;
+//            }
+//            for (CaseActionHolder elm : caseActions) {
+//                if (elm.btn != null) {
+//                    elm.btn.setEnabled( true );
+//                }
+//            }
         }
         catch (Exception e) {
             BatikApplication.handleError( "Die Änderungen konnten nicht korrekt übernommen werden.", e );
@@ -368,21 +368,21 @@ public class CasePanel
     
     private void discardActiveAction() {
         activeAction.caseAction.discard();
-        if (activeAction.btn != null && !activeAction.btn.isDisposed()) {
-            activeAction.btn.setSelection( false );
-        }
-        activeAction = null;
+//        if (activeAction.btn != null && !activeAction.btn.isDisposed()) {
+//            activeAction.btn.setSelection( false );
+//        }
+//        activeAction = null;
         updateActionSection( null );
-        if (submitBtn != null) {
-            submitBtn.dispose();
-            discardBtn.dispose();
-            submitBtn = discardBtn = null;
-        }
-        for (CaseActionHolder elm : caseActions) {
-            if (elm.btn != null) {
-                elm.btn.setEnabled( true );
-            }
-        }
+//        if (submitBtn != null) {
+//            submitBtn.dispose();
+//            discardBtn.dispose();
+//            submitBtn = discardBtn = null;
+//        }
+//        for (CaseActionHolder elm : caseActions) {
+//            if (elm.btn != null) {
+//                elm.btn.setEnabled( true );
+//            }
+//        }
     }
     
     
@@ -425,6 +425,8 @@ public class CasePanel
         protected void updateEnabled() {
             if (submitBtn != null && !submitBtn.isDisposed()) {
                 submitBtn.setEnabled( dirty && valid );            
+            }
+            if (discardBtn != null && !discardBtn.isDisposed()) {
                 discardBtn.setEnabled( dirty );
             }
         }
@@ -463,12 +465,12 @@ public class CasePanel
         @Override
         public void setShowSubmitDiscardButtons( boolean show ) {
             holder.showSubmitButton = show;
-            if (submitBtn != null && !submitBtn.isDisposed()) {
-                submitBtn.dispose();
-                submitBtn = null;
-                discardBtn.dispose();
-                discardBtn = null;
-            }
+//            if (submitBtn != null && !submitBtn.isDisposed()) {
+//                submitBtn.dispose();
+//                submitBtn = null;
+//                discardBtn.dispose();
+//                discardBtn = null;
+//            }
         }
 
         @Override
@@ -517,6 +519,19 @@ public class CasePanel
         @Override
         public boolean removeListener( Object annotated ) {
             return EventManager.instance().unsubscribe( annotated );
+        }
+
+        @Override
+        public Button createSubmit( Composite parent, String title ) {
+            submitBtn = toolkit().createButton( parent, title != null ? title : null );
+            submitBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
+            submitBtn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    submitActiveAction();
+                }
+            });
+            submitBtn.setEnabled( holder.valid );
+            return submitBtn;
         }
         
     }

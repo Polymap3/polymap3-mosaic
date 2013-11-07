@@ -113,7 +113,7 @@
             name="Hydrantenauskunft">
       </caseAction>
       <caseAction
-            caseStateChange="true"
+            caseStateChange="false"
             class="org.polymap.azv.ui.entsorgung.EntsorgungCaseAction"
             description="Termin festlegen und Entsorgung beantragen"
             id="org.polymap.azv.EntsorgungCaseAction"
@@ -121,7 +121,7 @@
             priority="100">
       </caseAction>
       <caseAction
-            caseStateChange="true"
+            caseStateChange="false"
             class="org.polymap.azv.ui.entsorgung.EntsorgungFreigabeCaseAction"
             description="Diesem Antrag einen Termin zuordnen"
             id="org.polymap.azv.EntsorgungFreigabeCaseAction"

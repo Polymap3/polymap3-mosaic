@@ -20,15 +20,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.action.IAction;
+
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.security.SecurityUtils;
+import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.BatikPlugin;
@@ -44,12 +49,14 @@ import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.User;
+import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.ui.RegisterPanel;
 
-import org.polymap.azv.AzvPermissions;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.NotNullValidator;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.KVPropertyAdapter;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -92,8 +99,21 @@ public class EntsorgungCaseAction
         if (mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )) {
             
-            umuser = AzvPermissions.instance().getUser();
+            // default setting from user
+            UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
+            if (principal != null
+                    && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
+                    && mcase.get().get( "name" ) == null) {
+                UserRepository umrepo = UserRepository.instance();
+                umuser = umrepo.findUser( principal.getName() );
+                mcase.get().put( "name", umuser.name().get() );
+                mcase.get().put( "street", umuser.address().get().street().get() );
+                mcase.get().put( "number", umuser.address().get().number().get() );
+                mcase.get().put( "city", umuser.address().get().city().get() );
+                mcase.get().put( "postalcode", umuser.address().get().postalCode().get() );
+                
 //            setUserOnCase( umuser );
+            }
 
             if (mcase.get().get( "termin" ) == null) {
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
@@ -109,9 +129,20 @@ public class EntsorgungCaseAction
 
 
     @Override
+    public void fillAction( IAction action ) {
+        if (Iterables.find( mcase.get().getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_BEANTRAGT ), null) != null) {
+            action.setText( null );
+            action.setImageDescriptor( null );
+        }
+    }
+
+
+    @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
         //status.put( "Entsorgung", "[Geben Sie einen Adresse an]", 10 );
+        status.put( "Vorgang", "Entsorgung", 10 );
+        status.put( "Name", mcase.get().get( "name" ), 5 );
         status.put( "Termin", mcase.get().get( "termin" ), 0 );
 
         site.getPanelSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
@@ -122,11 +153,16 @@ public class EntsorgungCaseAction
     public void fillContentArea( Composite parent ) {
         if (mcase.get().get( "termin" ) != null) {
             IPanelSection section = site.toolkit().createPanelSection( parent, "Daten" );
-            section.addConstraint( new PriorityConstraint( 1 ) );
+            section.addConstraint( new PriorityConstraint( 10 ) );
             section.getBody().setLayout( new FillLayout() );
 
-            new DataForm().createContents( section.getBody() );
-            site.setValid( false );
+            form = new DataForm();
+            form.createContents( section.getBody() );
+            form.setEnabled( false );
+
+            IPanelSection sep = site.toolkit().createPanelSection( parent, null );
+            sep.addConstraint( new PriorityConstraint( 0 ) );
+            sep.getBody().setLayout( new FillLayout() );
         }
     }
 
@@ -147,13 +183,15 @@ public class EntsorgungCaseAction
         playout.marginWidth *= 2;      
         playout.spacing *= 2;      
 
-        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt" ) );
+        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt", RegisterPanel.ID ) );
 
         Composite formContainer = site.toolkit().createComposite( parent );
         formContainer.setLayout( new FillLayout() );
         form = new DataForm();
         form.createContents( formContainer );
         site.setValid( false );
+        
+        site.createSubmit( formContainer, "Entsorgung beantragen" );
     }
 
     
@@ -189,10 +227,14 @@ public class EntsorgungCaseAction
             Composite body = formSite.getPageBody();
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
+            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), "name" ) )
+                    .setLabel( "Name" ).setToolTipText( "Ihr Name" )
+                    .setValidator( new NotNullValidator() ).create().setFocus();
+
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), "termin" ) )
                     .setLabel( "Termin" ).setToolTipText( "Gewünschter Termin der Entsorgung" )
-                    .setValidator( new NotNullValidator() ).create().setFocus();
-    
+                    .setValidator( new NotNullValidator() ).create();
+
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), "bemerkung" ) )
                     .setLabel( "Bemerkung" ).setToolTipText( "Besondere Hinweise für das Entsorgungsunternehmen" )
                     .setField( new TextFormField() ).create()
@@ -235,6 +277,9 @@ public class EntsorgungCaseAction
                     
                     if (ev.getFieldName().equals( "termin" )) {
                         caseStatus.put( "Termin", ev.getNewValue().toString() );
+                    }
+                    else if (ev.getFieldName().equals( "name" )) {
+                        caseStatus.put( "Name", ev.getNewValue().toString() );
                     }
                     else if (ev.getFieldName().equals( "city" )) {
                         city = ev.getNewValue();

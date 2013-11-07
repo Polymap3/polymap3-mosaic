@@ -27,12 +27,15 @@ import com.google.common.collect.Iterables;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
@@ -119,7 +122,11 @@ public class EntsorgungFreigabeCaseAction
             listen.put( liste.name().get(), liste );
         }
         
-        list = site.toolkit().createList( parent, SWT.SINGLE, SWT.BORDER );
+        Composite formContainer = site.toolkit().createComposite( parent );
+        formContainer.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
+        
+        list = site.toolkit().createList( formContainer, SWT.SINGLE, SWT.BORDER );
+        list.setLayoutData( FormDataFactory.filled().bottom( -1 ).height( 240 ).create() );
         list.setItems( Iterables.toArray( listen.keySet(), String.class ) );
         list.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
@@ -127,6 +134,9 @@ public class EntsorgungFreigabeCaseAction
             }
         });
         site.setValid( false );
+        
+        Button submitBtn = site.createSubmit( formContainer, "Termin zuordnen" );
+        submitBtn.setLayoutData( FormDataFactory.filled().top( list ).height( 28 ).create() );
     }
 
 

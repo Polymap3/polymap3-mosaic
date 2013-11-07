@@ -14,6 +14,8 @@
  */
 package org.polymap.mosaic.ui.casepanel;
 
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import org.polymap.core.runtime.event.EventHandler;
@@ -67,5 +69,7 @@ public interface ICaseActionSite {
     boolean removeListener( Object annotated );
 
     public IPanelToolkit toolkit();
+
+    public Button createSubmit( Composite formContainer, String string );
     
 }
