@@ -140,7 +140,7 @@ public class SchachtscheinStartCaseAction
 
         FillLayout playout = (FillLayout)parent.getLayout();
         playout.marginWidth *= 2;      
-        playout.spacing *= 2;      
+        playout.spacing *= 2;
 
 //        IPanelSection welcome = site.toolkit().createPanelSection( parent, i18n.get( "welcomeTitle" ) );
 //        welcome.getBody().setLayout( new FillLayout() );
@@ -205,7 +205,7 @@ public class SchachtscheinStartCaseAction
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
             Composite body = formSite.getPageBody();
-            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
                     .setLabel( "Bezeichnung" ).setToolTipText( "Bezeichnung der Maßnahme" )

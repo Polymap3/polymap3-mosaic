@@ -187,7 +187,7 @@ public class EntsorgungCaseAction
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
             Composite body = formSite.getPageBody();
-            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), "termin" ) )
                     .setLabel( "Termin" ).setToolTipText( "Gewünschter Termin der Entsorgung" )

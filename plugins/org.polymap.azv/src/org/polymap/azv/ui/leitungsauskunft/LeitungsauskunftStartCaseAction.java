@@ -196,7 +196,7 @@ public class LeitungsauskunftStartCaseAction
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
             Composite body = formSite.getPageBody();
-            body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
                     .setLabel( "Bezeichnung" ).setToolTipText( "Bezeichnung der Maßnahme" )

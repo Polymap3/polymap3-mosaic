@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
+import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.Context;
@@ -160,7 +161,9 @@ public class NutzerAnVorgangCaseAction
         if (umuser != null) {
             PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
             personForm.createContents( personSection );
-            personSection.getBody().setEnabled( false );            
+            personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
+
+            personForm.setEnabled( false );            
         }
         else {
             site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen" )
