@@ -36,7 +36,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -250,7 +249,25 @@ public class StartPanel
         loginForm.setShowRegisterLink( true );
         loginForm.setShowStoreCheck( true );
         loginForm.setShowLostLink( true );
-        loginForm.createContents( loginSection );
+        
+        Composite form = new Composite( loginSection.getBody(), SWT.BORDER ); 
+        loginForm.createContents( form );
+        
+//        Deque<Control> deque = new LinkedList();
+//        deque.push( form );
+//        while (!deque.isEmpty()) {
+//            Control control = deque.pop();
+////            if (control instanceof Label) {
+////                control.setFont( font );
+////            }
+//            control.setData( WidgetUtil.CUSTOM_VARIANT, null );
+//            if (control instanceof Composite) {
+//                for (Control child : ((Composite)control).getChildren()) {
+//                    deque.push( child );
+//                }
+//            }
+//        }
+
     }
 
     
