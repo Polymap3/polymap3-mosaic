@@ -79,8 +79,8 @@
             class="org.polymap.azv.ui.DokumenteCaseAction"
             icon="resources/icons/attachment.png"
             id="org.polymap.azv.DokumentCaseAction"
-            name="Dokumente anhängen"
-            priority="-10">
+            name="2. Dokument anhängen"
+            priority="0">
       </caseAction>
       <caseAction
             caseStateChange="true"
@@ -95,7 +95,7 @@
             icon="resources/icons/letter.png"
             id="org.polymap.azv.SchachtscheinStartCaseAction"
             name="Maßnahme"
-            priority="9">
+            priority="-10">
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.EreignisseCaseAction"
@@ -139,16 +139,16 @@
       <caseAction
             class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftStartCaseAction"
             description="Bezeichnung und Ort der Maßnahme"
-            icon="resources/icons/pipelines.png"
+            icon="resources/icons/pipelines-filter.png"
             id="org.polymap.azv.caseAction1"
-            name="Maßnahme"
+            name="1. Maßnahme"
             priority="-20">
       </caseAction>
       <caseAction
             caseStateChange="true"
             class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftAntragCaseAction"
             id="org.polymap.azv.LeitungsauskunftAntragCaseAction"
-            name="Leitungsauskunft beantragen"
+            name="3. Leitungsauskunft beantragen"
             priority="10">
       </caseAction>
    </extension>

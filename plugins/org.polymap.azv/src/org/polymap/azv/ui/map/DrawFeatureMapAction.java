@@ -187,6 +187,8 @@ public class DrawFeatureMapAction
             SimpleFeature feature = io.readFeature( new StringReader( payload.get( "features" ) ) );
             log.info( "Feature: " + feature );
             
+            //vectorLayer.destroyFeatures();
+            
             EventManager.instance().publish( new PropertyChangeEvent( this, "feature", null, feature ) );            
         }
         catch (IOException e) {

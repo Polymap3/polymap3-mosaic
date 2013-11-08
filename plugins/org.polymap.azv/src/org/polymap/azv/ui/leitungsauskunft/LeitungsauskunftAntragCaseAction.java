@@ -87,7 +87,7 @@ public class LeitungsauskunftAntragCaseAction
     
     @Override
     public void submit() throws Exception {
-        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", "Beantragt" );
+        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
         
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
@@ -100,7 +100,14 @@ public class LeitungsauskunftAntragCaseAction
 
     protected void updateEnabled() {
         action.setEnabled( false );
-        if (mcase.get().getName().length() > 0 && mcase.get().get( "point" ) != null) {
+        if (mcase.get().getName().length() == 0) {
+            action.setToolTipText( "Es fehlt der Name der Maßnahme" );
+        }
+        else if (mcase.get().get( "point" ) == null) {
+            action.setToolTipText( "Es fehlt der Ort der Maßnahme" );
+        }
+        else {
+            action.setToolTipText( "" );
             action.setEnabled( true );
         }
     }
