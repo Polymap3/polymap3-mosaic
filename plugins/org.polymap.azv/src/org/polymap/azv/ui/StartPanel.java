@@ -347,8 +347,7 @@ public class StartPanel
                 null,  //AzvPlugin.ROLE_DIENSTBARKEITEN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
-                // XXX Auto-generated method stub
-                throw new RuntimeException( "not yet implemented." );
+                getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) );
             }
         }));
         actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
@@ -377,7 +376,7 @@ public class StartPanel
                     // create new case; commit/rollback inside CaseAction
                     IMosaicCase newCase = repo.get().newCase( "", "" );
                     newCase.addNature( AzvPlugin.CASE_SCHACHTSCHEIN );
-                    //newCase.put( "user", user.get().username().get() );
+                    //newCase.put( KEY_USER, user.get().username().get() );
                     mcase.set( newCase );
                     getContext().openPanel( CasePanel.ID );
                 }
@@ -400,7 +399,7 @@ public class StartPanel
                         // create new case; commit/rollback inside CaseAction
                         IMosaicCase newCase = repo.get().newCase( "", "" );
                         newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
-                        //newCase.put( "user", user.get().username().get() );
+                        //newCase.put( KEY_USER, user.get().username().get() );
                         mcase.set( newCase );
                         getContext().openPanel( CasePanel.ID );
                     }

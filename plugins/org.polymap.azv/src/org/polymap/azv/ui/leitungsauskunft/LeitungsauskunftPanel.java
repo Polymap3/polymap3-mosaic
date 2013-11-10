@@ -163,7 +163,7 @@ public class LeitungsauskunftPanel
                             // create new case; commit/rollback inside CaseAction
                             IMosaicCase newCase = repo.get().newCase( "", "" );
                             newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
-                            //newCase.put( "user", user.get().username().get() );
+                            //newCase.put( KEY_USER, user.get().username().get() );
                             mcase.set( newCase );
                             getContext().openPanel( CasePanel.ID );
                         }

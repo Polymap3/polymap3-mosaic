@@ -187,12 +187,12 @@ public class EntsorgungCaseAction
     public void createContents( Composite parent ) {
 //        // wenn hier noch kein Nutzer am Vorgang hängt, dann wird der eingeloggte
 //        // Nutzer verwendet
-//        String username = mcase.get().get( "user" );
+//        String username = mcase.get().get( KEY_USER );
 //        if (username == null) {
 //            username = sessionUser.get().getName();
 //            User umuser = UserRepository.instance().findUser( username );
 //            setUserOnCase( umuser );
-//            mcase.get().put( "user", username );
+//            mcase.get().put( KEY_USER, username );
 //        }
 
         FillLayout playout = (FillLayout)parent.getLayout();

@@ -28,6 +28,7 @@ import com.google.common.collect.Iterables;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.rwt.widgets.ExternalBrowser;
@@ -97,6 +98,8 @@ public class DokumenteCaseAction
 
     private Display                         display;
 
+    private IPanelSection section;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -150,10 +153,12 @@ public class DokumenteCaseAction
         
         display.asyncExec( new Runnable() {
             public void run() {
-                //model.addAll( new IMosaicDocument[] { doc } );
-
-                viewer.refresh();
-                // close action area
+                if (viewer != null) {
+                    viewer.refresh();
+                }
+                else {
+                    createViewer();
+                }
             }
         });
     }
@@ -161,9 +166,23 @@ public class DokumenteCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        IPanelSection section = site.toolkit().createPanelSection( parent, "Dokumente" );
+        section = site.toolkit().createPanelSection( parent, "Dokumente" );
         section.addConstraint( new PriorityConstraint( 1 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().create() );
+        
+        if (Iterables.isEmpty( repo.get().documents( mcase.get() ) )) {
+            site.toolkit().createLabel( section.getBody(), "Noch kein Dokument." );
+        }
+        else {
+            createViewer();
+        }
+    }
+    
+    
+    protected void createViewer() {
+        for (Control child : section.getBody().getChildren()) {
+            child.dispose();
+        }
         
         // viewer
         viewer = new TableViewer( section.getBody(), SWT.NONE /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );

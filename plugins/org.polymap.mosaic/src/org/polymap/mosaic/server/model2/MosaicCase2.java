@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
@@ -210,11 +211,17 @@ public class MosaicCase2
     }
     
     @Override
-    public Iterable<? extends IMosaicCaseEvent> getEvents() {
+    public Iterable<IMosaicCaseEvent> getEvents() {
         MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
         FilterFactory2 ff = MosaicRepository2.ff;
         Filter filter = ff.equals( ff.property( "caseId" ), ff.literal( getId() ) );
-        return repo.query( MosaicCaseEvent2.class, filter ).execute();
+        
+        Collection<MosaicCaseEvent2> result = repo.query( MosaicCaseEvent2.class, filter ).execute();
+        return Iterables.transform( result, new Function<MosaicCaseEvent2,IMosaicCaseEvent>() {
+            public IMosaicCaseEvent apply( MosaicCaseEvent2 input ) {
+                return input;
+            }
+        });
 
 //        return Iterables.transform( eventIds, new Function<String,IMosaicCaseEvent>() {
 //            MosaicRepository2 repo = MosaicRepository2.instance();

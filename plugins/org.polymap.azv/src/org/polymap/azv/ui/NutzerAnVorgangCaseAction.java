@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -52,6 +53,7 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.entsorgung.EntsorgungCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
@@ -71,6 +73,8 @@ public class NutzerAnVorgangCaseAction
     private static Log log = LogFactory.getLog( NutzerAnVorgangCaseAction.class );
 
     public static final IMessages       i18n = Messages.forPrefix( "NutzerAnVorgang" );
+
+    public static final String          KEY_USER = "user";
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -104,7 +108,7 @@ public class NutzerAnVorgangCaseAction
             
             
             this.site = _site;
-            String username = mcase.get().get( "user" );
+            String username = mcase.get().get( KEY_USER );
             if (username != null) {
                 umuser = UserRepository.instance().findUser( username );
             }
@@ -128,6 +132,16 @@ public class NutzerAnVorgangCaseAction
         this.caseStatus = status;
         if (umuser != null) {
             status.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( umuser.firstname().get(), umuser.name().get() ), 101 );
+        }
+    }
+
+
+    @Override
+    public void fillAction( IAction action ) {
+        // nach Beantragung keine Änderung mehr
+        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+            action.setText( null );
+            action.setImageDescriptor( null );
         }
     }
 
@@ -164,7 +178,7 @@ public class NutzerAnVorgangCaseAction
     public void submit() throws Exception {
         umuser = new SelectionAdapter( viewer.getSelection() ).first( User.class );
         String username = umuser.username().get();
-        mcase.get().put( "user", username );
+        mcase.get().put( KEY_USER, username );
         repo.get().commitChanges();
         
         umuser = UserRepository.instance().findUser( username );
@@ -175,6 +189,7 @@ public class NutzerAnVorgangCaseAction
         }
         PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
         personForm.createContents( personSection );
+        personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
         personForm.setEnabled( false );
     }
 
@@ -189,11 +204,10 @@ public class NutzerAnVorgangCaseAction
             PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
             personForm.createContents( personSection );
             personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
-
             personForm.setEnabled( false );
         }
         else {
-            site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen" )
+            site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen." )
                     .setData( "no_user_yet", Boolean.TRUE );
         }
     }

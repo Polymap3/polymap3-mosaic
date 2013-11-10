@@ -25,6 +25,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.action.IAction;
+
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.runtime.IMessages;
@@ -35,6 +37,8 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.app.FormContainer;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.BeanPropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldLabel;
@@ -48,7 +52,9 @@ import org.polymap.rhei.um.UserRepository;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.NotNullValidator;
+import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
@@ -71,6 +77,11 @@ public class LeitungsauskunftStartCaseAction
 
     private static final FastDateFormat df = AzvPlugin.df;
 
+    public static final String          KEY_STREET = "street";
+    public static final String          KEY_NUMBER = "number";
+    public static final String          KEY_CITY = "city";
+    public static final String          KEY_POSTALCODE = "postalcode";
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
 
@@ -110,6 +121,15 @@ public class LeitungsauskunftStartCaseAction
 
 
     @Override
+    public void fillAction( IAction action ) {
+        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+            action.setText( null );
+            action.setImageDescriptor( null );
+        }
+    }
+
+
+    @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
         String id = mcase.get().getId();
@@ -123,12 +143,12 @@ public class LeitungsauskunftStartCaseAction
     public void createContents( Composite parent ) {
         // wenn hier noch kein Nutzer am Vorgang hängt, dann wird der eingeloggte
         // Nutzer verwendet
-        String username = mcase.get().get( "user" );
+        String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
         if (username == null) {
             username = Polymap.instance().getUser().getName();
             User umuser = UserRepository.instance().findUser( username );
             setUserOnCase( umuser );
-            mcase.get().put( "user", username );
+            mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, username );
         }
 
         FillLayout playout = (FillLayout)parent.getLayout();
@@ -151,19 +171,19 @@ public class LeitungsauskunftStartCaseAction
 //        Address address = umuser.address().get();
 //        String value = address.city().get();
 //        if (value != null) {
-//            mcase.get().put( "city", value );
+//            mcase.get().put( KEY_CITY, value );
 //        }
 //        value = address.street().get();
 //        if (value != null) {
-//            mcase.get().put( "street", value );
+//            mcase.get().put( KEY_STREET, value );
 //        }
 //        value = address.number().get();
 //        if (value != null) {
-//            mcase.get().put( "number", value );
+//            mcase.get().put( KEY_NUMBER, value );
 //        }
 //        value = address.postalCode().get();
 //        if (value != null) {
-//            mcase.get().put( "postalcode", value );
+//            mcase.get().put( KEY_POSTALCODE, value );
 //        }
     }
     
@@ -187,17 +207,34 @@ public class LeitungsauskunftStartCaseAction
     }
 
 
+    @Override
+    public void fillContentArea( Composite parent ) {
+        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+            IPanelSection section = site.toolkit().createPanelSection( parent, "Daten" );
+            section.addConstraint( new PriorityConstraint( 10 ) );
+            section.getBody().setLayout( new FillLayout() );
+
+            form = new BasedataForm();
+            form.createContents( section.getBody() );
+            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
+            form.setEnabled( false );
+        }
+    }
+
+
     /**
      * 
      */
     public class BasedataForm
             extends FormContainer {
 
-        private IFormFieldListener          fieldListener;
+        private IFormFieldListener      fieldListener;
+        
+        private Composite               body;
 
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
-            Composite body = formSite.getPageBody();
+            body = formSite.getPageBody();
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
@@ -210,23 +247,23 @@ public class LeitungsauskunftStartCaseAction
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite street = site.toolkit().createComposite( body );
-            Property prop = new PlainValuePropertyAdapter( "street", mcase.get().get( "street" ) );
+            Property prop = new PlainValuePropertyAdapter( KEY_STREET, mcase.get().get( KEY_STREET ) );
             new FormFieldBuilder( street, prop )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
-            prop = new PlainValuePropertyAdapter( "number", mcase.get().get( "number" ) );
+            prop = new PlainValuePropertyAdapter( KEY_NUMBER, mcase.get().get( KEY_NUMBER ) );
             new FormFieldBuilder( street, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
             Composite city = site.toolkit().createComposite( body );
-            prop = new PlainValuePropertyAdapter( "postalcode", mcase.get().get( "postalcode" ) );
+            prop = new PlainValuePropertyAdapter( KEY_POSTALCODE, mcase.get().get( KEY_POSTALCODE ) );
             new FormFieldBuilder( city, prop )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
-            prop = new PlainValuePropertyAdapter( "city", mcase.get().get( "city" ) );
+            prop = new PlainValuePropertyAdapter( KEY_CITY, mcase.get().get( KEY_CITY ) );
             new FormFieldBuilder( city, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
@@ -244,6 +281,10 @@ public class LeitungsauskunftStartCaseAction
             });
 //            activateStatusAdapter( getSite() );
 //        }
+        }
+
+        public Composite getBody() {
+            return body;
         }
     }
 

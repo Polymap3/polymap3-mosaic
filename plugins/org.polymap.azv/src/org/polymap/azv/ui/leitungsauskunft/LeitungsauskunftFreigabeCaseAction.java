@@ -14,22 +14,25 @@
  */
 package org.polymap.azv.ui.leitungsauskunft;
 
-import java.beans.PropertyChangeEvent;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.SimpleEmail;
 
 import org.eclipse.jface.action.IAction;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
-import org.polymap.core.runtime.event.EventHandler;
-import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.um.User;
+import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.email.EmailService;
 
 import org.polymap.azv.AzvPlugin;
-import org.polymap.azv.ui.map.DrawFeatureMapAction;
+import org.polymap.azv.Messages;
+import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -38,16 +41,19 @@ import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 
+
 /**
  * 
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LeitungsauskunftAntragCaseAction
+public class LeitungsauskunftFreigabeCaseAction
         extends DefaultCaseAction
         implements ICaseAction {
 
-    private static Log log = LogFactory.getLog( LeitungsauskunftAntragCaseAction.class );
+    private static Log log = LogFactory.getLog( LeitungsauskunftFreigabeCaseAction.class );
+
+    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftFreigabe" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -64,65 +70,37 @@ public class LeitungsauskunftAntragCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
-                && mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT )) {
+                && mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT )
+                && MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             return true;
         }
         return false;
     }
 
-    
-    @Override
-    public void dispose() {
-        EventManager.instance().unsubscribe( this );
-    }
 
-
-    @Override
-    public void fillAction( @SuppressWarnings("hiding") IAction action ) {
-        this.action = action;
-        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
-            action.setText( null );
-            action.setImageDescriptor( null );
-        }
-        else {
-            updateEnabled();
-        
-            EventManager.instance().subscribe( this );
-        }
-    }
-    
-    
     @Override
     public void submit() throws Exception {
-        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
-        repo.get().commitChanges();
+        MosaicRepository2 mosaic = repo.get();
+        mosaic.closeCase( mcase.get(), "Erteilt", "Die Leitungsauskunft wurde erteilt." );
+        mosaic.commitChanges();
+        
+        String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
+        User user = UserRepository.instance().findUser( username );
+                
+        String salu = user.salutation().get() != null ? user.salutation().get() : "";
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+        Email email = new SimpleEmail();
+        email.setCharset( "ISO-8859-1" );
+        email.addTo( user.email().get() )
+                .setSubject( i18n.get( "emailSubject") )
+                .setMsg( i18n.get( "email", header ) );
+        EmailService.instance().send( email );
         
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
                 site.getContext().closePanel();
             }
         });
-    }
-
-
-    protected void updateEnabled() {
-        action.setEnabled( false );
-        if (mcase.get().getName().length() == 0) {
-            action.setToolTipText( "Es fehlt der Name der Maßnahme" );
-        }
-        else if (mcase.get().get( "point" ) == null) {
-            action.setToolTipText( "Es fehlt der Ort der Maßnahme" );
-        }
-        else {
-            action.setToolTipText( "" );
-            action.setEnabled( true );
-        }
-    }
-    
-    /** Currently send be {@link DrawFeatureMapAction}. */
-    @EventHandler(display=true)
-    protected void mcaseChanged( PropertyChangeEvent ev ) {
-        updateEnabled();
     }
     
 }
