@@ -142,6 +142,8 @@ public class LeitungsauskunftStartCaseAction
         form = new BasedataForm();
         form.createContents( formContainer );
         site.setValid( false );
+        
+        site.createSubmit( formContainer, "Übernehmen" );
     }
 
     
@@ -207,25 +209,25 @@ public class LeitungsauskunftStartCaseAction
                     .setField( new TextFormField() ).setValidator( new NotNullValidator() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
-            Composite city = site.toolkit().createComposite( body );
-            Property prop = new PlainValuePropertyAdapter( "postalcode", mcase.get().get( "postalcode" ) );
-            new FormFieldBuilder( city, prop )
-                    .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
-
-            prop = new PlainValuePropertyAdapter( "city", mcase.get().get( "city" ) );
-            new FormFieldBuilder( city, prop )
-                    .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
-
             Composite street = site.toolkit().createComposite( body );
-            prop = new PlainValuePropertyAdapter( "street", mcase.get().get( "street" ) );
+            Property prop = new PlainValuePropertyAdapter( "street", mcase.get().get( "street" ) );
             new FormFieldBuilder( street, prop )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
             prop = new PlainValuePropertyAdapter( "number", mcase.get().get( "number" ) );
             new FormFieldBuilder( street, prop )
+                    .setLabel( IFormFieldLabel.NO_LABEL )
+                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
+
+            Composite city = site.toolkit().createComposite( body );
+            prop = new PlainValuePropertyAdapter( "postalcode", mcase.get().get( "postalcode" ) );
+            new FormFieldBuilder( city, prop )
+                    .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
+                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
+
+            prop = new PlainValuePropertyAdapter( "city", mcase.get().get( "city" ) );
+            new FormFieldBuilder( city, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 

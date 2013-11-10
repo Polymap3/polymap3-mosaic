@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
 import org.polymap.core.security.SecurityUtils;
+
 import org.polymap.rhei.batik.BatikPlugin;
 
 import org.polymap.azv.AzvPlugin;
@@ -54,6 +55,14 @@ public class LeitungsauskunftCasesDecorator
                 }
             });
         }
+//        // Mitarbeiter -> nur beantragte zeigen
+//        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && ! SecurityUtils.isAdmin()) {
+//            viewer.addFilter( new CasesViewerFilter() {
+//                protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
+//                    return Iterables.find( mcase.getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_BEANTRAGT ), null ) != null;
+//                }
+//            });            
+//        }
     }
 
     

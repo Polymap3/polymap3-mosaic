@@ -113,6 +113,7 @@ public class MosaicCase2
     public void setName( String value ) {
         name.set( value );
         repo().newCaseEvent( this, "Name: " + value, "Der Name wurde geändert auf: " + value, "Wert"  );
+        EventManager.instance().publish( new PropertyChangeEvent( this, "name", null, value ) );
     }
 
     @Override
@@ -170,7 +171,7 @@ public class MosaicCase2
 //                    "Der Wert \"" + key + "\" wurde geändert auf: " + value, "Wert"  );
         }
         else {
-            repo.newEntity( MosaicCaseKeyValue.class, null, new EntityCreator<MosaicCaseKeyValue>() {
+            current = repo.newEntity( MosaicCaseKeyValue.class, null, new EntityCreator<MosaicCaseKeyValue>() {
                 public void create( MosaicCaseKeyValue prototype ) throws Exception {
                     prototype.caseId.set( getId() );
                     prototype.key.set( key );
@@ -181,6 +182,7 @@ public class MosaicCase2
                 }
             });
         }
+        EventManager.instance().publish( new PropertyChangeEvent( this, key, null, value ) );
         return null;
     }
 

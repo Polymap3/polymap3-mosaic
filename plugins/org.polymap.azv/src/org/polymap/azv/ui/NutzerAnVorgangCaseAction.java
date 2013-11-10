@@ -180,7 +180,7 @@ public class NutzerAnVorgangCaseAction
     
     @Override
     public void fillContentArea( Composite parent ) {
-        personSection = site.toolkit().createPanelSection( parent, "Nutzerdaten" );
+        personSection = site.toolkit().createPanelSection( parent, "Kundendaten" );
         personSection.addConstraint( new PriorityConstraint( 1 ) );
         personSection.getBody().setLayout( new FillLayout() );
         

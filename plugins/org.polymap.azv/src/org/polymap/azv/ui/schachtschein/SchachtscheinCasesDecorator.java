@@ -60,8 +60,7 @@ public class SchachtscheinCasesDecorator
         }
         
         // Mitarbeiter -> nur beantragte zeigen
-        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
-                && ! SecurityUtils.isAdmin()) {
+        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && ! SecurityUtils.isAdmin()) {
             viewer.addFilter( new CasesViewerFilter() {
                 protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
                     return Iterables.find( mcase.getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_BEANTRAGT ), null ) != null;

@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
@@ -82,7 +83,9 @@ public class KarteCaseAction
 
     private VectorLayer                     vectorLayer;
 
-    private DrawFeatureMapAction drawFeatureAction;
+    private DrawFeatureMapAction            drawFeatureAction;
+
+    private VectorFeature vectorFeature;
 
     
     @Override
@@ -115,17 +118,19 @@ public class KarteCaseAction
         mapViewer.createContents( body, site.getPanelSite() );
         mapViewer.getControl().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 500 ) );
 
-        WMSLayer alk = new WMSLayer( "ALK", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-ALK" );
-        alk.setVisibility( false );
-        mapViewer.addLayer( alk );
-        
-        WMSLayer kanal = new WMSLayer( "Kanal", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Kanal" );
-        kanal.setVisibility( false );
-        mapViewer.addLayer( kanal );
-        
-        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
-        wasser.setVisibility( false );
-        mapViewer.addLayer( wasser );
+        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
+            WMSLayer alk = new WMSLayer( "ALK", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-ALK" );
+            alk.setVisibility( false );
+            mapViewer.addLayer( alk );
+
+            WMSLayer kanal = new WMSLayer( "Kanal", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Kanal" );
+            kanal.setVisibility( false );
+            mapViewer.addLayer( kanal );
+
+            WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
+            wasser.setVisibility( false );
+            mapViewer.addLayer( wasser );
+        }
         
         // vector layer
         vectorLayer = new VectorLayer( "Markierung" );
@@ -159,7 +164,7 @@ public class KarteCaseAction
                 vectorLayer.destroyFeatures();
                 
                 Point p = (Point)new WKTReader().read( wkt );
-                VectorFeature vectorFeature = new VectorFeature( new PointGeometry( p.getX(), p.getY() ) );
+                vectorFeature = new VectorFeature( new PointGeometry( p.getX(), p.getY() ) );
                 vectorLayer.addFeatures( vectorFeature );
                 //vectorLayer.redraw();
 
@@ -191,6 +196,8 @@ public class KarteCaseAction
         String wkt = new WKTWriter().write( point );
         mcase.get().put( "point", wkt );
         repo.get().commitChanges();
+        
+        drawMCasePoint();
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
         

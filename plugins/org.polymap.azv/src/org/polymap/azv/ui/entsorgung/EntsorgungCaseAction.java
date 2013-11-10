@@ -240,25 +240,25 @@ public class EntsorgungCaseAction
                     .setField( new TextFormField() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
     
-            Composite city = site.toolkit().createComposite( body );
-            Property prop = new KVPropertyAdapter( mcase.get(), "postalcode" );
-            new FormFieldBuilder( city, prop )
-                    .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
-
-            prop = new KVPropertyAdapter( mcase.get(), "city" );
-            new FormFieldBuilder( city, prop )
-                    .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
-
             Composite street = site.toolkit().createComposite( body );
-            prop = new KVPropertyAdapter( mcase.get(), "street" );
+            Property prop = new KVPropertyAdapter( mcase.get(), "street" );
             new FormFieldBuilder( street, prop )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
                     .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
 
             prop = new KVPropertyAdapter( mcase.get(), "number" );
             new FormFieldBuilder( street, prop )
+                    .setLabel( IFormFieldLabel.NO_LABEL )
+                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
+
+            Composite city = site.toolkit().createComposite( body );
+            prop = new KVPropertyAdapter( mcase.get(), "postalcode" );
+            new FormFieldBuilder( city, prop )
+                    .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
+                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
+
+            prop = new KVPropertyAdapter( mcase.get(), "city" );
+            new FormFieldBuilder( city, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
 
