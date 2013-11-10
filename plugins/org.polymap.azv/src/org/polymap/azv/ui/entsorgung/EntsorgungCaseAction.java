@@ -14,10 +14,15 @@
  */
 package org.polymap.azv.ui.entsorgung;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.opengis.feature.Property;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.qi4j.api.query.Query;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
@@ -45,6 +50,7 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldLabel;
 import org.polymap.rhei.field.IFormFieldListener;
+import org.polymap.rhei.field.PicklistFormField;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
@@ -54,6 +60,8 @@ import org.polymap.rhei.um.ui.RegisterPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.model.AzvRepository;
+import org.polymap.azv.model.Entsorgungsliste;
 import org.polymap.azv.ui.NotNullValidator;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
@@ -77,6 +85,14 @@ public class EntsorgungCaseAction
     private static Log log = LogFactory.getLog( EntsorgungCaseAction.class );
 
     public static final IMessages           i18n = Messages.forPrefix( "Entsorgung" );
+    
+    public static final String              KEY_LISTE = "liste";
+    public static final String              KEY_NAME = "name";
+    public static final String              KEY_BEMERKUNG = "bemerkung";
+    public static final String              KEY_STREET = "street";
+    public static final String              KEY_NUMBER = "number";
+    public static final String              KEY_CITY = "city";
+    public static final String              KEY_POSTALCODE = "postalcode";
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -103,14 +119,14 @@ public class EntsorgungCaseAction
             UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
             if (principal != null
                     && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
-                    && mcase.get().get( "name" ) == null) {
+                    && mcase.get().get( KEY_NAME ) == null) {
                 UserRepository umrepo = UserRepository.instance();
                 umuser = umrepo.findUser( principal.getName() );
-                mcase.get().put( "name", umuser.name().get() );
-                mcase.get().put( "street", umuser.address().get().street().get() );
-                mcase.get().put( "number", umuser.address().get().number().get() );
-                mcase.get().put( "city", umuser.address().get().city().get() );
-                mcase.get().put( "postalcode", umuser.address().get().postalCode().get() );
+                mcase.get().put( KEY_NAME, umuser.name().get() );
+                mcase.get().put( KEY_STREET, umuser.address().get().street().get() );
+                mcase.get().put( KEY_NUMBER, umuser.address().get().number().get() );
+                mcase.get().put( KEY_CITY, umuser.address().get().city().get() );
+                mcase.get().put( KEY_POSTALCODE, umuser.address().get().postalCode().get() );
                 
 //            setUserOnCase( umuser );
             }
@@ -142,7 +158,7 @@ public class EntsorgungCaseAction
         this.caseStatus = status;
         //status.put( "Entsorgung", "[Geben Sie einen Adresse an]", 10 );
         status.put( "Vorgang", "Entsorgung", 10 );
-        status.put( "Name", mcase.get().get( "name" ), 5 );
+        status.put( "Name", mcase.get().get( KEY_NAME ), 5 );
         status.put( "Termin", mcase.get().get( "termin" ), 0 );
 
         site.getPanelSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
@@ -199,12 +215,20 @@ public class EntsorgungCaseAction
     public void submit() throws Exception {
         form.submit();
         IMosaicCase mc = mcase.get();
-        mc.setName( Joiner.on( " " ).skipNulls().join( mc.get( "street" ), mc.get( "number" ), mc.get( "city" ) ) );
+        mc.setName( Joiner.on( " " ).skipNulls().join( mc.get( KEY_STREET ), mc.get( KEY_NUMBER ), mc.get( KEY_CITY ) ) );
         
-        repo.get().newCaseEvent( mcase.get(), mcase.get().get( "termin" ), 
-                Joiner.on( " " ).skipNulls().join( mc.get( "termin" ), mc.get( "street" ), mc.get( "number" ), mc.get( "city" ) ), 
+        AzvRepository azvRepo = AzvRepository.instance();
+        String listeId = mcase.get().get( KEY_LISTE );
+        Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
+        liste.mcaseIds().get().add( mcase.get().getId() );
+        azvRepo.commitChanges();
+        
+        repo.get().newCaseEvent( mcase.get(), liste.name().get(), 
+                Joiner.on( " " ).skipNulls().join( liste.name().get(), mc.get( KEY_STREET ), mc.get( KEY_NUMBER ), mc.get( KEY_CITY ) ), 
                 AzvPlugin.EVENT_TYPE_BEANTRAGT  );
         repo.get().commitChanges();
+
+        //EmailService
         
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
@@ -227,37 +251,43 @@ public class EntsorgungCaseAction
             Composite body = formSite.getPageBody();
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
-            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), "name" ) )
+            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_NAME ) )
                     .setLabel( "Name" ).setToolTipText( "Ihr Name" )
                     .setValidator( new NotNullValidator() ).create().setFocus();
 
-            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), "termin" ) )
+            Query<Entsorgungsliste> listen = AzvRepository.instance().findEntities( Entsorgungsliste.class, null, 0, -1 );
+            Map<String,String> picklistMap = new TreeMap();
+            for (Entsorgungsliste liste : listen) {
+                picklistMap.put( liste.name().get(), liste.id() );
+            }
+            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_LISTE ) )
                     .setLabel( "Termin" ).setToolTipText( "Gewünschter Termin der Entsorgung" )
+                    .setField( new PicklistFormField( picklistMap ) )
                     .setValidator( new NotNullValidator() ).create();
 
-            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), "bemerkung" ) )
+            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_BEMERKUNG ) )
                     .setLabel( "Bemerkung" ).setToolTipText( "Besondere Hinweise für das Entsorgungsunternehmen" )
                     .setField( new TextFormField() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
     
             Composite street = site.toolkit().createComposite( body );
-            Property prop = new KVPropertyAdapter( mcase.get(), "street" );
+            Property prop = new KVPropertyAdapter( mcase.get(), KEY_STREET );
             new FormFieldBuilder( street, prop )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
                     .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
 
-            prop = new KVPropertyAdapter( mcase.get(), "number" );
+            prop = new KVPropertyAdapter( mcase.get(), KEY_NUMBER );
             new FormFieldBuilder( street, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
 
             Composite city = site.toolkit().createComposite( body );
-            prop = new KVPropertyAdapter( mcase.get(), "postalcode" );
+            prop = new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE );
             new FormFieldBuilder( city, prop )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
                     .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
 
-            prop = new KVPropertyAdapter( mcase.get(), "city" );
+            prop = new KVPropertyAdapter( mcase.get(), KEY_CITY );
             new FormFieldBuilder( city, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
@@ -275,19 +305,19 @@ public class EntsorgungCaseAction
                     }
                     site.setValid( formSite.isValid() );
                     
-                    if (ev.getFieldName().equals( "termin" )) {
+                    if (ev.getFieldName().equals( KEY_LISTE )) {
                         caseStatus.put( "Termin", ev.getNewValue().toString() );
                     }
-                    else if (ev.getFieldName().equals( "name" )) {
+                    else if (ev.getFieldName().equals( KEY_NAME )) {
                         caseStatus.put( "Name", ev.getNewValue().toString() );
                     }
-                    else if (ev.getFieldName().equals( "city" )) {
+                    else if (ev.getFieldName().equals( KEY_CITY )) {
                         city = ev.getNewValue();
                     }
-                    else if (ev.getFieldName().equals( "number" )) {
+                    else if (ev.getFieldName().equals( KEY_NUMBER )) {
                         number = ev.getNewValue();
                     }
-                    else if (ev.getFieldName().equals( "street" )) {
+                    else if (ev.getFieldName().equals( KEY_STREET )) {
                         street = ev.getNewValue();
                     }
 //                    caseStatus.put( "Entsorgung", Joiner.on( " " ).skipNulls().join( 

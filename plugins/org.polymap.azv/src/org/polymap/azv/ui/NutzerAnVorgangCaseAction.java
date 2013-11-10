@@ -50,6 +50,7 @@ import org.polymap.rhei.um.ui.UsersTableViewer;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.ui.entsorgung.EntsorgungCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -97,7 +98,7 @@ public class NutzerAnVorgangCaseAction
                 return false;
             }
             else if (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG )
-                    && mcase.get().get( "name" ) != null) {
+                    && mcase.get().get( EntsorgungCaseAction.KEY_NAME ) != null) {
                 return false;
             }
             
@@ -174,7 +175,7 @@ public class NutzerAnVorgangCaseAction
         }
         PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
         personForm.createContents( personSection );
-        personSection.getBody().setEnabled( false );
+        personForm.setEnabled( false );
     }
 
     
@@ -189,7 +190,7 @@ public class NutzerAnVorgangCaseAction
             personForm.createContents( personSection );
             personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
 
-            personForm.setEnabled( false );            
+            personForm.setEnabled( false );
         }
         else {
             site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen" )

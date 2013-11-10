@@ -19,6 +19,7 @@ import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -35,6 +36,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.qi4j.api.query.Query;
 
+import com.google.common.collect.Iterables;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -47,6 +50,8 @@ import org.eclipse.rwt.widgets.ExternalBrowser;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.RowLayoutFactory;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.window.Window;
 
 import org.polymap.core.data.operation.DownloadServiceHandler;
@@ -86,6 +91,7 @@ import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
+import org.polymap.mosaic.ui.casepanel.CasePanel;
 import org.polymap.mosaic.ui.casestable.CasesTableViewer;
 import org.polymap.mosaic.ui.casestable.CasesViewerFilter;
 
@@ -106,6 +112,9 @@ public class EntsorgungsListenPanel
     @Context(scope="org.polymap.azv.ui")
     private ContextProperty<UserPrincipal>      user;
     
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<IMosaicCase>        mcase;
+
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2>  mosaicRepo;
     
@@ -166,6 +175,13 @@ public class EntsorgungsListenPanel
     }
 
     
+    @Override
+    public void dispose() {
+        super.dispose();
+        mcase.set( null );
+    }
+
+
     @EventHandler(display=true)
     protected void userLoggedIn( PropertyAccessEvent ev ) {
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
@@ -242,16 +258,16 @@ public class EntsorgungsListenPanel
                 ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ),
                 ff.equals( ff.property( "natures" ), ff.literal( AzvPlugin.CASE_ENTSORGUNG ) ) );
         
-        CasesTableViewer casesViewer = new CasesTableViewer( section.getBody(), mosaicRepo.get(), filter, SWT.NONE );
+        final CasesTableViewer casesViewer = new CasesTableViewer( section.getBody(), mosaicRepo.get(), filter, SWT.NONE );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( toolbar ).height( 300 ).width( 400 ).create() );
-//        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
-//            public void doubleClick( DoubleClickEvent ev ) {
-//                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
-//                log.info( "CASE: " + sel );
-//                mcase.set( sel );
-//                getContext().openPanel( CasePanel.ID );
-//            }
-//        });
+        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
+            public void doubleClick( DoubleClickEvent ev ) {
+                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                log.info( "CASE: " + sel );
+                mcase.set( sel );
+                getContext().openPanel( CasePanel.ID );
+            }
+        });
         // filter liste
         casesViewer.addFilter( new CasesViewerFilter() {
             protected boolean apply( CasesTableViewer viewer, IMosaicCase mcase ) {
@@ -280,11 +296,11 @@ public class EntsorgungsListenPanel
                 for (String id : liste.mcaseIds().get()) {
                     MosaicCase2 mcase = mosaicRepo.get().entity( MosaicCase2.class, id );
                     csvWriter.write( 
-                            StringUtils.defaultString( mcase.get( "city" ) ), 
-                            StringUtils.defaultString( mcase.get( "street" ) ), 
-                            StringUtils.defaultString( mcase.get( "number" ) ), 
-                            StringUtils.defaultString( mcase.get( "name" ) ), 
-                            StringUtils.defaultString( mcase.get( "bemerkung" ) ) );
+                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_CITY ) ), 
+                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_STREET ) ), 
+                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_NUMBER ) ), 
+                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_NAME ) ), 
+                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_BEMERKUNG ) ) );
                     
                     mosaicRepo.get().closeCase( mcase, "Gedruckt", "Gedruckt in Liste: " + liste.name().get() );
                 }

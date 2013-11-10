@@ -352,17 +352,20 @@ public class MosaicRepository2
     }
 
 
-    public IMosaicCaseEvent newCaseEvent( final IMosaicCase mcase, final String name, final String description, final String eventType) {
-       return newEntity( MosaicCaseEvent2.class, null, new EntityCreator<MosaicCaseEvent2>() {
-           public void create( MosaicCaseEvent2 prototype ) throws Exception {
-               prototype.name.set( name );
-               prototype.description.set( description );
-               prototype.type.set( eventType );
-               prototype.timestamp.set( new Date() );
-               prototype.user.set( user );
-               mcase.addEvent( prototype );
-           }
-       });
+    public IMosaicCaseEvent newCaseEvent( final IMosaicCase mcase, final String name, final String description, final String eventType ) {
+        assert mcase != null;
+        assert name != null : "Event name must not be null."; 
+        assert eventType != null : "Event type must not be null."; 
+        return newEntity( MosaicCaseEvent2.class, null, new EntityCreator<MosaicCaseEvent2>() {
+            public void create( MosaicCaseEvent2 prototype ) throws Exception {
+                prototype.name.set( name );
+                prototype.description.set( description );
+                prototype.type.set( eventType );
+                prototype.timestamp.set( new Date() );
+                prototype.user.set( user );
+                mcase.addEvent( prototype );
+            }
+        });
     }
 
     

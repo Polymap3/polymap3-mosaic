@@ -303,7 +303,9 @@ public class CasePanel
             discardActiveAction();
         }
         activeAction = holder;
-        holder.btn.setSelection( true );
+        if (holder.btn != null) {
+            holder.btn.setSelection( true );
+        }
 
 //        if (holder.showSubmitButton) {
 //            discardBtn = tk.createButton( toolbarSection, null, SWT.PUSH );
