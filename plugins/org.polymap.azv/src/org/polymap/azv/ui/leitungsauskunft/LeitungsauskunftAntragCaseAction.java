@@ -18,17 +18,25 @@ import java.beans.PropertyChangeEvent;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.SimpleEmail;
 
 import org.eclipse.jface.action.IAction;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.um.User;
+import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.email.EmailService;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
+import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
@@ -48,6 +56,8 @@ public class LeitungsauskunftAntragCaseAction
         implements ICaseAction {
 
     private static Log log = LogFactory.getLog( LeitungsauskunftAntragCaseAction.class );
+
+    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftAntrag" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -96,6 +106,18 @@ public class LeitungsauskunftAntragCaseAction
     public void submit() throws Exception {
         repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
+     
+        String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
+        User user = UserRepository.instance().findUser( username );
+                
+        String salu = user.salutation().get() != null ? user.salutation().get() : "";
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+        Email email = new SimpleEmail();
+        email.setCharset( "ISO-8859-1" );
+        email.addTo( user.email().get() )
+                .setSubject( i18n.get( "emailSubject") )
+                .setMsg( i18n.get( "email", header ) );
+        EmailService.instance().send( email );
         
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
