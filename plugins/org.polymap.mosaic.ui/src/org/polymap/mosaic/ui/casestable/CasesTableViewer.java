@@ -157,7 +157,7 @@ public class CasesTableViewer
 
         public StatusColumn() {
             super( schema.getDescriptor( new NameImpl( "name" ) ) );
-            setWeight( 1, 50 );
+            setWeight( 1, 70 );
             setHeader( "" );
             setAlign( SWT.CENTER );
             
@@ -238,7 +238,7 @@ public class CasesTableViewer
 
         public NatureColumn() {
             super( schema.getDescriptor( new NameImpl( "name" ) ) );
-            setWeight( 2, 120 );
+            setWeight( 2, 140 );
             setHeader( "Art" );
             setLabelProvider( new ColumnLabelProvider() {
                 @Override

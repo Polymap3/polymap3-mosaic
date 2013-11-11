@@ -51,7 +51,7 @@ public interface IMosaicCase {
     public String get( String key );
     
     /** First event is the creation event. */
-    public Iterable<? extends IMosaicCaseEvent> getEvents();
+    public Iterable<IMosaicCaseEvent> getEvents();
 
     public void addEvent( IMosaicCaseEvent event );
     

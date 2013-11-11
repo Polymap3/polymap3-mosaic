@@ -194,7 +194,7 @@ public class NutzerFreigabeCaseAction
         um.commitChanges();
         
         MosaicRepository2 mosaic = repo.get();
-        mosaic.closeCase( mcase.get(), "Freigabe", "Dem Nutzer erhält die Rechte: " + um.groupsOf( user ) );
+        mosaic.closeCase( mcase.get(), "Freigabe", "Nutzerrechte: " + um.groupsOf( user ) );
         mosaic.commitChanges();
         
         String salu = user.salutation().get() != null ? user.salutation().get() : "";

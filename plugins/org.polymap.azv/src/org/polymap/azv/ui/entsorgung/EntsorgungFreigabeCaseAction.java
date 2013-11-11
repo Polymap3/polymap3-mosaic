@@ -14,6 +14,7 @@
  */
 package org.polymap.azv.ui.entsorgung;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -82,7 +83,7 @@ public class EntsorgungFreigabeCaseAction
     
     private Map<String,Entsorgungsliste>    listen = new TreeMap();
 
-    private List list;
+    private List                            list;
     
     
     @Override
@@ -90,7 +91,7 @@ public class EntsorgungFreigabeCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )
-                && mcase.get().get( "termin" ) != null
+                //&& mcase.get().get( EntsorgungCaseAction.KEY_LISTE ) != null
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_ENTSORGUNG )) {
 
@@ -133,6 +134,13 @@ public class EntsorgungFreigabeCaseAction
                 site.setValid( list.getSelectionCount() > 0 );
             }
         });
+        String listeId = mcase.get().get( EntsorgungCaseAction.KEY_LISTE );
+        if (listeId != null) {
+            Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
+            list.setSelection( new String[] {liste.name().get()} );
+        }
+
+        
         site.setValid( false );
         
         Button submitBtn = site.createSubmit( formContainer, "Termin zuordnen" );
@@ -142,8 +150,18 @@ public class EntsorgungFreigabeCaseAction
 
     @Override
     public void submit() throws Exception {
+        String prevListeId = mcase.get().get( EntsorgungCaseAction.KEY_LISTE );
+        if (prevListeId != null) {
+            Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, prevListeId );
+            Collection<String> mcaseIds = liste.mcaseIds().get();
+            mcaseIds.remove( mcase.get().getId() );
+            liste.mcaseIds().set( mcaseIds );
+            //mcase.get().put( EntsorgungCaseAction.KEY_LISTE, null );
+        }
+        
         Entsorgungsliste liste = listen.get( list.getItem( list.getSelectionIndex() ) );
         liste.mcaseIds().get().add( mcase.get().getId() );
+        mcase.get().put( EntsorgungCaseAction.KEY_LISTE, liste.id() );
         azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), "Terminiert", 

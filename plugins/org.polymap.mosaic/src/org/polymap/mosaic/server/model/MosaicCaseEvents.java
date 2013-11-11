@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 /**
  * Static methods that help to work with {@link IMosaicCaseEvent}.
@@ -38,6 +39,11 @@ public class MosaicCaseEvents {
                 return input.getEventType().equals( eventType );
             }
         };
+    }
+    
+    
+    public static boolean contains( Iterable<IMosaicCaseEvent> events, String eventType ) {
+        return Iterables.find( events, contains( eventType ), null ) != null;
     }
     
     
