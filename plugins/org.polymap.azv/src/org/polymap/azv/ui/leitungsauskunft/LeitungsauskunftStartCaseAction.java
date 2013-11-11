@@ -14,8 +14,6 @@
  */
 package org.polymap.azv.ui.leitungsauskunft;
 
-import org.opengis.feature.Property;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
@@ -43,12 +41,12 @@ import org.polymap.rhei.field.BeanPropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldLabel;
 import org.polymap.rhei.field.IFormFieldListener;
-import org.polymap.rhei.field.PlainValuePropertyAdapter;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
+
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.NotNullValidator;
@@ -56,6 +54,7 @@ import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
+import org.polymap.mosaic.ui.KVPropertyAdapter;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
@@ -263,24 +262,20 @@ public class LeitungsauskunftStartCaseAction
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite street = site.toolkit().createComposite( body );
-            Property prop = new PlainValuePropertyAdapter( KEY_STREET, mcase.get().get( KEY_STREET ) );
-            new FormFieldBuilder( street, prop )
+            new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
-            prop = new PlainValuePropertyAdapter( KEY_NUMBER, mcase.get().get( KEY_NUMBER ) );
-            new FormFieldBuilder( street, prop )
+            new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
             Composite city = site.toolkit().createComposite( body );
-            prop = new PlainValuePropertyAdapter( KEY_POSTALCODE, mcase.get().get( KEY_POSTALCODE ) );
-            new FormFieldBuilder( city, prop )
+            new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
-            prop = new PlainValuePropertyAdapter( KEY_CITY, mcase.get().get( KEY_CITY ) );
-            new FormFieldBuilder( city, prop )
+            new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 

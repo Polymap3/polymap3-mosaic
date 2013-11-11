@@ -14,8 +14,6 @@
  */
 package org.polymap.azv.ui.schachtschein;
 
-import org.opengis.feature.Property;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
@@ -25,12 +23,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.action.IAction;
+
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
-import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
@@ -40,20 +39,21 @@ import org.polymap.rhei.field.BeanPropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldLabel;
 import org.polymap.rhei.field.IFormFieldListener;
-import org.polymap.rhei.field.PlainValuePropertyAdapter;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.Address;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
-import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.NotNullValidator;
+import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
+import org.polymap.mosaic.ui.KVPropertyAdapter;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
@@ -71,19 +71,31 @@ public class SchachtscheinStartCaseAction
 
     private static Log log = LogFactory.getLog( SchachtscheinStartCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "SchachtscheinStart" );
+    public static final IMessages           i18n = Messages.forPrefix( "SchachtscheinStart" );
 
-    private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
+    private static final FastDateFormat     df = FastDateFormat.getInstance( "dd.MM.yyyy" );
 
+    public static final String              KEY_STREET = "street";
+    public static final String              KEY_NUMBER = "number";
+    public static final String              KEY_CITY = "city";
+    public static final String              KEY_POSTALCODE = "postalcode";
+
+    public static final String address( IMosaicCase mcase ) {
+        return new StringBuilder( 256 )
+                .append( StringUtils.defaultString( mcase.get( KEY_STREET ) ) ).append( " " )
+                .append( StringUtils.defaultString( mcase.get( KEY_NUMBER ) ) ).append( ", " )
+                .append( StringUtils.defaultString( mcase.get( KEY_POSTALCODE ) ) ).append( " " )
+                .append( StringUtils.defaultString( mcase.get( KEY_CITY ) ) ).toString();
+    }
+    
+    // instance *******************************************
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2>  repo;
 
-    /** Set by the {@link LoginPanel}. */
-    private ContextProperty<UserPrincipal>      sessionUser;
-    
     private ICaseActionSite                     site;
     
     private CaseStatus                          caseStatus;
@@ -98,10 +110,10 @@ public class SchachtscheinStartCaseAction
                 && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
             
             // wenn Kunde und noch kein Name gesetzt ist
-            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
+            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && !SecurityUtils.isAdmin()
                     && mcase.get().getName().length() == 0) {
                 
-                User umuser = UserRepository.instance().findUser( sessionUser.get().getName() );
+                User umuser = UserRepository.instance().findUser( Polymap.instance().getUser().getName() );
                 setUserOnCase( umuser );
                 // open action
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
@@ -117,12 +129,24 @@ public class SchachtscheinStartCaseAction
 
 
     @Override
+    public void fillAction( IAction action ) {
+        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+            action.setText( null );
+            action.setImageDescriptor( null );
+        }
+    }
+
+    
+    @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
+        IMosaicCase mc = mcase.get();
         String id = mcase.get().getId();
         status.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
-        status.put( "Vorgang", mcase.get().getName(), 100 );
-        status.put( "Angelegt am", df.format( mcase.get().getCreated() ), 99 );
+        status.put( "Vorgang", mc.getName(), 100 );
+        status.put( "Angelegt am", df.format( mc.getCreated() ), 99 );
+        status.put( "Ort", address( mc ), 0 );
+        status.put( "Beschreibung", mc.getDescription(), -1 );
     }
 
 
@@ -130,12 +154,12 @@ public class SchachtscheinStartCaseAction
     public void createContents( Composite parent ) {
         // wenn hier noch kein Nutzer am Vorgang hängt, dann wird der eingeloggte
         // Nutzer verwendet
-        String username = mcase.get().get( "user" );
+        String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
         if (username == null) {
-            username = sessionUser.get().getName();
+            username = Polymap.instance().getUser().getName();
             User umuser = UserRepository.instance().findUser( username );
             setUserOnCase( umuser );
-            mcase.get().put( "user", username );
+            mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, username );
         }
 
         FillLayout playout = (FillLayout)parent.getLayout();
@@ -151,6 +175,8 @@ public class SchachtscheinStartCaseAction
         form = new BasedataForm();
         form.createContents( formContainer );
         site.setValid( false );
+        
+        site.createSubmit( formContainer, "Übernehmen" );
     }
 
     
@@ -158,19 +184,19 @@ public class SchachtscheinStartCaseAction
         Address address = umuser.address().get();
         String value = address.city().get();
         if (value != null) {
-            mcase.get().put( "city", value );
+            mcase.get().put( KEY_CITY, value );
         }
         value = address.street().get();
         if (value != null) {
-            mcase.get().put( "street", value );
+            mcase.get().put( KEY_STREET, value );
         }
         value = address.number().get();
         if (value != null) {
-            mcase.get().put( "number", value );
+            mcase.get().put( KEY_NUMBER, value );
         }
         value = address.postalCode().get();
         if (value != null) {
-            mcase.get().put( "postalcode", value );
+            mcase.get().put( KEY_POSTALCODE, value );
         }
     }
     
@@ -182,6 +208,8 @@ public class SchachtscheinStartCaseAction
         form.dispose();
         form = null;
         repo.get().commitChanges();
+        
+        fillStatus( caseStatus );
     }
 
 
@@ -217,75 +245,37 @@ public class SchachtscheinStartCaseAction
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite city = site.toolkit().createComposite( body );
-            Property prop = new PlainValuePropertyAdapter( "postalcode", mcase.get().get( "postalcode" ) );
-            new FormFieldBuilder( city, prop )
+
+            new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
-            prop = new PlainValuePropertyAdapter( "city", mcase.get().get( "city" ) );
-            new FormFieldBuilder( city, prop )
+            new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
             Composite street = site.toolkit().createComposite( body );
-            prop = new PlainValuePropertyAdapter( "street", mcase.get().get( "street" ) );
-            new FormFieldBuilder( street, prop )
+            new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
-            prop = new PlainValuePropertyAdapter( "number", mcase.get().get( "number" ) );
-            new FormFieldBuilder( street, prop )
+            new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
 
-            
-//            //new FormFieldBuilder( body, new PropertyAdapter( entity.get().antragsteller() ) ).create();
-//            new FormFieldBuilder( body, new PropertyAdapter( entity.get().startDate() ) )
-//                    .setLabel( "Beginn" ).setToolTipText( "Geplanter Beginn der Arbeiten" ).create();
-//            new FormFieldBuilder( body, new PropertyAdapter( entity.get().endDate() ) )
-//                    .setLabel( "Ende" ).setToolTipText( "Geplantes Ende der Arbeiten" ).create();
-//            new FormFieldBuilder( body, new PropertyAdapter( entity.get().bemerkungen() ) )
-//                    .setField( new TextFormField() ).create()
-//                    .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 80 ) );
-            
-//            // address
-//            Composite plzLine = site.getToolkit().createComposite( body );
-//            plzLine.setLayout( new FillLayout( SWT.HORIZONTAL ) );
-//            new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().plz() ) )
-//                    .setValidator( new NotNullValidator() ).setLabel( "PLZ/Ort" ).setToolTipText( "Postleitzahl der Baumaßnahme" ).create();
-//            new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().ort() ) )
-//                    .setValidator( new NotNullValidator() ).setLabel( IFormFieldLabel.NO_LABEL ).setToolTipText( "Ort der Baumaßnahme" ).create();
-//            new FormFieldBuilder( body, new PropertyAdapter( entity.get().strasse() ) )
-//                    .setValidator( new NotNullValidator() ).setLabel( "Strasse" ).setToolTipText( "Adresse der Baumaßnahme" ).create();
-//
-//            // submit
-//            submitBtn = site.getToolkit().createButton( body, "BEANTRAGEN", SWT.PUSH );
-//            submitBtn.addSelectionListener( new SelectionAdapter() {
-//                public void widgetSelected( SelectionEvent ev ) {
-//                    try {
-//                        site.submitEditor();
-//                        AzvRepository.instance().commitChanges();
-//                        getContext().closePanel();
-//                    }
-//                    catch (Exception e) {
-//                        BatikApplication.handleError( "Vorgang konnte nicht angelegt werden.", e );
-//                    }
-//                }
-//            });
-//            
-            // address listener
+            // field listener
             formSite.addFieldListener( fieldListener = new IFormFieldListener() {
                 public void fieldChange( FormFieldEvent ev ) {
                     
                     site.setValid( formSite.isValid() );
                     
-                    if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "name" )) {
-                        caseStatus.put( "Vorgang", (String)ev.getNewValue() );
-                    }
+//                    if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "name" )) {
+//                        caseStatus.put( "Vorgang", (String)ev.getNewValue() );
+//                    }
                 }
             });
-//            activateStatusAdapter( getSite() );
-//        }
+
+//            activateStatusAdapter( site.getPanelSite() );
         }
     }
 
