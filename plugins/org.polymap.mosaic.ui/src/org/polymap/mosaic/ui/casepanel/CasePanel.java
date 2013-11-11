@@ -155,7 +155,7 @@ public class CasePanel
         }
         
         // status area
-        Composite statusSection = tk.createComposite( panelBody, SWT.BORDER );
+        Composite statusSection = tk.createComposite( panelBody );
         statusSection.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
         createStatusSection( statusSection );
 

@@ -94,6 +94,8 @@ public class LeitungsauskunftStartCaseAction
 
     private BasedataForm                        form;
 
+    private IPanelSection section;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -195,6 +197,17 @@ public class LeitungsauskunftStartCaseAction
         form.dispose();
         form = null;
         repo.get().commitChanges();
+        
+        if (form != null) {
+            form.reloadEditor();
+        }
+        else {
+            section.getBody().getChildren()[0].dispose();
+            form = new BasedataForm();
+            form.createContents( section.getBody() );
+            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            form.setEnabled( false );            
+        }
     }
 
 
@@ -209,15 +222,18 @@ public class LeitungsauskunftStartCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
-            IPanelSection section = site.toolkit().createPanelSection( parent, "Daten" );
-            section.addConstraint( new PriorityConstraint( 10 ) );
-            section.getBody().setLayout( new FillLayout() );
+        section = site.toolkit().createPanelSection( parent, "Daten" );
+        section.addConstraint( new PriorityConstraint( 10 ) );
+        section.getBody().setLayout( new FillLayout() );
 
+        if (mcase.get().getName().length() > 0) {
             form = new BasedataForm();
             form.createContents( section.getBody() );
-            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
+            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
             form.setEnabled( false );
+        }
+        else {
+            site.toolkit().createLabel( section.getBody(), "Noch keine Daten." );
         }
     }
 
