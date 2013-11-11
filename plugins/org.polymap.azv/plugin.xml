@@ -93,7 +93,7 @@
       <caseAction
             class="org.polymap.azv.ui.schachtschein.SchachtscheinStartCaseAction"
             description="Bezeichnung und Ort der Maßnahme"
-            icon="resources/icons/letter.png"
+            icon="resources/icons/letter-filter.png"
             id="org.polymap.azv.SchachtscheinStartCaseAction"
             name="Maßnahme"
             priority="-10">

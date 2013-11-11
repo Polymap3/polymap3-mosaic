@@ -20,6 +20,8 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.SimpleEmail;
 
 import org.qi4j.api.query.Query;
 
@@ -41,11 +43,14 @@ import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.um.User;
+import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.email.EmailService;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Entsorgungsliste;
+import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -75,8 +80,6 @@ public class EntsorgungFreigabeCaseAction
 
     private ICaseActionSite                 site;
 
-    private User                            umuser;
-
     private CaseStatus                      caseStatus;
 
     private AzvRepository                   azvRepo = AzvRepository.instance();
@@ -91,7 +94,7 @@ public class EntsorgungFreigabeCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )
-                //&& mcase.get().get( EntsorgungCaseAction.KEY_LISTE ) != null
+                && mcase.get().get( EntsorgungCaseAction.KEY_LISTE ) != null
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_ENTSORGUNG )) {
 
@@ -164,10 +167,24 @@ public class EntsorgungFreigabeCaseAction
         mcase.get().put( EntsorgungCaseAction.KEY_LISTE, liste.id() );
         azvRepo.commitChanges();
         
-        repo.get().newCaseEvent( mcase.get(), "Terminiert", 
+        repo.get().newCaseEvent( mcase.get(), "Neuer Termin", 
                 "Entsorgung wurde der Liste zugeordnet: " + liste.name().get(), 
-                AzvPlugin.EVENT_TYPE_TERMINIERT  );
+                "Änderung" );
         repo.get().commitChanges();
+        
+        // email
+        String caseUser = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
+        if (caseUser != null) {
+            User user = UserRepository.instance().findUser( caseUser );
+            String salu = user.salutation().get() != null ? user.salutation().get() : "";
+            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+            Email email = new SimpleEmail();
+            email.setCharset( "ISO-8859-1" );
+            email.addTo( user.email().get() )
+                    .setSubject( i18n.get( "emailSubject") )
+                    .setMsg( i18n.get( "email", header, liste.name().get() ) );
+            EmailService.instance().send( email );
+        }
         
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {

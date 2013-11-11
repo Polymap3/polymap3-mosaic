@@ -61,7 +61,7 @@ public class AzvPlugin
     public static final String      CASE_NUTZER = "Neuer Nutzer";
 
     public static final String      EVENT_TYPE_BEANTRAGT = "Beantragt";
-    public static final String      EVENT_TYPE_TERMINIERT = "Terminiert";
+//    public static final String      EVENT_TYPE_TERMINIERT = "Terminiert";
     
 
     private static AzvPlugin        instance;
