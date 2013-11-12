@@ -14,12 +14,26 @@
  */
 package org.polymap.azv.ui.nutzerregistrierung;
 
+import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
+import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
+import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
+import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT2;
+import static org.polymap.azv.AzvPlugin.ROLE_MA;
+import static org.polymap.azv.AzvPlugin.ROLE_SCHACHTSCHEIN;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.collect.Lists;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -140,40 +154,55 @@ public class UsersTablePanel
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 500 ).create() );
         viewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
-                for (Control child: formArea.getChildren()) {
-                    child.dispose();
-                }
-                createUserSection( viewer.getSelectedUser() );
+                updateUserSection( viewer.getSelectedUser() );
             }
         });
         viewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent event ) {
-                for (Control child: formArea.getChildren()) {
-                    child.dispose();
-                }
-                createUserSection( viewer.getSelectedUser() );
+                updateUserSection( viewer.getSelectedUser() );
             }
         });
         
         // form area
-        formArea = tk.createComposite( contents.getBody(), SWT.BORDER );
-        tk.createLabel( formArea, "Wählen Sie einen Nutzer in der Tabelle" );
+        formArea = tk.createComposite( contents.getBody() );
+        tk.createLabel( formArea, "Wählen Sie einen Nutzer in der Tabelle." );
     }
 
     
-    protected void createUserSection( final User umuser ) {
-        // person section
-//        IPanelSection personSection = tk.createPanelSection( formArea, "Nutzerdaten" );
-//        Composite body = personSection.getBody();
-        Composite body = formArea;
-        body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
+    protected void updateUserSection( final User umuser ) {
+        formArea.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
+        for (Control child : formArea.getChildren()) {
+            child.dispose();
+        }
 
         final PersonForm personForm = new PersonForm( getSite(), umuser );
-        personForm.createContents( body );
+        personForm.createContents( formArea );
 
+        // permissions
+        Composite permissions = tk.createComposite( formArea );
+        permissions.setLayout( new FillLayout( SWT.VERTICAL ) );
+        List<String> roles = Lists.newArrayList( 
+                ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN,
+                ROLE_ENTSORGUNG, ROLE_HYDRANTEN, ROLE_MA
+                );
+        Set<String> groups = new HashSet( umrepo.groupsOf( umuser ) );
+        for (final String role : roles) {
+            final Button btn = tk.createButton( permissions, role, SWT.CHECK );
+            btn.setSelection( groups.contains( role ) );
+            btn.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected( SelectionEvent ev ) {
+                    if (btn.getSelection()) {
+                        umrepo.asignGroup( umuser, role );
+                    } else {
+                        umrepo.resignGroup( umuser, role );
+                    }
+                }
+            });
+        }
+        
         // change btn
-        Button okBtn = tk.createButton( body, i18n.get( "okBtn" ), SWT.PUSH );
-        okBtn.setEnabled( false );
+        Button okBtn = tk.createButton( formArea, i18n.get( "okBtn" ), SWT.PUSH );
+        //okBtn.setEnabled( false );
         okBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
@@ -189,7 +218,7 @@ public class UsersTablePanel
         });
         
         // delete btn
-        Button deleteBtn = tk.createButton( body, i18n.get( "deleteBtn" ), SWT.PUSH );
+        Button deleteBtn = tk.createButton( formArea, i18n.get( "deleteBtn" ), SWT.PUSH );
         deleteBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );
         deleteBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {

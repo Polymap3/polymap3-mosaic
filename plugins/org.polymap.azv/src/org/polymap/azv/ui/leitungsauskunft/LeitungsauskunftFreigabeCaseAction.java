@@ -23,6 +23,7 @@ import org.eclipse.jface.action.IAction;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.security.SecurityUtils;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
@@ -70,6 +71,7 @@ public class LeitungsauskunftFreigabeCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
+                && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                 && mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT )
                 && MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             return true;

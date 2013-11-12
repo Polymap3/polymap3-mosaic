@@ -27,6 +27,10 @@
             class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftPanel"
             id="org.polymap.azv.LeitungsauskunftPanel">
       </panel>
+      <panel
+            class="org.polymap.azv.ui.AllCasesPanel"
+            id="org.polymap.azv.AllCasesPanel">
+      </panel>
    </extension>
    <extension
          point="org.polymap.core.model.moduleAssemblers">
@@ -93,7 +97,7 @@
       <caseAction
             class="org.polymap.azv.ui.schachtschein.SchachtscheinStartCaseAction"
             description="Bezeichnung und Ort der Maßnahme"
-            icon="resources/icons/letter.png"
+            icon="resources/icons/letter-filter.png"
             id="org.polymap.azv.SchachtscheinStartCaseAction"
             name="Maßnahme"
             priority="-10">

@@ -21,6 +21,8 @@ import org.opengis.feature.Property;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.SimpleEmail;
 
 import org.qi4j.api.query.Query;
 
@@ -41,7 +43,6 @@ import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
-import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.app.FormContainer;
@@ -56,6 +57,7 @@ import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.email.EmailService;
 import org.polymap.rhei.um.ui.RegisterPanel;
 
 import org.polymap.azv.AzvPlugin;
@@ -63,6 +65,7 @@ import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Entsorgungsliste;
 import org.polymap.azv.ui.NotNullValidator;
+import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -119,6 +122,7 @@ public class EntsorgungCaseAction
             UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
             if (principal != null
                     && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
+                    && !SecurityUtils.isAdmin()
                     && mcase.get().get( KEY_NAME ) == null) {
                 UserRepository umrepo = UserRepository.instance();
                 umuser = umrepo.findUser( principal.getName() );
@@ -127,11 +131,13 @@ public class EntsorgungCaseAction
                 mcase.get().put( KEY_NUMBER, umuser.address().get().number().get() );
                 mcase.get().put( KEY_CITY, umuser.address().get().city().get() );
                 mcase.get().put( KEY_POSTALCODE, umuser.address().get().postalCode().get() );
-                
-//            setUserOnCase( umuser );
+
+                if (mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER ) == null) {
+                    mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, principal.getName() );
+                }
             }
 
-            if (mcase.get().get( "termin" ) == null) {
+            if (mcase.get().get( KEY_LISTE ) == null) {
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
                         site.activateCaseAction( site.getActionId() );
@@ -159,21 +165,28 @@ public class EntsorgungCaseAction
         //status.put( "Entsorgung", "[Geben Sie einen Adresse an]", 10 );
         status.put( "Vorgang", "Entsorgung", 10 );
         status.put( "Name", mcase.get().get( KEY_NAME ), 5 );
-        status.put( "Termin", mcase.get().get( "termin" ), 0 );
 
-        site.getPanelSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
+        AzvRepository azvRepo = AzvRepository.instance();
+        String listeId = mcase.get().get( KEY_LISTE );
+        if (listeId != null) {
+            Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
+            status.put( "Termin", liste.name().get(), 0 );
+        }
+
+        //site.getPanelSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
     }
 
 
     @Override
     public void fillContentArea( Composite parent ) {
-        if (mcase.get().get( "termin" ) != null) {
+        if (mcase.get().get( KEY_LISTE ) != null) {
             IPanelSection section = site.toolkit().createPanelSection( parent, "Daten" );
             section.addConstraint( new PriorityConstraint( 10 ) );
             section.getBody().setLayout( new FillLayout() );
 
             form = new DataForm();
             form.createContents( section.getBody() );
+            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).columns( 1, 1 ).create() );
             form.setEnabled( false );
 
             IPanelSection sep = site.toolkit().createPanelSection( parent, null );
@@ -221,6 +234,7 @@ public class EntsorgungCaseAction
         String listeId = mcase.get().get( KEY_LISTE );
         Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
         liste.mcaseIds().get().add( mcase.get().getId() );
+        
         azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), liste.name().get(), 
@@ -228,7 +242,20 @@ public class EntsorgungCaseAction
                 AzvPlugin.EVENT_TYPE_BEANTRAGT  );
         repo.get().commitChanges();
 
-        //EmailService
+        // email
+        String caseUser = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
+        if (caseUser != null) {
+            User user = UserRepository.instance().findUser( caseUser );
+            String salu = user.salutation().get() != null ? user.salutation().get() : "";
+            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+            Email email = new SimpleEmail();
+            email.setCharset( "ISO-8859-1" );
+            email.addTo( user.email().get() )
+                    .setSubject( i18n.get( "emailSubject") )
+                    .setMsg( i18n.get( "email", header, liste.name().get() ) );
+            EmailService.instance().send( email );
+        }
+
         
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
@@ -245,10 +272,12 @@ public class EntsorgungCaseAction
             extends FormContainer {
 
         private IFormFieldListener          fieldListener;
+        
+        private Composite                   body;
 
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
-            Composite body = formSite.getPageBody();
+            body = formSite.getPageBody();
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_NAME ) )
@@ -326,6 +355,11 @@ public class EntsorgungCaseAction
             });
             activateStatusAdapter( site.getPanelSite() );
         }
+
+        public Composite getBody() {
+            return body;
+        }
+        
     }
 
 }

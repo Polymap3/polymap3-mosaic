@@ -51,7 +51,6 @@ import org.polymap.rhei.um.ui.UsersTableViewer;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.ui.entsorgung.EntsorgungCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -101,10 +100,10 @@ public class NutzerAnVorgangCaseAction
             if (mcase.get().getNatures().contains( AzvPlugin.CASE_NUTZER )) {
                 return false;
             }
-            else if (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG )
-                    && mcase.get().get( EntsorgungCaseAction.KEY_NAME ) != null) {
-                return false;
-            }
+//            else if (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG )
+//                    && mcase.get().get( EntsorgungCaseAction.KEY_NAME ) != null) {
+//                return false;
+//            }
             
             
             this.site = _site;
@@ -203,7 +202,7 @@ public class NutzerAnVorgangCaseAction
         if (umuser != null) {
             PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
             personForm.createContents( personSection );
-            personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
+            personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
             personForm.setEnabled( false );
         }
         else {

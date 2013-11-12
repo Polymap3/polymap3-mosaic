@@ -14,16 +14,24 @@
  */
 package org.polymap.azv.ui.schachtschein;
 
+import java.beans.PropertyChangeEvent;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.jface.action.IAction;
 
+import org.polymap.core.runtime.Polymap;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
+
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model2.MosaicCase2;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
@@ -64,24 +72,58 @@ public class SchachtscheinAntragCaseAction
 
     
     @Override
+    public void dispose() {
+        EventManager.instance().unsubscribe( this );
+    }
+
+
+    @Override
     public void fillAction( @SuppressWarnings("hiding") IAction action ) {
         this.action = action;
-        updateEnabled();        
+        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+            action.setText( null );
+            action.setImageDescriptor( null );
+        }
+        else {
+            updateEnabled();
+        
+            EventManager.instance().subscribe( this );
+        }
     }
     
     
     @Override
     public void submit() throws Exception {
-        repo.get().newCaseEvent( (MosaicCase2)mcase.get(), "Beantragt", "", "Beantragt" );
+        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
+        
+        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+            public void run() {
+                site.getContext().closePanel();
+            }
+        });
+
     }
 
 
     protected void updateEnabled() {
-        action.setEnabled( false );
-        if (mcase.get().getName().length() > 0 && mcase.get().get( "point" ) != null) {
-            action.setEnabled( true );
+        action.setEnabled( true );
+        action.setToolTipText( "Antrag abschicken" );
+        if (mcase.get().getName().length() == 0) {
+            action.setToolTipText( "Bitte geben Sie der Maßnahme eine Bezeichnung" );
+            action.setEnabled( false );
+        }            
+        else if (mcase.get().get( "point" ) == null) {
+            action.setToolTipText( "Bitte geben Sie der Maßnahme einen Ort" );
+            action.setEnabled( false );
         }
     }
-    
+
+
+    /** Currently send be {@link DrawFeatureMapAction}. */
+    @EventHandler(display=true)
+    protected void mcaseChanged( PropertyChangeEvent ev ) {
+        updateEnabled();
+    }
+
 }

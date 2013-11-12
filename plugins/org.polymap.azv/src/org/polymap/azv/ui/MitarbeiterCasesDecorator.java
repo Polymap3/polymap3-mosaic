@@ -18,11 +18,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
 
-import org.polymap.azv.AzvPermissions;
+import org.polymap.rhei.batik.Context;
+import org.polymap.rhei.batik.ContextProperty;
+
 import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
+import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casestable.CasesTableViewer;
 import org.polymap.mosaic.ui.casestable.CasesViewerFilter;
 import org.polymap.mosaic.ui.casestable.ICasesViewerDecorator;
@@ -37,20 +43,36 @@ public class MitarbeiterCasesDecorator
 
     private static Log log = LogFactory.getLog( MitarbeiterCasesDecorator.class );
 
+    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+    private ContextProperty<MosaicRepository2> repo;
+
     
     @Override
     public void fill( CasesTableViewer viewer, FeatureTableFilterBar filterBar ) {
         // filter permissions
         viewer.addFilter( new CasesViewerFilter() {
-            private AzvPermissions permissions = AzvPermissions.instance();
+            private String username = Polymap.instance().getUser().getName();
+            
             protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
-                return permissions.check( mcase );
+                // Admin: alle
+                if (SecurityUtils.isAdmin()) {
+                    return true;
+                }
+                // Mitarbeiter: beantragt 
+                else if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
+                    return MosaicCaseEvents.contains( mcase.getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT );
+                }
+                // Kunde: meine Vorgänge
+                else {
+                    String caseuser = mcase.get( NutzerAnVorgangCaseAction.KEY_USER );
+                    return caseuser != null && caseuser.equals( username );
+                }
             }
         });
 
-        // filterBar
-        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
-            
+//        // filterBar
+//        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
+//            
 //            // Registrierungen
 //            filterBar.add( new CasesViewerFilter() {
 //                protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
@@ -69,7 +91,7 @@ public class MitarbeiterCasesDecorator
 //            })
 //            .setIcon( BatikPlugin.instance().imageForName( "resources/icons/filter.png" ) )
 //            .setTooltip( "Vollständige Anträge anzeigen" );
-        }
+//        }
     }
     
 }

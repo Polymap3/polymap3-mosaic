@@ -17,15 +17,12 @@ package org.polymap.azv.ui.entsorgung;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.collect.Iterables;
-
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.rhei.batik.BatikPlugin;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.ui.casestable.CasesTableViewer;
 import org.polymap.mosaic.ui.casestable.CasesViewerFilter;
 import org.polymap.mosaic.ui.casestable.ICasesViewerDecorator;
@@ -58,13 +55,11 @@ public class EntsorgungCasesDecorator
             });
         }
 
-        viewer.addFilter( new CasesViewerFilter() {
-            protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
-                // schon terminierte ausfiltern
-                return !EntsorgungCasesDecorator.this.apply( _viewer, mcase )
-                        || Iterables.find( mcase.getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_TERMINIERT ), null) == null;
-            }
-        });
+//        viewer.addFilter( new CasesViewerFilter() {
+//            protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
+//                return !EntsorgungCasesDecorator.this.apply( _viewer, mcase );
+//            }
+//        });
     }
     
     
