@@ -19,8 +19,6 @@ import java.util.Collection;
 import java.util.List;
 
 import java.beans.PropertyChangeEvent;
-import java.io.IOException;
-
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.FeatureType;
@@ -92,10 +90,11 @@ public class CasesTableViewer
         addColumn( new DateColumn() );
         
         try {
-            // supress deferred loading to fix "empty table" issue
+            // suppress deferred loading to fix "empty table" issue
             setContent( fs.getFeatures( this.baseFilter ) );
+            //setContent( fs, baseFilter );
         }
-        catch (IOException e) {
+        catch (Exception e) {
             throw new RuntimeException( e );
         }
         
@@ -120,6 +119,16 @@ public class CasesTableViewer
     }
 
     
+    public FeatureSource getFs() {
+        return fs;
+    }
+
+    
+    public FeatureType getSchema() {
+        return schema;
+    }
+
+
     public IMosaicCase entity( String fid ) {
         return repo.entity( MosaicCase2.class, fid );    
     }

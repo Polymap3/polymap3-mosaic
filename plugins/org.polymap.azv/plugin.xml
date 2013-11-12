@@ -27,6 +27,10 @@
             class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftPanel"
             id="org.polymap.azv.LeitungsauskunftPanel">
       </panel>
+      <panel
+            class="org.polymap.azv.ui.AllCasesPanel"
+            id="org.polymap.azv.AllCasesPanel">
+      </panel>
    </extension>
    <extension
          point="org.polymap.core.model.moduleAssemblers">
