@@ -136,12 +136,17 @@ public class MapViewer {
         OpenLayersMap map = olwidget.getMap();
         
         //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
-        //WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
         WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
         topo.setIsBaseLayer( true );
         topo.setTileSize( new Size( 600, 600 ) );
         topo.setBuffer( 0 );
         map.addLayer( topo );
+
+        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
+        osm.setIsBaseLayer( true );
+        osm.setTileSize( new Size( 600, 600 ) );
+        osm.setBuffer( 0 );
+        map.addLayer( osm );
 
         WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
         dop.setIsBaseLayer( true );
