@@ -53,6 +53,11 @@
                   rel="stylesheet"
                   type="text/css">
             </link>
+            <link
+                  href="azvres/css/azv.css"
+                  rel="stylesheet"
+                  type="text/css">
+            </link>
          </additionalHeaders>
       </branding>
    </extension>
