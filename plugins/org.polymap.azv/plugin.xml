@@ -53,6 +53,11 @@
                   rel="stylesheet"
                   type="text/css">
             </link>
+            <link
+                  href="azvres/css/azv.css"
+                  rel="stylesheet"
+                  type="text/css">
+            </link>
          </additionalHeaders>
       </branding>
    </extension>
@@ -130,6 +135,7 @@
             caseStateChange="false"
             class="org.polymap.azv.ui.entsorgung.EntsorgungFreigabeCaseAction"
             description="Diesem Antrag einen Termin zuordnen"
+            icon="resources/icons/calendar.png"
             id="org.polymap.azv.EntsorgungFreigabeCaseAction"
             name="Termin zuordnen"
             priority="120">

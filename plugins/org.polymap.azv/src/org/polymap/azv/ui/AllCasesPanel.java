@@ -46,6 +46,7 @@ import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
+import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.DefaultPanel;
@@ -128,7 +129,7 @@ public class AllCasesPanel
     protected void userLoggedIn( PropertyAccessEvent ev ) {
         if (SecurityUtils.isAdmin()) {
             getSite().setTitle( i18n.get( "title" ) );
-            //getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
+            getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/drawer.png" ) );
         }
     }
 
