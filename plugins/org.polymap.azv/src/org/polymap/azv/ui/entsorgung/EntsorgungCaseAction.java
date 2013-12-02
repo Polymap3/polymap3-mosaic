@@ -19,6 +19,7 @@ import java.util.TreeMap;
 
 import org.opengis.feature.Property;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.mail.Email;
@@ -287,7 +288,9 @@ public class EntsorgungCaseAction
             Query<Entsorgungsliste> listen = AzvRepository.instance().findEntities( Entsorgungsliste.class, null, 0, -1 );
             Map<String,String> picklistMap = new TreeMap();
             for (Entsorgungsliste liste : listen) {
-                picklistMap.put( liste.name().get(), liste.id() );
+                if (BooleanUtils.isNotTrue( liste.geschlossen().get() )) {
+                    picklistMap.put( liste.name().get(), liste.id() );
+                }
             }
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_LISTE ) )
                     .setLabel( "Termin" ).setToolTipText( "Gewünschter Termin der Entsorgung" )

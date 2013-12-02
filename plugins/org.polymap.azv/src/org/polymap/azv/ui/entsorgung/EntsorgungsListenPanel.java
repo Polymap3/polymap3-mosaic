@@ -30,6 +30,7 @@ import org.opengis.filter.Filter;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.prefs.CsvPreference;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -148,7 +149,7 @@ public class EntsorgungsListenPanel
 
             site.addToolbarAction( new Action( "Neue Liste" ) {
                 public void run() {
-                    final InputDialog dialog = new InputDialog( BatikApplication.getShellToParentOn(), 
+                    final InputDialog dialog = new InputDialog( BatikApplication.shellToParentOn(), 
                             "Eine neue Liste anlegen", "Name der Entsorgungsliste", "...", null );
                     dialog.setBlockOnOpen( true );
                     if (dialog.open() == Window.OK) {
@@ -228,6 +229,7 @@ public class EntsorgungsListenPanel
         // toolbar
         Composite toolbar = getSite().toolkit().createComposite( section.getBody() );
         toolbar.setLayout( RowLayoutFactory.fillDefaults().spacing( 5 ).create() );
+        
         Button btn = getSite().toolkit().createButton( toolbar, "Drucken und abschließen" );
         btn.setToolTipText( "Diese Liste als Excel/CSV exportieren und archivieren" );
         btn.addSelectionListener( new SelectionAdapter() {
@@ -235,6 +237,23 @@ public class EntsorgungsListenPanel
                 exportListe( liste, section );
             }
         });
+
+        btn = getSite().toolkit().createButton( toolbar, "Geschlossen", SWT.CHECK );
+        btn.setToolTipText( "Diese Liste ist geschlossen und kann nicht bebucht werden" );
+        btn.setSelection( BooleanUtils.isTrue( liste.geschlossen().get() ) );
+        btn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent ev ) {
+                try {
+                    liste.geschlossen().set( ((Button)ev.getSource()).getSelection() );
+                    azvRepo.commitChanges();
+                }
+                catch (Exception e) {
+                    //azvRepo.revertChanges();
+                    BatikApplication.handleError( "Liste konnte nicht geändert werden.", e );
+                }
+            }
+        });
+        
 //        btn = getSite().toolkit().createButton( toolbar, "Liste löschen" );
 //        btn.setToolTipText( "Diese Liste komplett löschen" );
 //        btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );

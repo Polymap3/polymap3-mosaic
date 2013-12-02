@@ -48,6 +48,10 @@ public interface Entsorgungsliste
     
     @Optional
     @UseDefaults
+    Property<Boolean>           geschlossen();
+    
+    @Optional
+    @UseDefaults
     Property<Collection<String>> mcaseIds();
 
 }
