@@ -150,9 +150,9 @@ public class MosaicRepository2
             documentsRoot = fsManager.resolveFile( rootUri );
             documentsRoot.createFolder();
             documentsNameMapper = new SimpleFilesystemMapper();
-            for (FileObject child : documentsRoot.getChildren()) {
-                log.info( "DOCUMENTS: " + child );
-            }
+//            for (FileObject child : documentsRoot.getChildren()) {
+//                log.info( "DOCUMENTS: " + child );
+//            }
 
 //            // IService and IGeoResource for MosaicCase/Event
 //            service = new RServiceImpl( RServiceExtension.toURL( "Mosaic" ), null ) {

@@ -63,10 +63,7 @@ import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
-import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.LoginPanel;
@@ -143,12 +140,10 @@ public class UsersTablePanel
     
     @Override
     public void createContents( Composite parent ) {
-        IPanelSection contents = tk.createPanelSection( parent, null );
-        contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
-                .addConstraint( new MaxWidthConstraint( 800, 1 ) );
+        Composite contents = parent;
 
         // table area
-        Composite tableArea = tk.createComposite( contents.getBody(), SWT.BORDER );
+        Composite tableArea = tk.createComposite( contents, SWT.BORDER );
         tableArea.setLayout( FormLayoutFactory.defaults().create() );
         viewer = new UsersTableViewer( tableArea, umrepo.find( User.class, null ), SWT.NONE );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 500 ).create() );
@@ -164,7 +159,7 @@ public class UsersTablePanel
         });
         
         // form area
-        formArea = tk.createComposite( contents.getBody() );
+        formArea = tk.createComposite( contents );
         tk.createLabel( formArea, "Wählen Sie einen Nutzer in der Tabelle." );
     }
 

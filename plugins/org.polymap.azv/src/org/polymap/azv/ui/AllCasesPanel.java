@@ -139,11 +139,11 @@ public class AllCasesPanel
         int panelHeight = panelBody.getParent().getSize().y;
         log.info( "panelHeight: " + panelHeight );
         contents = getSite().toolkit().createComposite( panelBody );
-        contents.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 10 ).create() );
+        contents.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         //Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
         casesViewer = new CasesTableViewer( contents, repo.get(), Filter.INCLUDE, SWT.NONE );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( panelHeight-65 )/*.width( 300 )*/.create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( panelHeight-75 )/*.width( 300 )*/.create() );
         
         casesViewer.addColumn( new UserColumn( casesViewer ) );
 

@@ -85,7 +85,7 @@ public class CasesTableViewer
         schema = fs.getSchema();
         addColumn( new StatusColumn() );
         PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "name" ) );
-        addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 4, 120 ) );
+        addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 2, 120 ) );
         addColumn( new NatureColumn() );
         addColumn( new DateColumn() );
         
@@ -224,7 +224,7 @@ public class CasesTableViewer
 
         public DateColumn() {
             super( schema.getDescriptor( new NameImpl( "name" ) ) );
-            setWeight( 2, 90 );
+            setWeight( 2, 120 );
             setHeader( "Angelegt am" );
             setAlign( SWT.RIGHT );
             setLabelProvider( new ColumnLabelProvider() {
@@ -247,7 +247,7 @@ public class CasesTableViewer
 
         public NatureColumn() {
             super( schema.getDescriptor( new NameImpl( "name" ) ) );
-            setWeight( 2, 140 );
+            setWeight( 2, 120 );
             setHeader( "Art" );
             setLabelProvider( new ColumnLabelProvider() {
                 @Override

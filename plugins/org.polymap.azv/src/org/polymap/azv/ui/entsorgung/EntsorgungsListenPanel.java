@@ -79,8 +79,6 @@ import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
-import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.ui.LoginPanel;
 
@@ -121,7 +119,7 @@ public class EntsorgungsListenPanel
     
     private AzvRepository                       azvRepo = AzvRepository.instance();
 
-    private IPanelSection                       contents;
+    private Composite                           contents;
 
     private List<CasesTableViewer>              casesViewers = new ArrayList();
 
@@ -161,8 +159,8 @@ public class EntsorgungsListenPanel
                                 }
                             });
                             azvRepo.commitChanges();
-                            createListenSection( contents.getBody(), liste );
-                            contents.getBody().layout();
+                            createListenSection( contents, liste );
+                            contents.layout();
                         }
                         catch (Exception e) {
                             BatikApplication.handleError( "Die neue Liste konnte nicht angelegt werden.", e );
@@ -195,13 +193,10 @@ public class EntsorgungsListenPanel
     
     @Override
     public void createContents( Composite parent ) {
-        contents = getSite().toolkit().createPanelSection( parent, null );
-        contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
-                .addConstraint( new MaxWidthConstraint( 800, 1 ) );
-        
+        contents = parent;
         Query<Entsorgungsliste> listen = azvRepo.findEntities( Entsorgungsliste.class, null, 0, 100 );
         for (Entsorgungsliste liste : listen) {
-            createListenSection( contents.getBody(), liste );
+            createListenSection( contents, liste );
         }
         
         panelListener = new Object() {

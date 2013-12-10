@@ -111,6 +111,7 @@ public class LeitungsauskunftPanel
         //body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
         //body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 20 ).create() );
 
+        panelBody.setLayout( new FillLayout() );
         ((FillLayout)panelBody.getLayout()).marginHeight = 10;
         ((FillLayout)panelBody.getLayout()).marginWidth = 10;
         

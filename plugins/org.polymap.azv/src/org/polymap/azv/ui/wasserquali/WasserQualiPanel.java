@@ -61,7 +61,6 @@ import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.app.FormContainer;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
-import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.FormFieldEvent;
@@ -132,21 +131,7 @@ public class WasserQualiPanel
 
     @Override
     public void createContents( Composite parent ) {
-        IPanelSection contents = getSite().toolkit().createPanelSection( parent, null );
-        contents.addConstraint( new MinWidthConstraint( 300, 1 ) )
-                .addConstraint( new MaxWidthConstraint( 800, 1 ) );
-        body = contents.getBody();
-        //body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
-        //body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 20 ).create() );
-
-//        resultSection = getSite().toolkit().createPanelSection( body, "Ergebnis" );
-//        resultSection.addConstraint( new MinWidthConstraint( 500, 1 ) )
-//                .addConstraint( new MaxWidthConstraint( 800, 1 ) )
-//                .addConstraint( new PriorityConstraint( 1000 ) );
-//        resultSection.getBody().setLayout( FormLayoutFactory.defaults().create() );
-//        getSite().toolkit().createLabel( resultSection.getBody(), "Bitte geben Sie einen Adresse ein." )
-//                .setLayoutData( FormDataFactory.filled().width( 500 ).create() );
-
+        body = parent;
         createWelcomeSection( body );
         createAddressSection( body );
         createMapSection( body );
@@ -159,18 +144,16 @@ public class WasserQualiPanel
                 //.addConstraint( new MaxWidthConstraint( 800, 1 ) )
                 .addConstraint( new PriorityConstraint( 10 ) );
         
-        section.getBody().setLayout( FormLayoutFactory.defaults().create() );
-        getSite().toolkit().createFlowText( section.getBody(), i18n.get( "welcomeTxt" ) )
-                .setLayoutData( FormDataFactory.filled().width( 500 ).create() );
+        getSite().toolkit().createFlowText( section.getBody(), i18n.get( "welcomeTxt" ) );
     }
 
 
     protected void createAddressSection( Composite parent ) {
         IPanelSection section = getSite().toolkit().createPanelSection( parent, "Adresse eingeben" );
-        section.addConstraint( new MinWidthConstraint( 300, 1 ) )
-                //.addConstraint( new MaxWidthConstraint( 800, 1 ) )
-                .addConstraint( new PriorityConstraint( 0 ) );
-        section.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).create() );
+//        section.addConstraint( new MinWidthConstraint( 300, 1 ) )
+//                //.addConstraint( new MaxWidthConstraint( 800, 1 ) )
+//                .addConstraint( new PriorityConstraint( 0 ) );
+        section.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).columns( 1, 1 ).create() );
 
         try {
             ILayer layer = ProjectRepository.instance().visit( new LayerVisitor() {
@@ -201,8 +184,7 @@ public class WasserQualiPanel
     
     protected void createMapSection( Composite parent ) {
         IPanelSection section = getSite().toolkit().createPanelSection( parent, null );
-        section.addConstraint( new MinWidthConstraint( 500, 1 ) )
-                //.addConstraint( new MaxWidthConstraint( 800, 1 ) )
+        section.addConstraint( new MinWidthConstraint( 300, 1 ) )
                 .addConstraint( new PriorityConstraint( 10 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().create() );
 
@@ -234,12 +216,11 @@ public class WasserQualiPanel
     protected void showResult( SimpleFeature address ) throws Exception {
         if (resultParent == null) {
             IPanelSection resultSection = getSite().toolkit().createPanelSection( body, "Ihre Wasserqualität" );
-            resultSection.addConstraint( new MinWidthConstraint( 500, 1 ) )
-                    .addConstraint( new MaxWidthConstraint( 800, 1 ) )
-                    .addConstraint( new PriorityConstraint( 1000 ) );
+            resultSection.addConstraint( new MinWidthConstraint( 300, 1 ) )
+                    .addConstraint( new PriorityConstraint( 10 ) );
             resultParent = resultSection.getBody();
             getSite().toolkit().createLabel( resultSection.getBody(), "Bitte geben Sie einen Adresse ein." )
-                    .setLayoutData( FormDataFactory.filled().width( 500 ).create() );
+                    .setLayoutData( FormDataFactory.filled().width( 300 ).create() );
         }        
         for (Control child : resultParent.getChildren()) {
             child.dispose();

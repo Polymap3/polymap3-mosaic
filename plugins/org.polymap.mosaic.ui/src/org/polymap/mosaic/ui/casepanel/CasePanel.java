@@ -183,6 +183,8 @@ public class CasePanel
         // create action area
         FillLayout fill = new FillLayout( SWT.HORIZONTAL );
         fill.spacing = fill.marginWidth = fill.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        fill.marginWidth /= 2;
+        fill.spacing /= 2;
         actionSection.setLayout( fill );
         if (holder != null) {
             try {

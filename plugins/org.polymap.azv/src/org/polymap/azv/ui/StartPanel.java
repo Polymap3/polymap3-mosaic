@@ -69,10 +69,8 @@ import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.ConstraintData;
-import org.polymap.rhei.batik.toolkit.ILayoutContainer;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
@@ -129,7 +127,7 @@ public class StartPanel
 
     private List<Control>                   actionBtns = new ArrayList();
 
-    private IPanelSection                   contents;
+    private Composite                       contents;
 
     private IPanelSection                   loginSection, casesSection, welcomeSection;
 
@@ -173,17 +171,17 @@ public class StartPanel
     
     @Override
     public void createContents( Composite parent ) {
-        contents = tk.createPanelSection( parent, null );
-        contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
-                .addConstraint( new MaxWidthConstraint( 1000, 1 ) );
+        contents = parent;
+//        contents = tk.createPanelSection( parent, null );
+//        contents.addConstraint( new MinWidthConstraint( 400, 1 ) )
+//                .addConstraint( new MaxWidthConstraint( 1000, 1 ) );
         
         createWelcomeSection( contents );
-        welcomeSection.getControl().setLayoutData( new ConstraintData( 
-                new PriorityConstraint( 100 ), new MinWidthConstraint( 300, 1 ) ) );
+        welcomeSection.addConstraint( 
+                new PriorityConstraint( 100 ), new MinWidthConstraint( 300, 1 ) );
         
         createLoginSection( contents );
-        loginSection.getControl().setLayoutData( new ConstraintData( 
-                new PriorityConstraint( 8 ) ) );
+        loginSection.addConstraint( new PriorityConstraint( 8 ) );
         
         createActionsSection( contents );
         
@@ -206,13 +204,13 @@ public class StartPanel
     }
     
     
-    protected void createWelcomeSection( ILayoutContainer parent ) {
+    protected void createWelcomeSection( Composite parent ) {
         welcomeSection = tk.createPanelSection( parent, i18n.get( "welcomeTitle" ) );
         tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) );
     }
 
     
-    protected void createLoginSection( ILayoutContainer parent ) {
+    protected void createLoginSection( Composite parent ) {
         loginSection = tk.createPanelSection( parent, i18n.get( "loginTitle" ) );
         loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
         
@@ -222,7 +220,13 @@ public class StartPanel
                 if (super.login( name, passwd )) {
                     loginSection.dispose();
                     createCasesSection( contents );
-                    contents.getBody().layout( true );
+                    
+                    // user -> show closed cases
+                    if (!(SecurityUtils.isAdmin() || SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ))) {
+                        createClosedCasesSection( contents );
+                    }
+                    
+                    contents.layout( true );
                     getSite().layout( true );
                 
                     // adjust context: username and preferences
@@ -271,11 +275,11 @@ public class StartPanel
     }
 
     
-    protected void createCasesSection( IPanelSection parent ) {
+    protected void createCasesSection( Composite parent ) {
         casesSection = tk.createPanelSection( parent, "Aktuelle Vorgänge" );
-        casesSection.getControl().setLayoutData( new ConstraintData( 
+        casesSection.addConstraint( 
                 new PriorityConstraint( 5 ), 
-                new MinWidthConstraint( 500, 1 ) ) );
+                new MinWidthConstraint( 400, 1 ) );
                 //, new MaxWidthConstraint( 1000, 1 ) ) );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
@@ -313,11 +317,47 @@ public class StartPanel
 //            }
 //        }
     }
+
     
+    protected void createClosedCasesSection( Composite parent ) {
+        casesSection = tk.createPanelSection( parent, "Bearbeitete Vorgänge" );
+        casesSection.getControl().setLayoutData( new ConstraintData( 
+                new PriorityConstraint( 5 ), 
+                new MinWidthConstraint( 400, 1 ) ) );
+                //, new MaxWidthConstraint( 1000, 1 ) ) );
+        casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
+        
+        Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
+        casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).width( 300 ).create() );
+        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
+            public void doubleClick( DoubleClickEvent ev ) {
+                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                log.info( "CASE: " + sel );
+                mcase.set( sel );
+                getContext().openPanel( CasePanel.ID );
+            }
+        });
+
+        // filterBar
+        FeatureTableFilterBar filterBar = new FeatureTableFilterBar( casesViewer, casesSection.getBody() );
+        filterBar.getControl().setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).right( 50 ).create() );
+        
+        // decorate viewer
+        for (ICasesViewerDecorator deco : casesViewerDecorators) {
+            deco.fill( casesViewer, filterBar );
+        }
+        
+//        // searchField
+//        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), casesViewer.propertyNames() );
+//        Composite searchCtrl = searchField.getControl();
+//        searchCtrl.setLayoutData( FormDataFactory.filled()
+//                .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+    }
     
-    protected IPanelSection createActionsSection( ILayoutContainer parent ) {
+    protected IPanelSection createActionsSection( Composite parent ) {
         IPanelSection section = tk.createPanelSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );
-        section.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 0 ) ) );
+        section.addConstraint( new PriorityConstraint( 0 ) );
         Composite body = section.getBody();
 
         actionBtns.add( createActionButton( body, "Wasserqualität", 
