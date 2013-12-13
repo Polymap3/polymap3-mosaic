@@ -132,27 +132,26 @@ public class WasserQualiPanel
     @Override
     public void createContents( Composite parent ) {
         body = parent;
-        createWelcomeSection( body );
-        createAddressSection( body );
-        createMapSection( body );
+        createWelcomeSection( body ).addConstraint( 
+                AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 10 ) );
+        
+        createAddressSection( body ).addConstraint( 
+                AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 5 ) );
+
+        createMapSection( body ).addConstraint( 
+                AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 3 ) );
     }
 
     
-    protected void createWelcomeSection( Composite parent ) {
+    protected IPanelSection createWelcomeSection( Composite parent ) {
         IPanelSection section = getSite().toolkit().createPanelSection( parent, "Wie gut ist mein Wasser?" );
-        section.addConstraint( new MinWidthConstraint( 300, 1 ) )
-                //.addConstraint( new MaxWidthConstraint( 800, 1 ) )
-                .addConstraint( new PriorityConstraint( 10 ) );
-        
         getSite().toolkit().createFlowText( section.getBody(), i18n.get( "welcomeTxt" ) );
+        return section;
     }
 
 
-    protected void createAddressSection( Composite parent ) {
+    protected IPanelSection createAddressSection( Composite parent ) {
         IPanelSection section = getSite().toolkit().createPanelSection( parent, "Adresse eingeben" );
-//        section.addConstraint( new MinWidthConstraint( 300, 1 ) )
-//                //.addConstraint( new MaxWidthConstraint( 800, 1 ) )
-//                .addConstraint( new PriorityConstraint( 0 ) );
         section.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).columns( 1, 1 ).create() );
 
         try {
@@ -179,13 +178,12 @@ public class WasserQualiPanel
         catch (Exception e) {
             throw new RuntimeException( e );
         }
+        return section;
     }
     
     
-    protected void createMapSection( Composite parent ) {
+    protected IPanelSection createMapSection( Composite parent ) {
         IPanelSection section = getSite().toolkit().createPanelSection( parent, null );
-        section.addConstraint( new MinWidthConstraint( 300, 1 ) )
-                .addConstraint( new PriorityConstraint( 10 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().create() );
 
         mapViewer = new MapViewer();
@@ -210,14 +208,15 @@ public class WasserQualiPanel
         styleMap.setIntentStyle( "default", standard );
         vectorLayer.setStyleMap( styleMap );
         mapViewer.getMap().addLayer( vectorLayer );
+        return section;
     }
 
     
     protected void showResult( SimpleFeature address ) throws Exception {
         if (resultParent == null) {
             IPanelSection resultSection = getSite().toolkit().createPanelSection( body, "Ihre Wasserqualität" );
-            resultSection.addConstraint( new MinWidthConstraint( 300, 1 ) )
-                    .addConstraint( new PriorityConstraint( 10 ) );
+            resultSection.addConstraint( 
+                    AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 4 ) );
             resultParent = resultSection.getBody();
             getSite().toolkit().createLabel( resultSection.getBody(), "Bitte geben Sie einen Adresse ein." )
                     .setLayoutData( FormDataFactory.filled().width( 300 ).create() );

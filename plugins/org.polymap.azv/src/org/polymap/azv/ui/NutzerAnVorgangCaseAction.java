@@ -196,7 +196,7 @@ public class NutzerAnVorgangCaseAction
     @Override
     public void fillContentArea( Composite parent ) {
         personSection = site.toolkit().createPanelSection( parent, "Kundendaten" );
-        personSection.addConstraint( new PriorityConstraint( 1 ) );
+        personSection.addConstraint( new PriorityConstraint( 1 ), AzvPlugin.MIN_COLUMN_WIDTH );
         personSection.getBody().setLayout( new FillLayout() );
         
         if (umuser != null) {

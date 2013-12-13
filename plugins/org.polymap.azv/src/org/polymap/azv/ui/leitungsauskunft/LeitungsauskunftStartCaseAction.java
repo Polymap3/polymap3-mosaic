@@ -222,7 +222,7 @@ public class LeitungsauskunftStartCaseAction
     @Override
     public void fillContentArea( Composite parent ) {
         section = site.toolkit().createPanelSection( parent, "Daten" );
-        section.addConstraint( new PriorityConstraint( 10 ) );
+        section.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
         section.getBody().setLayout( new FillLayout() );
 
         if (mcase.get().getName().length() > 0) {

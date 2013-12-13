@@ -77,8 +77,8 @@ import org.polymap.rhei.batik.PanelChangeEvent;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.app.BatikApplication;
-import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.ui.LoginPanel;
 
@@ -218,7 +218,8 @@ public class EntsorgungsListenPanel
     
     protected void createListenSection( final Composite parent, final Entsorgungsliste liste ) {
         final IPanelSection section = getSite().toolkit().createPanelSection( parent, "Liste: " + liste.name().get() );
-        section.getControl().setLayoutData( new ConstraintData( new PriorityConstraint( 5 ) ) );
+        int prio = (int)liste.angelegtAm().get().getTime();
+        section.addConstraint( new PriorityConstraint( prio ), AzvPlugin.MIN_COLUMN_WIDTH );
         section.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         // toolbar

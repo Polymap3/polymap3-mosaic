@@ -26,6 +26,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+
 /**
  *
  *
@@ -62,7 +64,8 @@ public class AzvPlugin
 
     public static final String      EVENT_TYPE_BEANTRAGT = "Beantragt";
 //    public static final String      EVENT_TYPE_TERMINIERT = "Terminiert";
-    
+
+    public static final MinWidthConstraint MIN_COLUMN_WIDTH = new MinWidthConstraint( 420, 1 );
 
     private static AzvPlugin        instance;
 

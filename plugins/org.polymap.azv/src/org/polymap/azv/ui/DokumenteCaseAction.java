@@ -167,7 +167,7 @@ public class DokumenteCaseAction
     @Override
     public void fillContentArea( Composite parent ) {
         section = site.toolkit().createPanelSection( parent, "Dokumente" );
-        section.addConstraint( new PriorityConstraint( 1 ) );
+        section.addConstraint( new PriorityConstraint( 5 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().create() );
         
         if (Iterables.isEmpty( repo.get().documents( mcase.get() ) )) {

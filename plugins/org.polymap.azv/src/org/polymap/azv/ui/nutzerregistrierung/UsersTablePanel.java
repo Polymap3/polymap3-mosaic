@@ -63,7 +63,10 @@ import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.LoginPanel;
@@ -144,6 +147,8 @@ public class UsersTablePanel
 
         // table area
         Composite tableArea = tk.createComposite( contents, SWT.BORDER );
+        tableArea.setLayoutData( new ConstraintData( 
+                new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH ) );
         tableArea.setLayout( FormLayoutFactory.defaults().create() );
         viewer = new UsersTableViewer( tableArea, umrepo.find( User.class, null ), SWT.NONE );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 500 ).create() );

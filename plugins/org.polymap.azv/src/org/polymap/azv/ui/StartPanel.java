@@ -33,6 +33,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -55,6 +56,7 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.security.UserPrincipal;
+import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
@@ -172,18 +174,16 @@ public class StartPanel
     @Override
     public void createContents( Composite parent ) {
         contents = parent;
-//        contents = tk.createPanelSection( parent, null );
-//        contents.addConstraint( new MinWidthConstraint( 400, 1 ) )
-//                .addConstraint( new MaxWidthConstraint( 1000, 1 ) );
         
-        createWelcomeSection( contents );
-        welcomeSection.addConstraint( 
-                new PriorityConstraint( 100 ), new MinWidthConstraint( 300, 1 ) );
+        MinWidthConstraint minWidth = AzvPlugin.MIN_COLUMN_WIDTH;
+        createLoginSection( contents )
+                .addConstraint( new PriorityConstraint( 10 ) );
+
+        createWelcomeSection( contents )
+                .addConstraint( new PriorityConstraint( 100 ), minWidth );
         
-        createLoginSection( contents );
-        loginSection.addConstraint( new PriorityConstraint( 8 ) );
-        
-        createActionsSection( contents );
+        createActionsSection( contents )
+                .addConstraint( new PriorityConstraint( 0 ) );
         
         // listen to PropertyAccessEvent
         EventManager.instance().subscribe( this, new EventFilter<PropertyAccessEvent>() {
@@ -204,15 +204,20 @@ public class StartPanel
     }
     
     
-    protected void createWelcomeSection( Composite parent ) {
+    protected IPanelSection createWelcomeSection( Composite parent ) {
         welcomeSection = tk.createPanelSection( parent, i18n.get( "welcomeTitle" ) );
+        welcomeSection.getControl().setData( "title", "welcome" );
+        welcomeSection.getBody().setLayout( new FillLayout() );
         tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) );
+        return welcomeSection;
     }
 
     
-    protected void createLoginSection( Composite parent ) {
+    protected IPanelSection createLoginSection( Composite parent ) {
         loginSection = tk.createPanelSection( parent, i18n.get( "loginTitle" ) );
+        loginSection.getControl().setData( "title", "login" );
         loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
+        loginSection.getBody().setLayout( new FillLayout() );
         
         LoginForm loginForm = new LoginPanel.LoginForm( getContext(), getSite(), user ) {
             @Override
@@ -221,10 +226,10 @@ public class StartPanel
                     loginSection.dispose();
                     createCasesSection( contents );
                     
-                    // user -> show closed cases
-                    if (!(SecurityUtils.isAdmin() || SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ))) {
-                        createClosedCasesSection( contents );
-                    }
+//                    // user -> show closed cases
+//                    if (!(SecurityUtils.isAdmin() || SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ))) {
+//                        createClosedCasesSection( contents );
+//                    }
                     
                     contents.layout( true );
                     getSite().layout( true );
@@ -271,7 +276,7 @@ public class StartPanel
 //                }
 //            }
 //        }
-
+        return loginSection;
     }
 
     
@@ -357,8 +362,9 @@ public class StartPanel
     
     protected IPanelSection createActionsSection( Composite parent ) {
         IPanelSection section = tk.createPanelSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );
-        section.addConstraint( new PriorityConstraint( 0 ) );
+        section.getControl().setData( "title", "actions" );
         Composite body = section.getBody();
+        body.setLayout( ColumnLayoutFactory.defaults().columns( 1, 2 ).spacing( 10 ).create() );
 
         actionBtns.add( createActionButton( body, "Wasserqualität", 
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
