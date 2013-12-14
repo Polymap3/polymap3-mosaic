@@ -175,13 +175,12 @@ public class StartPanel
     public void createContents( Composite parent ) {
         contents = parent;
         
-        MinWidthConstraint minWidth = AzvPlugin.MIN_COLUMN_WIDTH;
-        createLoginSection( contents )
-                .addConstraint( new PriorityConstraint( 10 ) );
-
         createWelcomeSection( contents )
-                .addConstraint( new PriorityConstraint( 100 ), minWidth );
-        
+                .addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
+
+        createLoginSection( contents )
+                .addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
+
         createActionsSection( contents )
                 .addConstraint( new PriorityConstraint( 0 ) );
         
