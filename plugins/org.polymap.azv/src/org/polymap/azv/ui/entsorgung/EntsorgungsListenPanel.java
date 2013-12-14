@@ -219,7 +219,7 @@ public class EntsorgungsListenPanel
     protected void createListenSection( final Composite parent, final Entsorgungsliste liste ) {
         final IPanelSection section = getSite().toolkit().createPanelSection( parent, "Liste: " + liste.name().get() );
         int prio = (int)liste.angelegtAm().get().getTime();
-        section.addConstraint( new PriorityConstraint( prio ), AzvPlugin.MIN_COLUMN_WIDTH );
+        section.addConstraint( new PriorityConstraint( prio ), new MinWidthConstraint( 500, 1 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         // toolbar
