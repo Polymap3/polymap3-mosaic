@@ -61,7 +61,6 @@ import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.app.FormContainer;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldLabel;
@@ -246,7 +245,6 @@ public class WasserQualiPanel
 
         // result form
         resultParent.setLayout( ColumnLayoutFactory.defaults().create() );
-//        getSite().toolkit().createFlowText( resultParent, "**Ihre Wasserqualität**" );
         if (results.isEmpty()) {
             getSite().toolkit().createLabel( resultParent, "An diesem Ort liegen keine Daten vor." );
         }
@@ -256,8 +254,10 @@ public class WasserQualiPanel
             form.createContents( getSite().toolkit().createComposite( resultParent ) );
             results.close( it );
         }
-        resultParent.layout();
         body.layout();
+        getSite().layout( true );
+//        resultParent.layout();
+//        body.layout();
         
         // map
         vectorLayer.destroyFeatures();
@@ -290,11 +290,7 @@ public class WasserQualiPanel
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).columns( 1, 1 ).create() );
 
             SimpleFeatureType schema = feature.getFeatureType();
-            int count = 0;
             for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {
-//                if (++count >= 4) {
-//                    break;
-//                }
                 if (Geometry.class.isAssignableFrom( descriptor.getType().getBinding() )) {
                     // skip
                 }
@@ -371,8 +367,6 @@ public class WasserQualiPanel
         }
 
         protected SimpleFeature findAddress() {
-            Timer timer = new Timer();
-
             List<Filter> props = new ArrayList();
             for (String propName : new String[] {"strasse", "nummer", "plz", "ort"}) {
                 props.add( ff.equals( ff.property( propName ), ff.literal( search.getAttribute( propName ) ) ) );

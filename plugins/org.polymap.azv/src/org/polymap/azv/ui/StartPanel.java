@@ -386,13 +386,23 @@ public class StartPanel
                 getContext().openPanel( CasePanel.ID );
             }
         }));
-        actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
-                "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
-                BatikPlugin.instance().imageForName( "resources/icons/letters.png" ),
-                null,  //AzvPlugin.ROLE_DIENSTBARKEITEN,
+        actionBtns.add( createActionButton( body, "Schachtschein", 
+                "Antrag für einen Schachtschein",
+                BatikPlugin.instance().imageForName( "resources/icons/letter.png" ),
+                AzvPlugin.ROLE_SCHACHTSCHEIN,
                 new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e ) {
-                getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) );
+            public void widgetSelected( SelectionEvent ev ) {
+                try {
+                    // create new case; commit/rollback inside CaseAction
+                    IMosaicCase newCase = repo.get().newCase( "", "" );
+                    newCase.addNature( AzvPlugin.CASE_SCHACHTSCHEIN );
+                    //newCase.put( KEY_USER, user.get().username().get() );
+                    mcase.set( newCase );
+                    getContext().openPanel( CasePanel.ID );
+                }
+                catch (Exception e) {
+                    BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                }
             }
         }));
         actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
@@ -411,23 +421,13 @@ public class StartPanel
                 }
             }
         }));
-        actionBtns.add( createActionButton( body, "Schachtschein", 
-                "Antrag für einen Schachtschein",
-                BatikPlugin.instance().imageForName( "resources/icons/letter.png" ),
-                AzvPlugin.ROLE_SCHACHTSCHEIN,
+        actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
+                "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
+                BatikPlugin.instance().imageForName( "resources/icons/letters.png" ),
+                null,  //AzvPlugin.ROLE_DIENSTBARKEITEN,
                 new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                try {
-                    // create new case; commit/rollback inside CaseAction
-                    IMosaicCase newCase = repo.get().newCase( "", "" );
-                    newCase.addNature( AzvPlugin.CASE_SCHACHTSCHEIN );
-                    //newCase.put( KEY_USER, user.get().username().get() );
-                    mcase.set( newCase );
-                    getContext().openPanel( CasePanel.ID );
-                }
-                catch (Exception e) {
-                    BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
-                }
+            public void widgetSelected( SelectionEvent e ) {
+                getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) );
             }
         }));
         actionBtns.add( createActionButton( body, "Leitungsauskunft", 
