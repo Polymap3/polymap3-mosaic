@@ -133,6 +133,15 @@
       </caseAction>
       <caseAction
             caseStateChange="false"
+            class="org.polymap.azv.ui.entsorgung.EntsorgungStornoCaseAction"
+            description="Diesen Antrag stornieren"
+            icon="resources/icons/close.png"
+            id="org.polymap.azv.EntsorgungStornoCaseAction"
+            name="Entsorgung stornieren"
+            priority="100">
+      </caseAction>
+      <caseAction
+            caseStateChange="false"
             class="org.polymap.azv.ui.entsorgung.EntsorgungFreigabeCaseAction"
             description="Diesem Antrag einen Termin zuordnen"
             icon="resources/icons/calendar.png"

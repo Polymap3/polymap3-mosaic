@@ -92,6 +92,7 @@ public class EntsorgungCaseAction
     
     public static final String              KEY_LISTE = "liste";
     public static final String              KEY_NAME = "name";
+    public static final String              KEY_KUNDENNUMMER = "kundennummer";
     public static final String              KEY_BEMERKUNG = "bemerkung";
     public static final String              KEY_STREET = "street";
     public static final String              KEY_NUMBER = "number";
@@ -163,7 +164,6 @@ public class EntsorgungCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        //status.put( "Entsorgung", "[Geben Sie einen Adresse an]", 10 );
         status.put( "Vorgang", "Entsorgung", 10 );
         status.put( "Name", mcase.get().get( KEY_NAME ), 5 );
 
@@ -190,9 +190,10 @@ public class EntsorgungCaseAction
             form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).columns( 1, 1 ).create() );
             form.setEnabled( false );
 
-            IPanelSection sep = site.toolkit().createPanelSection( parent, null );
+            IPanelSection sep = site.toolkit().createPanelSection( parent, "Status" );
             sep.addConstraint( new PriorityConstraint( 0 ) );
             sep.getBody().setLayout( new FillLayout() );
+            site.toolkit().createFlowText( sep.getBody(), i18n.get( "dataTxt" ) );
         }
     }
 
@@ -285,6 +286,10 @@ public class EntsorgungCaseAction
                     .setLabel( "Name" ).setToolTipText( "Ihr Name" )
                     .setValidator( new NotNullValidator() ).create().setFocus();
 
+            new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_KUNDENNUMMER ) )
+                    .setLabel( "Kundennummer" ).setToolTipText( "Ihre Kundennummer (siehe letzte Rechnung)" )
+                    .create();
+
             Query<Entsorgungsliste> listen = AzvRepository.instance().findEntities( Entsorgungsliste.class, null, 0, -1 );
             Map<String,String> picklistMap = new TreeMap();
             for (Entsorgungsliste liste : listen) {
@@ -338,7 +343,9 @@ public class EntsorgungCaseAction
                     site.setValid( formSite.isValid() );
                     
                     if (ev.getFieldName().equals( KEY_LISTE )) {
-                        caseStatus.put( "Termin", ev.getNewValue().toString() );
+                        String id = ev.getNewValue();
+                        Entsorgungsliste liste = AzvRepository.instance().findEntity( Entsorgungsliste.class, id );
+                        caseStatus.put( "Termin", liste.name().get() );
                     }
                     else if (ev.getFieldName().equals( KEY_NAME )) {
                         caseStatus.put( "Name", ev.getNewValue().toString() );
