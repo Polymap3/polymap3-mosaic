@@ -109,7 +109,7 @@ public class KarteCaseAction
     public void fillContentArea( Composite parent ) {
         // section
         IPanelSection mapSection = site.toolkit().createPanelSection( parent, "Ort" );
-        mapSection.addConstraint( new PriorityConstraint( 10 ) );
+        mapSection.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
         Composite body = mapSection.getBody();
         body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
 

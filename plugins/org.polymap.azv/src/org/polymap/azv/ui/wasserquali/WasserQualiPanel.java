@@ -61,6 +61,8 @@ import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.app.FormContainer;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldLabel;
@@ -102,8 +104,6 @@ public class WasserQualiPanel
 
     private SimpleFeature               search;
 
-//    private IPanelSection               resultSection;
-
     private Composite                   body;
 
     private PipelineFeatureSource       resultFs;
@@ -111,6 +111,8 @@ public class WasserQualiPanel
     private VectorLayer                 vectorLayer;
 
     private Composite                   resultParent;
+
+    private IPanelSection addressSection;
 
 
     @Override
@@ -150,8 +152,8 @@ public class WasserQualiPanel
 
 
     protected IPanelSection createAddressSection( Composite parent ) {
-        IPanelSection section = getSite().toolkit().createPanelSection( parent, "Adresse eingeben" );
-        section.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).columns( 1, 1 ).create() );
+        addressSection = getSite().toolkit().createPanelSection( parent, "Adresse eingeben" );
+        addressSection.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).columns( 1, 1 ).create() );
 
         try {
             ILayer layer = ProjectRepository.instance().visit( new LayerVisitor() {
@@ -170,14 +172,14 @@ public class WasserQualiPanel
             search.setAttribute( "plz", "01234" );
             
             AddressForm form = new AddressForm();
-            form.createContents( getSite().toolkit().createComposite( section.getBody() ) );
+            form.createContents( getSite().toolkit().createComposite( addressSection.getBody() ) );
             
             //resultParent = getSite().toolkit().createComposite( section.getBody() );
         }
         catch (Exception e) {
             throw new RuntimeException( e );
         }
-        return section;
+        return addressSection;
     }
     
     
@@ -214,8 +216,9 @@ public class WasserQualiPanel
     protected void showResult( SimpleFeature address ) throws Exception {
         if (resultParent == null) {
             IPanelSection resultSection = getSite().toolkit().createPanelSection( body, "Ihre Wasserqualität" );
-            resultSection.addConstraint( 
-                    AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 4 ) );
+            resultSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH, 
+                    new PriorityConstraint( 4 ), 
+                    new NeighborhoodConstraint( addressSection.getControl(), Neighborhood.BOTTOM, 1 ) );
             resultParent = resultSection.getBody();
             getSite().toolkit().createLabel( resultSection.getBody(), "Bitte geben Sie einen Adresse ein." )
                     .setLayoutData( FormDataFactory.filled().width( 300 ).create() );
@@ -254,10 +257,9 @@ public class WasserQualiPanel
             form.createContents( getSite().toolkit().createComposite( resultParent ) );
             results.close( it );
         }
+        resultParent.layout();
         body.layout();
         getSite().layout( true );
-//        resultParent.layout();
-//        body.layout();
         
         // map
         vectorLayer.destroyFeatures();
