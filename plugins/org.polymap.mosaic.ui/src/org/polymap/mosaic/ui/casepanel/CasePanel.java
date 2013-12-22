@@ -308,39 +308,6 @@ public class CasePanel
         if (holder.btn != null) {
             holder.btn.setSelection( true );
         }
-
-//        if (holder.showSubmitButton) {
-//            discardBtn = tk.createButton( toolbarSection, null, SWT.PUSH );
-//            discardBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );
-//            discardBtn.setLayoutData( FormDataFactory.filled().left( -1 ).create() );
-//            discardBtn.setToolTipText( "Änderungen verwerfen" );
-//            discardBtn.setImage( BatikPlugin.instance().imageForName( "resources/icons/close.png" ) );
-//            discardBtn.addSelectionListener( new SelectionAdapter() {
-//                public void widgetSelected( SelectionEvent ev ) {
-//                    discardActiveAction();
-//                }
-//            });
-//
-//            submitBtn = tk.createButton( toolbarSection, null, SWT.PUSH );
-//            submitBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
-//            submitBtn.setLayoutData( FormDataFactory.filled().left( -1 ).right( discardBtn ).create() );
-//            submitBtn.setToolTipText( "Aktion abschließen und Änderungen übernehmen" );
-//            submitBtn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
-//            submitBtn.addSelectionListener( new SelectionAdapter() {
-//                public void widgetSelected( SelectionEvent ev ) {
-//                    submitActiveAction();
-//                }
-//            });
-//            submitBtn.setEnabled( true );
-//            discardBtn.setEnabled( true );
-//            for (CaseActionHolder elm : caseActions) {
-//                if (elm != holder && elm.btn != null) {
-//                    elm.btn.setEnabled( false );
-//                }
-//            }
-//            toolbarSection.layout();
-//        }
-
         updateActionSection( holder );
         holder.updateEnabled();
     }
@@ -355,16 +322,6 @@ public class CasePanel
             }
             activeAction = null;
             updateActionSection( null );
-//            if (submitBtn != null) {
-//                submitBtn.dispose();
-//                discardBtn.dispose();
-//                submitBtn = discardBtn = null;
-//            }
-//            for (CaseActionHolder elm : caseActions) {
-//                if (elm.btn != null) {
-//                    elm.btn.setEnabled( true );
-//                }
-//            }
         }
         catch (Exception e) {
             BatikApplication.handleError( "Die Änderungen konnten nicht korrekt übernommen werden.", e );
@@ -380,16 +337,6 @@ public class CasePanel
         }
         activeAction = null;
         updateActionSection( null );
-//        if (submitBtn != null) {
-//            submitBtn.dispose();
-//            discardBtn.dispose();
-//            submitBtn = discardBtn = null;
-//        }
-//        for (CaseActionHolder elm : caseActions) {
-//            if (elm.btn != null) {
-//                elm.btn.setEnabled( true );
-//            }
-//        }
     }
     
     
@@ -511,6 +458,16 @@ public class CasePanel
                     return;
                 }
             }
+        }
+
+        @Override
+        public void submit() {
+            submitActiveAction();
+        }
+
+        @Override
+        public void discard() {
+            discardActiveAction();
         }
 
         @Override

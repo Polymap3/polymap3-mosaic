@@ -26,13 +26,14 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.rwt.widgets.ExternalBrowser;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -46,6 +47,7 @@ import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 import org.polymap.core.ui.SelectionAdapter;
@@ -54,12 +56,14 @@ import org.polymap.core.ui.upload.Upload;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -90,15 +94,13 @@ public class DokumenteCaseAction
 
     private ICaseActionSite                 site;
 
-    private IPanelSection                   personSection;
-
     private TableViewer                     viewer;
-
-//    private SetModel                        model;
 
     private Display                         display;
 
-    private IPanelSection section;
+    private IPanelSection                   section;
+
+    private Composite                       formContainer;
 
     
     @Override
@@ -111,6 +113,16 @@ public class DokumenteCaseAction
 
 
     @Override
+    public void fillAction( IAction action ) {
+        String caseStatus = mcase.get().getStatus();
+        if (caseStatus.equals( IMosaicCaseEvent.TYPE_CLOSED )) {
+            action.setText( null );
+            action.setImageDescriptor( null );
+        }
+    }
+
+    
+    @Override
     public void createContents( Composite parent ) {
         site.setShowSubmitDiscardButtons( false );
         FillLayout playout = (FillLayout)parent.getLayout();
@@ -119,48 +131,59 @@ public class DokumenteCaseAction
 
         site.toolkit().createFlowText( parent , i18n.get( "welcomeText" ) );
 
-        Composite formContainer = site.toolkit().createComposite( parent );
-        formContainer.setLayout( FormLayoutFactory.defaults().margins( 40 ).create() );
+        formContainer = site.toolkit().createComposite( parent );
+        formContainer.setLayout( ColumnLayoutFactory.defaults().margins( 40, 20 ).spacing( 10 ).create() );
         
         Upload upload = new Upload( formContainer, SWT.NONE );
-        upload.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
         upload.setHandler( this );
         display = Polymap.getSessionDisplay();
     }
 
     
     @Override
-    public void uploadStarted( String name, String contentType, InputStream in )
-            throws Exception {
+    public void uploadStarted( String name, String contentType, InputStream in ) throws Exception {
         log.info( "received: " + name );
         IMosaicDocument doc = repo.get().newDocument( mcase.get(), name );
         OutputStream out = null;
         try {
             IOUtils.copy( in, out = doc.getOutputStream() );
+            
+//          repo.get().newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
+//          ", Typ: " + doc.getContentType() +
+//          ", Größe: " + doc.getSize(), "Dokument angelegt"  );
+            repo.get().commitChanges();
+
+            display.asyncExec( new Runnable() {
+                public void run() {
+                    // success message
+                    site.toolkit().createFlowText( formContainer, i18n.get( "successText" ) );
+                    site.toolkit().createButton( formContainer, i18n.get( "closeBtn") )
+                        .addSelectionListener( new org.eclipse.swt.events.SelectionAdapter() {
+                            public void widgetSelected( SelectionEvent e ) {
+                                site.discard();
+                            }
+                        });
+                    formContainer.layout();
+
+                    // update viewer
+                    if (viewer != null) {
+                        viewer.refresh();
+                    }
+                    else {
+                        createViewer();
+                    }
+                }
+            });
+            
+            
         }
         catch (Exception e) {
-            throw new RuntimeException( e );
+            BatikApplication.handleError( "Datei konnte nicht vollständig hochgeladen werden.", e );
         }
         finally {
             IOUtils.closeQuietly( in );
             IOUtils.closeQuietly( out );
-        }
-
-//        repo.get().newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
-//                ", Typ: " + doc.getContentType() +
-//                ", Größe: " + doc.getSize(), "Dokument angelegt"  );
-        repo.get().commitChanges();
-        
-        display.asyncExec( new Runnable() {
-            public void run() {
-                if (viewer != null) {
-                    viewer.refresh();
-                }
-                else {
-                    createViewer();
-                }
-            }
-        });
+        }        
     }
 
 

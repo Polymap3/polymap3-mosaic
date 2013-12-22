@@ -60,6 +60,19 @@ public interface ICaseActionSite {
     public void activateCaseAction( String actionId );
     
     /**
+     * Programmatically trigger submit this action. The same action as the UI element
+     * created by {@link #createSubmit(Composite, String)} would trigger. This also
+     * closes the action area.
+     */
+    public void submit();
+    
+    /**
+     * Programmatically triggers discard this action. This closes the action area
+     * without any further oparation.
+     */
+    public void discard();
+    
+    /**
      * Listener for {@link CaseActionEvent} events.
      *
      * @param annotated The {@link EventHandler annotated} listener. 
