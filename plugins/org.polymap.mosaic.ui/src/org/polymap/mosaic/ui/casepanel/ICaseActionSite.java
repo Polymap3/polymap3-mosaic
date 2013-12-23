@@ -42,8 +42,20 @@ public interface ICaseActionSite {
      */
     public void setShowSubmitDiscardButtons( boolean show );
     
+    /**
+     * Signals that the content of the controls created by {@link ICaseAction#createContents(Composite)}
+     * is 'dirty'. That is, there is something to save.
+     *
+     * @param dirty
+     */
     public void setDirty( boolean dirty );
     
+    /**
+     * Signals that the content of the controls created by {@link ICaseAction#createContents(Composite)}
+     * is valid. This enables the submit button.
+     *
+     * @param dirty
+     */
     public void setValid( boolean valid );
     
     public String getActionId();

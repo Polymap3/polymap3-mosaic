@@ -341,6 +341,7 @@ public class EntsorgungCaseAction
                         return;
                     }
                     site.setValid( formSite.isValid() );
+                    site.setDirty( formSite.isDirty() );
                     
                     if (ev.getFieldName().equals( KEY_LISTE )) {
                         String id = ev.getNewValue();

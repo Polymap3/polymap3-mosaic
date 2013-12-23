@@ -265,11 +265,14 @@ public class SchachtscheinStartCaseAction
 
             // field listener
             formSite.addFieldListener( fieldListener = new IFormFieldListener() {
-                public void fieldChange( FormFieldEvent ev ) {
-                    
+                public void fieldChange( FormFieldEvent ev ) {                    
+                    if (ev.getEventCode() != VALUE_CHANGE) {
+                        return;
+                    }
+                    site.setDirty( formSite.isDirty() );
                     site.setValid( formSite.isValid() );
                     
-//                    if (ev.getEventCode() == VALUE_CHANGE && ev.getFieldName().equals( "name" )) {
+//                    if (ev.getFieldName().equals( "name" )) {
 //                        caseStatus.put( "Vorgang", (String)ev.getNewValue() );
 //                    }
                 }

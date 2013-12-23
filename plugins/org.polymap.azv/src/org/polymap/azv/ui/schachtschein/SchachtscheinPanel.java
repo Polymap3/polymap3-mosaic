@@ -85,7 +85,7 @@ public class SchachtscheinPanel
 
     private OpenLayersWidget                olwidget;
 
-    public Button submitBtn;
+    public Button                           submitBtn;
     
 
     @Override
