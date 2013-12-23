@@ -40,8 +40,6 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.rwt.lifecycle.WidgetUtil;
 
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
@@ -65,7 +63,6 @@ import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
@@ -150,15 +147,11 @@ public class UsersTablePanel
         tableArea.setLayoutData( new ConstraintData( 
                 new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH ) );
         tableArea.setLayout( FormLayoutFactory.defaults().create() );
+        
         viewer = new UsersTableViewer( tableArea, umrepo.find( User.class, null ), SWT.NONE );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 500 ).create() );
         viewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
-                updateUserSection( viewer.getSelectedUser() );
-            }
-        });
-        viewer.addDoubleClickListener( new IDoubleClickListener() {
-            public void doubleClick( DoubleClickEvent event ) {
                 updateUserSection( viewer.getSelectedUser() );
             }
         });
@@ -173,6 +166,9 @@ public class UsersTablePanel
         formArea.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
         for (Control child : formArea.getChildren()) {
             child.dispose();
+        }
+        if (umuser == null) {
+            return;
         }
 
         final PersonForm personForm = new PersonForm( getSite(), umuser );
@@ -208,7 +204,7 @@ public class UsersTablePanel
                 try {
                     personForm.submit();
                     umrepo.commitChanges();
-                    viewer.refresh();
+                    viewer.refresh( umuser, true, true );
                 }
                 catch (Exception e) {
                     UserRepository.instance().revertChanges();
@@ -223,9 +219,12 @@ public class UsersTablePanel
         deleteBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
+                    viewer.remove( umuser );
+                    for (Control child : formArea.getChildren()) {
+                        child.dispose();
+                    }
                     umrepo.deleteUser( umuser );
                     umrepo.commitChanges();
-                    viewer.refresh();
                 }
                 catch (Exception e) {
                     UserRepository.instance().revertChanges();
@@ -233,7 +232,6 @@ public class UsersTablePanel
                 }
             }
         });
-        
         formArea.getParent().layout( true );
         getSite().layout( true );
     }
