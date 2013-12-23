@@ -254,21 +254,21 @@ public class LeitungsauskunftStartCaseAction
 
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
                     .setLabel( "Bezeichnung" ).setToolTipText( "Bezeichnung der Maßnahme" )
-                    /*.setValidator( new NotEmptyValidator() )*/.create().setFocus();
+                    .setValidator( new NotEmptyValidator() ).create().setFocus();
             
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "description" ) )
                     .setLabel( "Beschreibung" ).setToolTipText( "Beschreibung der Maßnahme" )
-                    .setField( new TextFormField() )/*.setValidator( new NotEmptyValidator() )*/.create()
+                    .setField( new TextFormField() ).setValidator( new NotEmptyValidator() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite street = site.toolkit().createComposite( body );
             new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
-                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
+                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
             new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
+                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
             Composite city = site.toolkit().createComposite( body );
             new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
