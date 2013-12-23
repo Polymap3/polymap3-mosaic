@@ -18,12 +18,11 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Joiner;
 import org.eclipse.jface.action.IAction;
 
-import org.polymap.core.security.SecurityUtils;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -61,7 +60,7 @@ public class EreignisseCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         return mcase.get() != null && repo.get() != null
-                && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA );
+                /*&& SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )*/;
     }
 
 
@@ -81,7 +80,8 @@ public class EreignisseCaseAction
 
     @Override
     public void fillStatus( CaseStatus status ) {
-        status.put( "Vorgang", mcase.get().getName(), 100 );
+        status.put( "Vorgang", mcase.get().getName() 
+                + " (" + Joiner.on( "," ).join( mcase.get().getNatures() ) + ")", 100 );
         //IMosaicCaseEvent created = Iterables.getFirst( mcase.get().getEvents(), null );
         status.put( "Angelegt am", df.format( mcase.get().getCreated() ), 99 );
     }

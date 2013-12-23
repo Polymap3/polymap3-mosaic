@@ -70,7 +70,7 @@ public class CaseStatusViewer
     public void propertyChange( PropertyChangeEvent ev ) {
         StringBuilder buf = new StringBuilder( 1024 );
         for (CaseStatus.Entry entry : status.entries()) {
-            buf.append( buf.length() > 0 ? " | " : "" );
+            buf.append( buf.length() > 0 ? "&#160;&#160;|&#160;&#160;" : "" );
             buf.append( entry.getKey() ).append( ": " ).append( "<strong>" ).append( entry.getValue() ).append( "</strong>" );
         }
         flowText.setText( buf.toString() );

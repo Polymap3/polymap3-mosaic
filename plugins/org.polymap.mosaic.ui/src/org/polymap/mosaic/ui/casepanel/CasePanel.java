@@ -159,8 +159,14 @@ public class CasePanel
 
         // toolbar
         toolbarSection = tk.createComposite( panelBody );
-        toolbarSection.setLayoutData( FormDataFactory.filled().top( statusSection, spacing ).height( 30 ).bottom( -1 ).create() );
         createToolbarSection( toolbarSection );
+        toolbarSection.setLayoutData( toolbarSection.getChildren().length > 0
+                ? FormDataFactory.filled().top( statusSection, spacing ).height( 30 ).bottom( -1 ).create()
+                : FormDataFactory.filled().top( statusSection ).height( 0 ).bottom( -1 ).create() );
+//        if (toolbarSection.getChildren().length == 0) {
+//            toolbarSection.setVisible( false );
+//            toolbarSection.setBackground( Graphics.getColor( 30, 30, 30 ) );
+//        }
         
         // action area
         actionSection = tk.createComposite( panelBody );
@@ -211,6 +217,7 @@ public class CasePanel
             contentSection.setEnabled( true );
         }
         actionSection.getParent().layout( true );
+        getSite().layout( true );
     }
     
     
