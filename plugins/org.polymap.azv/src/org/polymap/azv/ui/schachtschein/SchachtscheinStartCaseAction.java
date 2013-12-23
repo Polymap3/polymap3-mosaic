@@ -48,7 +48,7 @@ import org.polymap.rhei.um.UserRepository;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.ui.NotNullValidator;
+import org.polymap.azv.ui.NotEmptyValidator;
 import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
@@ -174,7 +174,7 @@ public class SchachtscheinStartCaseAction
         formContainer.setLayout( new FillLayout() );
         form = new BasedataForm();
         form.createContents( formContainer );
-        site.setValid( false );
+        site.setSubmitEnabled( false );
         
         site.createSubmit( formContainer, "Übernehmen" );
     }
@@ -237,31 +237,31 @@ public class SchachtscheinStartCaseAction
 
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
                     .setLabel( "Bezeichnung" ).setToolTipText( "Bezeichnung der Maßnahme" )
-                    .setValidator( new NotNullValidator() ).create().setFocus();
+                    .setValidator( new NotEmptyValidator() ).create().setFocus();
             
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "description" ) )
                     .setLabel( "Beschreibung" ).setToolTipText( "Beschreibung der Maßnahme" )
-                    .setField( new TextFormField() ).setValidator( new NotNullValidator() ).create()
+                    .setField( new TextFormField() ).setValidator( new NotEmptyValidator() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite city = site.toolkit().createComposite( body );
 
             new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
+                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
             new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
+                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
             Composite street = site.toolkit().createComposite( body );
             new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
-                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
+                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
             new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() )/*.setValidator( new NotNullValidator() )*/.create();
+                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
             // field listener
             formSite.addFieldListener( fieldListener = new IFormFieldListener() {
@@ -269,8 +269,7 @@ public class SchachtscheinStartCaseAction
                     if (ev.getEventCode() != VALUE_CHANGE) {
                         return;
                     }
-                    site.setDirty( formSite.isDirty() );
-                    site.setValid( formSite.isValid() );
+                    site.setSubmitEnabled( formSite.isDirty() && formSite.isValid() );
                     
 //                    if (ev.getFieldName().equals( "name" )) {
 //                        caseStatus.put( "Vorgang", (String)ev.getNewValue() );

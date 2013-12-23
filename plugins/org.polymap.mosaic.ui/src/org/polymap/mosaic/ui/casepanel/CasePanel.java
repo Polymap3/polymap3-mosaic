@@ -89,8 +89,6 @@ public class CasePanel
 
     private Button                          submitBtn;
 
-    private Button                          discardBtn;
-
     /** The action that currently has an open action section. */ 
     protected CaseActionHolder              activeAction;
 
@@ -368,7 +366,7 @@ public class CasePanel
         public ICaseAction          caseAction;
         public Action               action;
         public Button               btn;
-        protected boolean           valid = true, dirty = true;
+        protected boolean           submitEnabled = true;
         protected boolean           showSubmitButton = true;        
 
         protected CaseActionHolder( CaseActionExtension ext, ICaseAction caseAction ) {
@@ -378,10 +376,7 @@ public class CasePanel
 
         protected void updateEnabled() {
             if (submitBtn != null && !submitBtn.isDisposed()) {
-                submitBtn.setEnabled( dirty && valid );            
-            }
-            if (discardBtn != null && !discardBtn.isDisposed()) {
-                discardBtn.setEnabled( dirty );
+                submitBtn.setEnabled( submitEnabled );            
             }
         }
         
@@ -417,7 +412,7 @@ public class CasePanel
         }
 
         @Override
-        public void setShowSubmitDiscardButtons( boolean show ) {
+        public void setShowSubmitButton( boolean show ) {
             holder.showSubmitButton = show;
 //            if (submitBtn != null && !submitBtn.isDisposed()) {
 //                submitBtn.dispose();
@@ -428,14 +423,8 @@ public class CasePanel
         }
 
         @Override
-        public void setDirty( boolean dirty ) {
-            holder.dirty = dirty;
-            holder.updateEnabled();
-        }
-
-        @Override
-        public void setValid( boolean valid ) {
-            holder.valid = valid;
+        public void setSubmitEnabled( boolean enabled ) {
+            holder.submitEnabled = enabled;
             holder.updateEnabled();
         }
 
@@ -494,7 +483,7 @@ public class CasePanel
                     submitActiveAction();
                 }
             });
-            submitBtn.setEnabled( holder.valid );
+            submitBtn.setEnabled( holder.submitEnabled );
             return submitBtn;
         }
         

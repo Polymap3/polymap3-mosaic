@@ -134,7 +134,7 @@ public class EntsorgungFreigabeCaseAction
         list.setItems( Iterables.toArray( listen.keySet(), String.class ) );
         list.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
-                site.setValid( list.getSelectionCount() > 0 );
+                site.setSubmitEnabled( list.getSelectionCount() > 0 );
             }
         });
         String listeId = mcase.get().get( EntsorgungCaseAction.KEY_LISTE );
@@ -144,7 +144,7 @@ public class EntsorgungFreigabeCaseAction
         }
 
         
-        site.setValid( false );
+        site.setSubmitEnabled( false );
         
         Button submitBtn = site.createSubmit( formContainer, "Termin zuordnen" );
         submitBtn.setLayoutData( FormDataFactory.filled().top( list ).height( 28 ).create() );

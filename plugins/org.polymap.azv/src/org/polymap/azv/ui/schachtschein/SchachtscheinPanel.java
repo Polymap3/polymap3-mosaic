@@ -53,7 +53,7 @@ import org.polymap.rhei.form.IFormEditorPageSite;
 
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Schachtschein;
-import org.polymap.azv.ui.NotNullValidator;
+import org.polymap.azv.ui.NotEmptyValidator;
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
 import org.polymap.openlayers.rap.widget.base_types.Bounds;
 import org.polymap.openlayers.rap.widget.base_types.Projection;
@@ -243,7 +243,7 @@ public class SchachtscheinPanel
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new PropertyAdapter( entity.get().beschreibung() ) )
-                    .setValidator( new NotNullValidator() ).create().setFocus();
+                    .setValidator( new NotEmptyValidator() ).create().setFocus();
             //new FormFieldBuilder( body, new PropertyAdapter( entity.get().antragsteller() ) ).create();
             new FormFieldBuilder( body, new PropertyAdapter( entity.get().startDate() ) )
                     .setLabel( "Beginn" ).setToolTipText( "Geplanter Beginn der Arbeiten" ).create();
@@ -257,11 +257,11 @@ public class SchachtscheinPanel
             Composite plzLine = site.getToolkit().createComposite( body );
             plzLine.setLayout( new FillLayout( SWT.HORIZONTAL ) );
             new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().plz() ) )
-                    .setValidator( new NotNullValidator() ).setLabel( "PLZ/Ort" ).setToolTipText( "Postleitzahl der Baumaßnahme" ).create();
+                    .setValidator( new NotEmptyValidator() ).setLabel( "PLZ/Ort" ).setToolTipText( "Postleitzahl der Baumaßnahme" ).create();
             new FormFieldBuilder( plzLine, new PropertyAdapter( entity.get().ort() ) )
-                    .setValidator( new NotNullValidator() ).setLabel( IFormFieldLabel.NO_LABEL ).setToolTipText( "Ort der Baumaßnahme" ).create();
+                    .setValidator( new NotEmptyValidator() ).setLabel( IFormFieldLabel.NO_LABEL ).setToolTipText( "Ort der Baumaßnahme" ).create();
             new FormFieldBuilder( body, new PropertyAdapter( entity.get().strasse() ) )
-                    .setValidator( new NotNullValidator() ).setLabel( "Strasse" ).setToolTipText( "Adresse der Baumaßnahme" ).create();
+                    .setValidator( new NotEmptyValidator() ).setLabel( "Strasse" ).setToolTipText( "Adresse der Baumaßnahme" ).create();
 
             // submit
             submitBtn = site.getToolkit().createButton( body, "BEANTRAGEN", SWT.PUSH );

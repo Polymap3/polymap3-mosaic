@@ -40,23 +40,12 @@ public interface ICaseActionSite {
      * False specifies that no default submit/discard buttons should
      * be generated.
      */
-    public void setShowSubmitDiscardButtons( boolean show );
+    public void setShowSubmitButton( boolean show );
     
     /**
-     * Signals that the content of the controls created by {@link ICaseAction#createContents(Composite)}
-     * is 'dirty'. That is, there is something to save.
-     *
-     * @param dirty
+     * Sets the status of the submit button.
      */
-    public void setDirty( boolean dirty );
-    
-    /**
-     * Signals that the content of the controls created by {@link ICaseAction#createContents(Composite)}
-     * is valid. This enables the submit button.
-     *
-     * @param dirty
-     */
-    public void setValid( boolean valid );
+    public void setSubmitEnabled( boolean enabled );
     
     public String getActionId();
     

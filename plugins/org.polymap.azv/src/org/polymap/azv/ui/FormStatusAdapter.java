@@ -43,9 +43,8 @@ public class FormStatusAdapter
     }
     
     @Override
-    public void fieldChange( FormFieldEvent ev ) {                    
-        caseSite.setDirty( formSite.isDirty() );
-        caseSite.setValid( formSite.isValid() );
+    public void fieldChange( FormFieldEvent ev ) {
+        caseSite.setSubmitEnabled( formSite.isDirty() && formSite.isValid() );
     }
     
 }

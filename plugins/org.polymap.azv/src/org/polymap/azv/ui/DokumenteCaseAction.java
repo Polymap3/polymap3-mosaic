@@ -124,7 +124,7 @@ public class DokumenteCaseAction
     
     @Override
     public void createContents( Composite parent ) {
-        site.setShowSubmitDiscardButtons( false );
+        site.setShowSubmitButton( false );
         FillLayout playout = (FillLayout)parent.getLayout();
         playout.marginWidth *= 2;      
         playout.spacing *= 2;      

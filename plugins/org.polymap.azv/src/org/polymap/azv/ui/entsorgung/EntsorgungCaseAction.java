@@ -65,7 +65,7 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Entsorgungsliste;
-import org.polymap.azv.ui.NotNullValidator;
+import org.polymap.azv.ui.NotEmptyValidator;
 import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
@@ -220,7 +220,7 @@ public class EntsorgungCaseAction
         formContainer.setLayout( new FillLayout() );
         form = new DataForm();
         form.createContents( formContainer );
-        site.setValid( false );
+        site.setSubmitEnabled( false );
         
         site.createSubmit( formContainer, "Entsorgung beantragen" );
     }
@@ -284,7 +284,7 @@ public class EntsorgungCaseAction
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_NAME ) )
                     .setLabel( "Name" ).setToolTipText( "Ihr Name" )
-                    .setValidator( new NotNullValidator() ).create().setFocus();
+                    .setValidator( new NotEmptyValidator() ).create().setFocus();
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_KUNDENNUMMER ) )
                     .setLabel( "Kundennummer" ).setToolTipText( "Ihre Kundennummer (siehe letzte Rechnung)" )
@@ -300,7 +300,7 @@ public class EntsorgungCaseAction
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_LISTE ) )
                     .setLabel( "Termin" ).setToolTipText( "Gewünschter Termin der Entsorgung" )
                     .setField( new PicklistFormField( picklistMap ) )
-                    .setValidator( new NotNullValidator() ).create();
+                    .setValidator( new NotEmptyValidator() ).create();
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_BEMERKUNG ) )
                     .setLabel( "Bemerkung" ).setToolTipText( "Besondere Hinweise für das Entsorgungsunternehmen" )
@@ -311,23 +311,23 @@ public class EntsorgungCaseAction
             Property prop = new KVPropertyAdapter( mcase.get(), KEY_STREET );
             new FormFieldBuilder( street, prop )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
-                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
+                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
 
             prop = new KVPropertyAdapter( mcase.get(), KEY_NUMBER );
             new FormFieldBuilder( street, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
+                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
 
             Composite city = site.toolkit().createComposite( body );
             prop = new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE );
             new FormFieldBuilder( city, prop )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
+                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
 
             prop = new KVPropertyAdapter( mcase.get(), KEY_CITY );
             new FormFieldBuilder( city, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() ).setValidator( new NotNullValidator() ).create();
+                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
 
             
             // field listener
@@ -340,8 +340,7 @@ public class EntsorgungCaseAction
                     if (ev.getEventCode() != VALUE_CHANGE) {
                         return;
                     }
-                    site.setValid( formSite.isValid() );
-                    site.setDirty( formSite.isDirty() );
+                    site.setSubmitEnabled( formSite.isDirty() && formSite.isValid() );
                     
                     if (ev.getFieldName().equals( KEY_LISTE )) {
                         String id = ev.getNewValue();

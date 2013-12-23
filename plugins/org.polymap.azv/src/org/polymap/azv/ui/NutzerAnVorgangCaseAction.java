@@ -116,7 +116,7 @@ public class NutzerAnVorgangCaseAction
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
                         site.activateCaseAction( site.getActionId() );
-                        site.setValid( false );
+                        site.setSubmitEnabled( false );
                     }
                 });
             }
@@ -160,7 +160,7 @@ public class NutzerAnVorgangCaseAction
         viewer.getControl().setLayoutData( FormDataFactory.filled().bottom( -1 ).height( 240 ).create() );
         viewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
-                site.setValid( !ev.getSelection().isEmpty() );
+                site.setSubmitEnabled( !ev.getSelection().isEmpty() );
             }
         });
         viewer.addDoubleClickListener( new IDoubleClickListener() {
