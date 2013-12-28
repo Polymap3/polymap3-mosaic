@@ -355,7 +355,7 @@ public class WasserQualiPanel
                                     }
                                 }
                                 else {
-                                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, "Diese Adresse existiert nicht." ) );
+                                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert nicht." ) );
                                 }
                             }
                             catch (Exception e) {

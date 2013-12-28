@@ -300,7 +300,7 @@ public class SchachtscheinPanel
                     }
                 }
             });
-            activateStatusAdapter( getSite() );
+//            activateStatusAdapter( getSite() );
         }
     }
 

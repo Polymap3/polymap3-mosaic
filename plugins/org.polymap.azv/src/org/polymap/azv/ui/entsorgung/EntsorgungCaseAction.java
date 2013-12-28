@@ -113,6 +113,8 @@ public class EntsorgungCaseAction
 
     private DataForm                        form;
 
+    private IAction caseAction;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -154,6 +156,7 @@ public class EntsorgungCaseAction
 
     @Override
     public void fillAction( IAction action ) {
+        this.caseAction = action;
         if (Iterables.find( mcase.get().getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_BEANTRAGT ), null) != null) {
             action.setText( null );
             action.setImageDescriptor( null );
@@ -258,12 +261,15 @@ public class EntsorgungCaseAction
             EmailService.instance().send( email );
         }
 
+        // update panel action and status
+        fillStatus( caseStatus );
+        fillAction( caseAction );
         
-        Polymap.getSessionDisplay().asyncExec( new Runnable() {
-            public void run() {
-                site.getContext().closePanel();
-            }
-        });
+//        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+//            public void run() {
+//                site.getContext().closePanel();
+//            }
+//        });
     }
 
 
@@ -363,7 +369,7 @@ public class EntsorgungCaseAction
 //                            street, number, city ) );
                 }
             });
-            activateStatusAdapter( site.getPanelSite() );
+//            activateStatusAdapter( site.getPanelSite() );
         }
 
         public Composite getBody() {
