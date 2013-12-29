@@ -27,6 +27,9 @@ import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
@@ -209,6 +212,7 @@ public class SchachtscheinStartCaseAction
         form = null;
         repo.get().commitChanges();
         
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
         fillStatus( caseStatus );
     }
 
@@ -218,6 +222,15 @@ public class SchachtscheinStartCaseAction
         if (form != null) {
             form.dispose();
             form = null;
+        }
+        // do not left 'empty' CasePanel after close button
+        if (mcase.get().getName().isEmpty()) {
+            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Basisdaten eingegeben. Der Vorgang wurde daher komplett abgebrochen." ) );
+            Polymap.getSessionDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    site.getContext().closePanel();
+                }
+            });
         }
     }
 

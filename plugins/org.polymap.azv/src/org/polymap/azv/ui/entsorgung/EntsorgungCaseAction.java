@@ -38,6 +38,9 @@ import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
@@ -115,6 +118,8 @@ public class EntsorgungCaseAction
 
     private IAction caseAction;
 
+    private Composite contentArea;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -183,6 +188,7 @@ public class EntsorgungCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
+        this.contentArea = parent;
         if (mcase.get().get( KEY_LISTE ) != null) {
             IPanelSection section = site.toolkit().createPanelSection( parent, "Daten" );
             section.addConstraint( new PriorityConstraint( 10 ) );
@@ -264,12 +270,19 @@ public class EntsorgungCaseAction
         // update panel action and status
         fillStatus( caseStatus );
         fillAction( caseAction );
-        
-//        Polymap.getSessionDisplay().asyncExec( new Runnable() {
-//            public void run() {
-//                site.getContext().closePanel();
-//            }
-//        });
+        fillContentArea( contentArea );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Der Antrag wurde entgegen genommen. Sie erhalten eine EMail." ) );
+    }
+
+
+    @Override
+    public void discard() {
+        // do not left 'empty' CasePanel after close button
+        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+            public void run() {
+                site.getContext().closePanel();
+            }
+        });
     }
 
 

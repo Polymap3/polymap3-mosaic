@@ -21,7 +21,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.jface.action.IAction;
 
-import org.polymap.core.runtime.Polymap;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
@@ -96,13 +98,14 @@ public class SchachtscheinAntragCaseAction
     public void submit() throws Exception {
         repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
-        
-        Polymap.getSessionDisplay().asyncExec( new Runnable() {
-            public void run() {
-                site.getContext().closePanel();
-            }
-        });
 
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
+        
+//        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+//            public void run() {
+//                site.getContext().closePanel();
+//            }
+//        });
     }
 
 

@@ -184,18 +184,38 @@ public class CasePanel
         for (Control child : actionSection.getChildren()) {
             child.dispose();
         }
-        // create action area
+        // action area
+        int margins = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        actionSection.setLayout( FormLayoutFactory.defaults().create() );
+        
+        // closeBtn
+        // XXX CSS currently for TOGGLE buttons only
+        Button closeBtn = getSite().toolkit().createButton( actionSection, null, SWT.TOGGLE );
+        closeBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
+        closeBtn.setSelection( true );
+        closeBtn.setToolTipText( "Aktion abbrechen" );
+        closeBtn.setImage( BatikPlugin.instance().imageForName( "resources/icons/cancel-circle.png" ) );
+        closeBtn.setLayoutData( FormDataFactory.filled().left( -1 ).bottom( -1 ).top( 0, 3 ).width( 27 ).create() );
+        closeBtn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent e ) {
+                discardActiveAction();
+            }
+        });
+        
+        // contents Composite
+        Composite contents = getSite().toolkit().createComposite( actionSection );
+        contents.setLayoutData( FormDataFactory.filled().create() );
         FillLayout fill = new FillLayout( SWT.HORIZONTAL );
-        fill.spacing = fill.marginWidth = fill.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        fill.spacing = fill.marginWidth = fill.marginHeight = margins;
         fill.marginWidth /= 2;
         fill.spacing /= 2;
-        actionSection.setLayout( fill );
+        contents.setLayout( fill );
         if (holder != null) {
             try {
                 actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
                 ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 350 );
-                holder.caseAction.createContents( actionSection );
-                if (actionSection.getChildren().length > 0) {
+                holder.caseAction.createContents( contents );
+                if (contents.getChildren().length > 0) {
                     contentSection.setEnabled( false );
                 }
                 // no children -> submit immediatelly

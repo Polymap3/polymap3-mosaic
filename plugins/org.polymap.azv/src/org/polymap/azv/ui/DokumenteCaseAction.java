@@ -26,11 +26,11 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.rwt.widgets.ExternalBrowser;
 
 import org.eclipse.jface.action.IAction;
@@ -42,6 +42,9 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
@@ -156,14 +159,16 @@ public class DokumenteCaseAction
             display.asyncExec( new Runnable() {
                 public void run() {
                     // success message
-                    site.toolkit().createFlowText( formContainer, i18n.get( "successText" ) );
-                    site.toolkit().createButton( formContainer, i18n.get( "closeBtn") )
-                        .addSelectionListener( new org.eclipse.swt.events.SelectionAdapter() {
-                            public void widgetSelected( SelectionEvent e ) {
-                                site.discard();
-                            }
-                        });
-                    formContainer.layout();
+//                    site.toolkit().createFlowText( formContainer, i18n.get( "successText" ) );
+//                    site.toolkit().createButton( formContainer, i18n.get( "closeBtn") )
+//                        .addSelectionListener( new org.eclipse.swt.events.SelectionAdapter() {
+//                            public void widgetSelected( SelectionEvent e ) {
+//                                site.discard();
+//                            }
+//                        });
+//                    formContainer.layout();
+                    site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "successText" ) ) );
+                    site.discard();
 
                     // update viewer
                     if (viewer != null) {
