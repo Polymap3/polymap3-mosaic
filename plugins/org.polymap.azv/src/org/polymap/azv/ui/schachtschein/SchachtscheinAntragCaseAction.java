@@ -24,6 +24,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
@@ -33,9 +34,11 @@ import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
+import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
@@ -61,12 +64,20 @@ public class SchachtscheinAntragCaseAction
 
     private IAction                             action;
 
+    private CaseStatus                          caseStatus;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
+
+            EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+                public boolean apply( PropertyChangeEvent input ) {
+                    return caseStatus != null && input.getSource() == mcase.get();
+                }
+            });
             return true;
         }
         return false;
@@ -78,18 +89,28 @@ public class SchachtscheinAntragCaseAction
         EventManager.instance().unsubscribe( this );
     }
 
+    
+    @Override
+    public void fillStatus( CaseStatus status ) {
+        this.caseStatus = status;
+        if (!mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
+            if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+                status.put( "Status", "Beantragt" );
+            }
+        }
+    }
 
+    
     @Override
     public void fillAction( @SuppressWarnings("hiding") IAction action ) {
         this.action = action;
         if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             action.setText( null );
             action.setImageDescriptor( null );
+            action.setEnabled( false );
         }
         else {
-            updateEnabled();
-        
-            EventManager.instance().subscribe( this );
+            updateAction( null );        
         }
     }
     
@@ -99,17 +120,16 @@ public class SchachtscheinAntragCaseAction
         repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
 
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
+        fillStatus( caseStatus );
+        fillAction( action );
         
-//        Polymap.getSessionDisplay().asyncExec( new Runnable() {
-//            public void run() {
-//                site.getContext().closePanel();
-//            }
-//        });
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
     }
 
 
-    protected void updateEnabled() {
+    /** Currently send be {@link DrawFeatureMapAction}. */
+    @EventHandler(display=true)
+    protected void updateAction( PropertyChangeEvent ev ) {
         action.setEnabled( true );
         action.setToolTipText( "Antrag abschicken" );
         if (mcase.get().getName().length() == 0) {
@@ -120,13 +140,6 @@ public class SchachtscheinAntragCaseAction
             action.setToolTipText( "Bitte geben Sie der Maßnahme einen Ort" );
             action.setEnabled( false );
         }
-    }
-
-
-    /** Currently send be {@link DrawFeatureMapAction}. */
-    @EventHandler(display=true)
-    protected void mcaseChanged( PropertyChangeEvent ev ) {
-        updateEnabled();
     }
 
 }

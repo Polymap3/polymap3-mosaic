@@ -24,7 +24,16 @@ import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Supplier;
+
+import org.eclipse.swt.graphics.Color;
+
+import org.eclipse.rwt.graphics.Graphics;
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.polymap.core.runtime.Lazy;
+import org.polymap.core.runtime.LockedLazyInit;
 
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 
@@ -79,6 +88,24 @@ public class AzvPlugin
 
     private ServiceTracker          httpServiceTracker;
     
+    public Lazy<Color>              discardColor = new LockedLazyInit( new Supplier<Color>() {
+        public Color get() {
+            return Graphics.getColor( 0xd3, 0x25, 0x16 );
+        }
+    });
+
+    public Lazy<Color>              okColor = new LockedLazyInit( new Supplier<Color>() {
+        public Color get() {
+            return Graphics.getColor( 0x6e, 0xb0, 0x2e );
+        }
+    });
+    
+    public Lazy<Color>              openColor = new LockedLazyInit( new Supplier<Color>() {
+        public Color get() {
+            return Graphics.getColor( 0xff, 0xcc, 0x00 );
+        }
+    });
+
 
     @Override
     public void start( BundleContext context ) throws Exception {

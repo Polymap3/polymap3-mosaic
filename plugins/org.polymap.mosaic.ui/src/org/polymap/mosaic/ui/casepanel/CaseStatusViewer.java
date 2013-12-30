@@ -20,6 +20,7 @@ import java.beans.PropertyChangeListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -68,12 +69,29 @@ public class CaseStatusViewer
     @Override
     @EventHandler(display=true)
     public void propertyChange( PropertyChangeEvent ev ) {
-        StringBuilder buf = new StringBuilder( 1024 );
-        for (CaseStatus.Entry entry : status.entries()) {
-            buf.append( buf.length() > 0 ? "&#160;&#160;|&#160;&#160;" : "" );
-            buf.append( entry.getKey() ).append( ": " ).append( "<strong>" ).append( entry.getValue() ).append( "</strong>" );
+        if (status != null) {
+            StringBuilder buf = new StringBuilder( 1024 );
+            for (CaseStatus.Entry entry : status.entries()) {
+                String key = entry.getKey().replace( " ", "&#160;" );
+                String value = entry.getValue().replace( " ", "&#160;" );
+                
+                buf.append( buf.length() > 0 ? "<span style=\"color:#959595;\">&#160;&#160;|&#160; </span>" : "" );
+                buf.append( "<span style=\"color:#959595;\">").append( key ).append( ":</span>&#160;" );
+                
+                buf.append( "<strong>" );
+                Color c = entry.getColor();
+                if (c != null) {
+                    buf.append( "<span style=\"border-radius:2px; padding:0 2px 0 2px; background:rgb(").append( c.getRed() ).append( ',' ).append( c.getGreen() ).append( ',' ).append( c.getBlue() ).append( ");\">" );
+                    buf.append( value );
+                    buf.append( "</span>" );
+                }
+                else {
+                    buf.append( value );
+                }
+                buf.append( "</strong>" );
+            }
+            flowText.setText( buf.toString() );
         }
-        flowText.setText( buf.toString() );
     }
     
 }

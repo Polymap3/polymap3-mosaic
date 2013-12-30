@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.ImmutableSortedSet;
 
+import org.eclipse.swt.graphics.Color;
+
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventManager;
 
@@ -41,18 +43,22 @@ public class CaseStatus {
     
     private Map<String,Entry>           entries = new HashMap();
     
-    
+    /**
+     * 
+     */
     public static class Entry
             implements Comparable<Entry> {
         
         private String      key;
         private String      value;
         private int         priority;
+        private Color       color;
         
-        protected Entry( String key, String value, int priority ) {
+        protected Entry( String key, String value, int priority, Color color ) {
             this.key = key;
             this.value = value;
             this.priority = priority;
+            this.color = color;
         }
         public String getKey() {
             return key;
@@ -60,11 +66,15 @@ public class CaseStatus {
         public String getValue() {
             return value;
         }
+        public Color getColor() {
+            return color;
+        }
         public int compareTo( Entry rhs ) {
             return priority != rhs.priority ? rhs.priority - priority : rhs.hashCode() - hashCode();
         }
     }
     
+
     public void addListener( PropertyChangeListener listener ) {
         EventManager.instance().subscribe( listener, new EventFilter<PropertyChangeEvent>() {
             public boolean apply( PropertyChangeEvent input ) {
@@ -73,42 +83,46 @@ public class CaseStatus {
         });
     }
     
+    
     public boolean removeListener( PropertyChangeListener listener ) {
         return EventManager.instance().unsubscribe( listener );
     }
     
-    public boolean put( String key, String value, int priority ) {
+    
+    public boolean put( String key, String value, int priority, Color color ) {
         value = value != null ? value : "";
         
         Entry found = entries.get( key );
         boolean result;
         if (found != null) {
-            found.priority = priority;
+            found.color = color != null ? color : found.color;
+            found.priority = priority != DEFAULT_PRIORITY ? priority : found.priority;
             found.value = value;
             result = false;
         }
         else {
-            entries.put( key, new Entry( key, value, priority ) );
+            entries.put( key, new Entry( key, value, priority, color ) );
             result = true;
         }
         EventManager.instance().publish( new PropertyChangeEvent( this, key, null, value ) );
-        return result;
+        return result;        
     }
     
-    public boolean put( String key, String value ) {
-        Entry found = entries.get( key );
-        boolean result;
-        if (found != null) {
-            found.value = value;
-            result = false;
-        }
-        else {
-            entries.put( key, new Entry( key, value, DEFAULT_PRIORITY ) );
-            result = true;
-        }
-        EventManager.instance().publish( new PropertyChangeEvent( this, key, null, value ) );
-        return result;
+    
+    public boolean put( String key, String value, int priority ) {
+        return put( key, value, priority, null );
     }
+    
+    
+    public boolean put( String key, String value ) {
+        return put( key, value, DEFAULT_PRIORITY, null );
+    }
+    
+
+    public Entry get( String key ) {
+        return entries.get( key );
+    }
+
     
     /**
      * Sorted entries of this status instance.
@@ -116,6 +130,7 @@ public class CaseStatus {
     public Iterable<Entry> entries() {
         return ImmutableSortedSet.copyOf( entries.values() );
     }
+
 
 //    public Set<String> keys() {
 //    }

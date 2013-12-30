@@ -19,9 +19,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.SimpleEmail;
 
+import com.google.common.collect.Iterables;
+
+import org.eclipse.jface.action.IAction;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.IMessages;
-import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
+
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.um.User;
@@ -34,6 +41,7 @@ import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.Entsorgungsliste;
 import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
@@ -65,6 +73,10 @@ public class EntsorgungStornoCaseAction
     private AzvRepository                   azvRepo = AzvRepository.instance();
 
     private Entsorgungsliste                liste;
+
+    private CaseStatus                      caseStatus;
+
+    private IAction caseAction;
     
     
     @Override
@@ -85,13 +97,31 @@ public class EntsorgungStornoCaseAction
 
     @Override
     public void fillStatus( CaseStatus status ) {
+        this.caseStatus = status;
         if (liste == null || liste.geschlossen().get()) {
             status.put( "Status", "Antrag kann nicht mehr storniert werden." );
-            site.setValid( false );
+            site.setSubmitEnabled( false );
+        }
+        if (mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
+            IMosaicCaseEvent lastEvent = Iterables.getLast( mcase.get().getEvents() );
+            if (lastEvent.getName().contains( "torniert" )) {
+                status.put( "Status", "STORNIERT", -1, AzvPlugin.instance().discardColor.get() );
+            }
         }
     }
 
+    
+    @Override
+    public void fillAction( IAction action ) {
+        this.caseAction = action;
+        if (mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
+            action.setText( null );
+            action.setImageDescriptor( null );
+            action.setEnabled( false );
+        }
+    }
 
+    
     @Override
     public void submit() throws Exception {
         liste.mcaseIds().get().remove( mcase.get().getId() );
@@ -114,11 +144,17 @@ public class EntsorgungStornoCaseAction
             EmailService.instance().send( email );
         }
         
-        Polymap.getSessionDisplay().asyncExec( new Runnable() {
-            public void run() {
-                site.getContext().closePanel();
-            }
-        });
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Der Antrag wurde storniert." ) );
+        
+        // update panel action and status
+        fillStatus( caseStatus );
+        fillAction( caseAction );
+        
+//        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+//            public void run() {
+//                site.getContext().closePanel();
+//            }
+//        });
     }
 
 }

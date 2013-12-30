@@ -245,7 +245,7 @@ public class CasePanel
         FillLayout layout = new FillLayout();
         //layout.marginWidth = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         layout.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
-        layout.marginHeight -= 6;
+        layout.marginHeight -= 10;
         body.setLayout( layout );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_STATUS_SECTION );
 
@@ -308,19 +308,17 @@ public class CasePanel
 
     
     private void fillToolbarBtn( CaseActionHolder holder, IAction action ) {
-        if (action.getText() != null || action.getImageDescriptor() != null) {
-            holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
-            holder.btn.setToolTipText( action.getToolTipText() );
-            holder.btn.setEnabled( action.isEnabled() );
-            ImageDescriptor icon = action.getImageDescriptor();
-            if (icon != null) {
-                holder.btn.setImage( MosaicUiPlugin.getDefault().images().image( icon, icon.toString() ) );
-            }
-            if (holder.ext.isCaseChangeAction()) {
-                holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
-                if (icon == null) {
-                    holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
-                }
+        holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
+        holder.btn.setToolTipText( action.getToolTipText() );
+        holder.btn.setEnabled( action.isEnabled() );
+        ImageDescriptor icon = action.getImageDescriptor();
+        if (icon != null) {
+            holder.btn.setImage( MosaicUiPlugin.getDefault().images().image( icon, icon.toString() ) );
+        }
+        if (holder.ext.isCaseChangeAction()) {
+            holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
+            if (icon == null) {
+                holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
             }
         }
     }

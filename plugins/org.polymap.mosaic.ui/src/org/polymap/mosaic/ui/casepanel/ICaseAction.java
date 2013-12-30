@@ -51,11 +51,11 @@ public interface ICaseAction {
     public void fillAction( IAction action );
 
     /**
-     * Provide content for the status area of the case panel. Priority of the entries
-     * should be 'around' 100. Less important entries should have a priority smaller
-     * than 100.
+     * Provide content for the status area of the case panel. Priority values should
+     * be in the range 0..100. The {@link CaseStatus#DEFAULT_PRIORITY} is 0. Less
+     * important entries have smaller priority.
      * <p/>
-     * Changes to the status object are reflected in the UI.
+     * Changes to the status object are reflected in the UI immediately.
      * 
      * @param status The status object to fill.
      */

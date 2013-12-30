@@ -14,6 +14,8 @@
  */
 package org.polymap.azv.ui.schachtschein;
 
+import java.beans.PropertyChangeEvent;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
@@ -32,12 +34,17 @@ import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.app.FormContainer;
+import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.BeanPropertyAdapter;
 import org.polymap.rhei.field.FormFieldEvent;
 import org.polymap.rhei.field.IFormFieldLabel;
@@ -105,6 +112,12 @@ public class SchachtscheinStartCaseAction
 
     private BasedataForm                        form;
 
+    private IPanelSection                       contentSection;
+
+    private BasedataForm                        contentForm;
+
+    private IAction                             caseAction;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -124,6 +137,13 @@ public class SchachtscheinStartCaseAction
                         site.activateCaseAction( site.getActionId() );
                     }
                 });
+    
+                // update action on status change
+                EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+                    public boolean apply( PropertyChangeEvent input ) {
+                        return caseStatus != null && input.getSource() == mcase.get();
+                    }
+                });
             }
             return true;
         }
@@ -132,10 +152,26 @@ public class SchachtscheinStartCaseAction
 
 
     @Override
+    public void dispose() {
+        EventManager.instance().unsubscribe( this );
+        caseAction = null;
+        caseStatus = null;
+    }
+
+
+    @Override
     public void fillAction( IAction action ) {
+        this.caseAction = action;
+        updateAction( null );
+    }
+
+    
+    @EventHandler(display=true)
+    protected void updateAction( PropertyChangeEvent ev ) {
         if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
-            action.setText( null );
-            action.setImageDescriptor( null );
+            caseAction.setText( null );
+            caseAction.setImageDescriptor( null );
+            caseAction.setEnabled( false );
         }
     }
 
@@ -146,10 +182,8 @@ public class SchachtscheinStartCaseAction
         IMosaicCase mc = mcase.get();
         String id = mcase.get().getId();
         status.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
-        status.put( "Vorgang", mc.getName(), 100 );
-        status.put( "Angelegt am", df.format( mc.getCreated() ), 99 );
-        status.put( "Ort", address( mc ), 0 );
-        status.put( "Beschreibung", mc.getDescription(), -1 );
+        status.put( "Ort", address( mc ), 1 );
+//        status.put( "Beschreibung", mc.getDescription(), 0 );
     }
 
 
@@ -214,6 +248,18 @@ public class SchachtscheinStartCaseAction
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
         fillStatus( caseStatus );
+        
+        if (contentForm != null) {
+            contentForm.reloadEditor();
+        }
+        else {
+            contentSection.getBody().getChildren()[0].dispose();
+            contentForm = new BasedataForm();
+            contentForm.createContents( contentSection.getBody() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            contentForm.setEnabled( false );            
+        }
+
     }
 
 
@@ -235,17 +281,42 @@ public class SchachtscheinStartCaseAction
     }
 
 
+    @Override
+    public void fillContentArea( Composite parent ) {
+        contentSection = site.toolkit().createPanelSection( parent, "Daten" );
+        contentSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
+        contentSection.getBody().setLayout( new FillLayout() );
+
+        if (mcase.get().getName().length() > 0) {
+            contentForm = new BasedataForm();
+            contentForm.createContents( contentSection.getBody() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            contentForm.setEnabled( false );
+        }
+        else {
+            site.toolkit().createLabel( contentSection.getBody(), "Noch keine Daten." );
+        }
+    }
+
+
     /**
      * 
      */
     public class BasedataForm
             extends FormContainer {
 
-        private IFormFieldListener          fieldListener;
+        private IFormFieldListener      fieldListener;
+        
+        private Composite               body;
+
+        
+        public Composite getBody() {
+            return body;
+        }
 
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
-            Composite body = formSite.getPageBody();
+            body = formSite.getPageBody();
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )

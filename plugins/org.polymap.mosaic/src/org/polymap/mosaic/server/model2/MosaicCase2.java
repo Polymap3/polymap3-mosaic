@@ -32,12 +32,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.Point;
 
+import org.polymap.core.model2.Concerns;
 import org.polymap.core.model2.DefaultValue;
 import org.polymap.core.model2.Defaults;
 import org.polymap.core.model2.Description;
 import org.polymap.core.model2.Entity;
 import org.polymap.core.model2.NameInStore;
 import org.polymap.core.model2.Property;
+import org.polymap.core.model2.runtime.event.PropertyChangeSupport;
 import org.polymap.core.model2.store.feature.SRS;
 import org.polymap.core.project.IMap;
 import org.polymap.core.runtime.event.EventManager;
@@ -52,10 +54,10 @@ import org.polymap.mosaic.server.model2.MosaicRepository2.EntityCreator;
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 //@Concerns( LogConcern.class )
-//@Mixins( {TrackableMixin.class} )
 @Description( "Provides meta data of all Mosaic cases in the store" )
 @SRS( "EPSG:4326" )
 @NameInStore( MosaicCase2.FEATURETYPE_NAME )
+@Concerns( {PropertyChangeSupport.class} )
 public class MosaicCase2
         extends Entity
         implements IMosaicCase {

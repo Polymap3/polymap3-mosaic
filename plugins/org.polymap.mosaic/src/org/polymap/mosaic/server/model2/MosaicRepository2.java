@@ -37,6 +37,8 @@ import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 
 import com.google.common.collect.Iterables;
 
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.polymap.core.data.feature.recordstore.LuceneQueryDialect;
 import org.polymap.core.data.feature.recordstore.RDataStore;
 import org.polymap.core.model2.Entity;
@@ -49,6 +51,7 @@ import org.polymap.core.runtime.ConcurrentReferenceHashMap;
 import org.polymap.core.runtime.ConcurrentReferenceHashMap.ReferenceType;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.SessionSingleton;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
 
 import org.polymap.mosaic.server.document.SimpleFilesystemMapper;
@@ -356,7 +359,8 @@ public class MosaicRepository2
         assert mcase != null;
         assert name != null : "Event name must not be null."; 
         assert eventType != null : "Event type must not be null."; 
-        return newEntity( MosaicCaseEvent2.class, null, new EntityCreator<MosaicCaseEvent2>() {
+        
+        MosaicCaseEvent2 result = newEntity( MosaicCaseEvent2.class, null, new EntityCreator<MosaicCaseEvent2>() {
             public void create( MosaicCaseEvent2 prototype ) throws Exception {
                 prototype.name.set( name );
                 prototype.description.set( description );
@@ -366,6 +370,11 @@ public class MosaicRepository2
                 mcase.addEvent( prototype );
             }
         });
+        
+        PropertyChangeEvent ev = new PropertyChangeEvent( mcase, "events", null, null );
+        EventManager.instance().publish( ev );
+        
+        return result;
     }
 
     

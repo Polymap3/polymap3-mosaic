@@ -105,6 +105,8 @@ public class DokumenteCaseAction
 
     private Composite                       formContainer;
 
+    private IAction                         caseAction;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -116,7 +118,14 @@ public class DokumenteCaseAction
 
 
     @Override
+    public void dispose() {
+        caseAction = null;
+    }
+
+
+    @Override
     public void fillAction( IAction action ) {
+        this.caseAction = action;
         String caseStatus = mcase.get().getStatus();
         if (caseStatus.equals( IMosaicCaseEvent.TYPE_CLOSED )) {
             action.setText( null );
@@ -204,6 +213,12 @@ public class DokumenteCaseAction
         else {
             createViewer();
         }
+        
+//        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+//            public boolean apply( PropertyChangeEvent input ) {
+//                return caseAction != null && input.getSource() == mcase.get();
+//            }
+//        });
     }
     
     

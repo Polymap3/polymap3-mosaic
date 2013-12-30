@@ -172,7 +172,6 @@ public class EntsorgungCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        status.put( "Vorgang", "Entsorgung", 10 );
         status.put( "Name", mcase.get().get( KEY_NAME ), 5 );
 
         AzvRepository azvRepo = AzvRepository.instance();

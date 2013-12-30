@@ -14,16 +14,28 @@
  */
 package org.polymap.azv.ui;
 
+import java.util.List;
+
+import java.beans.PropertyChangeEvent;
+
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Joiner;
-import org.eclipse.jface.action.IAction;
+
+import org.eclipse.rwt.graphics.Graphics;
+
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+
+import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.CaseStatus;
@@ -54,6 +66,10 @@ public class EreignisseCaseAction
     private ContextProperty<MosaicRepository2> repo;
 
     private EventsTableViewer               viewer;
+
+    private CaseStatus                      caseStatus;
+
+    private String mcaseStatus;
     
     
     @Override
@@ -66,6 +82,8 @@ public class EreignisseCaseAction
 
     @Override
     public void dispose() {
+        EventManager.instance().unsubscribe( this );
+        caseStatus = null;
         if (viewer != null) {
             viewer.dispose();
             viewer = null;
@@ -74,19 +92,46 @@ public class EreignisseCaseAction
 
 
     @Override
-    public void fillAction( IAction action ) {
-    }
-
-
-    @Override
     public void fillStatus( CaseStatus status ) {
-        status.put( "Vorgang", mcase.get().getName() 
-                + " (" + Joiner.on( "," ).join( mcase.get().getNatures() ) + ")", 100 );
-        //IMosaicCaseEvent created = Iterables.getFirst( mcase.get().getEvents(), null );
-        status.put( "Angelegt am", df.format( mcase.get().getCreated() ), 99 );
+        this.caseStatus = status;
+        updateStatus( null );
+        
+        // listen to changes
+        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+            public boolean apply( PropertyChangeEvent input ) {
+                return caseStatus != null && input.getSource() == mcase.get();
+            }
+        });
     }
 
+    
+    @EventHandler(display=true,delay=1000)
+    protected void updateStatus( List<PropertyChangeEvent> evs ) {
+        @SuppressWarnings("hiding")
+        IMosaicCase mcase = this.mcase.get();
+        site.getPanelSite().setTitle( "Vorgang: " + mcase.getName() );
+        
+        caseStatus.put( "Art", Joiner.on( "," ).join( mcase.getNatures() ), 101, Graphics.getColor( 0xDD, 0xE1, 0xE3 ) );
+        if (mcase.getName() != null && !mcase.getName().isEmpty()) {
+            caseStatus.put( "Bezeichnung", mcase.getName(), 100 );
+        }
+        caseStatus.put( "Angelegt", df.format( mcase.getCreated() ), 99 );
+        
+        // set status field only if mcase status has changed or status field is empty;
+        // don't change if other party has set (before my event arrived)
+        if (!mcase.getStatus().equals( mcaseStatus ) || caseStatus.get( "Status" ) == null) {
+            mcaseStatus = mcase.getStatus();
+            
+            if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcaseStatus )) {
+                caseStatus.put( "Status", "Erledigt", -1, AzvPlugin.instance().okColor.get() );            
+            }
+            else if (IMosaicCaseEvent.TYPE_OPEN.equals( mcaseStatus ) && caseStatus.get( "Status" ) == null) {
+                caseStatus.put( "Status", "Anlegen", -1, AzvPlugin.instance().openColor.get() );
+            }
+        }
+    }
 
+    
 //    @Override
 //    public void fillContentArea( Composite parent ) {
 //        // events table

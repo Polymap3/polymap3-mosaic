@@ -24,7 +24,7 @@ import org.apache.commons.mail.SimpleEmail;
 import org.eclipse.jface.action.IAction;
 
 import org.polymap.core.runtime.IMessages;
-import org.polymap.core.runtime.Polymap;
+import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 
@@ -39,9 +39,11 @@ import org.polymap.azv.Messages;
 import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
+import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
@@ -69,6 +71,8 @@ public class LeitungsauskunftAntragCaseAction
 
     private IAction                             action;
 
+    private CaseStatus                          caseStatus;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -84,20 +88,38 @@ public class LeitungsauskunftAntragCaseAction
     @Override
     public void dispose() {
         EventManager.instance().unsubscribe( this );
+        this.action = null;
+        this.caseStatus = null;
     }
 
 
+    @Override
+    public void fillStatus( CaseStatus status ) {
+        this.caseStatus = status;
+        if (!mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
+            if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+                status.put( "Status", "Beantragt" );
+            }
+        }
+    }
+
+    
     @Override
     public void fillAction( @SuppressWarnings("hiding") IAction action ) {
         this.action = action;
         if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             action.setText( null );
             action.setImageDescriptor( null );
+            action.setEnabled( false );
         }
         else {
             updateEnabled();
         
-            EventManager.instance().subscribe( this );
+            EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+                public boolean apply( PropertyChangeEvent input ) {
+                    return caseStatus != null && input.getSource() == mcase.get();
+                }
+            });
         }
     }
     
@@ -119,11 +141,14 @@ public class LeitungsauskunftAntragCaseAction
                 .setMsg( i18n.get( "email", header ) );
         EmailService.instance().send( email );
         
-        Polymap.getSessionDisplay().asyncExec( new Runnable() {
-            public void run() {
-                site.getContext().closePanel();
-            }
-        });
+        fillAction( action );
+        fillStatus( caseStatus );
+        
+//        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+//            public void run() {
+//                site.getContext().closePanel();
+//            }
+//        });
     }
 
 
@@ -145,6 +170,7 @@ public class LeitungsauskunftAntragCaseAction
     @EventHandler(display=true)
     protected void mcaseChanged( PropertyChangeEvent ev ) {
         updateEnabled();
+        fillStatus( caseStatus );
     }
     
 }

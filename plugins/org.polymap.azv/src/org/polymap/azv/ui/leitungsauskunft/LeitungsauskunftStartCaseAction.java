@@ -14,6 +14,8 @@
  */
 package org.polymap.azv.ui.leitungsauskunft;
 
+import java.beans.PropertyChangeEvent;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
@@ -32,6 +34,9 @@ import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
@@ -96,7 +101,11 @@ public class LeitungsauskunftStartCaseAction
 
     private BasedataForm                        form;
 
-    private IPanelSection section;
+    private IPanelSection                       contentSection;
+
+    private BasedataForm                        contentForm;
+
+    private IAction caseAction;
 
     
     @Override
@@ -125,21 +134,41 @@ public class LeitungsauskunftStartCaseAction
 
 
     @Override
-    public void fillAction( IAction action ) {
-        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
-            action.setText( null );
-            action.setImageDescriptor( null );
-        }
+    public void dispose() {
+        EventManager.instance().unsubscribe( this );
+        caseAction = null;
+        caseStatus = null;
     }
 
 
+    @Override
+    public void fillAction( IAction action ) {
+        this.caseAction = action;
+        updateAction( null );
+        
+        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+            public boolean apply( PropertyChangeEvent input ) {
+                return caseAction != null && input.getSource() == mcase.get();
+            }
+        });
+    }
+
+    
+    @EventHandler(display=true)
+    protected void updateAction( PropertyChangeEvent ev ) {
+        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+            caseAction.setText( null );
+            caseAction.setImageDescriptor( null );
+            caseAction.setEnabled( false );
+        }
+    }
+
+    
     @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
         String id = mcase.get().getId();
         status.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
-        status.put( "Vorgang", mcase.get().getName(), 100 );
-        status.put( "Angelegt am", df.format( mcase.get().getCreated() ), 99 );
     }
 
 
@@ -200,15 +229,19 @@ public class LeitungsauskunftStartCaseAction
         form = null;
         repo.get().commitChanges();
         
-        if (form != null) {
-            form.reloadEditor();
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
+        fillStatus( caseStatus );
+
+        // create/reload form
+        if (contentForm != null) {
+            contentForm.reloadEditor();
         }
         else {
-            section.getBody().getChildren()[0].dispose();
-            form = new BasedataForm();
-            form.createContents( section.getBody() );
-            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
-            form.setEnabled( false );            
+            contentSection.getBody().getChildren()[0].dispose();
+            contentForm = new BasedataForm();
+            contentForm.createContents( contentSection.getBody() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            contentForm.setEnabled( false );            
         }
     }
 
@@ -233,18 +266,18 @@ public class LeitungsauskunftStartCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        section = site.toolkit().createPanelSection( parent, "Daten" );
-        section.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
-        section.getBody().setLayout( new FillLayout() );
+        contentSection = site.toolkit().createPanelSection( parent, "Daten" );
+        contentSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
+        contentSection.getBody().setLayout( new FillLayout() );
 
         if (mcase.get().getName().length() > 0) {
-            form = new BasedataForm();
-            form.createContents( section.getBody() );
-            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
-            form.setEnabled( false );
+            contentForm = new BasedataForm();
+            contentForm.createContents( contentSection.getBody() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            contentForm.setEnabled( false );
         }
         else {
-            site.toolkit().createLabel( section.getBody(), "Noch keine Daten." );
+            site.toolkit().createLabel( contentSection.getBody(), "Noch keine Daten." );
         }
     }
 
@@ -302,9 +335,9 @@ public class LeitungsauskunftStartCaseAction
                     log.info( "dirty=" + dirty + ", valid=" + valid );
                     site.setSubmitEnabled( valid & dirty );
                     
-                    if (ev.getFieldName().equals( "name" )) {
-                        caseStatus.put( "Vorgang", (String)ev.getNewValue() );
-                    }
+//                    if (ev.getFieldName().equals( "name" )) {
+//                        caseStatus.put( "Bezeichnung", (String)ev.getNewValue() );
+//                    }
                 }
             });
 //            activateStatusAdapter( site.getPanelSite() );
