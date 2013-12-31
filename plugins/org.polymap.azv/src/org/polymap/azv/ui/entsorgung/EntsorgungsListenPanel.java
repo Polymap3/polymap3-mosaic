@@ -147,25 +147,7 @@ public class EntsorgungsListenPanel
 
             site.addToolbarAction( new Action( "Neue Liste" ) {
                 public void run() {
-                    final InputDialog dialog = new InputDialog( BatikApplication.shellToParentOn(), 
-                            "Eine neue Liste anlegen", "Name der Entsorgungsliste", "...", null );
-                    dialog.setBlockOnOpen( true );
-                    if (dialog.open() == Window.OK) {
-                        try {
-                            Entsorgungsliste liste = azvRepo.newEntity( Entsorgungsliste.class, null, new EntityCreator<Entsorgungsliste>() {
-                                public void create( Entsorgungsliste prototype ) throws Exception {
-                                    prototype.name().set( dialog.getValue() );
-                                    prototype.angelegtAm().set( new Date() );
-                                }
-                            });
-                            azvRepo.commitChanges();
-                            createListenSection( contents, liste );
-                            contents.layout();
-                        }
-                        catch (Exception e) {
-                            BatikApplication.handleError( "Die neue Liste konnte nicht angelegt werden.", e );
-                        }
-                    }
+                    openNeueListeDialog();
                 }
             });
             return true;
@@ -178,6 +160,10 @@ public class EntsorgungsListenPanel
     public void dispose() {
         super.dispose();
         mcase.set( null );
+        if (panelListener != null) {
+            getContext().removeEventHandler( panelListener );
+            panelListener = null;
+        }
     }
 
 
@@ -191,6 +177,30 @@ public class EntsorgungsListenPanel
     }
 
     
+    protected void openNeueListeDialog() {
+        final InputDialog dialog = new InputDialog( BatikApplication.shellToParentOn(), 
+                "Eine neue Liste anlegen", "Name der Entsorgungsliste", "...", null );
+        dialog.setBlockOnOpen( true );
+        if (dialog.open() == Window.OK) {
+            try {
+                Entsorgungsliste liste = azvRepo.newEntity( Entsorgungsliste.class, null, new EntityCreator<Entsorgungsliste>() {
+                    public void create( Entsorgungsliste prototype ) throws Exception {
+                        prototype.name().set( dialog.getValue() );
+                        prototype.angelegtAm().set( new Date() );
+                    }
+                });
+                azvRepo.commitChanges();
+                createListenSection( contents, liste );
+                contents.layout();
+                getSite().layout( true );
+            }
+            catch (Exception e) {
+                BatikApplication.handleError( "Die neue Liste konnte nicht angelegt werden.", e );
+            }
+        }
+    }
+    
+    
     @Override
     public void createContents( Composite parent ) {
         contents = parent;
@@ -199,20 +209,24 @@ public class EntsorgungsListenPanel
             createListenSection( contents, liste );
         }
         
-        panelListener = new Object() {
-            @EventHandler(display=true)
-            protected void panelActivated( PanelChangeEvent ev ) {
-                for (CasesTableViewer viewer : casesViewers) {
-                    viewer.refresh();
+        if (panelListener == null) {
+            panelListener = new Object() {
+                @EventHandler(display=true)
+                protected void panelActivated( PanelChangeEvent ev ) {
+                    for (CasesTableViewer viewer : casesViewers) {
+                        if (!viewer.getControl().isDisposed()) {
+                            viewer.refresh();
+                        }
+                    }
                 }
-            }
-        };
-        getContext().addEventHandler( panelListener, new EventFilter<PanelChangeEvent>() {
-            public boolean apply( PanelChangeEvent input ) {
-                return input.getSource() == EntsorgungsListenPanel.this
-                        && input.getType() == PanelChangeEvent.TYPE.ACTIVATING;
-            }
-        });
+            };
+            getContext().addEventHandler( panelListener, new EventFilter<PanelChangeEvent>() {
+                public boolean apply( PanelChangeEvent input ) {
+                    return input.getSource() == EntsorgungsListenPanel.this
+                            && input.getType() == PanelChangeEvent.TYPE.ACTIVATING;
+                }
+            });
+        }
     }
     
     
@@ -231,6 +245,7 @@ public class EntsorgungsListenPanel
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 exportListe( liste, section );
+                getSite().layout( true );
             }
         });
 
