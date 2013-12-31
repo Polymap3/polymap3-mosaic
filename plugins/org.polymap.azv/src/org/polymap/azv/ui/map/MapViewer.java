@@ -36,6 +36,7 @@ import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
 import org.polymap.openlayers.rap.widget.base_types.Projection;
 import org.polymap.openlayers.rap.widget.base_types.Size;
 import org.polymap.openlayers.rap.widget.controls.LayerSwitcherControl;
+import org.polymap.openlayers.rap.widget.controls.LoadingPanelControl;
 import org.polymap.openlayers.rap.widget.controls.MousePositionControl;
 import org.polymap.openlayers.rap.widget.controls.NavigationControl;
 import org.polymap.openlayers.rap.widget.controls.PanZoomBarControl;
@@ -170,6 +171,7 @@ public class MapViewer {
         map.addControl( new MousePositionControl() );
         map.addControl( new ScaleLineControl() );
         map.addControl( new ScaleControl() );
+        map.addControl( new LoadingPanelControl() );
 
         map.zoomToExtent( maxExtent, true );
         map.zoomTo( 10 );
