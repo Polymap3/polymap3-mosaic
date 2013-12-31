@@ -42,6 +42,8 @@ import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.email.EmailService;
@@ -118,7 +120,8 @@ public class EntsorgungFreigabeCaseAction
 
     @Override
     public void createContents( Composite parent ) {
-        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt", EntsorgungsListenPanel.ID ) );
+        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt", EntsorgungsListenPanel.ID ) )
+                .setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
 
         // liste
         Query<Entsorgungsliste> query = azvRepo.findEntities( Entsorgungsliste.class, null, 0, -1 );

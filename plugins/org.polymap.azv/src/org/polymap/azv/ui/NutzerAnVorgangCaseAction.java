@@ -41,6 +41,7 @@ import org.polymap.core.ui.SelectionAdapter;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
@@ -147,10 +148,8 @@ public class NutzerAnVorgangCaseAction
 
     @Override
     public void createContents( Composite parent ) {
-        FillLayout layout = (FillLayout)parent.getLayout();
-        //layout.marginWidth = layout.marginHeight = layout.marginWidth / 2;
-        
         Composite welcome = site.toolkit().createComposite( parent );
+        welcome.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
         site.toolkit().createFlowText( welcome, i18n.get( "welcomeMsg", RegisterPanel.ID ) );
         
         Composite formContainer = site.toolkit().createComposite( parent );

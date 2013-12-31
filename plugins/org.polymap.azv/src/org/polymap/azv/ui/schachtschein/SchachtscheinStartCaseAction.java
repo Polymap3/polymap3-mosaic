@@ -43,6 +43,7 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.app.FormContainer;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.field.BeanPropertyAdapter;
@@ -199,13 +200,10 @@ public class SchachtscheinStartCaseAction
             mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, username );
         }
 
-        FillLayout playout = (FillLayout)parent.getLayout();
-        playout.marginWidth *= 2;      
-        playout.spacing *= 2;
-
 //        IPanelSection welcome = site.toolkit().createPanelSection( parent, i18n.get( "welcomeTitle" ) );
 //        welcome.getBody().setLayout( new FillLayout() );
-        site.toolkit().createFlowText( parent /*welcome.getBody()*/, i18n.get( "welcomeTxt" ) );
+        site.toolkit().createFlowText( parent /*welcome.getBody()*/, i18n.get( "welcomeTxt" ) )
+                .setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
 
         Composite formContainer = site.toolkit().createComposite( parent );
         formContainer.setLayout( new FillLayout() );

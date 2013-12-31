@@ -186,6 +186,7 @@ public class CasePanel
         }
         // action area
         int margins = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
+        int spacing = getSite().getLayoutPreference( LAYOUT_SPACING_KEY );
         actionSection.setLayout( FormLayoutFactory.defaults().create() );
         
         // closeBtn
@@ -205,16 +206,19 @@ public class CasePanel
         // contents Composite
         Composite contents = getSite().toolkit().createComposite( actionSection );
         contents.setLayoutData( FormDataFactory.filled().create() );
-        FillLayout fill = new FillLayout( SWT.HORIZONTAL );
-        fill.spacing = fill.marginWidth = fill.marginHeight = margins;
-        fill.marginWidth /= 2;
-        fill.spacing /= 2;
-        contents.setLayout( fill );
+        ConstraintLayout layout = new ConstraintLayout( margins, margins, spacing );
+        contents.setLayout( layout );
+        
         if (holder != null) {
             try {
-                actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
-                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, 350 );
                 holder.caseAction.createContents( contents );
+
+                // XXX get margins from panel settings
+                int panelWidth = actionSection.getParent().getSize().x - 40;
+                int actionSectionHeight = contents.computeSize( panelWidth, -1, true ).y + 80;
+                ((FormData)actionSection.getLayoutData()).bottom = new FormAttachment( toolbarSection, actionSectionHeight );
+
+                actionSection.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_ACTION_SECTION_ACTIVE );
                 if (contents.getChildren().length > 0) {
                     contentSection.setEnabled( false );
                 }
@@ -365,10 +369,8 @@ public class CasePanel
     
     protected void createContentSection( Composite body ) {
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_CONTENT_SECTION );
-        ConstraintLayout layout = new ConstraintLayout();
-        layout.marginWidth = 0;
-        layout.marginHeight = 20;
-        layout.spacing = 40;
+        // XXX adopt computed margins/spacing from panel
+        ConstraintLayout layout = new ConstraintLayout( 0, 20, 40 );
         body.setLayout( layout );
         for (CaseActionHolder holder: caseActions) {
             try {

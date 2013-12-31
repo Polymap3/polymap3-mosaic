@@ -53,8 +53,11 @@ import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.email.EmailService;
@@ -178,10 +181,9 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void createContents( Composite parent ) {
-        ((FillLayout)parent.getLayout()).marginWidth *= 2;
-
         // welcome
         Composite welcome = site.toolkit().createComposite( parent );
+        welcome.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
         site.toolkit().createFlowText( welcome, i18n.get( "welcomeTxt", UsersTablePanel.ID ) );
         
         final UserRepository um = UserRepository.instance();
@@ -213,6 +215,7 @@ public class NutzerFreigabeCaseAction
 
         // right section
         Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
+        right.setLayoutData( new ConstraintData( new NeighborhoodConstraint( left, Neighborhood.TOP, 10 ) ) );
         right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).create() );
         Button btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
         btn.setSelection( groups.contains( AzvPlugin.ROLE_MA ) );

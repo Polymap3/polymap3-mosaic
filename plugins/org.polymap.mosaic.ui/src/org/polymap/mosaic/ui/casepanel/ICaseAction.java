@@ -14,12 +14,12 @@
  */
 package org.polymap.mosaic.ui.casepanel;
 
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IAction;
 
 import org.polymap.rhei.batik.ContextProperty;
+import org.polymap.rhei.batik.toolkit.ConstraintLayout;
 
 /**
  * Contribution to a case {@link CasePanel panel}.
@@ -68,14 +68,14 @@ public interface ICaseAction {
      */
     public void fillContentArea( Composite parent );
     
-    
     /**
      * Creates the UI of the action area. If this method does not generate children
      * under parent then {@link #submit()} is immediatelly called if the user clicks
      * this action.
      * <p/>
-     * Parent has {@link FillLayout} layout manager set. This can be changed. Margins
-     * and spacing should be transfered to new layout manager.
+     * The parent Composite has a {@link ConstraintLayout} layout manager set. This
+     * can be changed if necessary. Margins and spacing should be transfered to new
+     * layout manager.
      * 
      * @param parent
      */

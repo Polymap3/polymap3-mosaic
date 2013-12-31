@@ -26,10 +26,10 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.rwt.widgets.ExternalBrowser;
 
@@ -60,6 +60,7 @@ import org.polymap.core.ui.upload.Upload;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.app.BatikApplication;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
@@ -137,11 +138,9 @@ public class DokumenteCaseAction
     @Override
     public void createContents( Composite parent ) {
         site.setShowSubmitButton( false );
-        FillLayout playout = (FillLayout)parent.getLayout();
-        playout.marginWidth *= 2;      
-        playout.spacing *= 2;      
 
-        site.toolkit().createFlowText( parent , i18n.get( "welcomeText" ) );
+        Label txt = site.toolkit().createFlowText( parent , i18n.get( "welcomeText" ) );
+        txt.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
 
         formContainer = site.toolkit().createComposite( parent );
         formContainer.setLayout( ColumnLayoutFactory.defaults().margins( 40, 20 ).spacing( 10 ).create() );
