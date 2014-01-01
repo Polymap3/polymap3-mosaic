@@ -43,6 +43,9 @@ import org.eclipse.rwt.lifecycle.WidgetUtil;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
@@ -204,10 +207,12 @@ public class UsersTablePanel
                 try {
                     personForm.submit();
                     umrepo.commitChanges();
-                    viewer.refresh( umuser, true, true );
+                    viewer.update( umuser, null );
+                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Nutzerdaten wurden aktualisiert." ) );
                 }
                 catch (Exception e) {
                     UserRepository.instance().revertChanges();
+                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, "Daten wurden nicht korrekt geändert." ) );
                     throw new RuntimeException( e );
                 }
             }
@@ -219,19 +224,23 @@ public class UsersTablePanel
         deleteBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
                 try {
-                    viewer.remove( umuser );
                     for (Control child : formArea.getChildren()) {
                         child.dispose();
                     }
                     umrepo.deleteUser( umuser );
                     umrepo.commitChanges();
+
+                    viewer.reload();
+                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Nutzerdaten wurden gelöscht." ) );
                 }
                 catch (Exception e) {
                     UserRepository.instance().revertChanges();
+                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, "Nutzer wurden nicht korrekt gelöscht." ) );
                     throw new RuntimeException( e );
                 }
             }
         });
+        formArea.layout( true );
         formArea.getParent().layout( true );
         getSite().layout( true );
     }
