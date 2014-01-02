@@ -287,8 +287,9 @@ public class SchachtscheinStartCaseAction
 
         if (mcase.get().getName().length() > 0) {
             contentForm = new BasedataForm();
+            //contentForm.setFieldBuilderFactory( AzvPlugin.LABEL_FIELD_FACTORY );
             contentForm.createContents( contentSection.getBody() );
-            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 5 ).create() );
             contentForm.setEnabled( false );
         }
         else {
@@ -317,31 +318,31 @@ public class SchachtscheinStartCaseAction
             body = formSite.getPageBody();
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
-            new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
+            createField( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
                     .setLabel( "Bezeichnung" ).setToolTipText( "Bezeichnung der Maßnahme" )
                     .setValidator( new NotEmptyValidator() ).create().setFocus();
             
-            new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "description" ) )
+            createField( body, new BeanPropertyAdapter( mcase.get(), "description" ) )
                     .setLabel( "Beschreibung" ).setToolTipText( "Beschreibung der Maßnahme" )
                     .setField( new TextFormField() ).setValidator( new NotEmptyValidator() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite city = site.toolkit().createComposite( body );
 
-            new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
+            createField( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
                     .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
-            new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
+            createField( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
             Composite street = site.toolkit().createComposite( body );
-            new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
+            createField( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
                     .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 
-            new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
+            createField( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
 

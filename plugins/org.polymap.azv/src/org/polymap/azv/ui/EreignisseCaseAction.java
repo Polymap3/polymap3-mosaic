@@ -69,7 +69,7 @@ public class EreignisseCaseAction
 
     private CaseStatus                      caseStatus;
 
-    private String mcaseStatus;
+    private String                          mcaseStatus;
     
     
     @Override

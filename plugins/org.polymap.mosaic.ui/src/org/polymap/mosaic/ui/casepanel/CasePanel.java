@@ -247,9 +247,6 @@ public class CasePanel
     
     protected void createStatusSection( Composite body ) {
         FillLayout layout = new FillLayout();
-        //layout.marginWidth = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
-        layout.marginHeight = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
-        layout.marginHeight -= 10;
         body.setLayout( layout );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_STATUS_SECTION );
 

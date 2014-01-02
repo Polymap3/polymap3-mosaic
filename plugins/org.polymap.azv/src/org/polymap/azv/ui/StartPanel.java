@@ -70,10 +70,10 @@ import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.app.BatikApplication;
-import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
-import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
@@ -215,7 +215,6 @@ public class StartPanel
     protected IPanelSection createLoginSection( Composite parent ) {
         loginSection = tk.createPanelSection( parent, i18n.get( "loginTitle" ) );
         loginSection.getControl().setData( "title", "login" );
-        loginSection.addConstraint( new MinWidthConstraint( 300, 0 ) );
         loginSection.getBody().setLayout( new FillLayout() );
         
         LoginForm loginForm = new LoginPanel.LoginForm( getContext(), getSite(), user ) {
@@ -225,10 +224,10 @@ public class StartPanel
                     loginSection.dispose();
                     createCasesSection( contents );
                     
-//                    // user -> show closed cases
-//                    if (!(SecurityUtils.isAdmin() || SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ))) {
-//                        createClosedCasesSection( contents );
-//                    }
+                    // user -> show closed cases
+                    if (!(SecurityUtils.isAdmin() || SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ))) {
+                        createClosedCasesSection( contents );
+                    }
                     
                     contents.layout( true );
                     getSite().layout( true );
@@ -246,10 +245,11 @@ public class StartPanel
                             }
                         });
                     }
+                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Sie haben sich erfolgreich angemeldet." ) );
                     return true;
                 }
                 else {
-                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
+                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
                     return false;
                 }
             }
@@ -281,15 +281,12 @@ public class StartPanel
     
     protected void createCasesSection( Composite parent ) {
         casesSection = tk.createPanelSection( parent, "Aktuelle Vorgänge" );
-        casesSection.addConstraint( 
-                new PriorityConstraint( 5 ), 
-                new MinWidthConstraint( 400, 1 ) );
-                //, new MaxWidthConstraint( 1000, 1 ) ) );
+        casesSection.addConstraint( new PriorityConstraint( 5 ), AzvPlugin.MIN_COLUMN_WIDTH );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
         casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).width( 300 ).create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).create() );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
@@ -324,19 +321,21 @@ public class StartPanel
 
     
     protected void createClosedCasesSection( Composite parent ) {
-        casesSection = tk.createPanelSection( parent, "Bearbeitete Vorgänge" );
-        casesSection.getControl().setLayoutData( new ConstraintData( 
-                new PriorityConstraint( 5 ), 
-                new MinWidthConstraint( 400, 1 ) ) );
-                //, new MaxWidthConstraint( 1000, 1 ) ) );
-        casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
+        // normal user -> propable just a few open cases
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 150 ).create() );
+
+        IPanelSection closedCasesSection = tk.createPanelSection( parent, "Bearbeitete Vorgänge" );
+        closedCasesSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH,
+                new PriorityConstraint( 0 ),
+                new NeighborhoodConstraint( casesSection.getControl(), Neighborhood.BOTTOM, 1 ) ); 
+        closedCasesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
-        Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
-        casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).width( 300 ).create() );
-        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
+        Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) );
+        final CasesTableViewer closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
+        closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 150 ).create() );
+        closedCasesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
-                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                IMosaicCase sel = Iterables.getOnlyElement( closedCasesViewer.getSelected() );
                 log.info( "CASE: " + sel );
                 mcase.set( sel );
                 getContext().openPanel( CasePanel.ID );
@@ -344,20 +343,15 @@ public class StartPanel
         });
 
         // filterBar
-        FeatureTableFilterBar filterBar = new FeatureTableFilterBar( casesViewer, casesSection.getBody() );
-        filterBar.getControl().setLayoutData( FormDataFactory.filled().bottom( casesViewer.getTable() ).right( 50 ).create() );
+        FeatureTableFilterBar filterBar = new FeatureTableFilterBar( closedCasesViewer, closedCasesSection.getBody() );
+        filterBar.getControl().setLayoutData( FormDataFactory.filled().bottom( closedCasesViewer.getTable() ).right( 50 ).create() );
         
         // decorate viewer
         for (ICasesViewerDecorator deco : casesViewerDecorators) {
-            deco.fill( casesViewer, filterBar );
+            deco.fill( closedCasesViewer, filterBar );
         }
-        
-//        // searchField
-//        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), casesViewer.propertyNames() );
-//        Composite searchCtrl = searchField.getControl();
-//        searchCtrl.setLayoutData( FormDataFactory.filled()
-//                .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
     }
+    
     
     protected IPanelSection createActionsSection( Composite parent ) {
         IPanelSection section = tk.createPanelSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );

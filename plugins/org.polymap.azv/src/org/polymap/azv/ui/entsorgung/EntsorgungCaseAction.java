@@ -191,12 +191,12 @@ public class EntsorgungCaseAction
         this.contentArea = parent;
         if (mcase.get().get( KEY_LISTE ) != null) {
             IPanelSection section = site.toolkit().createPanelSection( parent, "Daten" );
-            section.addConstraint( new PriorityConstraint( 10 ) );
+            section.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
             section.getBody().setLayout( new FillLayout() );
 
             form = new DataForm();
             form.createContents( section.getBody() );
-            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).columns( 1, 1 ).create() );
+            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 5 ).columns( 1, 1 ).create() );
             form.setEnabled( false );
 
             IPanelSection sep = site.toolkit().createPanelSection( parent, "Status" );
