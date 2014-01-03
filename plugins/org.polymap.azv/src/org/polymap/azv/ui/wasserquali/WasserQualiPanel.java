@@ -289,7 +289,7 @@ public class WasserQualiPanel
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
             body = formSite.getPageBody();
-            body.setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).columns( 1, 1 ).create() );
+            body.setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).columns( 1, 1 ).create() );
 
             SimpleFeatureType schema = feature.getFeatureType();
             for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {

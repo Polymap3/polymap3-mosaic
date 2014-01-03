@@ -196,7 +196,7 @@ public class EntsorgungCaseAction
 
             form = new DataForm();
             form.createContents( section.getBody() );
-            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 5 ).columns( 1, 1 ).create() );
+            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).columns( 1, 1 ).create() );
             form.setEnabled( false );
 
             IPanelSection sep = site.toolkit().createPanelSection( parent, "Status" );

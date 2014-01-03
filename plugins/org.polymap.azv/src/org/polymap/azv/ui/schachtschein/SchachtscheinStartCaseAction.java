@@ -289,7 +289,7 @@ public class SchachtscheinStartCaseAction
             contentForm = new BasedataForm();
             //contentForm.setFieldBuilderFactory( AzvPlugin.LABEL_FIELD_FACTORY );
             contentForm.createContents( contentSection.getBody() );
-            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 5 ).create() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
             contentForm.setEnabled( false );
         }
         else {

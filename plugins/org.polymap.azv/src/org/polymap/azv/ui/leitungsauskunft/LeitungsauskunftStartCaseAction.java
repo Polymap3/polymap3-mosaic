@@ -271,7 +271,7 @@ public class LeitungsauskunftStartCaseAction
         if (mcase.get().getName().length() > 0) {
             contentForm = new BasedataForm();
             contentForm.createContents( contentSection.getBody() );
-            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 5 ).create() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
             contentForm.setEnabled( false );
         }
         else {
