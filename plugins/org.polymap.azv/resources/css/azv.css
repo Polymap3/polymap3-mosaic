@@ -1,14 +1,18 @@
 a, a:active, a:visited {
-	color: #4a8aaf;
-	text-decoration: none;
+    color: #4a8aaf;
+    text-decoration: none;
 }
 a:hover {
-	color: #0f1c23;
-	text-decoration: none;
+    color: #0f1c23;
+    text-decoration: none;
 }
 
 h1, h2, h3, h4 {
-	font: 18px"Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
-	color: #4a8aaf;
-	font-weight: normal;
+    font: 18px"Open Sans", "Lucida Sans", Helvetica, Verdana, Arial, sans-serif;
+    color: #4a8aaf;
+    font-weight: normal;
+}
+div.olMap {
+    background: #E5E9EC !important;
+    border-radius: 3px;
 }

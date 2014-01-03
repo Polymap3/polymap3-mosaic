@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
@@ -115,16 +116,14 @@ public class MapViewer {
     public void createContents( Composite _body, IPanelSite _site ) {
         this.site = _site;
         this.contents = site.toolkit().createComposite( _body );
-        //body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
         contents.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 0 ).create() );
 
         // toolbar
         toolbar = site.toolkit().createComposite( contents );
         toolbar.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
         
-        // map widget
+        // map widget (styling/background color from azv.css)
         olwidget = new OpenLayersWidget( contents, SWT.MULTI | SWT.WRAP | SWT.BORDER, "openlayers/full/OpenLayers-2.12.1.js" );
-        //olwidget.setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 450 ) );
         olwidget.setLayoutData( FormDataFactory.filled().top( toolbar ).create() );
 
         String srs = "EPSG:25833";
@@ -173,6 +172,7 @@ public class MapViewer {
         map.addControl( new ScaleControl() );
         map.addControl( new LoadingPanelControl() );
 
+       // map.setRestrictedExtend( maxExtent );
         map.zoomToExtent( maxExtent, true );
         map.zoomTo( 10 );
 
