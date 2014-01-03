@@ -143,7 +143,7 @@ public class NutzerFreigabeCaseAction
         if (umuser != null) {
             PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
             personForm.createContents( personSection );
-            personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
             personForm.setEnabled( false );            
         }
         else {
@@ -215,7 +215,7 @@ public class NutzerFreigabeCaseAction
 
         // right section
         Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
-        right.setLayoutData( new ConstraintData( new NeighborhoodConstraint( left, Neighborhood.TOP, 10 ) ) );
+        right.setLayoutData( new ConstraintData( new PriorityConstraint( 10 ), new NeighborhoodConstraint( left, Neighborhood.TOP, 10 ) ) );
         right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).create() );
         Button btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
         btn.setSelection( groups.contains( AzvPlugin.ROLE_MA ) );
