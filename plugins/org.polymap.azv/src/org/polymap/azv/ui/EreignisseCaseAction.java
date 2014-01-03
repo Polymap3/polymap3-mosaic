@@ -109,7 +109,7 @@ public class EreignisseCaseAction
     protected void updateStatus( List<PropertyChangeEvent> evs ) {
         @SuppressWarnings("hiding")
         IMosaicCase mcase = this.mcase.get();
-        site.getPanelSite().setTitle( "Vorgang: " + mcase.getName() );
+        site.getPanelSite().setTitle( "Vorgang: " + (mcase.getName().isEmpty() ? "[Neu angelegt]" : mcase.getName()) );
         
         caseStatus.put( "Art", Joiner.on( "," ).join( mcase.getNatures() ), 101, Graphics.getColor( 0xDD, 0xE1, 0xE3 ) );
         if (mcase.getName() != null && !mcase.getName().isEmpty()) {

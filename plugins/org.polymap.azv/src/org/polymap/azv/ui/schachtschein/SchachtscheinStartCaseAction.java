@@ -254,7 +254,7 @@ public class SchachtscheinStartCaseAction
             contentSection.getBody().getChildren()[0].dispose();
             contentForm = new BasedataForm();
             contentForm.createContents( contentSection.getBody() );
-            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 0, 0 ).create() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
             contentForm.setEnabled( false );            
         }
 
