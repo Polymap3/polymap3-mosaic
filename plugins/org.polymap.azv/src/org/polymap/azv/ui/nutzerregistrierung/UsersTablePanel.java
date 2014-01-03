@@ -166,7 +166,7 @@ public class UsersTablePanel
 
     
     protected void updateUserSection( final User umuser ) {
-        formArea.setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).margins( 20, 20 ).create() );
+        formArea.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 20, 20 ).create() );
         for (Control child : formArea.getChildren()) {
             child.dispose();
         }
@@ -201,6 +201,7 @@ public class UsersTablePanel
         
         // change btn
         Button okBtn = tk.createButton( formArea, i18n.get( "okBtn" ), SWT.PUSH );
+        okBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
         //okBtn.setEnabled( false );
         okBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
