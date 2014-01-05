@@ -21,6 +21,9 @@ import org.apache.commons.mail.SimpleEmail;
 
 import org.eclipse.jface.action.IAction;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
@@ -98,11 +101,18 @@ public class LeitungsauskunftFreigabeCaseAction
                 .setMsg( i18n.get( "email", header ) );
         EmailService.instance().send( email );
         
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) );
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
-                site.getContext().closePanel();
+                site.getContext().closePanel( site.getPanelSite().getPath() );
             }
         });
+    }
+
+
+    @Override
+    public void discard() {
+        repo.get().rollbackChanges();
     }
     
 }

@@ -16,11 +16,15 @@ package org.polymap.mosaic.ui.casestable;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import java.beans.PropertyChangeEvent;
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
+import org.geotools.feature.type.AttributeDescriptorImpl;
+import org.geotools.feature.type.AttributeTypeImpl;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
@@ -225,9 +229,9 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public DateColumn() {
-            super( schema.getDescriptor( new NameImpl( "name" ) ) );
+            super( createDescriptor( "created", Date.class ) );
             setWeight( 2, 120 );
-            setHeader( "Angelegt am" );
+            setHeader( "Angelegt" );
             setAlign( SWT.RIGHT );
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
@@ -248,7 +252,7 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public NatureColumn() {
-            super( schema.getDescriptor( new NameImpl( "name" ) ) );
+            super( createDescriptor( "natures", String.class ) );
             setWeight( 2, 100 );
             setHeader( "Art" );
             setLabelProvider( new ColumnLabelProvider() {
@@ -259,6 +263,12 @@ public class CasesTableViewer
                 }
             });
         }
+    }
+    
+    public static PropertyDescriptor createDescriptor( String _name, Class binding ) {
+        NameImpl name = new NameImpl( _name );
+        AttributeType type = new AttributeTypeImpl( name,binding, true, false, null, null, null );
+        return new AttributeDescriptorImpl( type, name, 1, 1, false, null );
     }
     
 }

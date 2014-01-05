@@ -46,6 +46,9 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IAction;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
@@ -98,7 +101,11 @@ public class NutzerFreigabeCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
     
+    private UserRepository                  um;
+    
     private User                            user;
+
+    private String username;
 
     
     @Override
@@ -108,8 +115,8 @@ public class NutzerFreigabeCaseAction
         log.info( "CASE:" + mycase );
         if (mycase != null && mycase.getNatures().contains( CASE_NUTZER )) {
             // user data
-            String username = mycase.get( "user" );
-            UserRepository um = UserRepository.instance();
+            username = mycase.get( "user" );
+            um = UserRepository.instance();
             user = um.findUser( username );
             
             // open action
@@ -138,8 +145,7 @@ public class NutzerFreigabeCaseAction
         personSection.addConstraint( new PriorityConstraint( 1 ), MIN_COLUMN_WIDTH );
         personSection.getBody().setLayout( new FillLayout() );
         
-        String username = mcase.get().get( "user" );
-        User umuser = UserRepository.instance().findUser( username );
+        User umuser = um.findUser( username );
         if (umuser != null) {
             PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
             personForm.createContents( personSection );
@@ -175,6 +181,7 @@ public class NutzerFreigabeCaseAction
         if (!SecurityUtils.isUserInGroup( ROLE_MA )) {
             action.setText( null );
             action.setImageDescriptor( null );
+            action.setEnabled( false );
         }
     }
 
@@ -185,8 +192,6 @@ public class NutzerFreigabeCaseAction
         Composite welcome = site.toolkit().createComposite( parent );
         welcome.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
         site.toolkit().createFlowText( welcome, i18n.get( "welcomeTxt", UsersTablePanel.ID ) );
-        
-        final UserRepository um = UserRepository.instance();
         
         // left section
         Composite left = site.toolkit().createComposite( parent, SWT.BORDER );
@@ -230,7 +235,6 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void submit() throws Exception {        
-        UserRepository um = UserRepository.instance();
         um.commitChanges();
         
         List<String> roles = um.groupsOf( user );
@@ -249,9 +253,10 @@ public class NutzerFreigabeCaseAction
                 .setMsg( i18n.get( "email", header, roles ) );
         EmailService.instance().send( email );
         
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) );
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
-                site.getContext().closePanel();
+                site.getContext().closePanel( site.getPanelSite().getPath() );
             }
         });
     }
@@ -259,8 +264,8 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void discard() {
-        UserRepository um = UserRepository.instance();
         um.revertChanges();
+        user = um.findUser( username );
     }
     
 }

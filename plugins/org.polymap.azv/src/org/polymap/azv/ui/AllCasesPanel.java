@@ -55,6 +55,7 @@ import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
+import org.polymap.rhei.batik.toolkit.ConstraintLayout;
 import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.Messages;
@@ -136,6 +137,7 @@ public class AllCasesPanel
     
     @Override
     public void createContents( Composite panelBody ) {
+        ((ConstraintLayout)panelBody.getLayout()).marginHeight /= 2;
         int panelHeight = panelBody.getParent().getSize().y;
         log.info( "panelHeight: " + panelHeight );
         contents = getSite().toolkit().createComposite( panelBody );
@@ -143,7 +145,7 @@ public class AllCasesPanel
         
         //Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
         casesViewer = new CasesTableViewer( contents, repo.get(), Filter.INCLUDE, SWT.NONE );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( panelHeight-75 )/*.width( 300 )*/.create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( panelHeight-80 )/*.width( 300 )*/.create() );
         
         casesViewer.addColumn( new UserColumn( casesViewer ) );
 
@@ -191,6 +193,7 @@ public class AllCasesPanel
             super( viewer.getSchema().getDescriptor( new NameImpl( "name" ) ) );
             setWeight( 2, 140 );
             setHeader( "Kunde/Nutzer" );
+            setSortable( false );
             
             setLabelProvider( new ColumnLabelProvider() {
                 @Override

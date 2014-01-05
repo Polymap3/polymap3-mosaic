@@ -31,6 +31,9 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
@@ -192,6 +195,22 @@ public class NutzerAnVorgangCaseAction
     }
 
     
+    @Override
+    public void discard() {
+        repo.get().rollbackChanges();
+        
+        // do not left 'empty' CasePanel after close button
+        if (mcase.get().getName().isEmpty()) {
+            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Kunde ausgewählt.\nDer Vorgang wurde daher geschlossen." ) );
+            Polymap.getSessionDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    site.getContext().closePanel( site.getPanelSite().getPath() );
+                }
+            });
+        }
+    }
+
+
     @Override
     public void fillContentArea( Composite parent ) {
         personSection = site.toolkit().createPanelSection( parent, "Kundendaten" );

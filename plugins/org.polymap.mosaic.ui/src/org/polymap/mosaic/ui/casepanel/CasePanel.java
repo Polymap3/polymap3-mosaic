@@ -135,6 +135,7 @@ public class CasePanel
         panelBody.setLayout( FormLayoutFactory.defaults().margins( margins+10, 0 ).create() );
 
         // init caseActions
+        CaseActionHolder autoActivate = null;
         for (CaseActionExtension ext : CaseActionExtension.all()) {
             try {
                 ICaseAction caseAction = ext.newInstance();
@@ -145,13 +146,26 @@ public class CasePanel
                 
                 if (caseAction.init( actionSite )) {
                     caseActions.add( holder );
+                    if (ext.isAutoActivate()) {
+                        autoActivate = autoActivate == null || autoActivate.ext.getPriority() < ext.getPriority()
+                                ? holder : autoActivate;
+                    }
                 }
             }
             catch (Exception e) {
                 log.warn( "Exception while initializing ICaseAction: " + ext, e );
             }
         }
-        
+        // auto activate CaseAction after init has completed
+        if (autoActivate != null) {
+            final CaseActionHolder finalAutoActivate = autoActivate;
+            panelBody.getDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    activateAction( finalAutoActivate );
+                }
+            });
+        }
+
         // status area
         Composite statusSection = tk.createComposite( panelBody );
         statusSection.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );

@@ -270,7 +270,7 @@ public class SchachtscheinPanel
                     try {
                         site.submitEditor();
                         AzvRepository.instance().commitChanges();
-                        getContext().closePanel();
+                        getContext().closePanel( getSite().getPath() );
                     }
                     catch (Exception e) {
                         BatikApplication.handleError( "Vorgang konnte nicht angelegt werden.", e );

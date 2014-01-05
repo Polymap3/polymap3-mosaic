@@ -110,6 +110,13 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="autoActivate" type="boolean">
+            <annotation>
+               <documentation>
+                  Automatically activate this CaseAction when the panel is opened. If more than one CaseActions are autoActivated then the one with highest priority is choosen.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

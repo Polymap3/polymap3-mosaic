@@ -117,9 +117,9 @@ public class EntsorgungCaseAction
 
     private DataForm                        form;
 
-    private IAction caseAction;
+    private IAction                         caseAction;
 
-    private Composite contentArea;
+    private Composite                       contentArea;
 
     
     @Override
@@ -147,7 +147,8 @@ public class EntsorgungCaseAction
                 }
             }
 
-            if (mcase.get().get( KEY_LISTE ) == null) {
+            // wenn Kunde und noch keine Liste gesetzt
+            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && mcase.get().get( KEY_LISTE ) == null) {
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
                         site.activateCaseAction( site.getActionId() );
@@ -166,6 +167,7 @@ public class EntsorgungCaseAction
         if (Iterables.find( mcase.get().getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_BEANTRAGT ), null) != null) {
             action.setText( null );
             action.setImageDescriptor( null );
+            action.setEnabled( false );
         }
     }
 
@@ -194,10 +196,10 @@ public class EntsorgungCaseAction
             section.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
             section.getBody().setLayout( new FillLayout() );
 
-            form = new DataForm();
-            form.createContents( section.getBody() );
-            form.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).columns( 1, 1 ).create() );
-            form.setEnabled( false );
+            DataForm contentForm = new DataForm();
+            contentForm.createContents( section.getBody() );
+            contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).columns( 1, 1 ).create() );
+            contentForm.setEnabled( false );
 
             IPanelSection sep = site.toolkit().createPanelSection( parent, "Status" );
             sep.addConstraint( new PriorityConstraint( 0 ) );
@@ -274,12 +276,17 @@ public class EntsorgungCaseAction
 
     @Override
     public void discard() {
+        repo.get().rollbackChanges();
+        
         // do not left 'empty' CasePanel after close button
-        Polymap.getSessionDisplay().asyncExec( new Runnable() {
-            public void run() {
-                site.getContext().closePanel();
-            }
-        });
+        if (mcase.get().getName().isEmpty()) {
+            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Basisdaten eingegeben. Der Vorgang wurde daher komplett abgebrochen." ) );
+            Polymap.getSessionDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    site.getContext().closePanel( site.getPanelSite().getPath() );
+                }
+            });
+        }
     }
 
 

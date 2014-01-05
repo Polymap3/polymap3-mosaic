@@ -250,12 +250,14 @@ public class LeitungsauskunftStartCaseAction
             form.dispose();
             form = null;
         }
+        repo.get().rollbackChanges();
+        
         // do not left 'empty' CasePanel after close button
         if (mcase.get().getName().isEmpty()) {
-            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Basisdaten eingegeben. Der Vorgang wurde daher komplett abgebrochen." ) );
+            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Basisdaten eingegeben.\nDer Vorgang wurde daher geschlossen." ) );
             Polymap.getSessionDisplay().asyncExec( new Runnable() {
                 public void run() {
-                    site.getContext().closePanel();
+                    site.getContext().closePanel( site.getPanelSite().getPath() );
                 }
             });
         }
