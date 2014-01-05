@@ -190,7 +190,7 @@ public class NutzerAnVorgangCaseAction
         }
         PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
         personForm.createContents( personSection );
-        personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 0 ).margins( 20, 5 ).create() );
+        personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
         personForm.setEnabled( false );
     }
 

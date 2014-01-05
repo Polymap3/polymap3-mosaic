@@ -287,6 +287,7 @@ public class StartPanel
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
         casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).create() );
+        casesViewer.getColumn( "created" ).sort( SWT.UP );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
@@ -350,6 +351,7 @@ public class StartPanel
         for (ICasesViewerDecorator deco : casesViewerDecorators) {
             deco.fill( closedCasesViewer, filterBar );
         }
+        closedCasesViewer.getColumn( "created" ).sort( SWT.UP );
     }
     
     

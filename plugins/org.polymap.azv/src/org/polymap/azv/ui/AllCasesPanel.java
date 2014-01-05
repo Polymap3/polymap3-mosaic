@@ -148,6 +148,7 @@ public class AllCasesPanel
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( panelHeight-80 )/*.width( 300 )*/.create() );
         
         casesViewer.addColumn( new UserColumn( casesViewer ) );
+        casesViewer.getColumn( "created" ).sort( SWT.UP );
 
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {

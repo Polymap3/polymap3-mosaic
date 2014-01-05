@@ -95,8 +95,8 @@ public class CasesTableViewer
         
         try {
             // suppress deferred loading to fix "empty table" issue
-            setContent( fs.getFeatures( this.baseFilter ) );
-            //setContent( fs, baseFilter );
+            //setContent( fs.getFeatures( this.baseFilter ) );
+            setContent( fs, baseFilter );
         }
         catch (Exception e) {
             throw new RuntimeException( e );
