@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -280,7 +281,7 @@ public class CasePanel
     protected void createToolbarSection( Composite body ) {
         body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
-        
+
         Button prev = null;
         for (final CaseActionHolder holder: caseActions) {
             final Action action = new Action() {};
@@ -298,7 +299,7 @@ public class CasePanel
             });
             
             if (action.getText() != null || action.getImageDescriptor() != null) {
-                holder.btn = tk.createButton( body, action.getText(), SWT.TOGGLE );
+                holder.btn = tk.createButton( body, null, SWT.TOGGLE );
                 fillToolbarBtn( holder, action );
 
                 FormDataFactory layoutData = FormDataFactory.filled().right( -1 );
@@ -324,9 +325,10 @@ public class CasePanel
     
     private void fillToolbarBtn( CaseActionHolder holder, IAction action ) {
         holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
-        holder.btn.setToolTipText( action.getToolTipText() );
+        holder.btn.setToolTipText( action.getToolTipText() != null ? action.getToolTipText() : action.getText() );
         holder.btn.setEnabled( action.isEnabled() );
-        ImageDescriptor icon = action.getImageDescriptor();
+        
+        ImageDescriptor icon = action.getImageDescriptor();        
         if (icon != null) {
             holder.btn.setImage( MosaicUiPlugin.getDefault().images().image( icon, icon.toString() ) );
         }
@@ -335,6 +337,11 @@ public class CasePanel
             if (icon == null) {
                 holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
             }
+        }
+        Image btnIcon = holder.btn.getImage();
+        int displayWidth = BatikApplication.sessionDisplay().getClientArea().width;
+        if ((displayWidth > 720 && action.getText() != null) || btnIcon == null) {
+            holder.btn.setText( action.getText() );
         }
     }
 
