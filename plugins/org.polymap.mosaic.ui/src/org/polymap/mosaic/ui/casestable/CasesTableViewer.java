@@ -104,6 +104,7 @@ public class CasesTableViewer
         
         EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
             public boolean apply( PropertyChangeEvent input ) {
+                // XXX update just the element that has changed / or added / or removed
                 return input.getSource() instanceof IMosaicCase;
             }
         });
@@ -117,10 +118,10 @@ public class CasesTableViewer
     }
 
     
-    @EventHandler(display=true)
-    protected void caseChanged( PropertyChangeEvent ev ) {
+    @EventHandler(display=true,delay=1000)
+    protected void caseChanged( List<PropertyChangeEvent> ev ) {
         if (!getControl().isDisposed()) {
-            refresh( true );
+            refresh();
         }
     }
 
