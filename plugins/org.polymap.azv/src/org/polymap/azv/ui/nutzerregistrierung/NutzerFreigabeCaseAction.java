@@ -241,7 +241,8 @@ public class NutzerFreigabeCaseAction
 
         MosaicRepository2 mosaic = repo.get();
         mcase.get().put( "roles", Iterables.toString( roles ) );
-        mosaic.closeCase( mcase.get(), "Freigabe", "Nutzerrechte: " + um.groupsOf( user ) );
+        mosaic.newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, "Nutzerrechte: " + um.groupsOf( user ), AzvPlugin.EVENT_TYPE_FREIGABE );
+        mosaic.closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, "Nutzerrechte: " + um.groupsOf( user ) );
         mosaic.commitChanges();
         
         String salu = user.salutation().get() != null ? user.salutation().get() : "";

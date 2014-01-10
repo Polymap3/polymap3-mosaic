@@ -14,7 +14,6 @@
  */
 package org.polymap.azv;
 
-import org.opengis.feature.Property;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -28,21 +27,13 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Supplier;
 
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.rwt.graphics.Graphics;
-import org.eclipse.rwt.lifecycle.WidgetUtil;
-
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.polymap.core.runtime.Lazy;
 import org.polymap.core.runtime.LockedLazyInit;
 
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
-import org.polymap.rhei.field.IFormField;
-import org.polymap.rhei.field.StringFormField;
-import org.polymap.rhei.form.IFormEditorToolkit;
 
 /**
  *
@@ -78,10 +69,16 @@ public class AzvPlugin
     public static final String      CASE_ENTSORGUNG = "Entsorgung";
     public static final String      CASE_NUTZER = "Neuer Nutzer";
 
-    public static final String      EVENT_TYPE_BEANTRAGT = "Beantragt";
+    public static final String      EVENT_TYPE_BEANTRAGT = "Antrag";
 //    public static final String      EVENT_TYPE_TERMINIERT = "Terminiert";
+    public static final String      EVENT_TYPE_STORNIERT = "Storno";
+    public static final String      EVENT_TYPE_ABGEBROCHEN = "Abbruch";
+    public static final String      EVENT_TYPE_FREIGABE = "Freigabe";
 
     public static final MinWidthConstraint MIN_COLUMN_WIDTH = new MinWidthConstraint( 420, 1 );
+
+
+
 
 //    /**
 //     * Produces {@link StringFormField} instances only.

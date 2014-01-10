@@ -47,6 +47,11 @@ public class MosaicCaseEvents {
     }
     
     
+    public static boolean contains( IMosaicCase mcase, String eventType ) {
+        return contains( mcase.getEvents(), eventType );
+    }
+    
+    
     /**
      * The general status of the given case:
      * 

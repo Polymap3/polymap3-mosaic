@@ -127,7 +127,8 @@ public class EntsorgungStornoCaseAction
         liste.mcaseIds().get().remove( mcase.get().getId() );
         azvRepo.commitChanges();
         
-        repo.get().closeCase( mcase.get(), "Storniert", "Antrag wurde storniert." );
+        repo.get().newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, "Antrag wurde storniert.", AzvPlugin.EVENT_TYPE_STORNIERT );
+        repo.get().closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, "Antrag wurde storniert." );
         repo.get().commitChanges();
         
         // email

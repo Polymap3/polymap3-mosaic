@@ -131,6 +131,7 @@ public class DokumenteCaseAction
         if (caseStatus.equals( IMosaicCaseEvent.TYPE_CLOSED )) {
             action.setText( null );
             action.setImageDescriptor( null );
+            action.setEnabled( false );
         }
     }
 

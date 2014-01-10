@@ -86,7 +86,8 @@ public class LeitungsauskunftFreigabeCaseAction
     @Override
     public void submit() throws Exception {
         MosaicRepository2 mosaic = repo.get();
-        mosaic.closeCase( mcase.get(), "Erteilt", "Die Leitungsauskunft wurde erteilt." );
+        mosaic.newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt.", AzvPlugin.EVENT_TYPE_FREIGABE );
+        mosaic.closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt." );
         mosaic.commitChanges();
         
         String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );

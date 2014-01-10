@@ -142,8 +142,10 @@ public class EntsorgungCaseAction
                 mcase.get().put( KEY_CITY, umuser.address().get().city().get() );
                 mcase.get().put( KEY_POSTALCODE, umuser.address().get().postalCode().get() );
 
-                if (mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER ) == null) {
-                    mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, principal.getName() );
+                String caseUser = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
+                if (caseUser == null) {
+                    String username = Polymap.instance().getUser().getName();
+                    mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, username );
                 }
             }
 

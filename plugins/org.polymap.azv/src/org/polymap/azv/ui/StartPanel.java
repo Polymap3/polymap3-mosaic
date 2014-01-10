@@ -286,6 +286,7 @@ public class StartPanel
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
         casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
+        casesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).create() );
         casesViewer.getColumn( "created" ).sort( SWT.UP );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
@@ -333,6 +334,7 @@ public class StartPanel
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) );
         final CasesTableViewer closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
+        closedCasesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
         closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 150 ).create() );
         closedCasesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {

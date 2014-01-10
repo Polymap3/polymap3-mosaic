@@ -22,6 +22,7 @@ import org.polymap.core.security.SecurityUtils;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
+import org.polymap.azv.AzvPlugin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -62,7 +63,8 @@ public class CloseCaseAction
 
     @Override
     public void submit() throws Exception {
-        repo.get().closeCase( mcase.get(), "Abgebrochen", "Der Vorgang wurde erfolglos abgebrochen" );
+        repo.get().newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_ABGEBROCHEN, "Der Vorgang wurde erfolglos abgebrochen", AzvPlugin.EVENT_TYPE_ABGEBROCHEN );
+        repo.get().closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_ABGEBROCHEN, "Der Vorgang wurde erfolglos abgebrochen" );
         repo.get().commitChanges();
     }
     

@@ -87,10 +87,10 @@ public class CasesTableViewer
         
         fs = repo.featureSource( IMosaicCase.class );
         schema = fs.getSchema();
-        addColumn( new StatusColumn() );
+//        addColumn( new StatusColumn() );
         PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "name" ) );
-        addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 2, 120 ) );
         addColumn( new NatureColumn() );
+        addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 2, 120 ) );
         addColumn( new DateColumn() );
         
         try {

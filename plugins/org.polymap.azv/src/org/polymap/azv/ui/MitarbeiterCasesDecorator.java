@@ -60,7 +60,7 @@ public class MitarbeiterCasesDecorator
                 }
                 // Mitarbeiter: beantragt 
                 else if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
-                    return MosaicCaseEvents.contains( mcase.getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT );
+                    return MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_BEANTRAGT );
                 }
                 // Kunde: meine Vorgänge
                 else {
