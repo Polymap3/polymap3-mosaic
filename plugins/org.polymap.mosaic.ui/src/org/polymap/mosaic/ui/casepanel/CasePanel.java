@@ -341,7 +341,7 @@ public class CasePanel
         Image btnIcon = holder.btn.getImage();
         int displayWidth = BatikApplication.sessionDisplay().getClientArea().width;
         if ((displayWidth > 720 && action.getText() != null) || btnIcon == null) {
-            holder.btn.setText( action.getText() );
+            holder.btn.setText( action.getText().toUpperCase() );
         }
     }
 
