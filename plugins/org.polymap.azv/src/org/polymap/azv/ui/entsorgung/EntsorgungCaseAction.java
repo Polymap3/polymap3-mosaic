@@ -63,6 +63,7 @@ import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.email.EmailService;
+import org.polymap.rhei.um.ui.PlzValidator;
 import org.polymap.rhei.um.ui.RegisterPanel;
 
 import org.polymap.azv.AzvPlugin;
@@ -120,6 +121,8 @@ public class EntsorgungCaseAction
     private IAction                         caseAction;
 
     private Composite                       contentArea;
+
+    private IPanelSection contentSection;
 
     
     @Override
@@ -192,14 +195,20 @@ public class EntsorgungCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
+        // contentSection
         this.contentArea = parent;
+        if (contentSection == null) {
+            contentSection = site.toolkit().createPanelSection( parent, "Daten" );
+            contentSection.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
+            contentSection.getBody().setLayout( new FillLayout() );
+        }
+        else {
+            contentSection.getBody().getChildren()[0].dispose();
+        }
+        // content: form or label
         if (mcase.get().get( KEY_LISTE ) != null) {
-            IPanelSection section = site.toolkit().createPanelSection( parent, "Daten" );
-            section.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
-            section.getBody().setLayout( new FillLayout() );
-
             DataForm contentForm = new DataForm();
-            contentForm.createContents( section.getBody() );
+            contentForm.createContents( contentSection.getBody() );
             contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).columns( 1, 1 ).create() );
             contentForm.setEnabled( false );
 
@@ -207,6 +216,10 @@ public class EntsorgungCaseAction
             sep.addConstraint( new PriorityConstraint( 0 ) );
             sep.getBody().setLayout( new FillLayout() );
             site.toolkit().createFlowText( sep.getBody(), i18n.get( "dataTxt" ) );
+        }
+        else {
+            site.toolkit().createLabel( contentSection.getBody(), "Noch keine Daten." )
+                    .setForeground( MosaicUiPlugin.COLOR_RED.get() );
         }
     }
 
@@ -347,7 +360,7 @@ public class EntsorgungCaseAction
             prop = new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE );
             new FormFieldBuilder( city, prop )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
+                    .setField( new StringFormField() ).setValidator( new PlzValidator( new NotEmptyValidator() ) ).create();
 
             prop = new KVPropertyAdapter( mcase.get(), KEY_CITY );
             new FormFieldBuilder( city, prop )

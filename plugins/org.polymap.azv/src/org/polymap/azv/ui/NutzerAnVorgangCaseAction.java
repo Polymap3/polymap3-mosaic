@@ -24,15 +24,13 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
@@ -199,15 +197,15 @@ public class NutzerAnVorgangCaseAction
     public void discard() {
         repo.get().rollbackChanges();
         
-        // do not left 'empty' CasePanel after close button
-        if (mcase.get().getName().isEmpty()) {
-            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Kunde ausgewählt.\nDer Vorgang wurde daher geschlossen." ) );
-            Polymap.getSessionDisplay().asyncExec( new Runnable() {
-                public void run() {
-                    site.getContext().closePanel( site.getPanelSite().getPath() );
-                }
-            });
-        }
+//        // do not left 'empty' CasePanel after close button
+//        if (mcase.get().getName().isEmpty()) {
+//            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Kunde ausgewählt.\nDer Vorgang wurde daher geschlossen." ) );
+//            Polymap.getSessionDisplay().asyncExec( new Runnable() {
+//                public void run() {
+//                    site.getContext().closePanel( site.getPanelSite().getPath() );
+//                }
+//            });
+//        }
     }
 
 
@@ -224,8 +222,9 @@ public class NutzerAnVorgangCaseAction
             personForm.setEnabled( false );
         }
         else {
-            site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen." )
-                    .setData( "no_user_yet", Boolean.TRUE );
+            Label l = site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen." );
+            l.setData( "no_user_yet", Boolean.TRUE );
+            l.setForeground( MosaicUiPlugin.COLOR_RED.get() );
         }
     }
 

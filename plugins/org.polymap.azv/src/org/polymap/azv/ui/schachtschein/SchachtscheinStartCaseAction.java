@@ -56,6 +56,7 @@ import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.Address;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
+import org.polymap.rhei.um.ui.PlzValidator;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
@@ -295,7 +296,8 @@ public class SchachtscheinStartCaseAction
             contentForm.setEnabled( false );
         }
         else {
-            site.toolkit().createLabel( contentSection.getBody(), "Noch keine Daten." );
+            site.toolkit().createLabel( contentSection.getBody(), "Noch keine Daten." )
+                    .setForeground( MosaicUiPlugin.COLOR_RED.get() );
         }
     }
 
@@ -333,7 +335,7 @@ public class SchachtscheinStartCaseAction
 
             createField( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
+                    .setField( new StringFormField() ).setValidator( new PlzValidator() ).create();
 
             createField( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
