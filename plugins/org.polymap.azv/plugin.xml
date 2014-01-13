@@ -43,6 +43,7 @@
       <branding
             body="resources/html/body.html"
             defaultEntrypointId="org.polymap.rhei.batik.entrypoint"
+            exitConfirmationClass="org.polymap.azv.ui.BrowserExitConfirmation"
             id="org.polymap.azv.branding"
             servletName="azv"
             themeId="org.polymap.rhei.batik.theme"
@@ -97,6 +98,14 @@
             class="org.polymap.azv.ui.schachtschein.SchachtscheinAntragCaseAction"
             id="org.polymap.azv.SchachtscheinCaseAction"
             name="Schachtschein beantragen"
+            priority="10">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.schachtschein.SchachtscheinFreigabeCaseAction"
+            description="Nutzer per EMail informieren und Vorgang schließen"
+            id="org.polymap.azv.SchachtscheinFreigabeCaseAction"
+            name="Schachtschein freigeben"
             priority="10">
       </caseAction>
       <caseAction
