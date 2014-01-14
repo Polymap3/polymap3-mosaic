@@ -21,6 +21,7 @@ import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT2;
 import static org.polymap.azv.AzvPlugin.ROLE_MA;
 import static org.polymap.azv.AzvPlugin.ROLE_SCHACHTSCHEIN;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,6 +72,7 @@ import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.LoginPanel;
 import org.polymap.rhei.um.ui.PersonForm;
+import org.polymap.rhei.um.ui.UsersTableSearchField;
 import org.polymap.rhei.um.ui.UsersTableViewer;
 
 import org.polymap.azv.AzvPlugin;
@@ -149,7 +151,7 @@ public class UsersTablePanel
         Composite tableArea = tk.createComposite( contents, SWT.BORDER );
         tableArea.setLayoutData( new ConstraintData( 
                 new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH ) );
-        tableArea.setLayout( FormLayoutFactory.defaults().create() );
+        tableArea.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         viewer = new UsersTableViewer( tableArea, umrepo.find( User.class, null ), SWT.NONE );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 500 ).create() );
@@ -158,6 +160,11 @@ public class UsersTablePanel
                 updateUserSection( viewer.getSelectedUser() );
             }
         });
+        
+        UsersTableSearchField searchField = new UsersTableSearchField( viewer, tableArea, 
+                Arrays.asList( "name", "username", "firstname", "company", "street", "city" ) );
+        FormDataFactory.filled().bottom( -1 ).applyTo( searchField.getControl() );
+        FormDataFactory.filled().top( searchField.getControl() ).applyTo( viewer.getControl() );
         
         // form area
         formArea = tk.createComposite( contents );

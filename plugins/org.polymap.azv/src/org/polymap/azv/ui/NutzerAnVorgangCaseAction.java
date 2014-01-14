@@ -14,6 +14,8 @@
  */
 package org.polymap.azv.ui;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,6 +51,7 @@ import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.PersonForm;
 import org.polymap.rhei.um.ui.RegisterPanel;
+import org.polymap.rhei.um.ui.UsersTableSearchField;
 import org.polymap.rhei.um.ui.UsersTableViewer;
 
 import org.polymap.azv.AzvPlugin;
@@ -157,7 +160,6 @@ public class NutzerAnVorgangCaseAction
         formContainer.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         viewer = new UsersTableViewer( formContainer, UserRepository.instance().find( User.class, null ), SWT.NONE );
-        viewer.getControl().setLayoutData( FormDataFactory.filled().bottom( -1 ).height( 240 ).create() );
         viewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
                 site.setSubmitEnabled( !ev.getSelection().isEmpty() );
@@ -167,9 +169,16 @@ public class NutzerAnVorgangCaseAction
             public void doubleClick( DoubleClickEvent event ) {
             }
         });
+
+        UsersTableSearchField searchField = new UsersTableSearchField( viewer, formContainer, 
+                Arrays.asList( "name", "username", "firstname", "company", "street", "city" ) );
         
         Button submitBtn = site.createSubmit( formContainer, "Kunden auswählen" );
-        submitBtn.setLayoutData( FormDataFactory.filled().top( viewer.getControl() ).height( 28 ).create() );
+
+        // layout
+        searchField.getControl().setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
+        viewer.getControl().setLayoutData( FormDataFactory.filled().top( searchField.getControl() ).bottom( submitBtn ).height( 250 ).create() );
+        submitBtn.setLayoutData( FormDataFactory.filled().top( -1 ).height( 28 ).create() );
     }
 
     
