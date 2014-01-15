@@ -80,6 +80,8 @@ public class EntsorgungFreigabeCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
     
+    private EntsorgungMixin                 entsorgung;
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
 
@@ -92,14 +94,16 @@ public class EntsorgungFreigabeCaseAction
     private Map<String,Entsorgungsliste>    listen = new TreeMap();
 
     private List                            list;
-    
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
+        this.entsorgung = mcase.get().as( EntsorgungMixin.class );
+
         if (mcase.get() != null && repo.get() != null
-                && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )
-                && mcase.get().get( EntsorgungCaseAction.KEY_LISTE ) != null
+                && mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG )
+                && entsorgung.liste.get() != null
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_ENTSORGUNG )) {
 
@@ -143,7 +147,7 @@ public class EntsorgungFreigabeCaseAction
                 site.setSubmitEnabled( list.getSelectionCount() > 0 );
             }
         });
-        String listeId = mcase.get().get( EntsorgungCaseAction.KEY_LISTE );
+        String listeId = entsorgung.liste.get();
         if (listeId != null) {
             Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
             list.setSelection( new String[] {liste.name().get()} );
@@ -159,7 +163,7 @@ public class EntsorgungFreigabeCaseAction
 
     @Override
     public void submit() throws Exception {
-        String prevListeId = mcase.get().get( EntsorgungCaseAction.KEY_LISTE );
+        String prevListeId = entsorgung.liste.get();
         if (prevListeId != null) {
             Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, prevListeId );
             Collection<String> mcaseIds = liste.mcaseIds().get();
@@ -170,7 +174,7 @@ public class EntsorgungFreigabeCaseAction
         
         Entsorgungsliste liste = listen.get( list.getItem( list.getSelectionIndex() ) );
         liste.mcaseIds().get().add( mcase.get().getId() );
-        mcase.get().put( EntsorgungCaseAction.KEY_LISTE, liste.id() );
+        entsorgung.name.set( liste.id() );
         azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), "Neuer Termin", 

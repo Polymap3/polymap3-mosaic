@@ -45,7 +45,6 @@ import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 
-
 /**
  * 
  *

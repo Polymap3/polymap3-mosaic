@@ -123,7 +123,7 @@ public class EntsorgungsListenPanel
 
     private List<CasesTableViewer>              casesViewers = new ArrayList();
 
-    private Object panelListener;
+    private Object                              panelListener;
     
     
     @Override
@@ -325,12 +325,13 @@ public class EntsorgungsListenPanel
                 csvWriter.writeHeader( "Ort", "Straße", "Nr.", "Name", "Bemerkung" );
                 for (String id : liste.mcaseIds().get()) {
                     MosaicCase2 mcase = mosaicRepo.get().entity( MosaicCase2.class, id );
+                    EntsorgungMixin entsorgung = mcase.as( EntsorgungMixin.class );
                     csvWriter.write( 
-                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_CITY ) ), 
-                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_STREET ) ), 
-                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_NUMBER ) ), 
-                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_NAME ) ), 
-                            StringUtils.defaultString( mcase.get( EntsorgungCaseAction.KEY_BEMERKUNG ) ) );
+                            StringUtils.defaultString( entsorgung.stadt.get() ), 
+                            StringUtils.defaultString( entsorgung.strasse.get() ), 
+                            StringUtils.defaultString( entsorgung.nummer.get() ), 
+                            StringUtils.defaultString( entsorgung.name.get() ), 
+                            StringUtils.defaultString( entsorgung.bemerkung.get() ) );
                     
                     mosaicRepo.get().closeCase( mcase, "Gedruckt", "Gedruckt in Liste: " + liste.name().get() );
                 }

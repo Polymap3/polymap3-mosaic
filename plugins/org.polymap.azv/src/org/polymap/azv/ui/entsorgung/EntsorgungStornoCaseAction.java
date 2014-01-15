@@ -65,6 +65,8 @@ public class EntsorgungStornoCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
     
+    private EntsorgungMixin                 entsorgung;
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
 
@@ -76,7 +78,7 @@ public class EntsorgungStornoCaseAction
 
     private CaseStatus                      caseStatus;
 
-    private IAction caseAction;
+    private IAction                         caseAction;
     
     
     @Override
@@ -84,12 +86,13 @@ public class EntsorgungStornoCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )
-                && mcase.get().get( EntsorgungCaseAction.KEY_LISTE ) != null
                 && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
 
-            String id = mcase.get().get( EntsorgungCaseAction.KEY_LISTE );
-            liste = azvRepo.findEntity( Entsorgungsliste.class, id );
-            return true;
+            entsorgung = mcase.get().as( EntsorgungMixin.class );
+            if (entsorgung.liste.get() != null) {
+                liste = azvRepo.findEntity( Entsorgungsliste.class, entsorgung.liste.get() );
+                return true;
+            }
         }
         return false;
     }

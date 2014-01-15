@@ -17,6 +17,7 @@ package org.polymap.mosaic.server.model;
 import java.util.Date;
 import java.util.Set;
 
+import org.polymap.core.model2.Composite;
 import org.polymap.core.project.IMap;
 
 /**
@@ -62,5 +63,15 @@ public interface IMosaicCase {
     public IMap getMetaDataMap();
 
     public IMap getDataMap();
+
+    /**
+     * Casts this entity into one of its Mixin types. Mixins are defined via the
+     * {@link Mixins} annotation.
+     * 
+     * @param <T>
+     * @param mixinClass
+     * @return A mixin of the given type, or null if no such mixin was defined.
+     */
+    public <T extends Composite> T as( Class<T> mixinClass );
 
 }

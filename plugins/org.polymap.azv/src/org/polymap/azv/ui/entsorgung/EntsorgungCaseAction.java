@@ -14,6 +14,8 @@
  */
 package org.polymap.azv.ui.entsorgung;
 
+import static org.polymap.azv.ui.entsorgung.EntsorgungMixin.*;
+
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -74,6 +76,7 @@ import org.polymap.azv.ui.NotEmptyValidator;
 import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
+import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.KVPropertyAdapter;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -95,17 +98,10 @@ public class EntsorgungCaseAction
 
     public static final IMessages           i18n = Messages.forPrefix( "Entsorgung" );
     
-    public static final String              KEY_LISTE = "liste";
-    public static final String              KEY_NAME = "name";
-    public static final String              KEY_KUNDENNUMMER = "kundennummer";
-    public static final String              KEY_BEMERKUNG = "bemerkung";
-    public static final String              KEY_STREET = "street";
-    public static final String              KEY_NUMBER = "number";
-    public static final String              KEY_CITY = "city";
-    public static final String              KEY_POSTALCODE = "postalcode";
-    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
+
+    private EntsorgungMixin                 entsorgung;
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
@@ -122,7 +118,7 @@ public class EntsorgungCaseAction
 
     private Composite                       contentArea;
 
-    private IPanelSection contentSection;
+    private IPanelSection                   contentSection;
 
     
     @Override
@@ -133,17 +129,21 @@ public class EntsorgungCaseAction
             
             // default setting from user
             UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
+            entsorgung = mcase.get().as( EntsorgungMixin.class );
+            
             if (principal != null
                     && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                     && !SecurityUtils.isAdmin()
-                    && mcase.get().get( KEY_NAME ) == null) {
+                    && entsorgung.name.get() == null) {
                 UserRepository umrepo = UserRepository.instance();
                 umuser = umrepo.findUser( principal.getName() );
-                mcase.get().put( KEY_NAME, umuser.name().get() );
-                mcase.get().put( KEY_STREET, umuser.address().get().street().get() );
-                mcase.get().put( KEY_NUMBER, umuser.address().get().number().get() );
-                mcase.get().put( KEY_CITY, umuser.address().get().city().get() );
-                mcase.get().put( KEY_POSTALCODE, umuser.address().get().postalCode().get() );
+                EntsorgungMixin mixin = ((MosaicCase2)mcase.get()).as( EntsorgungMixin.class );
+                mixin.strasse.set( umuser.address().get().street().get() );
+                mixin.nummer.set( umuser.address().get().number().get() );
+                mixin.stadt.set( umuser.address().get().city().get() );
+                mixin.plz.set( umuser.address().get().postalCode().get() );
+                
+                entsorgung.name.set( umuser.name().get() );
 
                 String caseUser = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
                 if (caseUser == null) {
@@ -153,7 +153,7 @@ public class EntsorgungCaseAction
             }
 
             // wenn Kunde und noch keine Liste gesetzt
-            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && mcase.get().get( KEY_LISTE ) == null) {
+            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && entsorgung.liste.get() == null) {
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
                         site.activateCaseAction( site.getActionId() );
@@ -180,10 +180,10 @@ public class EntsorgungCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        status.put( "Name", mcase.get().get( KEY_NAME ), 5 );
+        status.put( "Name", entsorgung.name.get(), 5 );
 
         AzvRepository azvRepo = AzvRepository.instance();
-        String listeId = mcase.get().get( KEY_LISTE );
+        String listeId = entsorgung.liste.get();
         if (listeId != null) {
             Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
             status.put( "Termin", liste.name().get(), 0 );
@@ -206,7 +206,7 @@ public class EntsorgungCaseAction
             contentSection.getBody().getChildren()[0].dispose();
         }
         // content: form or label
-        if (mcase.get().get( KEY_LISTE ) != null) {
+        if (entsorgung.liste.get() != null) {
             DataForm contentForm = new DataForm();
             contentForm.createContents( contentSection.getBody() );
             contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).columns( 1, 1 ).create() );
@@ -252,18 +252,17 @@ public class EntsorgungCaseAction
     @Override
     public void submit() throws Exception {
         form.submit();
-        IMosaicCase mc = mcase.get();
-        mc.setName( Joiner.on( " " ).skipNulls().join( mc.get( KEY_STREET ), mc.get( KEY_NUMBER ), mc.get( KEY_CITY ) ) );
+        mcase.get().setName( Joiner.on( " " ).skipNulls().join( entsorgung.strasse.get(), entsorgung.nummer.get(), entsorgung.stadt.get() ) );
         
         AzvRepository azvRepo = AzvRepository.instance();
-        String listeId = mcase.get().get( KEY_LISTE );
+        String listeId = entsorgung.liste.get();
         Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
         liste.mcaseIds().get().add( mcase.get().getId() );
         
         azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), liste.name().get(), 
-                Joiner.on( " " ).skipNulls().join( liste.name().get(), mc.get( KEY_STREET ), mc.get( KEY_NUMBER ), mc.get( KEY_CITY ) ), 
+                Joiner.on( " " ).skipNulls().join( liste.name().get(), entsorgung.strasse.get(), entsorgung.nummer.get(), entsorgung.stadt.get() ), 
                 AzvPlugin.EVENT_TYPE_BEANTRAGT  );
         repo.get().commitChanges();
 
