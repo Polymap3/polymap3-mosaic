@@ -32,14 +32,14 @@ import org.polymap.core.security.SecurityUtils;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.email.EmailService;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
+import org.polymap.azv.model.EntsorgungMixin;
 import org.polymap.azv.model.Entsorgungsliste;
-import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -135,9 +135,8 @@ public class EntsorgungStornoCaseAction
         repo.get().commitChanges();
         
         // email
-        String caseUser = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
-        if (caseUser != null) {
-            User user = UserRepository.instance().findUser( caseUser );
+        User user = mcase.get().as( NutzerMixin.class ).user();
+        if (user != null) {
             String salu = user.salutation().get() != null ? user.salutation().get() : "";
             String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
             Email email = new SimpleEmail();

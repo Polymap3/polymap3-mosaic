@@ -56,6 +56,7 @@ import org.polymap.rhei.um.ui.UsersTableViewer;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -78,17 +79,15 @@ public class NutzerAnVorgangCaseAction
 
     public static final IMessages       i18n = Messages.forPrefix( "NutzerAnVorgang" );
 
-    public static final String          KEY_USER = "user";
-
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
+    
+    private NutzerMixin                     nutzer;
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2>  repo;
     
     private ICaseActionSite                 site;
-
-    private User                            umuser;
 
     private IPanelSection                   personSection;
 
@@ -112,11 +111,8 @@ public class NutzerAnVorgangCaseAction
             
             
             this.site = _site;
-            String username = mcase.get().get( KEY_USER );
-            if (username != null) {
-                umuser = UserRepository.instance().findUser( username );
-            }
-            else {
+            this.nutzer = mcase.get().as( NutzerMixin.class );
+            if (nutzer.username.get() == null) {
                 // open action
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
@@ -134,8 +130,9 @@ public class NutzerAnVorgangCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        if (umuser != null) {
-            status.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( umuser.firstname().get(), umuser.name().get() ), 101 );
+        User user = nutzer.user();
+        if (user != null) {
+            status.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
         }
     }
 
@@ -184,18 +181,16 @@ public class NutzerAnVorgangCaseAction
     
     @Override
     public void submit() throws Exception {
-        umuser = new SelectionAdapter( viewer.getSelection() ).first( User.class );
-        String username = umuser.username().get();
-        mcase.get().put( KEY_USER, username );
+        User user = new SelectionAdapter( viewer.getSelection() ).first( User.class );
+        nutzer.username.set( user.username().get() );
         repo.get().commitChanges();
         
-        umuser = UserRepository.instance().findUser( username );
-        caseStatus.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( umuser.firstname().get(), umuser.name().get() ), 101 );
+        caseStatus.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
 
         for (Control child : personSection.getBody().getChildren()) {
             child.dispose();
         }
-        PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
+        PersonForm personForm = new PersonForm( site.getPanelSite(), user );
         personForm.createContents( personSection );
         personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
         personForm.setEnabled( false );
@@ -224,8 +219,9 @@ public class NutzerAnVorgangCaseAction
         personSection.addConstraint( new PriorityConstraint( 1 ), AzvPlugin.MIN_COLUMN_WIDTH );
         personSection.getBody().setLayout( new FillLayout() );
         
-        if (umuser != null) {
-            PersonForm personForm = new PersonForm( site.getPanelSite(), umuser );
+        User user = nutzer.user();
+        if (user != null) {
+            PersonForm personForm = new PersonForm( site.getPanelSite(), user );
             personForm.createContents( personSection );
             personForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
             personForm.setEnabled( false );

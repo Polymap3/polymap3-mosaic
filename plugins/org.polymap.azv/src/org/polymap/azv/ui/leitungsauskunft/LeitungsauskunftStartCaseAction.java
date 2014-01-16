@@ -14,6 +14,11 @@
  */
 package org.polymap.azv.ui.leitungsauskunft;
 
+import static org.polymap.azv.model.AdresseMixin.KEY_CITY;
+import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
+import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
+import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
+
 import java.beans.PropertyChangeEvent;
 
 import org.apache.commons.lang.StringUtils;
@@ -53,14 +58,12 @@ import org.polymap.rhei.field.IFormFieldListener;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
-import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.PlzValidator;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
-import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -86,11 +89,6 @@ public class LeitungsauskunftStartCaseAction
 
     private static final FastDateFormat df = AzvPlugin.df;
 
-    public static final String          KEY_STREET = "street";
-    public static final String          KEY_NUMBER = "number";
-    public static final String          KEY_CITY = "city";
-    public static final String          KEY_POSTALCODE = "postalcode";
-    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
 
@@ -107,7 +105,7 @@ public class LeitungsauskunftStartCaseAction
 
     private BasedataForm                        contentForm;
 
-    private IAction caseAction;
+    private IAction                             caseAction;
 
     
     @Override
@@ -116,12 +114,10 @@ public class LeitungsauskunftStartCaseAction
         if (mcase.get() != null && repo.get() != null
                 && mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT )) {
             
-            // wenn Kunde und noch kein Name gesetzt ist
+            // wenn Kunde und noch kein Name (nichts) gesetzt ist
             if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                     && mcase.get().getName().length() == 0) {
                 
-                User umuser = UserRepository.instance().findUser( Polymap.instance().getUser().getName() );
-                setUserOnCase( umuser );
                 // open action
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
@@ -176,14 +172,10 @@ public class LeitungsauskunftStartCaseAction
 
     @Override
     public void createContents( Composite parent ) {
-        // wenn hier noch kein Nutzer am Vorgang hängt, dann wird der eingeloggte
-        // Nutzer verwendet
-        String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
-        if (username == null) {
-            username = Polymap.instance().getUser().getName();
-            User umuser = UserRepository.instance().findUser( username );
-            setUserOnCase( umuser );
-            mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, username );
+        // noch kein Nutzer am Vorgang -> Nutzer/Adresse vom user eintragen
+        NutzerMixin nutzer = mcase.get().as( NutzerMixin.class );
+        if (nutzer.user() == null) {
+            nutzer.setSessionUser();
         }
 
         site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt" ) )
@@ -198,27 +190,6 @@ public class LeitungsauskunftStartCaseAction
         site.createSubmit( formContainer, "Übernehmen" );
     }
 
-    
-    protected void setUserOnCase( User umuser ) {
-//        Address address = umuser.address().get();
-//        String value = address.city().get();
-//        if (value != null) {
-//            mcase.get().put( KEY_CITY, value );
-//        }
-//        value = address.street().get();
-//        if (value != null) {
-//            mcase.get().put( KEY_STREET, value );
-//        }
-//        value = address.number().get();
-//        if (value != null) {
-//            mcase.get().put( KEY_NUMBER, value );
-//        }
-//        value = address.postalCode().get();
-//        if (value != null) {
-//            mcase.get().put( KEY_POSTALCODE, value );
-//        }
-    }
-    
     
     @Override
     public void submit() throws Exception {
@@ -267,7 +238,7 @@ public class LeitungsauskunftStartCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        contentSection = site.toolkit().createPanelSection( parent, "Daten" );
+        contentSection = site.toolkit().createPanelSection( parent, "Maßnahme" );
         contentSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
         contentSection.getBody().setLayout( new FillLayout() );
 

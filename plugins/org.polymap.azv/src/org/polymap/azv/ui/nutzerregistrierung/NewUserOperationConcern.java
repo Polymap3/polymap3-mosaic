@@ -31,7 +31,7 @@ import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.operations.NewUserOperation;
 
 import org.polymap.azv.AzvPlugin;
-import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 
@@ -66,7 +66,7 @@ public class NewUserOperationConcern
                         IMosaicCase newCase = repo.newCase( user.name().get(),
                                 "Ein neuer Nutzer wurde angelegt. Authentizität und Rechte müssen bestätigt werden." );
                         newCase.addNature( AzvPlugin.CASE_NUTZER );
-                        newCase.put( NutzerAnVorgangCaseAction.KEY_USER, user.username().get() );
+                        newCase.as( NutzerMixin.class ).username.set( user.username().get() );
                         repo.commitChanges();
                         
 //                        MosaicRemoteServer mosaic = MosaicRemoteServer.instance();

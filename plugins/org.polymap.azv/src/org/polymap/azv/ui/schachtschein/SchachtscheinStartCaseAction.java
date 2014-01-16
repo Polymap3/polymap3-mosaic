@@ -14,6 +14,11 @@
  */
 package org.polymap.azv.ui.schachtschein;
 
+import static org.polymap.azv.model.AdresseMixin.KEY_CITY;
+import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
+import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
+import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
+
 import java.beans.PropertyChangeEvent;
 
 import org.apache.commons.lang.StringUtils;
@@ -53,15 +58,14 @@ import org.polymap.rhei.field.IFormFieldListener;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
-import org.polymap.rhei.um.Address;
 import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.PlzValidator;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.model.AdresseMixin;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
-import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -87,18 +91,6 @@ public class SchachtscheinStartCaseAction
 
     private static final FastDateFormat     df = FastDateFormat.getInstance( "dd.MM.yyyy" );
 
-    public static final String              KEY_STREET = "street";
-    public static final String              KEY_NUMBER = "number";
-    public static final String              KEY_CITY = "city";
-    public static final String              KEY_POSTALCODE = "postalcode";
-
-    public static final String address( IMosaicCase mcase ) {
-        return new StringBuilder( 256 )
-                .append( StringUtils.defaultString( mcase.get( KEY_STREET ) ) ).append( " " )
-                .append( StringUtils.defaultString( mcase.get( KEY_NUMBER ) ) ).append( ", " )
-                .append( StringUtils.defaultString( mcase.get( KEY_POSTALCODE ) ) ).append( " " )
-                .append( StringUtils.defaultString( mcase.get( KEY_CITY ) ) ).toString();
-    }
     
     // instance *******************************************
     
@@ -128,11 +120,16 @@ public class SchachtscheinStartCaseAction
                 && mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )) {
             
             // wenn Kunde und noch kein Name gesetzt ist
-            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && !SecurityUtils.isAdmin()
+            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) 
+                    && !SecurityUtils.isAdmin()
                     && mcase.get().getName().length() == 0) {
+
+                // Nutzer am Vorgang setzen
+                User user = mcase.get().as( NutzerMixin.class ).setSessionUser();
                 
-                User umuser = UserRepository.instance().findUser( Polymap.instance().getUser().getName() );
-                setUserOnCase( umuser );
+                // Adresse vom Nutzer eintragen
+                mcase.get().as( AdresseMixin.class ).setAdresseVonNutzer( user );
+
                 // open action
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
@@ -181,24 +178,17 @@ public class SchachtscheinStartCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
-        IMosaicCase mc = mcase.get();
-        String id = mcase.get().getId();
-        status.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
-        status.put( "Ort", address( mc ), 1 );
-//        status.put( "Beschreibung", mc.getDescription(), 0 );
+        status.put( "Laufende Nr.", StringUtils.right( mcase.get().getId(), 6 ) );
+        status.put( "Ort", mcase.get().as( AdresseMixin.class ).adresse(), 1 );
     }
 
 
     @Override
     public void createContents( Composite parent ) {
-        // wenn hier noch kein Nutzer am Vorgang hängt, dann wird der eingeloggte
-        // Nutzer verwendet
-        String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
-        if (username == null) {
-            username = Polymap.instance().getUser().getName();
-            User umuser = UserRepository.instance().findUser( username );
-            setUserOnCase( umuser );
-            mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, username );
+        // noch kein Nutzer am Vorgang -> Nutzer/Adresse vom user eintragen
+        NutzerMixin nutzer = mcase.get().as( NutzerMixin.class );
+        if (nutzer.user() == null) {
+            nutzer.setSessionUser();
         }
 
 //        IPanelSection welcome = site.toolkit().createPanelSection( parent, i18n.get( "welcomeTitle" ) );
@@ -215,27 +205,6 @@ public class SchachtscheinStartCaseAction
         site.createSubmit( formContainer, "Übernehmen" );
     }
 
-    
-    protected void setUserOnCase( User umuser ) {
-        Address address = umuser.address().get();
-        String value = address.city().get();
-        if (value != null) {
-            mcase.get().put( KEY_CITY, value );
-        }
-        value = address.street().get();
-        if (value != null) {
-            mcase.get().put( KEY_STREET, value );
-        }
-        value = address.number().get();
-        if (value != null) {
-            mcase.get().put( KEY_NUMBER, value );
-        }
-        value = address.postalCode().get();
-        if (value != null) {
-            mcase.get().put( KEY_POSTALCODE, value );
-        }
-    }
-    
     
     @Override
     public void submit() throws Exception {
@@ -284,7 +253,7 @@ public class SchachtscheinStartCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        contentSection = site.toolkit().createPanelSection( parent, "Daten" );
+        contentSection = site.toolkit().createPanelSection( parent, "Maßnahme" );
         contentSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
         contentSection.getBody().setLayout( new FillLayout() );
 

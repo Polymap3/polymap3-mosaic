@@ -32,7 +32,7 @@ import org.polymap.core.security.UserPrincipal;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 
-import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 
 /**
@@ -116,7 +116,7 @@ public class AzvPermissions
         }
         // Kunde: meine Vorgänge
         else {
-            String caseuser = mcase.get( NutzerAnVorgangCaseAction.KEY_USER );
+            String caseuser = mcase.get( NutzerMixin.KEY_USER );
             return caseuser != null && caseuser.equals( user.username().get() );
         }
     }

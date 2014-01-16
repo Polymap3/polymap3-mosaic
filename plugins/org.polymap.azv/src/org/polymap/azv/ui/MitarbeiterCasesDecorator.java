@@ -25,6 +25,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -64,7 +65,7 @@ public class MitarbeiterCasesDecorator
                 }
                 // Kunde: meine Vorgänge
                 else {
-                    String caseuser = mcase.get( NutzerAnVorgangCaseAction.KEY_USER );
+                    String caseuser = mcase.get( NutzerMixin.KEY_USER );
                     return caseuser != null && caseuser.equals( username );
                 }
             }

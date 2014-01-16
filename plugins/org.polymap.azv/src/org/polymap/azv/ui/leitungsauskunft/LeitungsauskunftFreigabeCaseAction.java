@@ -31,12 +31,11 @@ import org.polymap.core.security.SecurityUtils;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.email.EmailService;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -89,8 +88,7 @@ public class LeitungsauskunftFreigabeCaseAction
         mosaic.closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt." );
         mosaic.commitChanges();
         
-        String username = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
-        User user = UserRepository.instance().findUser( username );
+        User user = mcase.get().as( NutzerMixin.class ).user();
                 
         String salu = user.salutation().get() != null ? user.salutation().get() : "";
         String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();

@@ -14,7 +14,14 @@
  */
 package org.polymap.azv.ui.entsorgung;
 
-import static org.polymap.azv.ui.entsorgung.EntsorgungMixin.*;
+import static org.polymap.azv.model.AdresseMixin.KEY_CITY;
+import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
+import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
+import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
+import static org.polymap.azv.model.EntsorgungMixin.KEY_BEMERKUNG;
+import static org.polymap.azv.model.EntsorgungMixin.KEY_KUNDENNUMMER;
+import static org.polymap.azv.model.EntsorgungMixin.KEY_LISTE;
+import static org.polymap.azv.model.EntsorgungMixin.KEY_NAME;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -46,7 +53,6 @@ import org.eclipse.core.runtime.Status;
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
-import org.polymap.core.security.UserPrincipal;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
@@ -63,20 +69,20 @@ import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.email.EmailService;
 import org.polymap.rhei.um.ui.PlzValidator;
 import org.polymap.rhei.um.ui.RegisterPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.AzvRepository;
+import org.polymap.azv.model.EntsorgungMixin;
 import org.polymap.azv.model.Entsorgungsliste;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
-import org.polymap.azv.ui.NutzerAnVorgangCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
-import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.KVPropertyAdapter;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -103,12 +109,14 @@ public class EntsorgungCaseAction
 
     private EntsorgungMixin                 entsorgung;
     
+    private NutzerMixin                     nutzer;
+    
+    private AdresseMixin                    adresse;
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
 
     private ICaseActionSite                 site;
-
-    private User                            umuser;
 
     private CaseStatus                      caseStatus;
 
@@ -128,32 +136,24 @@ public class EntsorgungCaseAction
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )) {
             
             // default setting from user
-            UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
+//            UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
             entsorgung = mcase.get().as( EntsorgungMixin.class );
+            adresse = mcase.get().as( AdresseMixin.class );
+            nutzer = mcase.get().as( NutzerMixin.class );
             
-            if (principal != null
-                    && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
-                    && !SecurityUtils.isAdmin()
-                    && entsorgung.name.get() == null) {
-                UserRepository umrepo = UserRepository.instance();
-                umuser = umrepo.findUser( principal.getName() );
-                EntsorgungMixin mixin = ((MosaicCase2)mcase.get()).as( EntsorgungMixin.class );
-                mixin.strasse.set( umuser.address().get().street().get() );
-                mixin.nummer.set( umuser.address().get().number().get() );
-                mixin.stadt.set( umuser.address().get().city().get() );
-                mixin.plz.set( umuser.address().get().postalCode().get() );
-                
-                entsorgung.name.set( umuser.name().get() );
-
-                String caseUser = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
-                if (caseUser == null) {
-                    String username = Polymap.instance().getUser().getName();
-                    mcase.get().put( NutzerAnVorgangCaseAction.KEY_USER, username );
-                }
-            }
+//            if (principal != null
+//                    && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
+//                    && !SecurityUtils.isAdmin()
+//                    && entsorgung.name.get() == null) {
+//                
+//                // Nutzer am Vorgang setzen
+//                nutzer.setSessionUser();                
+//            }
 
             // wenn Kunde und noch keine Liste gesetzt
-            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && entsorgung.liste.get() == null) {
+            if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) 
+                    && entsorgung.liste.get() == null) {
+                
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
                         site.activateCaseAction( site.getActionId() );
@@ -226,15 +226,16 @@ public class EntsorgungCaseAction
 
     @Override
     public void createContents( Composite parent ) {
-//        // wenn hier noch kein Nutzer am Vorgang hängt, dann wird der eingeloggte
-//        // Nutzer verwendet
-//        String username = mcase.get().get( KEY_USER );
-//        if (username == null) {
-//            username = sessionUser.get().getName();
-//            User umuser = UserRepository.instance().findUser( username );
-//            setUserOnCase( umuser );
-//            mcase.get().put( KEY_USER, username );
-//        }
+        // noch kein Nutzer am Vorgang -> session user eintragen
+        User user = nutzer.user();
+        if (user == null && Polymap.instance().getUser() != null) {
+            user = nutzer.setSessionUser();
+        }
+        // noch keine Adresse -> vom Nutzer
+        if (entsorgung.name.get() == null) {
+            adresse.setAdresseVonNutzer( user );
+            entsorgung.name.set( user.name().get() );
+        }
 
         site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt", RegisterPanel.ID ) )
                 .setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
@@ -252,7 +253,7 @@ public class EntsorgungCaseAction
     @Override
     public void submit() throws Exception {
         form.submit();
-        mcase.get().setName( Joiner.on( " " ).skipNulls().join( entsorgung.strasse.get(), entsorgung.nummer.get(), entsorgung.stadt.get() ) );
+        mcase.get().setName( Joiner.on( " " ).skipNulls().join( adresse.strasse.get(), adresse.nummer.get(), adresse.stadt.get() ) );
         
         AzvRepository azvRepo = AzvRepository.instance();
         String listeId = entsorgung.liste.get();
@@ -262,14 +263,13 @@ public class EntsorgungCaseAction
         azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), liste.name().get(), 
-                Joiner.on( " " ).skipNulls().join( liste.name().get(), entsorgung.strasse.get(), entsorgung.nummer.get(), entsorgung.stadt.get() ), 
+                Joiner.on( " " ).skipNulls().join( liste.name().get(), adresse.strasse.get(), adresse.nummer.get(), adresse.stadt.get() ), 
                 AzvPlugin.EVENT_TYPE_BEANTRAGT  );
         repo.get().commitChanges();
 
         // email
-        String caseUser = mcase.get().get( NutzerAnVorgangCaseAction.KEY_USER );
-        if (caseUser != null) {
-            User user = UserRepository.instance().findUser( caseUser );
+        User user = nutzer.user();
+        if (user != null) {
             String salu = user.salutation().get() != null ? user.salutation().get() : "";
             String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
             Email email = new SimpleEmail();

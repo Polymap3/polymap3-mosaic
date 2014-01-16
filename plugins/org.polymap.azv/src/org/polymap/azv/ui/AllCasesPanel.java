@@ -59,6 +59,7 @@ import org.polymap.rhei.batik.toolkit.ConstraintLayout;
 import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.Messages;
+import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftCasesDecorator;
 import org.polymap.azv.ui.nutzerregistrierung.NutzerCasesDecorator;
@@ -201,7 +202,7 @@ public class AllCasesPanel
                 @Override
                 public String getText( Object elm ) {
                     IMosaicCase mc = viewer.entity( ((IFeatureTableElement)elm).fid() );
-                    return defaultString( mc.get( NutzerAnVorgangCaseAction.KEY_USER ), "-" );
+                    return defaultString( mc.as( NutzerMixin.class ).username.get(), "-" );
                 }
             });
         }

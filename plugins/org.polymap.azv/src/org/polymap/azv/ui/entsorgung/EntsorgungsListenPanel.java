@@ -83,7 +83,9 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.AzvRepository;
+import org.polymap.azv.model.EntsorgungMixin;
 import org.polymap.azv.model.Entsorgungsliste;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
@@ -326,10 +328,11 @@ public class EntsorgungsListenPanel
                 for (String id : liste.mcaseIds().get()) {
                     MosaicCase2 mcase = mosaicRepo.get().entity( MosaicCase2.class, id );
                     EntsorgungMixin entsorgung = mcase.as( EntsorgungMixin.class );
+                    AdresseMixin adresse = mcase.as( AdresseMixin.class );
                     csvWriter.write( 
-                            StringUtils.defaultString( entsorgung.stadt.get() ), 
-                            StringUtils.defaultString( entsorgung.strasse.get() ), 
-                            StringUtils.defaultString( entsorgung.nummer.get() ), 
+                            StringUtils.defaultString( adresse.stadt.get() ), 
+                            StringUtils.defaultString( adresse.strasse.get() ), 
+                            StringUtils.defaultString( adresse.nummer.get() ), 
                             StringUtils.defaultString( entsorgung.name.get() ), 
                             StringUtils.defaultString( entsorgung.bemerkung.get() ) );
                     
