@@ -120,7 +120,7 @@ public class UsersTablePanel
                     return input.getType() == PropertyAccessEvent.TYPE.SET;
                 }
             });
-            getSite().setTitle( "" );
+            getSite().setTitle( null );
             return true;
         }
         return false;

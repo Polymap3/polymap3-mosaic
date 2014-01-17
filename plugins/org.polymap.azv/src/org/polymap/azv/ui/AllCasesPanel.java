@@ -17,9 +17,9 @@ package org.polymap.azv.ui;
 import static org.apache.commons.lang.StringUtils.defaultString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.geotools.feature.NameImpl;
 import org.opengis.filter.Filter;
 
 import org.apache.commons.logging.Log;
@@ -109,7 +109,7 @@ public class AllCasesPanel
         super.init( site, context );
         if (site.getPath().size() == 1) {
             // wait for user to log in, then check permission
-            site.setTitle( "" );
+            site.setTitle( null );
             user.addListener( this, new EventFilter<PropertyAccessEvent>() {
                 public boolean apply( PropertyAccessEvent input ) {
                     return input.getType() == PropertyAccessEvent.TYPE.SET;
@@ -171,7 +171,8 @@ public class AllCasesPanel
         }
         
         // searchField
-        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, contents, casesViewer.propertyNames() );
+        FeatureTableSearchField searchField = new FeatureTableSearchField( 
+                casesViewer, contents, Arrays.asList( "name", "created", "user" ) );
         Composite searchCtrl = searchField.getControl();
         searchCtrl.setLayoutData( FormDataFactory.filled()
                 .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
@@ -193,7 +194,8 @@ public class AllCasesPanel
             extends DefaultFeatureTableColumn {
 
         public UserColumn( final CasesTableViewer viewer ) {
-            super( viewer.getSchema().getDescriptor( new NameImpl( "name" ) ) );
+            super( CasesTableViewer.createDescriptor( "user", String.class ) );
+            // viewer.getSchema().getDescriptor( new NameImpl( "user" ) ) );
             setWeight( 2, 140 );
             setHeader( "Kunde/Nutzer" );
             setSortable( false );
@@ -202,7 +204,9 @@ public class AllCasesPanel
                 @Override
                 public String getText( Object elm ) {
                     IMosaicCase mc = viewer.entity( ((IFeatureTableElement)elm).fid() );
-                    return defaultString( mc.as( NutzerMixin.class ).username.get(), "-" );
+                    String username = mc.get( NutzerMixin.KEY_USER );
+                    //String username = mc.as( NutzerMixin.class ).username.get();
+                    return defaultString( username, "-" );
                 }
             });
         }

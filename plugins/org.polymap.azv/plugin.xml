@@ -80,14 +80,15 @@
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.NutzerAnVorgangCaseAction"
-            description="Den Kunden für diesen Vorgang auswählen"
+            description="Diesem Vorgang einen Kunden zuordnen"
             icon="resources/icons/user.png"
             id="org.polymap.azv.NutzerAnVorgangCaseAction"
-            name="Kunden wählen"
+            name="Kunden zuordnen"
             priority="-30">
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.DokumenteCaseAction"
+            description="Ein Dokument an diesen Vorgang anhängen"
             icon="resources/icons/attachment.png"
             id="org.polymap.azv.DokumentCaseAction"
             name="Dokument anhängen"
@@ -110,7 +111,7 @@
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.schachtschein.SchachtscheinStartCaseAction"
-            description="Bezeichnung und Ort der Maßnahme"
+            description="Bezeichnung und Ort der Maßnahme eingeben/ändern"
             icon="resources/icons/letter-filter.png"
             id="org.polymap.azv.SchachtscheinStartCaseAction"
             name="Maßnahme"
@@ -167,7 +168,7 @@
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftStartCaseAction"
-            description="Bezeichnung und Ort der Maßnahme"
+            description="Bezeichnung und Ort der Maßnahme eingeben/ändern"
             icon="resources/icons/pipelines-filter.png"
             id="org.polymap.azv.caseAction1"
             name="Maßnahme"

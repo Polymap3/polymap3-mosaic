@@ -140,7 +140,7 @@ public class EntsorgungsListenPanel
         if (site.getPath().size() == 1) {
             
             // wait for user to log in, then check permission
-            site.setTitle( "" );
+            site.setTitle( null );
             user.addListener( this, new EventFilter<PropertyAccessEvent>() {
                 public boolean apply( PropertyAccessEvent input ) {
                     return input.getType() == PropertyAccessEvent.TYPE.SET;

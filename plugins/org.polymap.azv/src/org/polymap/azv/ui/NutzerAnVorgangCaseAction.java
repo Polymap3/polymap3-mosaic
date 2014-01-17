@@ -95,6 +95,8 @@ public class NutzerAnVorgangCaseAction
 
     private UsersTableViewer                viewer;
 
+    private IAction caseAction;
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -139,10 +141,12 @@ public class NutzerAnVorgangCaseAction
 
     @Override
     public void fillAction( IAction action ) {
+        this.caseAction = action;
         // nach Beantragung keine Änderung mehr
         if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             action.setText( null );
             action.setImageDescriptor( null );
+            action.setEnabled( false );
         }
     }
 
@@ -184,6 +188,10 @@ public class NutzerAnVorgangCaseAction
         User user = new SelectionAdapter( viewer.getSelection() ).first( User.class );
         nutzer.username.set( user.username().get() );
         repo.get().commitChanges();
+        
+        if (caseAction != null) {
+            caseAction.setEnabled( false );
+        }
         
         caseStatus.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
 

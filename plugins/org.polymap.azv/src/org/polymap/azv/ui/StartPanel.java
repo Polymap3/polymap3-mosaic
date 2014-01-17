@@ -17,6 +17,7 @@ package org.polymap.azv.ui;
 import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.opengis.filter.Filter;
@@ -308,7 +309,8 @@ public class StartPanel
         }
         
         // searchField
-        FeatureTableSearchField searchField = new FeatureTableSearchField( casesViewer, casesSection.getBody(), casesViewer.propertyNames() );
+        FeatureTableSearchField searchField = new FeatureTableSearchField( 
+                casesViewer, casesSection.getBody(), Arrays.asList( "name", "created" ) );
         Composite searchCtrl = searchField.getControl();
         searchCtrl.setLayoutData( FormDataFactory.filled()
                 .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
