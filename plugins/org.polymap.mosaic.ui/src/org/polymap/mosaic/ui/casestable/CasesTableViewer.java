@@ -231,7 +231,7 @@ public class CasesTableViewer
         public NameColumn() {
             super( createDescriptor( "name", Date.class ) );
             setWeight( 2, 120 );
-            setHeader( "Name" );
+            setHeader( "Bezeichnung" );
             setAlign( SWT.LEFT );
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
