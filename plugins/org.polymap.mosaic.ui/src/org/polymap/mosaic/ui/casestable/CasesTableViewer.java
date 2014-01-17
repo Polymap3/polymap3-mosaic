@@ -88,9 +88,8 @@ public class CasesTableViewer
         fs = repo.featureSource( IMosaicCase.class );
         schema = fs.getSchema();
 //        addColumn( new StatusColumn() );
-        PropertyDescriptor nameProp = schema.getDescriptor( new NameImpl( "name" ) );
         addColumn( new NatureColumn() );
-        addColumn( new DefaultFeatureTableColumn( nameProp ).setWeight( 2, 120 ) );
+        addColumn( new NameColumn() );
         addColumn( new DateColumn() );
         
         try {
@@ -218,6 +217,35 @@ public class CasesTableViewer
 //                    FontData bold = new FontData(defaultFont[0].getName(), defaultFont[0].getHeight(), SWT.BOLD);
 //                    return Graphics.getFont( bold );
 //                }
+            });
+        }
+    }
+
+    
+    /**
+     * 
+     */
+    class NameColumn
+            extends DefaultFeatureTableColumn {
+
+        public NameColumn() {
+            super( createDescriptor( "name", Date.class ) );
+            setWeight( 2, 120 );
+            setHeader( "Name" );
+            setAlign( SWT.LEFT );
+            setLabelProvider( new ColumnLabelProvider() {
+                @Override
+                public String getText( Object elm ) {
+                    IMosaicCase mcase = new CaseFinder().apply( (IFeatureTableElement)elm );
+                    return mcase.getName();
+                }
+                @Override
+                public String getToolTipText( Object elm ) {
+                    String fid = ((IFeatureTableElement)elm).fid();
+                    MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
+                    String username = mcase.get( "user" );
+                    return username;
+                }
             });
         }
     }
