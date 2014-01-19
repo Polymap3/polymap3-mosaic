@@ -32,13 +32,12 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
-import org.polymap.mosaic.ui.casepanel.CaseStatus;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
@@ -64,8 +63,6 @@ public class SchachtscheinAntragCaseAction
 
     private IAction                             action;
 
-    private CaseStatus                          caseStatus;
-
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -75,7 +72,7 @@ public class SchachtscheinAntragCaseAction
 
             EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
                 public boolean apply( PropertyChangeEvent input ) {
-                    return caseStatus != null && input.getSource() == mcase.get();
+                    return action != null && DrawFeatureMapAction.EVENT_NAME.equals( input.getPropertyName() );
                 }
             });
             return true;
@@ -86,25 +83,15 @@ public class SchachtscheinAntragCaseAction
     
     @Override
     public void dispose() {
+        action = null;
         EventManager.instance().unsubscribe( this );
-    }
-
-    
-    @Override
-    public void fillStatus( CaseStatus status ) {
-        this.caseStatus = status;
-        if (!mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
-            if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
-                status.put( "Status", "Beantragt" );
-            }
-        }
     }
 
     
     @Override
     public void fillAction( @SuppressWarnings("hiding") IAction action ) {
         this.action = action;
-        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+        if (MosaicCaseEvents.contains( mcase.get(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             action.setText( null );
             action.setImageDescriptor( null );
             action.setEnabled( false );
@@ -120,7 +107,6 @@ public class SchachtscheinAntragCaseAction
         repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
 
-        fillStatus( caseStatus );
         fillAction( action );
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
@@ -136,7 +122,7 @@ public class SchachtscheinAntragCaseAction
             action.setToolTipText( "Bitte geben Sie der Maßnahme eine Bezeichnung" );
             action.setEnabled( false );
         }            
-        else if (mcase.get().get( "point" ) == null) {
+        else if (mcase.get().get( OrtMixin.KEY_POINT ) == null) {
             action.setToolTipText( "Bitte geben Sie der Maßnahme einen Ort" );
             action.setEnabled( false );
         }

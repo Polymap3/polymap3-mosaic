@@ -34,6 +34,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.model.AzvStatusMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -75,8 +76,18 @@ public class EreignisseCaseAction
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
-        return mcase.get() != null && repo.get() != null
-                /*&& SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )*/;
+        if (mcase.get() != null && repo.get() != null) {
+            /*&& SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )*/;
+
+            // listen to changes
+            EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+                public boolean apply( PropertyChangeEvent input ) {
+                    return caseStatus != null && input.getSource() == mcase.get();
+                }
+            });
+            return true;
+        }
+        return false;
     }
 
 
@@ -95,18 +106,14 @@ public class EreignisseCaseAction
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
         updateStatus( null );
-        
-        // listen to changes
-        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
-            public boolean apply( PropertyChangeEvent input ) {
-                return caseStatus != null && input.getSource() == mcase.get();
-            }
-        });
     }
 
     
-    @EventHandler(display=true,delay=1000)
+    @EventHandler(display=true,delay=500)
     protected void updateStatus( List<PropertyChangeEvent> evs ) {
+        if (caseStatus == null) {
+            return;
+        }
         @SuppressWarnings("hiding")
         IMosaicCase mcase = this.mcase.get();
         site.getPanelSite().setTitle( "Vorgang: " + (mcase.getName().isEmpty() ? "[Neu angelegt]" : mcase.getName()) );
@@ -119,16 +126,45 @@ public class EreignisseCaseAction
         
         // set status field only if mcase status has changed or status field is empty;
         // don't change if other party has set (before my event arrived)
-        if (!mcase.getStatus().equals( mcaseStatus ) || caseStatus.get( "Status" ) == null) {
+//        if (!mcase.getStatus().equals( mcaseStatus ) || caseStatus.get( "Status" ) == null) {
             mcaseStatus = mcase.getStatus();
             
-            if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcaseStatus )) {
-                caseStatus.put( "Status", "Erledigt", -1, AzvPlugin.instance().okColor.get() );            
+//            if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcaseStatus )) {
+//                caseStatus.put( "Status", "Erledigt", -1, AzvPlugin.instance().okColor.get() );            
+//            }
+//            else if (IMosaicCaseEvent.TYPE_OPEN.equals( mcaseStatus ) && caseStatus.get( "Status" ) == null) {
+//                caseStatus.put( "Status", "Anlegen", -1, AzvPlugin.instance().openColor.get() );
+//            }
+            
+            String azvStatus = AzvStatusMixin.ofCase( mcase );
+            if (azvStatus == null) {
+                caseStatus.put( "Status", "NEU", -1, AzvPlugin.instance().openColor.get() );
             }
-            else if (IMosaicCaseEvent.TYPE_OPEN.equals( mcaseStatus ) && caseStatus.get( "Status" ) == null) {
-                caseStatus.put( "Status", "Anlegen", -1, AzvPlugin.instance().openColor.get() );
+            else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_ABGEBROCHEN )) {
+                caseStatus.put( "Status", "Abgebrochen", -1, AzvPlugin.instance().discardColor.get() );
             }
-        }
+            else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_STORNIERT )) {
+                caseStatus.put( "Status", "Storniert", -1, AzvPlugin.instance().discardColor.get() );
+            }
+            else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+                caseStatus.put( "Status", "Beantragt", -1, AzvPlugin.instance().openColor.get() );
+            }
+            else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_ANFREIGABE )) {
+                caseStatus.put( "Status", "An Freigabe", -1, AzvPlugin.instance().openColor.get() );
+            }
+            else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_ANBEARBEITUNG )) {
+                caseStatus.put( "Status", "An Bearbeitung", -1, AzvPlugin.instance().openColor.get() );
+            }
+            else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_FREIGABE )) {
+                caseStatus.put( "Status", "Freigegeben", -1, AzvPlugin.instance().okColor.get() );
+            }
+            else if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
+                caseStatus.put( "Status", "Erledigt", -1, AzvPlugin.instance().okColor.get() );
+            }
+            else {
+                caseStatus.put( "Status", "???" );
+            }
+//        }
     }
 
     

@@ -14,6 +14,11 @@
  */
 package org.polymap.azv.ui;
 
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANBEARBEITUNG;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_BEANTRAGT;
+import static org.polymap.azv.AzvPlugin.ROLE_BL;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,9 +30,9 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.model.AzvStatusMixin;
 import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casestable.CasesTableViewer;
@@ -60,8 +65,16 @@ public class MitarbeiterCasesDecorator
                     return true;
                 }
                 // Mitarbeiter: beantragt 
-                else if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
-                    return MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_BEANTRAGT );
+                String azvStatus = AzvStatusMixin.ofCase( mcase );
+                if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) 
+                        && (EVENT_TYPE_BEANTRAGT.equals( azvStatus ) 
+                        || EVENT_TYPE_ANBEARBEITUNG.equals( azvStatus ))) {
+                    return true;
+                }
+                // Betriebstellenleiter: An Freigabe
+                if (SecurityUtils.isUserInGroup( ROLE_BL )
+                        && EVENT_TYPE_ANFREIGABE.equals( azvStatus )) {
+                    return true;
                 }
                 // Kunde: meine Vorgänge
                 else {

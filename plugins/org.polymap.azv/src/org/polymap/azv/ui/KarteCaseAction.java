@@ -21,10 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
-import com.vividsolutions.jts.io.WKTWriter;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -43,6 +39,7 @@ import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.azv.ui.map.HomeMapAction;
 import org.polymap.azv.ui.map.MapViewer;
@@ -85,7 +82,9 @@ public class KarteCaseAction
 
     private DrawFeatureMapAction            drawFeatureAction;
 
-    private VectorFeature vectorFeature;
+    private VectorFeature                   vectorFeature;
+
+    private IPanelSection                   mapSection;
 
     
     @Override
@@ -108,7 +107,8 @@ public class KarteCaseAction
     @Override
     public void fillContentArea( Composite parent ) {
         // section
-        IPanelSection mapSection = site.toolkit().createPanelSection( parent, "Ort" );
+        String hex = MosaicUiPlugin.rgbToHex( MosaicUiPlugin.COLOR_RED.get().getRGB() );
+        mapSection = site.toolkit().createPanelSection( parent, "Ort <span style=\"color:" + hex + ";\">(noch nicht markiert)</span>" );
         mapSection.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
         Composite body = mapSection.getBody();
         body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
@@ -158,22 +158,18 @@ public class KarteCaseAction
 
     
     protected void drawMCasePoint() {
-        String wkt = mcase.get().get( "point" );
-        if (wkt != null) {
-            try {
-                vectorLayer.destroyFeatures();
-                
-                Point p = (Point)new WKTReader().read( wkt );
-                vectorFeature = new VectorFeature( new PointGeometry( p.getX(), p.getY() ) );
-                vectorLayer.addFeatures( vectorFeature );
-                //vectorLayer.redraw();
+        Point geom = mcase.get().as( OrtMixin.class ).getGeom();
+        if (geom != null) {
+            vectorLayer.destroyFeatures();
 
-                mapViewer.getMap().setCenter( p.getX(), p.getY() );
-                mapViewer.getMap().zoomTo( 15 );
-            }
-            catch (ParseException e) {
-                log.warn( "", e );
-            }
+            vectorFeature = new VectorFeature( new PointGeometry( geom.getX(), geom.getY() ) );
+            vectorLayer.addFeatures( vectorFeature );
+            //vectorLayer.redraw();
+
+            mapViewer.getMap().setCenter( geom.getX(), geom.getY() );
+            mapViewer.getMap().zoomTo( 15 );
+            
+            mapSection.setTitle( "Ort" );
         }
     }
     
@@ -193,13 +189,12 @@ public class KarteCaseAction
     protected void featureAdded( PropertyChangeEvent ev ) {
         Feature feature = (Feature)ev.getNewValue();
         Point point = (Point)feature.getDefaultGeometryProperty().getValue();
-        String wkt = new WKTWriter().write( point );
-        mcase.get().put( "point", wkt );
+        mcase.get().as( OrtMixin.class ).setGeom( point );
         repo.get().commitChanges();
         
         drawMCasePoint();
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Ort der Maßnahme wurde festgelegt." ) );
         
         drawFeatureAction.deactivate();
     }

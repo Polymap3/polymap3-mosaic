@@ -25,9 +25,9 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
 
-import org.polymap.azv.AzvPlugin;
+import static org.polymap.azv.AzvPlugin.*;
+import org.polymap.azv.model.AzvStatusMixin;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
-import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -55,54 +55,66 @@ public class AzvStatusCaseTableColumn
 
         setLabelProvider( new ColumnLabelProvider() {
             
+            private MosaicCase2 mcase;
+            private String azvStatus;
+            
             @Override
             public String getText( Object elm ) {
                 String fid = ((IFeatureTableElement)elm).fid();
-                MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
+                mcase = repo.entity( MosaicCase2.class, fid );
                 
-                String status = mcase.getStatus();
-                MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_BEANTRAGT );
-                
-                if (MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_ABGEBROCHEN )) {
+                azvStatus = AzvStatusMixin.ofCase( mcase );
+                if (azvStatus == null) {
+                    return "NEU";                    
+                }
+                else if (azvStatus.equals( EVENT_TYPE_ABGEBROCHEN )) {
                     return "Abbruch";
                 }
-                else if (MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_STORNIERT )) {
+                else if (azvStatus.equals( EVENT_TYPE_STORNIERT )) {
                     return "Storno";
                 }
-                else if (MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+                else if (azvStatus.equals( EVENT_TYPE_BEANTRAGT )) {
                     return "Antrag";
                 }
-                else if (MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_FREIGABE )) {
+                else if (azvStatus.equals( EVENT_TYPE_FREIGABE )) {
                     return "Freigabe";
                 }
-                else if (IMosaicCaseEvent.TYPE_CLOSED.equals( status )) {
+                else if (azvStatus.equals( EVENT_TYPE_ANFREIGABE )) {
+                    return "An Freigabe";
+                }
+                else if (azvStatus.equals( EVENT_TYPE_ANBEARBEITUNG )) {
+                    return "An Bearbeitung";
+                }
+                else if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
                     return "ERLEDIGT";
                 }
                 else {
-                    return "NEU";
+                    return "???";
                 }
             }
             
             @Override
             public Color getBackground( Object elm ) {
-                String fid = ((IFeatureTableElement)elm).fid();
-                MosaicCase2 mcase = repo.entity( MosaicCase2.class, fid );
-                
-                String status = mcase.getStatus();
+                assert mcase != null && mcase.id().equals( ((IFeatureTableElement)elm).fid() );
 
-                if (MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_ABGEBROCHEN )
-                        || MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_STORNIERT )) {
+                if (azvStatus == null) {
+                    return MosaicUiPlugin.COLOR_NEW.get();                    
+                }
+                else if (azvStatus.equals( EVENT_TYPE_ABGEBROCHEN )
+                        || azvStatus.equals( EVENT_TYPE_STORNIERT )) {
                     return MosaicUiPlugin.COLOR_RED.get();
                 }
-                else if (MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+                else if (azvStatus.equals( EVENT_TYPE_BEANTRAGT )
+                        || azvStatus.equals( EVENT_TYPE_ANFREIGABE )
+                        || azvStatus.equals( EVENT_TYPE_ANBEARBEITUNG )) {
                     return MosaicUiPlugin.COLOR_OPEN.get();
                 }
-                else if (IMosaicCaseEvent.TYPE_CLOSED.equals( status )
-                        || MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_FREIGABE )) {
+                else if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.status.get() )
+                        || azvStatus.equals( EVENT_TYPE_FREIGABE )) {
                     return MosaicUiPlugin.COLOR_CLOSED.get();
                 }
                 else {
-                    return MosaicUiPlugin.COLOR_NEW.get();
+                    return null;
                 }
             }
             

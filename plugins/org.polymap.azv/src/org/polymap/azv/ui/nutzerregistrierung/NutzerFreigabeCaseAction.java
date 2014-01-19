@@ -21,6 +21,7 @@ import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT2;
 import static org.polymap.azv.AzvPlugin.ROLE_MA;
+import static org.polymap.azv.AzvPlugin.ROLE_BL;
 import static org.polymap.azv.AzvPlugin.ROLE_SCHACHTSCHEIN;
 
 import java.util.HashSet;
@@ -200,20 +201,9 @@ public class NutzerFreigabeCaseAction
 
         List<String> roles = Lists.newArrayList( 
                 ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN,
-                ROLE_ENTSORGUNG, ROLE_HYDRANTEN
-                );
+                ROLE_ENTSORGUNG, ROLE_HYDRANTEN );
         for (final String role : roles) {
-            final Button btn = site.toolkit().createButton( left, role, SWT.CHECK );
-            btn.setSelection( groups.contains( role ) );
-            btn.addSelectionListener( new SelectionAdapter() {
-                public void widgetSelected( SelectionEvent ev ) {
-                    if (btn.getSelection()) {
-                        um.asignGroup( user, role );
-                    } else {
-                        um.resignGroup( user, role );
-                    }
-                }
-            });
+            createBtn( left, role ).setSelection( groups.contains( role ) );
         }
         
         site.createSubmit( left, "Ok" );
@@ -222,17 +212,29 @@ public class NutzerFreigabeCaseAction
         Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
         right.setLayoutData( new ConstraintData( new PriorityConstraint( 10 ), new NeighborhoodConstraint( left, Neighborhood.TOP, 10 ) ) );
         right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).create() );
-        Button btn = site.toolkit().createButton( right, "Interner Sachbearbeiter", SWT.CHECK );
-        btn.setSelection( groups.contains( AzvPlugin.ROLE_MA ) );
-        btn.addSelectionListener( new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                log.info( "ev: " + ev );
-                um.asignGroup( user, AzvPlugin.ROLE_MA );
-            }
-        });
+        
+        roles = Lists.newArrayList( ROLE_MA, ROLE_BL );
+        for (final String role : roles) {
+            createBtn( left, role ).setSelection( groups.contains( role ) );
+        }
     }
 
+    
+    protected Button createBtn( Composite parent, final String role ) {
+        final Button btn = site.toolkit().createButton( parent, role, SWT.CHECK );
+        btn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent ev ) {
+                if (btn.getSelection()) {
+                    um.asignGroup( user, role );
+                } else {
+                    um.resignGroup( user, role );
+                }
+            }
+        });
+        return btn;
+    }
 
+    
     @Override
     public void submit() throws Exception {        
         um.commitChanges();

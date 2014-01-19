@@ -54,7 +54,7 @@ public class CloseCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
-                && SecurityUtils.isAdmin()) {
+                && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_BL )) {
             return true;
         }
         return false;

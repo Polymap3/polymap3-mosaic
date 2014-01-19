@@ -4,9 +4,13 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.opengis.filter.FilterFactory2;
 import org.osgi.framework.BundleContext;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.google.common.base.Joiner;
 import com.google.common.base.Supplier;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.rwt.graphics.Graphics;
 
@@ -50,7 +54,15 @@ public class MosaicUiPlugin
     public static MosaicUiPlugin getDefault() {
         return plugin;
     }
-
+    
+    public static String rgbToHex( RGB rgb ) {
+        return Joiner.on( "" ).join( "#",
+                StringUtils.leftPad( Integer.toHexString( rgb.red ), 2, "0" ),
+                StringUtils.leftPad( Integer.toHexString( rgb.green ), 2, "0" ),
+                StringUtils.leftPad( Integer.toHexString( rgb.blue ), 2, "0" ) );
+    }
+    
+    
     // instance *******************************************
     
     private ImageRegistryHelper         images = new ImageRegistryHelper( this );

@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2013, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2014, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -12,17 +12,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui.leitungsauskunft;
+package org.polymap.azv.ui;
 
-import static org.polymap.azv.AzvPlugin.CASE_LEITUNGSAUSKUNFT;
-import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
-import static org.polymap.azv.AzvPlugin.EVENT_TYPE_FREIGABE;
-import static org.polymap.azv.AzvPlugin.ROLE_BL;
+import static org.polymap.azv.AzvPlugin.*;
+
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.SimpleEmail;
 
 import org.eclipse.jface.action.IAction;
 
@@ -35,13 +32,10 @@ import org.polymap.core.security.SecurityUtils;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
-import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.email.EmailService;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvStatusMixin;
-import org.polymap.azv.model.NutzerMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -54,13 +48,13 @@ import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LeitungsauskunftFreigabeCaseAction
+public class AnFreigabeCaseAction
         extends DefaultCaseAction
         implements ICaseAction {
 
-    private static Log log = LogFactory.getLog( LeitungsauskunftFreigabeCaseAction.class );
+    private static Log log = LogFactory.getLog( AnFreigabeCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftFreigabe" );
+    public static final IMessages       i18n = Messages.forPrefix( "AnFreigabe" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -72,37 +66,28 @@ public class LeitungsauskunftFreigabeCaseAction
 
     private IAction                             action;
 
-    
+
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
-        if (mcase.get() != null && repo.get() != null
-                && SecurityUtils.isUserInGroup( ROLE_BL )
-                && mcase.get().getNatures().contains( CASE_LEITUNGSAUSKUNFT )
-                && EVENT_TYPE_ANFREIGABE.equals( AzvStatusMixin.ofCase( mcase.get() ))) {
-            return true;
+        if (mcase.get() != null && repo.get() != null) {
+            Set<String> natures = mcase.get().getNatures();
+            String azvStatus = mcase.get().as( AzvStatusMixin.class ).azvStatus();
+            if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
+                    && (natures.contains( CASE_LEITUNGSAUSKUNFT ) || natures.contains( CASE_SCHACHTSCHEIN ))
+                    && (EVENT_TYPE_BEANTRAGT.equals( azvStatus ) || EVENT_TYPE_ANBEARBEITUNG.equals( azvStatus ))) {
+                return true;
+            }
         }
         return false;
     }
 
-
+    
     @Override
     public void submit() throws Exception {
         MosaicRepository2 mosaic = repo.get();
-        mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt.", EVENT_TYPE_FREIGABE );
-        mosaic.closeCase( mcase.get(), EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt." );
+        mosaic.newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_ANFREIGABE, "An Freigabe übermittelt", AzvPlugin.EVENT_TYPE_ANFREIGABE );
         mosaic.commitChanges();
-        
-        User user = mcase.get().as( NutzerMixin.class ).user();
-                
-        String salu = user.salutation().get() != null ? user.salutation().get() : "";
-        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
-        Email email = new SimpleEmail();
-        email.setCharset( "ISO-8859-1" );
-        email.addTo( user.email().get() )
-                .setSubject( i18n.get( "emailSubject") )
-                .setMsg( i18n.get( "email", header ) );
-        EmailService.instance().send( email );
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) );
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
@@ -112,10 +97,4 @@ public class LeitungsauskunftFreigabeCaseAction
         });
     }
 
-
-    @Override
-    public void discard() {
-        repo.get().rollbackChanges();
-    }
-    
 }

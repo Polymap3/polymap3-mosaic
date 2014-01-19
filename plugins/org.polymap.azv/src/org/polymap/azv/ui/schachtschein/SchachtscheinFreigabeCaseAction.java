@@ -12,9 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui.leitungsauskunft;
+package org.polymap.azv.ui.schachtschein;
 
-import static org.polymap.azv.AzvPlugin.CASE_LEITUNGSAUSKUNFT;
+import static org.polymap.azv.AzvPlugin.CASE_SCHACHTSCHEIN;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_FREIGABE;
 import static org.polymap.azv.AzvPlugin.ROLE_BL;
@@ -54,13 +54,13 @@ import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LeitungsauskunftFreigabeCaseAction
+public class SchachtscheinFreigabeCaseAction
         extends DefaultCaseAction
         implements ICaseAction {
 
-    private static Log log = LogFactory.getLog( LeitungsauskunftFreigabeCaseAction.class );
+    private static Log log = LogFactory.getLog( SchachtscheinFreigabeCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftFreigabe" );
+    public static final IMessages       i18n = Messages.forPrefix( "SchachtscheinFreigabe" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -78,7 +78,7 @@ public class LeitungsauskunftFreigabeCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && SecurityUtils.isUserInGroup( ROLE_BL )
-                && mcase.get().getNatures().contains( CASE_LEITUNGSAUSKUNFT )
+                && mcase.get().getNatures().contains( CASE_SCHACHTSCHEIN )
                 && EVENT_TYPE_ANFREIGABE.equals( AzvStatusMixin.ofCase( mcase.get() ))) {
             return true;
         }
@@ -89,8 +89,8 @@ public class LeitungsauskunftFreigabeCaseAction
     @Override
     public void submit() throws Exception {
         MosaicRepository2 mosaic = repo.get();
-        mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt.", EVENT_TYPE_FREIGABE );
-        mosaic.closeCase( mcase.get(), EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt." );
+        mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_FREIGABE, "Schachtschein zur Prüfung freigegeben.", EVENT_TYPE_FREIGABE );
+        mosaic.closeCase( mcase.get(), EVENT_TYPE_FREIGABE, "Schachtschein zur Prüfung freigegeben." );
         mosaic.commitChanges();
         
         User user = mcase.get().as( NutzerMixin.class ).user();

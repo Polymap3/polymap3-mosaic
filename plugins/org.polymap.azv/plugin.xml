@@ -106,7 +106,7 @@
             class="org.polymap.azv.ui.schachtschein.SchachtscheinFreigabeCaseAction"
             description="Nutzer per EMail informieren und Vorgang schließen"
             id="org.polymap.azv.SchachtscheinFreigabeCaseAction"
-            name="Schachtschein freigeben"
+            name="Freigeben"
             priority="10">
       </caseAction>
       <caseAction
@@ -186,8 +186,22 @@
             class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftFreigabeCaseAction"
             description="Nutzer per EMail informieren und Vorgang schließen"
             id="org.polymap.azv.LeitungsauskunftFreigabeCaseAction"
-            name="Leitungsauskunft erteilen"
+            name="Freigeben"
             priority="10">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.AnFreigabeCaseAction"
+            description="Vorgang zur Prüfung/Freigabe geben"
+            id="org.polymap.azv.ZurPruefungCaseAction"
+            name="An Freigabe">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.AnBearbeitungCaseAction"
+            description="Vorgang zurück an Bearbeitung"
+            id="org.polymap.azv.caseAction2"
+            name="An Bearbeitung">
       </caseAction>
    </extension>
 

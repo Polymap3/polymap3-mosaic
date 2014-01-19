@@ -19,8 +19,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.SimpleEmail;
 
-import com.google.common.collect.Iterables;
-
 import org.eclipse.jface.action.IAction;
 
 import org.eclipse.core.runtime.IStatus;
@@ -105,12 +103,12 @@ public class EntsorgungStornoCaseAction
             status.put( "Status", "Antrag kann nicht mehr storniert werden." );
             site.setSubmitEnabled( false );
         }
-        if (mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
-            IMosaicCaseEvent lastEvent = Iterables.getLast( mcase.get().getEvents() );
-            if (lastEvent.getName().contains( "torniert" )) {
-                status.put( "Status", "STORNIERT", -1, AzvPlugin.instance().discardColor.get() );
-            }
-        }
+//        if (mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
+//            String azvStatus = mcase.get().as( AzvStatusMixin.class ).azvStatus();
+//            if (azvStatus != null && azvStatus.contains( "torniert" )) {
+//                status.put( "Status", "STORNIERT", -1, AzvPlugin.instance().discardColor.get() );
+//            }
+//        }
     }
 
     

@@ -154,7 +154,7 @@ public class LeitungsauskunftStartCaseAction
     
     @EventHandler(display=true)
     protected void updateAction( PropertyChangeEvent ev ) {
-        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+        if (MosaicCaseEvents.contains( mcase.get(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             caseAction.setText( null );
             caseAction.setImageDescriptor( null );
             caseAction.setEnabled( false );

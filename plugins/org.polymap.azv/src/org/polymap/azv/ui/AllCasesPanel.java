@@ -58,6 +58,7 @@ import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.toolkit.ConstraintLayout;
 import org.polymap.rhei.um.ui.LoginPanel;
 
+import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
@@ -116,7 +117,7 @@ public class AllCasesPanel
                 }
             });
 
-            casesViewerDecorators.add( context.propagate( new MitarbeiterCasesDecorator() ) );
+            //casesViewerDecorators.add( context.propagate( new MitarbeiterCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new NutzerCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new SchachtscheinCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new LeitungsauskunftCasesDecorator() ) );
@@ -129,7 +130,7 @@ public class AllCasesPanel
     
     @EventHandler(display=true)
     protected void userLoggedIn( PropertyAccessEvent ev ) {
-        if (SecurityUtils.isAdmin()) {
+        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
             getSite().setTitle( i18n.get( "title" ) );
             getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/drawer.png" ) );
         }

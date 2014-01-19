@@ -59,6 +59,8 @@ public class DrawFeatureMapAction
         extends ContributionItem
         implements OpenLayersEventListener {
 
+    public static final String      EVENT_NAME = "feature";
+
     private static Log log = LogFactory.getLog( DrawFeatureMapAction.class );
     
     private IPanelSite              site;
@@ -140,6 +142,8 @@ public class DrawFeatureMapAction
             standard.setAttribute( "pointRadius", "10" );
             StyleMap styleMap = new StyleMap();
             styleMap.setIntentStyle( "default", standard );
+            styleMap.setIntentStyle( "select", standard );
+            styleMap.setIntentStyle( "temporary", standard );
             vectorLayer.setStyleMap( styleMap );
 
             map.addLayer( vectorLayer );
@@ -189,7 +193,7 @@ public class DrawFeatureMapAction
             
             //vectorLayer.destroyFeatures();
             
-            EventManager.instance().publish( new PropertyChangeEvent( this, "feature", null, feature ) );            
+            EventManager.instance().publish( new PropertyChangeEvent( this, EVENT_NAME, null, feature ) );            
         }
         catch (IOException e) {
             log.warn( "", e );

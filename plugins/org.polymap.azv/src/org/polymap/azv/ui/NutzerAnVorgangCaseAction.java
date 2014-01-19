@@ -143,7 +143,7 @@ public class NutzerAnVorgangCaseAction
     public void fillAction( IAction action ) {
         this.caseAction = action;
         // nach Beantragung keine Änderung mehr
-        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+        if (MosaicCaseEvents.contains( mcase.get(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             action.setText( null );
             action.setImageDescriptor( null );
             action.setEnabled( false );

@@ -60,6 +60,7 @@ public class AzvPlugin
     public static final String      ROLE_WASSERQUALITAET = "Wasserqualität";
     public static final String      ROLE_ENTSORGUNG = "Entsorgung";
     public static final String      ROLE_MA = "Interner Sachbearbeiter";
+    public static final String      ROLE_BL = "Betriebsstellenleiter";
 
     public static final String      CASE_SCHACHTSCHEIN = "Schachtschein";
     public static final String      CASE_LEITUNGSAUSKUNFT = "Leitungsauskunft";
@@ -73,10 +74,11 @@ public class AzvPlugin
 //    public static final String      EVENT_TYPE_TERMINIERT = "Terminiert";
     public static final String      EVENT_TYPE_STORNIERT = "Storno";
     public static final String      EVENT_TYPE_ABGEBROCHEN = "Abbruch";
+    public static final String      EVENT_TYPE_ANFREIGABE = "An Freigabe";
+    public static final String      EVENT_TYPE_ANBEARBEITUNG = "An Bearbeitung";
     public static final String      EVENT_TYPE_FREIGABE = "Freigabe";
 
     public static final MinWidthConstraint MIN_COLUMN_WIDTH = new MinWidthConstraint( 420, 1 );
-
 
 
 

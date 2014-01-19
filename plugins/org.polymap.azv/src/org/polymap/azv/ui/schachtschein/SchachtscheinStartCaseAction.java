@@ -19,6 +19,8 @@ import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
 import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
 import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
 
+import java.util.List;
+
 import java.beans.PropertyChangeEvent;
 
 import org.apache.commons.lang.StringUtils;
@@ -165,9 +167,9 @@ public class SchachtscheinStartCaseAction
     }
 
     
-    @EventHandler(display=true)
-    protected void updateAction( PropertyChangeEvent ev ) {
-        if (MosaicCaseEvents.contains( mcase.get().getEvents(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
+    @EventHandler(display=true, delay=500)
+    protected void updateAction( List<PropertyChangeEvent> evs ) {
+        if (MosaicCaseEvents.contains( mcase.get(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             caseAction.setText( null );
             caseAction.setImageDescriptor( null );
             caseAction.setEnabled( false );

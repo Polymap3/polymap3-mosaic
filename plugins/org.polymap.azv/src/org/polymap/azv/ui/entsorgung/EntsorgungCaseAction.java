@@ -37,8 +37,6 @@ import org.apache.commons.mail.SimpleEmail;
 import org.qi4j.api.query.Query;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -169,7 +167,7 @@ public class EntsorgungCaseAction
     @Override
     public void fillAction( IAction action ) {
         this.caseAction = action;
-        if (Iterables.find( mcase.get().getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_BEANTRAGT ), null) != null) {
+        if (MosaicCaseEvents.contains( mcase.get(), AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
             action.setText( null );
             action.setImageDescriptor( null );
             action.setEnabled( false );
@@ -232,7 +230,7 @@ public class EntsorgungCaseAction
             user = nutzer.setSessionUser();
         }
         // noch keine Adresse -> vom Nutzer
-        if (entsorgung.name.get() == null) {
+        if (entsorgung.name.get() == null && user != null) {
             adresse.setAdresseVonNutzer( user );
             entsorgung.name.set( user.name().get() );
         }

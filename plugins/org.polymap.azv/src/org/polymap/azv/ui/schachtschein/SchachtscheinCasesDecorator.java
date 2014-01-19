@@ -17,8 +17,6 @@ package org.polymap.azv.ui.schachtschein;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.collect.Iterables;
-
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
 import org.polymap.core.security.SecurityUtils;
 
@@ -63,7 +61,7 @@ public class SchachtscheinCasesDecorator
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) && ! SecurityUtils.isAdmin()) {
             viewer.addFilter( new CasesViewerFilter() {
                 protected boolean apply( CasesTableViewer _viewer, IMosaicCase mcase ) {
-                    return Iterables.find( mcase.getEvents(), MosaicCaseEvents.contains( AzvPlugin.EVENT_TYPE_BEANTRAGT ), null ) != null;
+                    return MosaicCaseEvents.contains( mcase, AzvPlugin.EVENT_TYPE_BEANTRAGT );
                 }
             });            
         }

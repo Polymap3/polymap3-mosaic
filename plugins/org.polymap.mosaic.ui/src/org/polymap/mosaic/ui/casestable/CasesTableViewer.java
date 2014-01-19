@@ -48,6 +48,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableViewer;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
+import org.polymap.core.runtime.event.Event;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -117,7 +118,7 @@ public class CasesTableViewer
     }
 
     
-    @EventHandler(display=true,delay=1000)
+    @EventHandler(display=true,delay=1000,scope=Event.Scope.JVM)
     protected void caseChanged( List<PropertyChangeEvent> ev ) {
         if (!getControl().isDisposed()) {
             refresh();
@@ -175,6 +176,7 @@ public class CasesTableViewer
             setWeight( 1, 90 );
             setHeader( "" );
             setAlign( SWT.CENTER );
+            setSortable( false );
             
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
@@ -229,7 +231,7 @@ public class CasesTableViewer
             extends DefaultFeatureTableColumn {
 
         public NameColumn() {
-            super( createDescriptor( "name", Date.class ) );
+            super( createDescriptor( "name", String.class ) );
             setWeight( 2, 120 );
             setHeader( "Bezeichnung" );
             setAlign( SWT.LEFT );
@@ -259,7 +261,7 @@ public class CasesTableViewer
 
         public DateColumn() {
             super( createDescriptor( "created", Date.class ) );
-            setWeight( 2, 120 );
+            setWeight( 1, 90 );
             setHeader( "Angelegt" );
             setAlign( SWT.RIGHT );
             setLabelProvider( new ColumnLabelProvider() {
@@ -282,7 +284,7 @@ public class CasesTableViewer
 
         public NatureColumn() {
             super( createDescriptor( "natures", String.class ) );
-            setWeight( 2, 100 );
+            setWeight( 1, 120 );
             setHeader( "Art" );
             setLabelProvider( new ColumnLabelProvider() {
                 @Override
