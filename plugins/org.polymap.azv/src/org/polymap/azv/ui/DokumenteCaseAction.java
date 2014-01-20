@@ -245,7 +245,7 @@ public class DokumenteCaseAction
                 return ((IMosaicDocument)elm).getName();
             }
         });
-        layout.addColumnData( new ColumnWeightData( 2, 100, true ) );            
+        layout.addColumnData( new ColumnWeightData( 4, 120, true ) );            
 
         // date column
         vcolumn = new TableViewerColumn( viewer, SWT.CENTER );
@@ -256,7 +256,7 @@ public class DokumenteCaseAction
                 return df.format( ((IMosaicDocument)elm).getLastModified() );
             }
         });
-        layout.addColumnData( new ColumnWeightData( 2, 100, true ) );            
+        layout.addColumnData( new ColumnWeightData( 1, 90, true ) );            
 
         // size column
         vcolumn = new TableViewerColumn( viewer, SWT.RIGHT );
@@ -267,7 +267,7 @@ public class DokumenteCaseAction
                 return FileUtils.byteCountToDisplaySize( ((IMosaicDocument)elm).getSize() );
             }
         });
-        layout.addColumnData( new ColumnWeightData( 1, 60, true ) );            
+        layout.addColumnData( new ColumnWeightData( 1, 90, true ) );            
 
         viewer.setContentProvider( new ArrayContentProvider() {
             public Object[] getElements( Object input ) {

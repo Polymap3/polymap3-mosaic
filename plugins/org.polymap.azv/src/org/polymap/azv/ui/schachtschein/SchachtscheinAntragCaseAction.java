@@ -15,7 +15,11 @@
 package org.polymap.azv.ui.schachtschein;
 
 import java.beans.PropertyChangeEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,6 +28,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -35,6 +40,7 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -104,6 +110,21 @@ public class SchachtscheinAntragCaseAction
     
     @Override
     public void submit() throws Exception {
+        // dokumente
+        File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Schachtschein" );
+        for (File f : dir.listFiles()) {
+            IMosaicDocument doc = repo.get().newDocument( mcase.get(), f.getName() );
+            OutputStream out = doc.getOutputStream();
+            FileInputStream in = new FileInputStream( f );
+            try {
+                IOUtils.copy( in, out );
+            }
+            finally {
+                IOUtils.closeQuietly( out );
+                IOUtils.closeQuietly( in );
+            }
+        }
+        // events
         repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
 

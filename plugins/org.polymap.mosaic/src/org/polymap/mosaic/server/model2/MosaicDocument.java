@@ -71,7 +71,15 @@ public class MosaicDocument
     @Override
     public String getContentType() {
         try {
-            return file.getContent().getContentInfo().getContentType();
+            String result = file.getContent().getContentInfo().getContentType();
+            if (result != null) {
+                return result;
+            }
+            String ext = file.getName().getExtension();
+            if (ext.equalsIgnoreCase( "doc" )) {
+                return "application/msword";
+            }
+            return null;
         }
         catch (FileSystemException e) {
             throw new RuntimeException( e );

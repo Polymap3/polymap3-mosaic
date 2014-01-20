@@ -15,7 +15,11 @@
 package org.polymap.azv.ui.leitungsauskunft;
 
 import java.beans.PropertyChangeEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.mail.Email;
@@ -24,6 +28,7 @@ import org.apache.commons.mail.SimpleEmail;
 import org.eclipse.jface.action.IAction;
 
 import org.polymap.core.runtime.IMessages;
+import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -38,6 +43,7 @@ import org.polymap.azv.Messages;
 import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
+import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -110,6 +116,21 @@ public class LeitungsauskunftAntragCaseAction
     
     @Override
     public void submit() throws Exception {
+        // dokumente
+        File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Leitungen" );
+        for (File f : dir.listFiles()) {
+            IMosaicDocument doc = repo.get().newDocument( mcase.get(), f.getName() );
+            OutputStream out = doc.getOutputStream();
+            FileInputStream in = new FileInputStream( f );
+            try {
+                IOUtils.copy( in, out );
+            }
+            finally {
+                IOUtils.closeQuietly( out );
+                IOUtils.closeQuietly( in );
+            }
+        }
+        // event, commit
         repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
         repo.get().commitChanges();
      
