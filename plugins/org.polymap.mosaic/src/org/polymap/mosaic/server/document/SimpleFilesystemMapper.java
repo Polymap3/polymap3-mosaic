@@ -33,7 +33,7 @@ public class SimpleFilesystemMapper
 
     private static Log log = LogFactory.getLog( SimpleFilesystemMapper.class );
 
-    public static final Pattern     notAllowed = Pattern.compile( "[^a-zA-Z0-9.-]" ); 
+    public static final Pattern     notAllowed = Pattern.compile( "[^a-zA-Z0-9.-_]" ); 
 
     @Override
     public String documentPath( IMosaicCase mcase, String name ) {

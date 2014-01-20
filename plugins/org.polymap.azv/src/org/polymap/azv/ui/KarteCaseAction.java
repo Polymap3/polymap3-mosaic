@@ -15,12 +15,15 @@
 package org.polymap.azv.ui;
 
 import java.beans.PropertyChangeEvent;
+
 import org.opengis.feature.Feature;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.itextpdf.text.PageSize;
 import com.vividsolutions.jts.geom.Point;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -43,6 +46,8 @@ import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.azv.ui.map.HomeMapAction;
 import org.polymap.azv.ui.map.MapViewer;
+import org.polymap.azv.ui.map.PdfMapAction;
+import org.polymap.azv.ui.map.ScaleMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -177,11 +182,16 @@ public class KarteCaseAction
     protected void createToolbar( Composite parent ) {
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
 
-        drawFeatureAction = new DrawFeatureMapAction( 
-                mapViewer, vectorLayer, DrawFeatureControl.HANDLER_POINT );
-
+        drawFeatureAction = new DrawFeatureMapAction( mapViewer, vectorLayer, DrawFeatureControl.HANDLER_POINT );
         drawFeatureAction.addListener( this );
         mapViewer.addToolbarItem( drawFeatureAction );
+        
+        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
+            mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 500 ) );
+            mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
+            mapViewer.addToolbarItem( new PdfMapAction( mapViewer, "A4", PageSize.A4, mcase.get(), repo.get() ) );
+            mapViewer.addToolbarItem( new PdfMapAction( mapViewer, "A3", PageSize.A3, mcase.get(), repo.get() ) );
+        }
     }
 
     

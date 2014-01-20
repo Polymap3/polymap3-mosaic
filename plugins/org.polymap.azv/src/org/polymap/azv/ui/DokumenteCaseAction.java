@@ -14,6 +14,9 @@
  */
 package org.polymap.azv.ui;
 
+import java.util.List;
+
+import java.beans.PropertyChangeEvent;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -50,6 +53,9 @@ import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
+import org.polymap.core.runtime.event.EventFilter;
+import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -121,6 +127,7 @@ public class DokumenteCaseAction
     @Override
     public void dispose() {
         caseAction = null;
+        EventManager.instance().unsubscribe( this );
     }
 
 
@@ -222,11 +229,26 @@ public class DokumenteCaseAction
     }
     
     
+    @EventHandler(display=true,delay=500)
+    protected void mcaseChanged( List<PropertyChangeEvent> evs ) {
+        if (viewer != null && !viewer.getControl().isDisposed()) {
+            viewer.setInput( mcase.get() );            
+        }
+    }
+    
+    
     protected void createViewer() {
         for (Control child : section.getBody().getChildren()) {
             child.dispose();
         }
         
+        //
+        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+            public boolean apply( PropertyChangeEvent input ) {
+                return input.getSource() == mcase.get();
+            }
+        });
+
         // viewer
         viewer = new TableViewer( section.getBody(), SWT.NONE /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );

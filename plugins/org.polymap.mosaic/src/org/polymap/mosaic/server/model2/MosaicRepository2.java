@@ -431,6 +431,9 @@ public class MosaicRepository2
         try {
             String path = documentsNameMapper.documentPath( mcase, name );
             FileObject file = documentsRoot.resolveFile( path );
+            if (file.exists()) {
+                throw new IllegalArgumentException( "Dokument existiert bereits: " + path );
+            }
             MosaicDocument doc = new MosaicDocument( file );
             
             ((MosaicCase2)mcase).lastModified.set( new Date() );
