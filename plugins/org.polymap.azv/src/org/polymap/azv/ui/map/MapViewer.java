@@ -15,10 +15,19 @@
 package org.polymap.azv.ui.map;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import java.io.ByteArrayOutputStream;
+
+import org.geotools.geometry.jts.ReferencedEnvelope;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.base.Joiner;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Rectangle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -26,12 +35,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
+import org.polymap.core.data.util.Geometries;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.IPanelSite;
 
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
+import org.polymap.openlayers.rap.widget.base.OpenLayersEventListener;
+import org.polymap.openlayers.rap.widget.base.OpenLayersObject;
 import org.polymap.openlayers.rap.widget.base_types.Bounds;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
 import org.polymap.openlayers.rap.widget.base_types.Projection;
@@ -52,19 +64,28 @@ import org.polymap.openlayers.rap.widget.layers.WMSLayer;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class MapViewer {
+public class MapViewer
+        implements OpenLayersEventListener {
 
     private static Log log = LogFactory.getLog( MapViewer.class );
     
     private IPanelSite          site;
 
     private OpenLayersWidget    olwidget;
+    
+    private String              srs;
+
+    private OpenLayersMap       map;
+
+    private List<WMSLayer>      layers = new ArrayList();
 
     private Composite           contents;
     
     private List<IContributionItem> toolbarItems = new ArrayList();
 
-    private Composite toolbar;
+    private Composite           toolbar;
+
+    private ReferencedEnvelope  bbox;
 
     
     public void dispose() {
@@ -101,6 +122,10 @@ public class MapViewer {
             ((GridLayer)layer).setBuffer( 0 );
         }
         olwidget.getMap().addLayer( layer );
+        
+        if (layer instanceof WMSLayer) {
+            layers.add( (WMSLayer)layer );
+        }
         return this;
     }
     
@@ -126,14 +151,14 @@ public class MapViewer {
         olwidget = new OpenLayersWidget( contents, SWT.MULTI | SWT.WRAP | SWT.BORDER, "openlayers/full/OpenLayers-2.12.1.js" );
         olwidget.setLayoutData( FormDataFactory.filled().top( toolbar ).create() );
 
-        String srs = "EPSG:25833";
+        srs = "EPSG:25833";
         Projection proj = new Projection( srs );
         String units = srs.equals( "EPSG:4326" ) ? "degrees" : "m";
         float maxResolution = srs.equals( "EPSG:4326" ) ? (360/256) : 125000;
         //Bounds maxExtent = new Bounds( 12.80, 53.00, 14.30, 54.50 );
         Bounds maxExtent = new Bounds( 330000, 5820000, 477000, 6078174.895021 );
         olwidget.createMap( proj, proj, units, maxExtent, maxResolution );
-        OpenLayersMap map = olwidget.getMap();
+        map = olwidget.getMap();
         
         //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
         WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
@@ -141,18 +166,21 @@ public class MapViewer {
         topo.setTileSize( new Size( 600, 600 ) );
         topo.setBuffer( 0 );
         map.addLayer( topo );
+        layers.add( topo );
 
         WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
         osm.setIsBaseLayer( true );
         osm.setTileSize( new Size( 600, 600 ) );
         osm.setBuffer( 0 );
         map.addLayer( osm );
+//        layers.add( osm );
 
         WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
         dop.setIsBaseLayer( true );
         dop.setTileSize( new Size( 400, 400 ) );
         dop.setBuffer( 0 );
         map.addLayer( dop );
+//        layers.add( dop );
 
 //        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasserquali" );
 //        wasser.setIsBaseLayer( false );
@@ -176,6 +204,14 @@ public class MapViewer {
         map.zoomToExtent( maxExtent, true );
         map.zoomTo( 10 );
 
+        // map events
+        HashMap<String, String> payload = new HashMap<String, String>();
+        payload.put( "left", "event.object.getExtent().toArray()[0]" );
+        payload.put( "bottom", "event.object.getExtent().toArray()[1]" );
+        payload.put( "right", "event.object.getExtent().toArray()[2]" );
+        payload.put( "top", "event.object.getExtent().toArray()[3]" );
+        map.events.register( this, OpenLayersMap.EVENT_MOVEEND, payload );
+
         // after olwidget is initialized
         createToolbar();        
     }
@@ -186,6 +222,82 @@ public class MapViewer {
         
         for (IContributionItem item : toolbarItems) {
             item.fill( toolbar );
+        }
+    }
+
+    
+    public byte[] createPdf( Rectangle pageSize ) {
+        try {
+            // image
+            int w = (int)(pageSize.getWidth() - pageSize.getBorderWidthLeft() - pageSize.getBorderWidthRight());
+            int h = (int)(pageSize.getHeight() - pageSize.getBorderWidthTop() - pageSize.getBorderWidthBottom());
+            java.awt.Image image = new WmsMapImageCreator( layers ).createImage( bbox, w, h );
+
+            // pdf
+            ByteArrayOutputStream bout = new ByteArrayOutputStream( 200*1024 );
+            PdfCreator pdf = new PdfCreator( pageSize, bout );
+
+            Image pdfImage = Image.getInstance( image, null, false );
+            pdfImage.scalePercent( 85 );
+            pdfImage.setAlignment( Image.MIDDLE );
+            //pdfImage.setBorder( Rectangle.BOX );
+            //pdfImage.setBorderWidth( 1 );
+            pdf.document().add( pdfImage );
+            
+            pdf.addHtml( Joiner.on( "\n" ).join( 
+                    "<html>",
+                    "<head><style type=\"text/css\">",
+                        "body { font:10px Arial; }",
+                        "table { font:10px Arial; width:100%; margin-top:10px; }",
+                        "th { border:1px solid gray; }",
+                        "tr#bestand { font:14px Arial; border:1px solid gray; width:100%; }",
+                    "</style></head>",
+                    "<body>",
+                    "<table cellspacing=\"0\" cellpadding=\"5px\">",
+                        "<tr class=\"bestand\">",
+                            "<th colspan=\"4\">Bestand: ...</th>",
+                        "</tr>",
+                        "<tr>",
+                            "<th>Hallo!</th>",
+                            "<th>GKU</th>",
+                            "<th><b>Im Auftrag</b><br/>des Zweckverbandes</th>",
+                            "<th>Tel.: 03 97 53 / 24 79 10</th>",
+                        "</tr>",
+                    "</table>",
+                    "</body></html>" ) );
+            
+            pdf.close();
+            
+            return bout.toByteArray();
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
+    
+
+    /*
+     * Processes events triggered by the OpenLayers map. 
+     */
+    public void process_event( OpenLayersObject obj, String name, HashMap<String,String> payload ) {
+        if (olwidget.getMap() != obj) {
+            return;
+        }
+        // map zoom/pan
+        String left = payload.get( "left" );
+        if (left != null) {
+            try {
+                bbox = new ReferencedEnvelope(
+                        Double.parseDouble( payload.get( "left" ) ),
+                        Double.parseDouble( payload.get( "right" ) ),
+                        Double.parseDouble( payload.get( "bottom" ) ),
+                        Double.parseDouble( payload.get( "top" ) ),
+                        Geometries.crs( srs ) );
+                log.debug( "### process_event: bbox= " + bbox );
+            }
+            catch (Exception e) {
+                log.error( "unhandled:", e );
+            }
         }
     }
 
