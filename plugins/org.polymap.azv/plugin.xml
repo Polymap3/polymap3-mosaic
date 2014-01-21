@@ -31,6 +31,10 @@
             class="org.polymap.azv.ui.AllCasesPanel"
             id="org.polymap.azv.AllCasesPanel">
       </panel>
+      <panel
+            class="org.polymap.azv.ui.hydranten.HydrantenPanel"
+            id="org.polymap.azv.HydrantenPanel">
+      </panel>
    </extension>
    <extension
          point="org.polymap.core.model.moduleAssemblers">

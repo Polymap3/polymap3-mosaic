@@ -54,12 +54,12 @@ public class LayerMapAction
     
     
     public LayerMapAction( MapViewer viewer, Layer layer, String label, boolean visible ) {
+        this.label = label;
         this.viewer = viewer;
         this.site = viewer.getPanelSite();
         this.map = viewer.getMap();
         this.layer = layer;
-        this.layer.setVisibility( this.visible = visible );
-        this.label = label;
+        viewer.visibleLayer( this.layer, this.visible = visible );
     }
 
     
@@ -72,7 +72,7 @@ public class LayerMapAction
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
-                layer.setVisibility( visible = !visible );
+                viewer.visibleLayer( layer, visible = !visible );
             }
         });
     }

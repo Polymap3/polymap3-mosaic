@@ -17,7 +17,6 @@ package org.polymap.azv.ui.map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import java.io.ByteArrayOutputStream;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -79,6 +78,8 @@ public class MapViewer
 
     private List<WMSLayer>      layers = new ArrayList();
 
+    private List<WMSLayer>      visibleLayers = new ArrayList();
+
     private Composite           contents;
     
     private List<IContributionItem> toolbarItems = new ArrayList();
@@ -115,16 +116,29 @@ public class MapViewer
     }
 
 
-    public MapViewer addLayer( Layer layer ) {
-        layer.setIsBaseLayer( false );
+    public MapViewer addLayer( Layer layer, boolean isBaseLayer ) {
+        layer.setIsBaseLayer( isBaseLayer );
         if (layer instanceof GridLayer) {
             ((GridLayer)layer).setTileSize( new Size( 400, 400 ) );
             ((GridLayer)layer).setBuffer( 0 );
         }
-        olwidget.getMap().addLayer( layer );
+        map.addLayer( layer );
         
         if (layer instanceof WMSLayer) {
             layers.add( (WMSLayer)layer );
+            visibleLayer( layer, true );
+        }
+        return this;
+    }
+    
+    
+    public MapViewer visibleLayer( Layer layer, boolean visible ) {
+        assert layers.contains( layer );
+        layer.setVisibility( visible );
+        if (visible) {
+            visibleLayers.add( (WMSLayer)layer );
+        } else {
+            visibleLayers.remove( layer );
         }
         return this;
     }
@@ -162,24 +176,21 @@ public class MapViewer
         
         //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
         WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
-        topo.setIsBaseLayer( true );
+        addLayer( topo, true );
         topo.setTileSize( new Size( 600, 600 ) );
-        topo.setBuffer( 0 );
-        map.addLayer( topo );
-        layers.add( topo );
 
-        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
-        osm.setIsBaseLayer( true );
-        osm.setTileSize( new Size( 600, 600 ) );
-        osm.setBuffer( 0 );
-        map.addLayer( osm );
+//        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
+//        osm.setIsBaseLayer( true );
+//        osm.setTileSize( new Size( 600, 600 ) );
+//        osm.setBuffer( 0 );
+//        map.addLayer( osm );
 //        layers.add( osm );
 
-        WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
-        dop.setIsBaseLayer( true );
-        dop.setTileSize( new Size( 400, 400 ) );
-        dop.setBuffer( 0 );
-        map.addLayer( dop );
+//        WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
+//        dop.setIsBaseLayer( true );
+//        dop.setTileSize( new Size( 400, 400 ) );
+//        dop.setBuffer( 0 );
+//        map.addLayer( dop );
 //        layers.add( dop );
 
 //        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasserquali" );
@@ -231,7 +242,7 @@ public class MapViewer
             // image
             int w = (int)(pageSize.getWidth() - pageSize.getBorderWidthLeft() - pageSize.getBorderWidthRight());
             int h = (int)(pageSize.getHeight() - pageSize.getBorderWidthTop() - pageSize.getBorderWidthBottom());
-            java.awt.Image image = new WmsMapImageCreator( layers ).createImage( bbox, w, h );
+            java.awt.Image image = new WmsMapImageCreator( visibleLayers ).createImage( bbox, w, h );
 
             // pdf
             ByteArrayOutputStream bout = new ByteArrayOutputStream( 200*1024 );

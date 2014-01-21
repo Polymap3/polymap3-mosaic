@@ -61,10 +61,9 @@ import org.polymap.openlayers.rap.widget.controls.ScaleControl;
 import org.polymap.openlayers.rap.widget.controls.ScaleLineControl;
 import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
-
 /**
  * 
- *
+ * @deprecated Siehe {@link HydrantenPanel}
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class HydrantenCaseAction

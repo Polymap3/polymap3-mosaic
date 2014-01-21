@@ -17,12 +17,12 @@ package org.polymap.azv.ui.map;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -41,7 +41,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.ows.ServiceException;
 import org.xml.sax.SAXException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -74,7 +73,7 @@ public class WmsMapImageCreator {
     }
     
     
-    public WmsMapImageCreator( List<WMSLayer> layers ) {
+    public WmsMapImageCreator( Iterable<WMSLayer> layers ) {
         for (WMSLayer layer : layers) {
             try {
                 Descriptor descriptor = new Descriptor();
@@ -113,6 +112,8 @@ public class WmsMapImageCreator {
                 getMap.setBBox( Joiner.on( "," ).join( minX, minY, maxX, maxY ) );
                 getMap.setSRS( Geometries.srs( bbox.getCoordinateReferenceSystem() ) );
                 for (String layerName : descriptor.layerNames) {
+                    // XXX Polygis(alt) möchte unbedingt mit Windows verbandelt blieben und nutzt Backslashes :(
+                    layerName = StringUtils.replace( layerName, "\\\\", "\\" );
                     getMap.addLayer( layerName, (String)null );
                 }
 
@@ -120,7 +121,6 @@ public class WmsMapImageCreator {
                 GetMapResponse wmsResponse = wms.issueRequest( getMap );
                 byte[] bytes = IOUtils.toByteArray( in = wmsResponse.getInputStream() );
                 log.info( "::: " + bytes.length );
-                FileUtils.writeByteArrayToFile( new File( "/tmp/bytes.png" ), bytes );
 
                 if (bytes.length > 1024) {
                     images.add( ImageIO.read( new ByteArrayInputStream( bytes ) ) );
@@ -155,11 +155,10 @@ public class WmsMapImageCreator {
             hints.add( new RenderingHints( RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON ) );
             g.setRenderingHints( hints );
 
-            // FIXME honor layer.getOrderKey()
             for (Image image : images) {
-//                int rule = AlphaComposite.SRC_OVER;
-//                float alpha = ((float)entry.getKey().getOpacity()) / 100;
-//                g.setComposite( AlphaComposite.getInstance( rule, alpha ) );
+                int rule = AlphaComposite.SRC_OVER;
+                float alpha = 1f; //((float)entry.getKey().getOpacity()) / 100;
+                g.setComposite( AlphaComposite.getInstance( rule, alpha ) );
                 g.drawImage( image, 0, 0, null );
             }
             return result;

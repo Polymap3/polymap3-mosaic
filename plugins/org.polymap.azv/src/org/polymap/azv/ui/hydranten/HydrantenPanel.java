@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui.leitungsauskunft;
+package org.polymap.azv.ui.hydranten;
 
 import java.util.Date;
 
@@ -48,19 +48,15 @@ import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
-import org.polymap.rhei.batik.app.BatikApplication;
-
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.map.AddressSearchMapAction;
 import org.polymap.azv.ui.map.HomeMapAction;
-import org.polymap.azv.ui.map.LayerMapAction;
 import org.polymap.azv.ui.map.MapViewer;
 import org.polymap.azv.ui.map.ScaleMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
-import org.polymap.mosaic.ui.casepanel.CasePanel;
 import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
 /**
@@ -68,15 +64,15 @@ import org.polymap.openlayers.rap.widget.layers.WMSLayer;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LeitungsauskunftPanel
+public class HydrantenPanel
         extends DefaultPanel
         implements IPanel {
 
-    private static Log log = LogFactory.getLog( LeitungsauskunftPanel.class );
+    private static Log log = LogFactory.getLog( HydrantenPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "Leitungsauskunft" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "Hydranten" );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftPanel" );
+    public static final IMessages       i18n = Messages.forPrefix( "HydrantenPanel" );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase> mcase;
@@ -90,7 +86,7 @@ public class LeitungsauskunftPanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        site.setTitle( "Automatische Leitungsauskunft" );
+        site.setTitle( "Hydrantenpläne" );
         return false;
     }
 
@@ -109,13 +105,6 @@ public class LeitungsauskunftPanel
 
     @Override
     public void createContents( Composite panelBody ) {
-//        IPanelSection contents = getSite().toolkit().createPanelSection( panelBody, null );  //"Wasserhärten und -Qualitäten" );
-//        contents.addConstraint( new MinWidthConstraint( 500, 1 ) )
-//                .addConstraint( new MaxWidthConstraint( 800, 1 ) );
-//        Composite body = contents.getBody();
-        //body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
-        //body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 20 ).create() );
-
         panelBody.setLayout( new FillLayout() );
         ((FillLayout)panelBody.getLayout()).marginHeight = 10;
         ((FillLayout)panelBody.getLayout()).marginWidth = 10;
@@ -124,19 +113,16 @@ public class LeitungsauskunftPanel
         mapViewer.createContents( panelBody, getSite() );
         
         // layers
-        WMSLayer kanal = new WMSLayer( "Kanal", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Kanal" );
-        mapViewer.addLayer( kanal, false );
-        
-        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
-        mapViewer.addLayer( wasser, false );
+        WMSLayer hydranten = new WMSLayer( "Hydranten", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Hydranten" );
+        hydranten.setIsBaseLayer( false );
+        hydranten.setVisibility( true );
+        mapViewer.addLayer( hydranten, false );
         
         // toolbar
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 250 ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 500 ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
-        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, kanal, "Kanal", true ) );
-        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, wasser, "Wasser", false ) );
         mapViewer.addToolbarItem( new AddressSearchMapAction( mapViewer ) );
         
         mapViewer.addToolbarItem( new ContributionItem() {
@@ -164,28 +150,6 @@ public class LeitungsauskunftPanel
                 });
             }
         });
-        
-        mapViewer.addToolbarItem( new ContributionItem() {
-            public void fill( Composite parent ) {
-                Button btn = getSite().toolkit().createButton( parent, "Einzelauskunft" );
-                btn.setToolTipText( "Antrag auf Einzelauskunft durch den AZV" );
-                btn.addSelectionListener( new SelectionAdapter() {
-                    public void widgetSelected( SelectionEvent ev ) {
-                        try {
-                            // create new case; commit/rollback inside CaseAction
-                            IMosaicCase newCase = repo.get().newCase( "", "" );
-                            newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
-                            //newCase.put( KEY_USER, user.get().username().get() );
-                            mcase.set( newCase );
-                            getContext().openPanel( CasePanel.ID );
-                        }
-                        catch (Exception e) {
-                            BatikApplication.handleError( "Einzelauskunft konnte nicht gestartet werden.", e );
-                        }
-                    }
-                });
-            }
-        });
     }
     
     
@@ -193,7 +157,7 @@ public class LeitungsauskunftPanel
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
             @Override
             public String getFilename() {
-                return "Leistungsauskunft-" + AzvPlugin.df.format( new Date() ) + ".pdf";
+                return "Hydranten-" + AzvPlugin.df.format( new Date() ) + ".pdf";
             }
             @Override
             public String getContentType() {

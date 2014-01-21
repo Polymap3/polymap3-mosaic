@@ -126,15 +126,15 @@ public class KarteCaseAction
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
             WMSLayer alk = new WMSLayer( "ALK", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-ALK" );
             alk.setVisibility( false );
-            mapViewer.addLayer( alk );
+            mapViewer.addLayer( alk, false );
 
             WMSLayer kanal = new WMSLayer( "Kanal", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Kanal" );
             kanal.setVisibility( false );
-            mapViewer.addLayer( kanal );
+            mapViewer.addLayer( kanal, false );
 
-            WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
-            wasser.setVisibility( false );
-            mapViewer.addLayer( wasser );
+//            WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
+//            wasser.setVisibility( false );
+//            mapViewer.addLayer( wasser, false );
         }
         
         // vector layer
@@ -152,7 +152,7 @@ public class KarteCaseAction
         styleMap.setIntentStyle( "default", standard );
         vectorLayer.setStyleMap( styleMap );
         
-        mapViewer.addLayer( vectorLayer );
+        mapViewer.addLayer( vectorLayer, false );
         
         // check if mcase has point
         drawMCasePoint();

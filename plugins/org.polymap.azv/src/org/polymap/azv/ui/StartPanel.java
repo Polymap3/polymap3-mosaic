@@ -85,6 +85,7 @@ import org.polymap.rhei.um.ui.UserSettingsPanel;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
+import org.polymap.azv.ui.hydranten.HydrantenPanel;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftCasesDecorator;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftPanel;
 import org.polymap.azv.ui.nutzerregistrierung.NutzerCasesDecorator;
@@ -410,15 +411,7 @@ public class StartPanel
                 AzvPlugin.ROLE_HYDRANTEN,
                 new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
-                try {
-                    IMosaicCase newCase = repo.get().newCase( "Hydrantenauskunft", "" );
-                    newCase.addNature( AzvPlugin.CASE_HYDRANTEN );
-                    mcase.set( newCase );
-                    getContext().openPanel( CasePanel.ID );
-                }
-                catch (Exception e) {
-                    BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
-                }
+                getContext().openPanel( HydrantenPanel.ID );
             }
         }));
         actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
