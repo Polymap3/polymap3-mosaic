@@ -174,7 +174,7 @@ public class MapViewer
         srs = "EPSG:25833";
         Projection proj = new Projection( srs );
         String units = srs.equals( "EPSG:4326" ) ? "degrees" : "m";
-        float maxResolution = srs.equals( "EPSG:4326" ) ? (360/256) : 125000;
+        float maxResolution = -1; //srs.equals( "EPSG:4326" ) ? (360/256) : 50000;
         //Bounds maxExtent = new Bounds( 12.80, 53.00, 14.30, 54.50 );
         Bounds maxExtent = new Bounds( 330000, 5820000, 477000, 6078174.895021 );
         olwidget.createMap( proj, proj, units, maxExtent, maxResolution );
@@ -219,7 +219,7 @@ public class MapViewer
 
        // map.setRestrictedExtend( maxExtent );
         map.zoomToExtent( maxExtent, true );
-        map.zoomTo( 10 );
+        map.zoomTo( 2 );
 
         // map events
         HashMap<String, String> payload = new HashMap<String, String>();

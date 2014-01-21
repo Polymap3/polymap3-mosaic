@@ -134,6 +134,9 @@ public class LeitungsauskunftPanel
         WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
         mapViewer.addLayer( wasser, false );
         
+        WMSLayer alk = new WMSLayer( "ALK", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-ALK" );
+        mapViewer.addLayer( alk, false );
+
         // toolbar
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 250 ) );
@@ -141,6 +144,7 @@ public class LeitungsauskunftPanel
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
         mapViewer.addToolbarItem( new LayerMapAction( mapViewer, kanal, "Kanal", true ) );
         mapViewer.addToolbarItem( new LayerMapAction( mapViewer, wasser, "Wasser", false ) );
+        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, alk, "ALK", false ) );
         mapViewer.addToolbarItem( addressSearch = new AddressSearchMapAction( mapViewer ) );
         
         mapViewer.addToolbarItem( new ContributionItem() {

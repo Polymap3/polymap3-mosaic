@@ -27,7 +27,6 @@ import org.eclipse.jface.action.ContributionItem;
 
 import org.polymap.rhei.batik.IPanelSite;
 
-import org.polymap.openlayers.rap.widget.base_types.Bounds;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
 
 /**
@@ -64,8 +63,8 @@ public class ScaleMapAction
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
-                Bounds maxExtent = map.getMaxExtent();
-                map.zoomToExtent( maxExtent, true );
+                //Bounds maxExtent = map.getMaxExtent();
+                //map.zoomToExtent( maxExtent, true );
                 map.zoomToScale( scale, true );
             }
         });
