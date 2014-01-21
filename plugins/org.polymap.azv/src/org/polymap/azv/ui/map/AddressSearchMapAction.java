@@ -39,6 +39,8 @@ public class AddressSearchMapAction
     private static Log log = LogFactory.getLog( AddressSearchMapAction.class );
 
     private MapViewer           viewer;
+
+    private Text                searchTxt;
     
     
     public AddressSearchMapAction( MapViewer viewer ) {
@@ -46,9 +48,14 @@ public class AddressSearchMapAction
     }
 
 
+    public String getSearchText() {
+        return !searchTxt.getText().startsWith( "Suchen" ) ? searchTxt.getText() : null;
+    }
+    
+    
     @Override
     public void fill( Composite parent ) {
-        final Text searchTxt = viewer.getPanelSite().toolkit().createText( parent, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
+        searchTxt = viewer.getPanelSite().toolkit().createText( parent, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
         searchTxt.setLayoutData( RowDataFactory.swtDefaults().hint( 320, SWT.DEFAULT ).create() );
         //searchTxt.setLayoutData( FormDataFactory.filled().right( clearBtn ).create() );
 

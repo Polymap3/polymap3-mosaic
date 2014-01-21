@@ -14,6 +14,8 @@
  */
 package org.polymap.azv.ui.leitungsauskunft;
 
+import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
+
 import java.util.Date;
 
 import java.io.ByteArrayInputStream;
@@ -86,6 +88,8 @@ public class LeitungsauskunftPanel
 
     private MapViewer                   mapViewer;
 
+    private AddressSearchMapAction      addressSearch;
+
 
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
@@ -137,7 +141,7 @@ public class LeitungsauskunftPanel
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
         mapViewer.addToolbarItem( new LayerMapAction( mapViewer, kanal, "Kanal", true ) );
         mapViewer.addToolbarItem( new LayerMapAction( mapViewer, wasser, "Wasser", false ) );
-        mapViewer.addToolbarItem( new AddressSearchMapAction( mapViewer ) );
+        mapViewer.addToolbarItem( addressSearch = new AddressSearchMapAction( mapViewer ) );
         
         mapViewer.addToolbarItem( new ContributionItem() {
             public void fill( Composite parent ) {
@@ -190,6 +194,8 @@ public class LeitungsauskunftPanel
     
     
     protected void createPDF( final Rectangle pageSize ) {
+        final String title = defaultIfEmpty( addressSearch.getSearchText(), "Leitungsauskunft" );
+        
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
             @Override
             public String getFilename() {
@@ -201,7 +207,7 @@ public class LeitungsauskunftPanel
             }
             @Override
             public InputStream getInputStream() throws Exception {
-                byte[] bytes = mapViewer.createPdf( pageSize );
+                byte[] bytes = mapViewer.createPdf( pageSize, title );
                 //FileUtils.writeByteArrayToFile( new File( "/tmp/bytes.pdf" ), bytes );
                 return new ByteArrayInputStream( bytes );
             }

@@ -165,7 +165,7 @@ public class HydrantenPanel
             }
             @Override
             public InputStream getInputStream() throws Exception {
-                byte[] bytes = mapViewer.createPdf( pageSize );
+                byte[] bytes = mapViewer.createPdf( pageSize, mcase.get().getName() );
                 //FileUtils.writeByteArrayToFile( new File( "/tmp/bytes.pdf" ), bytes );
                 return new ByteArrayInputStream( bytes );
             }

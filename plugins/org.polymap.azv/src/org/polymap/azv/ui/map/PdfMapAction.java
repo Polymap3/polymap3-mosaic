@@ -92,7 +92,7 @@ public class PdfMapAction
 
     protected void createDocument() {
         try {            
-            byte[] bytes = viewer.createPdf( pageSize );
+            byte[] bytes = viewer.createPdf( pageSize, mcase.getName() );
 
             // find next name
             String name = mcase.getName() + "-" + title + ".pdf";

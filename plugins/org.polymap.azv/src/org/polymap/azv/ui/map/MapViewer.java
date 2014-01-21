@@ -15,16 +15,21 @@
 package org.polymap.azv.ui.map;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.base.Joiner;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Rectangle;
 
@@ -40,6 +45,7 @@ import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.IPanelSite;
 
+import org.polymap.azv.AzvPlugin;
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
 import org.polymap.openlayers.rap.widget.base.OpenLayersEventListener;
 import org.polymap.openlayers.rap.widget.base.OpenLayersObject;
@@ -119,7 +125,7 @@ public class MapViewer
     public MapViewer addLayer( Layer layer, boolean isBaseLayer ) {
         layer.setIsBaseLayer( isBaseLayer );
         if (layer instanceof GridLayer) {
-            ((GridLayer)layer).setTileSize( new Size( 400, 400 ) );
+            ((GridLayer)layer).setTileSize( new Size( 800, 800 ) );
             ((GridLayer)layer).setBuffer( 0 );
         }
         map.addLayer( layer );
@@ -177,7 +183,7 @@ public class MapViewer
         //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
         WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
         addLayer( topo, true );
-        topo.setTileSize( new Size( 600, 600 ) );
+        //topo.setTileSize( new Size( 600, 600 ) );
 
 //        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
 //        osm.setIsBaseLayer( true );
@@ -237,45 +243,32 @@ public class MapViewer
     }
 
     
-    public byte[] createPdf( Rectangle pageSize ) {
+    public byte[] createPdf( Rectangle pageSize, String title ) {
+        InputStream htmlIn = null; 
         try {
+            // pdf
+            ByteArrayOutputStream bout = new ByteArrayOutputStream( 200*1024 );
+            PdfCreator pdf = new PdfCreator( pageSize, bout );
+
             // image
             int w = (int)(pageSize.getWidth() - pageSize.getBorderWidthLeft() - pageSize.getBorderWidthRight());
             int h = (int)(pageSize.getHeight() - pageSize.getBorderWidthTop() - pageSize.getBorderWidthBottom());
             java.awt.Image image = new WmsMapImageCreator( visibleLayers ).createImage( bbox, w, h );
 
-            // pdf
-            ByteArrayOutputStream bout = new ByteArrayOutputStream( 200*1024 );
-            PdfCreator pdf = new PdfCreator( pageSize, bout );
-
             Image pdfImage = Image.getInstance( image, null, false );
-            pdfImage.scalePercent( 85 );
+            pdfImage.scalePercent( 80 );
             pdfImage.setAlignment( Image.MIDDLE );
             //pdfImage.setBorder( Rectangle.BOX );
             //pdfImage.setBorderWidth( 1 );
             pdf.document().add( pdfImage );
             
-            pdf.addHtml( Joiner.on( "\n" ).join( 
-                    "<html>",
-                    "<head><style type=\"text/css\">",
-                        "body { font:10px Arial; }",
-                        "table { font:10px Arial; width:100%; margin-top:10px; }",
-                        "th { border:1px solid gray; }",
-                        "tr#bestand { font:14px Arial; border:1px solid gray; width:100%; }",
-                    "</style></head>",
-                    "<body>",
-                    "<table cellspacing=\"0\" cellpadding=\"5px\">",
-                        "<tr class=\"bestand\">",
-                            "<th colspan=\"4\">Bestand: ...</th>",
-                        "</tr>",
-                        "<tr>",
-                            "<th>Hallo!</th>",
-                            "<th>GKU</th>",
-                            "<th><b>Im Auftrag</b><br/>des Zweckverbandes</th>",
-                            "<th>Tel.: 03 97 53 / 24 79 10</th>",
-                        "</tr>",
-                    "</table>",
-                    "</body></html>" ) );
+            // html footer
+            URL res = AzvPlugin.instance().getBundle().getResource( "resources/mapfooter.html" );
+            String html = IOUtils.toString( htmlIn = res.openStream(), "UTF8" );
+            html = StringUtils.replace( html, "{0}", title );
+            html = StringUtils.replace( html, "{1}", "???" );
+            html = StringUtils.replace( html, "{2}", AzvPlugin.df.format( new Date() ) );
+            pdf.addHtml( html );
             
             pdf.close();
             
@@ -283,6 +276,9 @@ public class MapViewer
         }
         catch (Exception e) {
             throw new RuntimeException( e );
+        }
+        finally {
+            IOUtils.closeQuietly( htmlIn );
         }
     }
     
