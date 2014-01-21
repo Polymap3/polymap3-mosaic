@@ -172,7 +172,7 @@ public class KarteCaseAction
             //vectorLayer.redraw();
 
             mapViewer.getMap().setCenter( geom.getX(), geom.getY() );
-            mapViewer.getMap().zoomTo( 15 );
+            mapViewer.getMap().zoomTo( 10 );
             
             mapSection.setTitle( "Ort" );
         }

@@ -50,7 +50,7 @@ public class AzvStatusCaseTableColumn
         this.repo = repo;
         setWeight( 1, 90 );
         setHeader( "" );
-        setAlign( SWT.CENTER );
+        setAlign( SWT.LEFT );
         setSortable( false );
 
         setLabelProvider( new ColumnLabelProvider() {

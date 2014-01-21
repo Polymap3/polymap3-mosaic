@@ -35,6 +35,10 @@
             class="org.polymap.azv.ui.hydranten.HydrantenPanel"
             id="org.polymap.azv.HydrantenPanel">
       </panel>
+      <panel
+            class="org.polymap.azv.ui.AzvLoginPanel"
+            id="org.polymap.azv.AzvLoginPanel">
+      </panel>
    </extension>
    <extension
          point="org.polymap.core.model.moduleAssemblers">

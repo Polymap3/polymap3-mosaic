@@ -28,11 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
@@ -79,7 +76,6 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.LoginPanel;
-import org.polymap.rhei.um.ui.LoginPanel.LoginForm;
 import org.polymap.rhei.um.ui.UserSettingsPanel;
 
 import org.polymap.azv.AzvPlugin;
@@ -148,7 +144,7 @@ public class StartPanel
         if (site.getPath().size() == 1) {
             this.tk = site.toolkit();
             this.repo.set( MosaicRepository2.instance() );
-            site.setTitle( i18n.get( "title" ) );
+            site.setTitle( "GKU" ); //i18n.get( "title" ) );
             site.setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
 
             casesViewerDecorators.add( context.propagate( new MitarbeiterCasesDecorator() ) );
@@ -156,6 +152,12 @@ public class StartPanel
             casesViewerDecorators.add( context.propagate( new SchachtscheinCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new LeitungsauskunftCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new EntsorgungCasesDecorator() ) );
+            
+            user.addListener( this, new EventFilter<PropertyAccessEvent>() {
+                public boolean apply( PropertyAccessEvent input ) {
+                    return input.getType() == PropertyAccessEvent.TYPE.SET;
+                }
+            });
             return true;
         }
         return false;
@@ -180,8 +182,8 @@ public class StartPanel
         createWelcomeSection( contents )
                 .addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
 
-        createLoginSection( contents )
-                .addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
+//        createLoginSection( contents )
+//                .addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
 
         createActionsSection( contents )
                 .addConstraint( new PriorityConstraint( 0 ) );
@@ -211,73 +213,6 @@ public class StartPanel
         welcomeSection.getBody().setLayout( new FillLayout() );
         tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) );
         return welcomeSection;
-    }
-
-    
-    protected IPanelSection createLoginSection( Composite parent ) {
-        loginSection = tk.createPanelSection( parent, i18n.get( "loginTitle" ) );
-        loginSection.getControl().setData( "title", "login" );
-        loginSection.getBody().setLayout( new FillLayout() );
-        
-        LoginForm loginForm = new LoginPanel.LoginForm( getContext(), getSite(), user ) {
-            @Override
-            protected boolean login( String name, String passwd ) {
-                if (super.login( name, passwd )) {
-                    loginSection.dispose();
-                    createCasesSection( contents );
-                    
-                    // user -> show closed cases
-                    if (!(SecurityUtils.isAdmin() || SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ))) {
-                        createClosedCasesSection( contents );
-                    }
-                    
-                    contents.layout( true );
-                    getSite().layout( true );
-                
-                    // adjust context: username and preferences
-                    getSite().setTitle( i18n.get( "titleLoggedIn" ) );
-                    getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
-                    
-                    User umuser = UserRepository.instance().findUser( name );
-                    getContext().setUserName( umuser != null ? umuser.name().get() : name );
-                    if (!SecurityUtils.isAdmin()) {
-                        getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
-                            public void run() {
-                                getContext().openPanel( UserSettingsPanel.ID );
-                            }
-                        });
-                    }
-                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Sie haben sich erfolgreich angemeldet." ) );
-                    return true;
-                }
-                else {
-                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
-                    return false;
-                }
-            }
-        };
-        loginForm.setShowRegisterLink( true );
-        loginForm.setShowStoreCheck( true );
-        loginForm.setShowLostLink( true );
-        
-        Composite form = new Composite( loginSection.getBody(), SWT.BORDER ); 
-        loginForm.createContents( form );
-        
-//        Deque<Control> deque = new LinkedList();
-//        deque.push( form );
-//        while (!deque.isEmpty()) {
-//            Control control = deque.pop();
-////            if (control instanceof Label) {
-////                control.setFont( font );
-////            }
-//            control.setData( WidgetUtil.CUSTOM_VARIANT, null );
-//            if (control instanceof Composite) {
-//                for (Control child : ((Composite)control).getChildren()) {
-//                    deque.push( child );
-//                }
-//            }
-//        }
-        return loginSection;
     }
 
     
@@ -370,106 +305,161 @@ public class StartPanel
                 "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
                 BatikPlugin.instance().imageForName( "resources/icons/waterdrop.png" ),
                 null,
-                new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e ) {
-                getContext().openPanel( WasserQualiPanel.ID );
-            }
+                false, new Runnable() {
+                    public void run() {
+                        getContext().openPanel( WasserQualiPanel.ID );
+                    }
         }));
         actionBtns.add( createActionButton( body, "Entsorgung", 
                 "Antrag auf Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
                 BatikPlugin.instance().imageForName( "resources/icons/truck.png" ),
                 null, //AzvPlugin.ROLE_ENTSORGUNG,
-                new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e ) {
-                IMosaicCase newCase = repo.get().newCase( "", "" );
-                newCase.addNature( AzvPlugin.CASE_ENTSORGUNG );
-                mcase.set( newCase );
-                getContext().openPanel( CasePanel.ID );
-            }
+                false, new Runnable() {
+                    public void run() {
+                        IMosaicCase newCase = repo.get().newCase( "", "" );
+                        newCase.addNature( AzvPlugin.CASE_ENTSORGUNG );
+                        mcase.set( newCase );
+                        getContext().openPanel( CasePanel.ID );
+                    }
         }));
         actionBtns.add( createActionButton( body, "Schachtschein", 
                 "Antrag für einen Schachtschein",
                 BatikPlugin.instance().imageForName( "resources/icons/letter.png" ),
                 AzvPlugin.ROLE_SCHACHTSCHEIN,
-                new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                try {
-                    // create new case; commit/rollback inside CaseAction
-                    IMosaicCase newCase = repo.get().newCase( "", "" );
-                    newCase.addNature( AzvPlugin.CASE_SCHACHTSCHEIN );
-                    //newCase.put( KEY_USER, user.get().username().get() );
-                    mcase.set( newCase );
-                    getContext().openPanel( CasePanel.ID );
-                }
-                catch (Exception e) {
-                    BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
-                }
-            }
+                true, new Runnable() {
+                    public void run() {
+                        try {
+                            // create new case; commit/rollback inside CaseAction
+                            IMosaicCase newCase = repo.get().newCase( "", "" );
+                            newCase.addNature( AzvPlugin.CASE_SCHACHTSCHEIN );
+                            //newCase.put( KEY_USER, user.get().username().get() );
+                            mcase.set( newCase );
+                            getContext().openPanel( CasePanel.ID );
+                        }
+                        catch (Exception e) {
+                            BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                        }
+                    }
         }));
         actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
                 BatikPlugin.instance().imageForName( "resources/icons/fire.png" ),
                 AzvPlugin.ROLE_HYDRANTEN,
-                new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                getContext().openPanel( HydrantenPanel.ID );
-            }
+                true, new Runnable() {
+                    public void run() {
+                        getContext().openPanel( HydrantenPanel.ID );
+                    }
         }));
         actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
                 "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
                 BatikPlugin.instance().imageForName( "resources/icons/letters.png" ),
                 null,  //AzvPlugin.ROLE_DIENSTBARKEITEN,
-                new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent e ) {
-                getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) );
-            }
+                false, new Runnable() {
+                    public void run() {
+                        getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) );
+                    }
         }));
         actionBtns.add( createActionButton( body, "Leitungsauskunft", 
                 "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
                 BatikPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
                 AzvPlugin.ROLE_LEITUNGSAUSKUNFT,
-                new SelectionAdapter() {
-            public void widgetSelected( SelectionEvent ev ) {
-                if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_LEITUNGSAUSKUNFT2 )) {
-                    getContext().openPanel( LeitungsauskunftPanel.ID );
-                }
-                else {
-                    try {
-                        // create new case; commit/rollback inside CaseAction
-                        IMosaicCase newCase = repo.get().newCase( "", "" );
-                        newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
-                        //newCase.put( KEY_USER, user.get().username().get() );
-                        mcase.set( newCase );
-                        getContext().openPanel( CasePanel.ID );
+                true, new Runnable() {
+                    public void run() {
+                        if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_LEITUNGSAUSKUNFT2 )) {
+                            getContext().openPanel( LeitungsauskunftPanel.ID );
+                        }
+                        else {
+                            try {
+                                // create new case; commit/rollback inside CaseAction
+                                IMosaicCase newCase = repo.get().newCase( "", "" );
+                                newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
+                                //newCase.put( KEY_USER, user.get().username().get() );
+                                mcase.set( newCase );
+                                getContext().openPanel( CasePanel.ID );
+                            }
+                            catch (Exception e) {
+                                BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                            }
+                        }
                     }
-                    catch (Exception e) {
-                        BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
-                    }
-                }
-            }
         }));
         return section;
     }
 
     
-    private Control createActionButton( Composite client, String title, String tooltip, Image image, String role, final SelectionListener l ) {
+    private Runnable          afterLogginTask;
+    
+    private Control createActionButton( Composite client, String title, String tooltip, Image image, 
+                final String role, final boolean checkLogin, final Runnable task ) {
+            
         Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT );
         result.setToolTipText( tooltip );
         result.setImage( image );
-        //result.setLayoutData( RowDataFactory.swtDefaults().create() );
-        result.addMouseListener( new MouseListener() {
+        result.addMouseListener( new MouseAdapter() {
             public void mouseUp( MouseEvent e ) {
-                l.widgetSelected( null );
-            }
-            public void mouseDown( MouseEvent e ) {
-            }
-            public void mouseDoubleClick( MouseEvent e ) {
-                l.widgetSelected( null );
+                checkLogin( task, checkLogin, role );
             }
         });
-        if (role != null) {
-            result.setEnabled( SecurityUtils.isUserInGroup( role ) );
-            result.setData( "role", role );
-        }
         return result;
+    }
+
+
+    private void checkLogin( final Runnable task, boolean checkLogin, final String role ) {
+        Runnable checkPermissionsTask = new Runnable() {
+            public void run() {
+                if (role == null || SecurityUtils.isUserInGroup( role ) ) {
+                    task.run();
+                }
+                else {
+                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Sie haben keine Freigabe für diese Aktion." ) );
+                }
+            }
+        };
+
+        // logged in -> run task
+        if (!checkLogin || user.get() != null) {
+            checkPermissionsTask.run();
+        }
+        // open LoginPanel and wait for user property to by set
+        else {
+            afterLogginTask = checkPermissionsTask;
+            getContext().openPanel( AzvLoginPanel.ID );
+        }
+    }
+
+    
+    @EventHandler(display=true)
+    void userLoggedIn( PropertyAccessEvent ev ) {
+        if (casesSection != null) {
+            return;
+        }
+        user.removeListener( StartPanel.this );
+
+        createCasesSection( contents );
+
+        // user -> show closed cases
+        if (!(SecurityUtils.isAdmin() || SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ))) {
+            createClosedCasesSection( contents );
+        }
+
+        contents.layout( true );
+        getSite().layout( true );
+
+        // adjust context: username and preferences
+        getSite().setTitle( i18n.get( "titleLoggedIn" ) );
+        getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
+
+        User umuser = UserRepository.instance().findUser( user.get().getName() );
+        getContext().setUserName( umuser != null ? umuser.name().get() : user.get().getName() );
+        if (!SecurityUtils.isAdmin()) {
+            getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
+                public void run() {
+                    getContext().openPanel( UserSettingsPanel.ID );
+                }
+            });
+        }
+        
+        if (afterLogginTask != null) {
+            afterLogginTask.run();
+        }
     }
 }

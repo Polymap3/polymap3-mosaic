@@ -65,7 +65,7 @@ public class HomeMapAction
             public void widgetSelected( SelectionEvent ev ) {
                 Bounds maxExtent = map.getMaxExtent();
                 map.zoomToExtent( maxExtent, true );
-                map.zoomTo( 9 );
+                map.zoomTo( 2 );
             }
         });
     }
