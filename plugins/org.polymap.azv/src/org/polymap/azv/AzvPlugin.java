@@ -158,8 +158,8 @@ public class AzvPlugin
 
     public FullTextIndex addressIndex() {
         FullTextIndex result = new LogQueryDecorator( addressIndex.get() );
-        result = new FullQueryProposalDecorator( result );
         result = new LowerCaseTokenFilter( result );
+        result = new FullQueryProposalDecorator( result );
         return result;
     }
 

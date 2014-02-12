@@ -92,10 +92,11 @@ public class AddressSearchMapAction
     public void fill( Composite parent ) {
         IPanelToolkit tk = viewer.getPanelSite().toolkit();
         searchTxt = tk.createText( parent, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
-        searchTxt.setLayoutData( RowDataFactory.swtDefaults().hint( 250, SWT.DEFAULT ).create() );
+        searchTxt.setLayoutData( RowDataFactory.swtDefaults().hint( 280, SWT.DEFAULT ).create() );
         //searchTxt.setLayoutData( FormDataFactory.filled().right( clearBtn ).create() );
 
         resultCountLbl = tk.createLabel( parent, "-" );
+        resultCountLbl.setToolTipText( "Noch keine Treffer\nGeben Sie zuerst eine Suche ein" );
         resultCountLbl.setLayoutData( RowDataFactory.swtDefaults().hint( 20, SWT.DEFAULT ).create() );
         
         searchTxt.setToolTipText( "Mit <Enter> das Ergebnisse in der Karte anzeigen\nBei mehreren Treffern wird das gesamte Gebiet angezeigt" );
@@ -138,7 +139,6 @@ public class AddressSearchMapAction
         
         // modification listener
         searchTxt.addModifyListener( new ModifyListener() {
-            @Override
             public void modifyText( ModifyEvent ev ) {
                 String txt = searchTxt.getText();
                 if (txt.length() <= 2) {
@@ -165,8 +165,12 @@ public class AddressSearchMapAction
 
     
     protected void zoomResults() throws Exception {
+        String txt = searchTxt.getText();
+        if (txt.length() == 0) {
+            return;
+        }
         FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
-        Iterable<JSONObject> results = addressIndex.search( searchTxt.getText(), 300 );
+        Iterable<JSONObject> results = addressIndex.search( txt, 300 );
 
         ReferencedEnvelope bbox = new ReferencedEnvelope();
         for (JSONObject feature : results) {
