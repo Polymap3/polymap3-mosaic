@@ -14,6 +14,9 @@
  */
 package org.polymap.azv;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -27,13 +30,32 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.base.Supplier;
 
 import org.eclipse.swt.graphics.Color;
+
 import org.eclipse.rwt.graphics.Graphics;
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.polymap.core.project.ILayer;
+import org.polymap.core.project.LayerFinder;
+import org.polymap.core.project.ProjectRepository;
+import org.polymap.core.runtime.CachedLazyInit;
 import org.polymap.core.runtime.Lazy;
 import org.polymap.core.runtime.LockedLazyInit;
+import org.polymap.core.runtime.Polymap;
 
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
+import org.polymap.rhei.fulltext.FullQueryProposalDecorator;
+import org.polymap.rhei.fulltext.FullTextIndex;
+import org.polymap.rhei.fulltext.LogQueryDecorator;
+import org.polymap.rhei.fulltext.SessionHolder;
+import org.polymap.rhei.fulltext.address.AddressFeatureTransformer;
+import org.polymap.rhei.fulltext.address.AddressTokenFilter;
+import org.polymap.rhei.fulltext.indexing.Feature2JsonTransformer;
+import org.polymap.rhei.fulltext.indexing.LowerCaseTokenFilter;
+import org.polymap.rhei.fulltext.indexing.ToStringTransformer;
+import org.polymap.rhei.fulltext.lucene.LuceneFullTextIndex;
+import org.polymap.rhei.fulltext.update.LayerModificationWatcher;
+import org.polymap.rhei.fulltext.update.UpdateableFullTextIndex;
 
 /**
  *
@@ -110,29 +132,83 @@ public class AzvPlugin
 
     private ServiceTracker          httpServiceTracker;
     
+//    private MosaicRepository2       mosaicRepo;
+    
+    private Lazy<LuceneFullTextIndex> addressIndex;           
+
+    private LayerModificationWatcher addressWatcher;
+    
+    private SessionHolder           addressSession;
+    
+    /** Color defined/used in batik.css. */
     public Lazy<Color>              discardColor = new LockedLazyInit( new Supplier<Color>() {
-        public Color get() {
-            return Graphics.getColor( 0xd3, 0x25, 0x16 );
-        }
+        public Color get() { return Graphics.getColor( 0xd3, 0x25, 0x16 ); }
     });
 
+    /** Color defined/used in batik.css. */
     public Lazy<Color>              okColor = new LockedLazyInit( new Supplier<Color>() {
-        public Color get() {
-            return Graphics.getColor( 0x6e, 0xb0, 0x2e );
-        }
+        public Color get() { return Graphics.getColor( 0x6e, 0xb0, 0x2e ); }
     });
     
+    /** Color defined/used in batik.css. */
     public Lazy<Color>              openColor = new LockedLazyInit( new Supplier<Color>() {
-        public Color get() {
-            return Graphics.getColor( 0xff, 0xcc, 0x00 );
-        }
+        public Color get() { return Graphics.getColor( 0xff, 0xcc, 0x00 ); }
     });
 
 
+    public FullTextIndex addressIndex() {
+        FullTextIndex result = new LogQueryDecorator( addressIndex.get() );
+        result = new FullQueryProposalDecorator( result );
+        result = new LowerCaseTokenFilter( result );
+        return result;
+    }
+
+    
     @Override
     public void start( BundleContext context ) throws Exception {
         super.start( context );
         instance = this;
+        
+//        mosaicRepo = MosaicRepository2.instance();
+        
+        // addressIndex
+        addressSession = new SessionHolder( "Adressen" );
+        final File addressStoreDir = new File( Polymap.getDataDir(), "org.polymap.azv.addresses" );
+        addressIndex = new CachedLazyInit( 10000, new Supplier<LuceneFullTextIndex>() {
+            public LuceneFullTextIndex get() {
+                try {
+                    LuceneFullTextIndex result = new LuceneFullTextIndex( addressStoreDir );
+                    result.addTokenFilter( new AddressTokenFilter() );
+                    result.addTokenFilter( new LowerCaseTokenFilter() );                    
+                    return result;
+                }
+                catch (IOException e) {
+                    log.error( "", e );
+                    throw new RuntimeException( e );
+                }
+            }
+        });
+        // watch layer
+        addressSession.execute( new Runnable() {
+            public void run() {
+                ILayer layer = ProjectRepository.instance().visit( new LayerFinder( "Adressen", "adressen", "addresses") );
+                if (layer != null) {
+                    addressWatcher = new LayerModificationWatcher( addressSession, null, layer ) {
+                        protected UpdateableFullTextIndex index() { return addressIndex.get(); }
+                    };
+                    addressWatcher.addTransformer( new Feature2JsonTransformer( layer ) );
+                    addressWatcher.addTransformer( new ToStringTransformer() );
+                    addressWatcher.addTransformer( new AddressFeatureTransformer() );
+                } 
+                else {
+                    log.warn( "Es existiert keine Ebene für Adressdaten! (Ebenenname: Adressen)" );
+                }
+            }
+        });
+        // check/initialize index
+        if (addressStoreDir.list().length == 0) {
+            addressWatcher.start();
+        }
         
         // register HTTP resource
         httpServiceTracker = new ServiceTracker( context, HttpService.class.getName(), null ) {
@@ -155,8 +231,10 @@ public class AzvPlugin
 
     @Override
     public void stop( BundleContext context ) throws Exception {
+//        mosaicRepo.close();
+        
         super.stop( context );
         instance = null;
     }
-
+    
 }

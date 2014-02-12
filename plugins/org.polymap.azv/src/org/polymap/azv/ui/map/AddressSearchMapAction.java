@@ -14,22 +14,51 @@
  */
 package org.polymap.azv.ui.map;
 
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.json.JSONObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
+import com.vividsolutions.jts.geom.Geometry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.rwt.graphics.Graphics;
 
 import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.RowDataFactory;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.polymap.core.runtime.UIJob;
+
+import org.polymap.rhei.batik.app.BatikApplication;
+import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.fulltext.FullTextIndex;
+
+import org.polymap.azv.AzvPlugin;
+import org.polymap.openlayers.rap.widget.base_types.Bounds;
+
 /**
- * 
+ * Address search field using {@link AzvPlugin#addressIndex()}.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -38,9 +67,15 @@ public class AddressSearchMapAction
 
     private static Log log = LogFactory.getLog( AddressSearchMapAction.class );
 
-    private MapViewer           viewer;
+    private MapViewer               viewer;
 
-    private Text                searchTxt;
+    private Text                    searchTxt;
+    
+    private Label                   resultCountLbl;
+    
+    private ContentProposalAdapter  proposal;
+
+    private SimpleContentProposalProvider proposalProvider;
     
     
     public AddressSearchMapAction( MapViewer viewer ) {
@@ -55,11 +90,15 @@ public class AddressSearchMapAction
     
     @Override
     public void fill( Composite parent ) {
-        searchTxt = viewer.getPanelSite().toolkit().createText( parent, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
-        searchTxt.setLayoutData( RowDataFactory.swtDefaults().hint( 320, SWT.DEFAULT ).create() );
+        IPanelToolkit tk = viewer.getPanelSite().toolkit();
+        searchTxt = tk.createText( parent, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
+        searchTxt.setLayoutData( RowDataFactory.swtDefaults().hint( 250, SWT.DEFAULT ).create() );
         //searchTxt.setLayoutData( FormDataFactory.filled().right( clearBtn ).create() );
 
-        searchTxt.setToolTipText( "Suchbegriff: min. 3 Zeichen" );
+        resultCountLbl = tk.createLabel( parent, "-" );
+        resultCountLbl.setLayoutData( RowDataFactory.swtDefaults().hint( 20, SWT.DEFAULT ).create() );
+        
+        searchTxt.setToolTipText( "Mit <Enter> das Ergebnisse in der Karte anzeigen\nBei mehreren Treffern wird das gesamte Gebiet angezeigt" );
         searchTxt.setForeground( Graphics.getColor( 0xa0, 0xa0, 0xa0 ) );
         searchTxt.addFocusListener( new FocusListener() {
             @Override
@@ -78,39 +117,128 @@ public class AddressSearchMapAction
                 }
             }
         });
-//        searchTxt.addModifyListener( new ModifyListener() {
-//            @Override
-//            public void modifyText( ModifyEvent ev ) {
-//                clearBtn.setEnabled( searchTxt.getText().length() > 0 );
-//                if (filter != null) {
-//                    viewer.removeFilter( filter );
-//                }
-//                if (searchTxt.getText().length() > 2) {
-//                    if (filter != null) {
-//                        viewer.removeFilter( filter );
-//                    }
-//                    viewer.addFilter( filter = new TextFilter( searchTxt.getText() ) );
-//                }
-//            }
-//        });
         
-//        final DrawFeatureMapAction drawFeatureAction = new DrawFeatureMapAction( 
-//                site, olwidget.getMap(), vectorLayer, DrawFeatureControl.HANDLER_POINT );
-//        drawFeatureAction.fill( toolbar );
-//        drawFeatureAction.addListener( new PropertyChangeListener() {
-//            @EventHandler(display=true)
-//            public void propertyChange( PropertyChangeEvent ev ) {
-//                Feature feature = (Feature)ev.getNewValue();
-//                Point point = (Point)feature.getDefaultGeometryProperty().getValue();
-//                String wkt = new WKTWriter().write( point );
-//                mcase.get().put( "point", wkt );
-//                repo.get().commitChanges();
-//                
-//                site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Markierung wurde gesetzt auf: " + point.toText() ) );
-//                
-//                drawFeatureAction.deactivate();
-//            }
-//        });
+        // proposal
+        proposalProvider = new SimpleContentProposalProvider( new String[0] );
+        TextContentAdapter controlAdapter = new TextContentAdapter() {
+            public void insertControlContents( Control control, String text, int cursorPosition ) {
+                ((Text)control).setText( text );
+                ((Text)control).setSelection( text.length() );
+            }
+        };
+        proposal = new ContentProposalAdapter( searchTxt, controlAdapter, proposalProvider, null, null );
+        proposal.setAutoActivationDelay( 750 );
+        searchTxt.addKeyListener( new KeyAdapter() {
+            public void keyReleased( KeyEvent ev ) {
+                if (ev.keyCode == SWT.ARROW_DOWN) {
+                    proposal.setProposalPopupFocus();
+                }
+            }
+        });
+        
+        // modification listener
+        searchTxt.addModifyListener( new ModifyListener() {
+            @Override
+            public void modifyText( ModifyEvent ev ) {
+                String txt = searchTxt.getText();
+                if (txt.length() <= 2) {
+                    proposalProvider.setProposals( new String[0] );
+                }
+                else {
+                    new ProposalJob().schedule();
+                    new ResultCountJob().schedule();
+                }
+            }
+        });
+        searchTxt.addListener( SWT.DefaultSelection, new Listener() {
+            public void handleEvent( Event ev ) {
+                try {
+                    zoomResults();
+                }
+                catch (Exception e) {
+                    log.warn( "", e );
+                    BatikApplication.handleError( "", e );
+                }
+            }
+        });
+    }
+
+    
+    protected void zoomResults() throws Exception {
+        FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
+        Iterable<JSONObject> results = addressIndex.search( searchTxt.getText(), 300 );
+
+        ReferencedEnvelope bbox = new ReferencedEnvelope();
+        for (JSONObject feature : results) {
+            Geometry geom = (Geometry)feature.get( FullTextIndex.FIELD_GEOM );
+            bbox.expandToInclude( geom.getEnvelopeInternal() );
+        }
+        
+        if (!bbox.isNull()) {
+            bbox.expandBy( 100 );
+            log.info( "BBox: " + bbox );
+            viewer.getMap().zoomToExtent( new Bounds( bbox.getMinX(), bbox.getMinY(), bbox.getMaxX(), bbox.getMaxY() ), true );
+        }
+    }
+    
+    
+    /**
+     * Updates the {@link AddressSearchMapAction#proposalProvider}. 
+     */
+    class ProposalJob
+            extends UIJob {
+
+        private String      searchTextValue = searchTxt.getText();
+        
+        public ProposalJob() {
+            super( "Proposals" );
+        }
+
+        @Override
+        protected void runWithException( IProgressMonitor monitor ) throws Exception {
+            // proposals
+            FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
+            final Iterable<String> results = addressIndex.propose( searchTextValue, 10 );
+
+            // display
+            searchTxt.getDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    proposalProvider.setProposals( Iterables.toArray( results, String.class ) );
+                }
+            });
+        }        
+    }
+
+    
+    /**
+     * Updates the {@link AddressSearchMapAction#resultCountLbl} label. 
+     */
+    class ResultCountJob
+            extends UIJob {
+
+        private String      searchTextValue = searchTxt.getText();
+
+        public ResultCountJob() {
+            super( "Count results" );
+        }
+
+        @Override
+        protected void runWithException( IProgressMonitor monitor ) throws Exception {
+            // search
+            FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
+            Iterable<JSONObject> results = addressIndex.search( searchTextValue, 100 );
+            final int resultCount = FluentIterable.from( results ).size();
+            
+            // display
+            searchTxt.getDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    String text = resultCount < 100 ? String.valueOf( resultCount ) : ">100";
+                    resultCountLbl.setText( text );
+                    resultCountLbl.setToolTipText( "Die aktuelle Suche ergibt " + text + " Treffer" );
+                }
+            });
+        }
+
     }
 
 }
