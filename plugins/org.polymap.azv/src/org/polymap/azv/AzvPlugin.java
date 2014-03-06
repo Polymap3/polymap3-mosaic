@@ -207,7 +207,7 @@ public class AzvPlugin
             }
         });
         // check/initialize index
-        if (addressStoreDir.list().length == 0) {
+        if (addressStoreDir.list().length == 0 && addressWatcher != null) {
             addressWatcher.start();
         }
         
