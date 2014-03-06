@@ -14,17 +14,11 @@
  */
 package org.polymap.azv.ui.wasserquali;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import static org.polymap.rhei.fulltext.FullTextIndex.FIELD_GEOM;
+
 import java.util.Iterator;
-import java.util.List;
-
-import java.io.IOException;
-
-import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureIterator;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.json.JSONObject;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -34,6 +28,7 @@ import org.opengis.filter.FilterFactory2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -45,10 +40,9 @@ import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.data.PipelineFeatureSource;
 import org.polymap.core.project.ILayer;
-import org.polymap.core.project.LayerVisitor;
+import org.polymap.core.project.Layers;
 import org.polymap.core.project.ProjectRepository;
 import org.polymap.core.runtime.IMessages;
-import org.polymap.core.runtime.Timer;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -64,14 +58,11 @@ import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
-import org.polymap.rhei.field.FormFieldEvent;
-import org.polymap.rhei.field.IFormFieldLabel;
-import org.polymap.rhei.field.IFormFieldListener;
-import org.polymap.rhei.field.IFormFieldValidator;
 import org.polymap.rhei.form.IFormEditorPageSite;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.ui.map.AddressForm;
 import org.polymap.azv.ui.map.HomeMapAction;
 import org.polymap.azv.ui.map.MapViewer;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -100,9 +91,9 @@ public class WasserQualiPanel
 
     private MapViewer                   mapViewer;
 
-    private FeatureSource               addressFs;
-
-    private SimpleFeature               search;
+//    private FeatureSource               addressFs;
+//
+//    private SimpleFeature               search;
 
     private Composite                   body;
 
@@ -112,7 +103,7 @@ public class WasserQualiPanel
 
     private Composite                   resultParent;
 
-    private IPanelSection addressSection;
+    private IPanelSection               addressSection;
 
 
     @Override
@@ -155,30 +146,28 @@ public class WasserQualiPanel
         addressSection = getSite().toolkit().createPanelSection( parent, "Adresse eingeben" );
         addressSection.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).columns( 1, 1 ).create() );
 
-        try {
-            ILayer layer = ProjectRepository.instance().visit( new LayerVisitor() {
-                public boolean visit( ILayer input ) {
-                    if (input.getLabel().toLowerCase().startsWith( "adressen" )) {
-                        result = input;
-                        return false;
+            AddressForm form = new AddressForm( getSite() ) {
+                protected void showResults( Iterable<JSONObject> addresses ) {
+                    try {
+                        int count = Iterables.size( addresses );
+                        if (count == 0) {
+                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert nicht." ) );                        
+                        }
+                        else if (count > 1) {
+                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Die Angabe ist zu ungenau. Es exitieren mehrere solche Adressen." ) );                        
+                        }
+                        else {
+                            showResult( Iterables.getFirst( addresses, null ) );
+                        }
                     }
-                    return true;
+                    catch (Exception e) {
+                        throw new RuntimeException( e );
+                    }
                 }
-            });
-            addressFs = PipelineFeatureSource.forLayer( layer, false );
-            search = SimpleFeatureBuilder.build( (SimpleFeatureType)addressFs.getSchema(), Collections.EMPTY_LIST, null );
-            search.setAttribute( "strasse", "Markt" );
-            search.setAttribute( "nummer", "1" );
-            search.setAttribute( "plz", "01234" );
-            
-            AddressForm form = new AddressForm();
+            };
             form.createContents( getSite().toolkit().createComposite( addressSection.getBody() ) );
             
             //resultParent = getSite().toolkit().createComposite( section.getBody() );
-        }
-        catch (Exception e) {
-            throw new RuntimeException( e );
-        }
         return addressSection;
     }
     
@@ -213,7 +202,7 @@ public class WasserQualiPanel
     }
 
     
-    protected void showResult( SimpleFeature address ) throws Exception {
+    protected void showResult( JSONObject address ) throws Exception {
         if (resultParent == null) {
             IPanelSection resultSection = getSite().toolkit().createPanelSection( body, "Ihre Wasserqualität" );
             resultSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH, 
@@ -228,18 +217,12 @@ public class WasserQualiPanel
         }
         
         if (resultFs == null) {
-            ILayer layer = ProjectRepository.instance().visit( new LayerVisitor() {
-                public boolean visit( ILayer input ) {
-                    if (input.getLabel().toLowerCase().startsWith( "wasserquali" )) {
-                        result = input; return false;
-                    }
-                    return true;
-                }
-            });
+            ILayer layer = ProjectRepository.instance().visit( Layers.finder( "wasserquali", "Wasserquali" ) );
+            assert layer != null : "Keine Ebene 'Wasserquali' gefunden!";
             resultFs = PipelineFeatureSource.forLayer( layer, false );
         }
 
-        Point p = (Point)address.getDefaultGeometry();
+        Point p = (Point)address.get( FIELD_GEOM );
         Filter filter = ff.contains( 
                 ff.property( resultFs.getSchema().getGeometryDescriptor().getLocalName() ), 
                 ff.literal( p ) );
@@ -305,131 +288,131 @@ public class WasserQualiPanel
     }
     
     
-    /**
-     * 
-     */
-    public class AddressForm
-            extends FormContainer {
-
-        private IFormFieldListener          fieldListener;
-        
-        @SuppressWarnings("hiding")
-        private Composite                   body;
-        
-        private SimpleFeature               address;
-        
-        
-        @Override
-        public void createFormContent( final IFormEditorPageSite formSite ) {
-            body = formSite.getPageBody();
-            body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
-
-            Composite street = getSite().toolkit().createComposite( body );
-            new FormFieldBuilder( street, search.getProperty( "strasse" ) )
-                    .setLabel( "Straße + Nr." ).setValidator( new ValueExistsValidator( "strasse" ) ).create().setFocus();
-
-            new FormFieldBuilder( street, search.getProperty( "nummer" ) )
-                    .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( new ValueExistsValidator( "nummer" ) ).create();
-
-            Composite city = getSite().toolkit().createComposite( body );
-            new FormFieldBuilder( city, search.getProperty( "plz" ) )
-                    .setLabel( "PLZ + Ort" ).setValidator( new ValueExistsValidator( "plz" ) ).create();
-
-            new FormFieldBuilder( city, search.getProperty( "ort" ) )
-                    .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( new ValueExistsValidator( "ort" ) ).create();
-
-            // field listener
-            formSite.addFieldListener( fieldListener = new IFormFieldListener() {
-                public void fieldChange( FormFieldEvent ev ) {
-                    if (ev.getEventCode() == VALUE_CHANGE) {
-                        if (formSite.isValid()) {
-                            try {
-                                formSite.submitEditor();
-                                log.info( "VALID: " + search );
-                                getSite().setStatus( Status.OK_STATUS );
-                                SimpleFeature nextAddress = findAddress();
-                                if (nextAddress != null) {
-                                    if (address == null || !nextAddress.getID().equals( address.getID() )) {
-                                        address = nextAddress;
-                                        showResult( address );
-                                    }
-                                }
-                                else {
-                                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert nicht." ) );
-                                }
-                            }
-                            catch (Exception e) {
-                                throw new RuntimeException( e );
-                            }
-                        }
-                    }
-                }
-            });
-//            activateStatusAdapter( site.getPanelSite() );
-        }
-
-        protected SimpleFeature findAddress() {
-            List<Filter> props = new ArrayList();
-            for (String propName : new String[] {"strasse", "nummer", "plz", "ort"}) {
-                props.add( ff.equals( ff.property( propName ), ff.literal( search.getAttribute( propName ) ) ) );
-            }
-            Filter filter = ff.and( props );
-            log.info( "Filter: " + filter );
-            FeatureIterator it = null;
-            try {
-                it = addressFs.getFeatures( filter ).features();
-                return it.hasNext() ? (SimpleFeature)it.next() : null;
-            }
-            catch (IOException e) {
-                throw new RuntimeException( e );
-            }
-            finally {
-                if (it != null) { it.close(); }
-            }
-        }
-    }
-
-    
-    /**
-     * 
-     */
-    class ValueExistsValidator
-            implements IFormFieldValidator {
-        
-        private String      propName;
-        
-    
-        public ValueExistsValidator( String propName ) {
-            this.propName = propName;
-        }
-
-        @Override
-        public String validate( Object fieldValue ) {
-            try {
-                if (fieldValue == null) {
-                    return "Feld darf nicht leer sein.";                    
-                }
-                Timer timer = new Timer();
-                Filter filter = ff.equals( ff.property( propName ), ff.literal( fieldValue ) );
-                FeatureCollection features = addressFs.getFeatures( filter );
-                log.info( "Features for '" + propName + "'==" + fieldValue + ": " + features.size() + " (" + timer.elapsedTime() + "ms)" );
-                return features.isEmpty() ? "Wert existiert nicht in der Adressdatenbank: " + fieldValue : null;
-            }
-            catch (IOException e) {
-                throw new RuntimeException( e );
-            }
-        }
-    
-        @Override
-        public Object transform2Model( Object fieldValue ) throws Exception {
-            return fieldValue;
-        }
-    
-        @Override
-        public Object transform2Field( Object modelValue ) throws Exception {
-            return modelValue;
-        }
-        
-    }
+//    /**
+//     * 
+//     */
+//    public class AddressForm
+//            extends FormContainer {
+//
+//        private IFormFieldListener          fieldListener;
+//        
+//        @SuppressWarnings("hiding")
+//        private Composite                   body;
+//        
+//        private SimpleFeature               address;
+//        
+//        
+//        @Override
+//        public void createFormContent( final IFormEditorPageSite formSite ) {
+//            body = formSite.getPageBody();
+//            body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
+//
+//            Composite street = getSite().toolkit().createComposite( body );
+//            new FormFieldBuilder( street, search.getProperty( "strasse" ) )
+//                    .setLabel( "Straße + Nr." ).setValidator( new AddressValidator( "strasse" ) ).create().setFocus();
+//
+//            new FormFieldBuilder( street, search.getProperty( "nummer" ) )
+//                    .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( new AddressValidator( "nummer" ) ).create();
+//
+//            Composite city = getSite().toolkit().createComposite( body );
+//            new FormFieldBuilder( city, search.getProperty( "plz" ) )
+//                    .setLabel( "PLZ + Ort" ).setValidator( new AddressValidator( "plz" ) ).create();
+//
+//            new FormFieldBuilder( city, search.getProperty( "ort" ) )
+//                    .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( new AddressValidator( "ort" ) ).create();
+//
+//            // field listener
+//            formSite.addFieldListener( fieldListener = new IFormFieldListener() {
+//                public void fieldChange( FormFieldEvent ev ) {
+//                    if (ev.getEventCode() == VALUE_CHANGE) {
+//                        if (formSite.isValid()) {
+//                            try {
+//                                formSite.submitEditor();
+//                                log.info( "VALID: " + search );
+//                                getSite().setStatus( Status.OK_STATUS );
+//                                SimpleFeature nextAddress = findAddress();
+//                                if (nextAddress != null) {
+//                                    if (address == null || !nextAddress.getID().equals( address.getID() )) {
+//                                        address = nextAddress;
+//                                        showResult( address );
+//                                    }
+//                                }
+//                                else {
+//                                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert nicht." ) );
+//                                }
+//                            }
+//                            catch (Exception e) {
+//                                throw new RuntimeException( e );
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+////            activateStatusAdapter( site.getPanelSite() );
+//        }
+//
+//        protected SimpleFeature findAddress() {
+//            List<Filter> props = new ArrayList();
+//            for (String propName : new String[] {"strasse", "nummer", "plz", "ort"}) {
+//                props.add( ff.equals( ff.property( propName ), ff.literal( search.getAttribute( propName ) ) ) );
+//            }
+//            Filter filter = ff.and( props );
+//            log.info( "Filter: " + filter );
+//            FeatureIterator it = null;
+//            try {
+//                it = addressFs.getFeatures( filter ).features();
+//                return it.hasNext() ? (SimpleFeature)it.next() : null;
+//            }
+//            catch (IOException e) {
+//                throw new RuntimeException( e );
+//            }
+//            finally {
+//                if (it != null) { it.close(); }
+//            }
+//        }
+//    }
+//
+//    
+//    /**
+//     * 
+//     */
+//    class AddressValidator
+//            implements IFormFieldValidator {
+//        
+//        private String      propName;
+//        
+//    
+//        public AddressValidator( String propName ) {
+//            this.propName = propName;
+//        }
+//
+//        @Override
+//        public String validate( Object fieldValue ) {
+//            try {
+//                if (fieldValue == null) {
+//                    return "Feld darf nicht leer sein.";                    
+//                }
+//                Timer timer = new Timer();
+//                Filter filter = ff.equals( ff.property( propName ), ff.literal( fieldValue ) );
+//                FeatureCollection features = addressFs.getFeatures( filter );
+//                log.info( "Features for '" + propName + "'==" + fieldValue + ": " + features.size() + " (" + timer.elapsedTime() + "ms)" );
+//                return features.isEmpty() ? "Wert existiert nicht in der Adressdatenbank: " + fieldValue : null;
+//            }
+//            catch (IOException e) {
+//                throw new RuntimeException( e );
+//            }
+//        }
+//    
+//        @Override
+//        public Object transform2Model( Object fieldValue ) throws Exception {
+//            return fieldValue;
+//        }
+//    
+//        @Override
+//        public Object transform2Field( Object modelValue ) throws Exception {
+//            return modelValue;
+//        }
+//        
+//    }
 
 }

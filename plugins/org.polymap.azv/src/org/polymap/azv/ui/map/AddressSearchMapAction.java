@@ -45,10 +45,13 @@ import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.RowDataFactory;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.polymap.core.runtime.UIJob;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
@@ -91,13 +94,20 @@ public class AddressSearchMapAction
     @Override
     public void fill( Composite parent ) {
         IPanelToolkit tk = viewer.getPanelSite().toolkit();
-        searchTxt = tk.createText( parent, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
-        searchTxt.setLayoutData( RowDataFactory.swtDefaults().hint( 280, SWT.DEFAULT ).create() );
-        //searchTxt.setLayoutData( FormDataFactory.filled().right( clearBtn ).create() );
+        
+        Composite result = tk.createComposite( parent );
+        result.setLayoutData( RowDataFactory.swtDefaults().hint( 280, SWT.DEFAULT ).create() );
+        result.setLayout( FormLayoutFactory.defaults().create() );
+        
+        searchTxt = tk.createText( result, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
+        searchTxt.setLayoutData( FormDataFactory.filled().create() );
 
-        resultCountLbl = tk.createLabel( parent, "-" );
+        resultCountLbl = tk.createLabel( result, "" );
+        resultCountLbl.moveAbove( searchTxt );
         resultCountLbl.setToolTipText( "Noch keine Treffer\nGeben Sie zuerst eine Suche ein" );
-        resultCountLbl.setLayoutData( RowDataFactory.swtDefaults().hint( 20, SWT.DEFAULT ).create() );
+        resultCountLbl.setLayoutData( FormDataFactory.filled().top( 0, 7 ).clearLeft().width( 25 ).create() );
+        resultCountLbl.setForeground( AzvPlugin.instance().discardColor.get() );
+        resultCountLbl.setFont( JFaceResources.getFontRegistry().getBold( JFaceResources.DEFAULT_FONT ) ); 
         
         searchTxt.setToolTipText( "Mit <Enter> das Ergebnisse in der Karte anzeigen\nBei mehreren Treffern wird das gesamte Gebiet angezeigt" );
         searchTxt.setForeground( Graphics.getColor( 0xa0, 0xa0, 0xa0 ) );
@@ -141,7 +151,7 @@ public class AddressSearchMapAction
         searchTxt.addModifyListener( new ModifyListener() {
             public void modifyText( ModifyEvent ev ) {
                 String txt = searchTxt.getText();
-                if (txt.length() <= 2) {
+                if (txt.length() < 1) {
                     proposalProvider.setProposals( new String[0] );
                 }
                 else {
@@ -153,7 +163,14 @@ public class AddressSearchMapAction
         searchTxt.addListener( SWT.DefaultSelection, new Listener() {
             public void handleEvent( Event ev ) {
                 try {
-                    zoomResults();
+                    String txt = searchTxt.getText();
+                    if (txt.length() == 0) {
+                        return;
+                    }
+                    FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
+                    Iterable<JSONObject> results = addressIndex.search( txt, 100 );
+
+                    zoomResults( results );
                 }
                 catch (Exception e) {
                     log.warn( "", e );
@@ -164,14 +181,7 @@ public class AddressSearchMapAction
     }
 
     
-    protected void zoomResults() throws Exception {
-        String txt = searchTxt.getText();
-        if (txt.length() == 0) {
-            return;
-        }
-        FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
-        Iterable<JSONObject> results = addressIndex.search( txt, 300 );
-
+    protected void zoomResults( Iterable<JSONObject> results ) throws Exception {
         ReferencedEnvelope bbox = new ReferencedEnvelope();
         for (JSONObject feature : results) {
             Geometry geom = (Geometry)feature.get( FullTextIndex.FIELD_GEOM );
@@ -230,15 +240,30 @@ public class AddressSearchMapAction
         protected void runWithException( IProgressMonitor monitor ) throws Exception {
             // search
             FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
-            Iterable<JSONObject> results = addressIndex.search( searchTextValue, 100 );
+            final Iterable<JSONObject> results = addressIndex.search( searchTextValue, 100 );
             final int resultCount = FluentIterable.from( results ).size();
             
-            // display
+            // display results
             searchTxt.getDisplay().asyncExec( new Runnable() {
                 public void run() {
                     String text = resultCount < 100 ? String.valueOf( resultCount ) : ">100";
                     resultCountLbl.setText( text );
                     resultCountLbl.setToolTipText( "Die aktuelle Suche ergibt " + text + " Treffer" );
+                    
+                    if (resultCount == 0 || resultCount > 100) {
+                        resultCountLbl.setForeground( AzvPlugin.instance().discardColor.get() );
+                    }
+                    else {
+                        resultCountLbl.setForeground( AzvPlugin.instance().okColor.get() );
+
+                        try {
+                            zoomResults( results );
+                        }
+                        catch (Exception e) {
+                            log.warn( "", e );
+                            BatikApplication.handleError( "", e );
+                        }
+                    }
                 }
             });
         }

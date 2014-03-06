@@ -18,15 +18,27 @@ import static org.polymap.azv.model.AdresseMixin.KEY_CITY;
 import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
 import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
 import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_CITY;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_NUMBER;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_POSTALCODE;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_STREET;
+import static org.polymap.rhei.fulltext.FullTextIndex.FIELD_GEOM;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import java.beans.PropertyChangeEvent;
+
+import org.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.collect.Iterables;
+import com.vividsolutions.jts.geom.Point;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -59,7 +71,10 @@ import org.polymap.rhei.field.IFormFieldLabel;
 import org.polymap.rhei.field.IFormFieldListener;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
+import org.polymap.rhei.field.Validators;
 import org.polymap.rhei.form.IFormEditorPageSite;
+import org.polymap.rhei.fulltext.FullTextIndex;
+import org.polymap.rhei.fulltext.address.AddressFinder;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.ui.PlzValidator;
 
@@ -68,6 +83,8 @@ import org.polymap.azv.Messages;
 import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
+import org.polymap.azv.ui.map.AddressValidator;
+import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -114,6 +131,9 @@ public class SchachtscheinStartCaseAction
 
     private IAction                             caseAction;
 
+    /** */
+//    private Map<String,String>                  searchAddress = new HashMap();
+
     
     @Override
     public boolean init( ICaseActionSite _site ) {
@@ -130,7 +150,13 @@ public class SchachtscheinStartCaseAction
                 User user = mcase.get().as( NutzerMixin.class ).setSessionUser();
                 
                 // Adresse vom Nutzer eintragen
-                mcase.get().as( AdresseMixin.class ).setAdresseVonNutzer( user );
+                AdresseMixin address = mcase.get().as( AdresseMixin.class );
+                address.setAdresseVonNutzer( user );
+//                Object dummy = null;
+//                dummy = address.nummer.get() != null ? searchAddress.put( FIELD_NUMBER, address.nummer.get() ) : null;
+//                dummy = address.plz.get() != null ? searchAddress.put( FIELD_POSTALCODE, address.nummer.get() ) : null;
+//                dummy = address.stadt.get() != null ? searchAddress.put( FIELD_CITY, address.nummer.get() ) : null;
+//                dummy = address.strasse.get() != null ? searchAddress.put( FIELD_STREET, address.nummer.get() ) : null;
 
                 // open action
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
@@ -306,20 +332,24 @@ public class SchachtscheinStartCaseAction
 
             createField( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() ).setValidator( new PlzValidator() ).create();
+                    .setField( new StringFormField() )
+                    .setValidator( Validators.AND( new PlzValidator(), new AddressValidator( FIELD_POSTALCODE ) ) ).create();
 
             createField( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
+                    .setField( new StringFormField() )
+                    .setValidator( new AddressValidator( FIELD_CITY ) ).create();
 
             Composite street = site.toolkit().createComposite( body );
             createField( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
-                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
+                    .setField( new StringFormField() )
+                    .setValidator( new AddressValidator( FIELD_STREET ) ).create();
 
             createField( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
+                    .setField( new StringFormField() )
+                    .setValidator( new AddressValidator( FIELD_NUMBER ) ).create();
 
             // field listener
             formSite.addFieldListener( fieldListener = new IFormFieldListener() {
@@ -327,11 +357,39 @@ public class SchachtscheinStartCaseAction
                     if (ev.getEventCode() != VALUE_CHANGE) {
                         return;
                     }
-                    site.setSubmitEnabled( formSite.isDirty() && formSite.isValid() );
-                    
-//                    if (ev.getFieldName().equals( "name" )) {
-//                        caseStatus.put( "Vorgang", (String)ev.getNewValue() );
+//                    // collect search address fields
+//                    switch (ev.getFieldName()) {
+//                        case KEY_POSTALCODE: search.put( FIELD_POSTALCODE, (String)ev.getNewValue() ); break;
+//                        case KEY_CITY: search.put( FIELD_CITY, (String)ev.getNewValue() ); break;
+//                        case KEY_STREET: search.put( FIELD_STREET, (String)ev.getNewValue() ); break;
+//                        case KEY_NUMBER: search.put( FIELD_NUMBER, (String)ev.getNewValue() ); break;
 //                    }
+                    //
+                    if (formSite.isDirty() && formSite.isValid() ) {
+                        site.setSubmitEnabled( true );
+                
+                        Map<String,String> search = new HashMap();
+                        search.put( FIELD_POSTALCODE, (String)formSite.getFieldValue( KEY_POSTALCODE ) );
+                        search.put( FIELD_CITY, (String)formSite.getFieldValue( KEY_CITY ) );
+                        search.put( FIELD_STREET, (String)formSite.getFieldValue( KEY_STREET ) );
+                        search.put( FIELD_NUMBER, (String)formSite.getFieldValue( KEY_NUMBER ) );
+                        
+                        FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
+                        Iterable<JSONObject> addresses = new AddressFinder( addressIndex ).maxResults( 1 ).find( search );
+                        JSONObject address = Iterables.getFirst( addresses, null );
+                        if (address != null) {
+                            Point geom = (Point)address.get( FIELD_GEOM );
+                            log.info( "Point: " + geom );
+                            
+//                            OrtMixin ort = mcase.get().as( OrtMixin.class );
+//                            ort.setGeom( geom );
+
+                            EventManager.instance().publish( new PropertyChangeEvent( this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
+                        }
+                        else {
+                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert leider nicht in unserer Datenbank." ) );                        
+                        }
+                    }
                 }
             });
 

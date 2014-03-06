@@ -27,6 +27,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.vividsolutions.jts.geom.Point;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -59,7 +61,7 @@ public class DrawFeatureMapAction
         extends ContributionItem
         implements OpenLayersEventListener {
 
-    public static final String      EVENT_NAME = "feature";
+    public static final String      EVENT_NAME = "_ort_";
 
     private static Log log = LogFactory.getLog( DrawFeatureMapAction.class );
     
@@ -193,7 +195,8 @@ public class DrawFeatureMapAction
             
             //vectorLayer.destroyFeatures();
             
-            EventManager.instance().publish( new PropertyChangeEvent( this, EVENT_NAME, null, feature ) );            
+            Point geom = (Point)feature.getDefaultGeometry();
+            EventManager.instance().publish( new PropertyChangeEvent( this, EVENT_NAME, null, geom ) );            
         }
         catch (IOException e) {
             log.warn( "", e );

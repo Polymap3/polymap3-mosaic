@@ -58,7 +58,6 @@ import org.polymap.openlayers.rap.widget.controls.LoadingPanelControl;
 import org.polymap.openlayers.rap.widget.controls.MousePositionControl;
 import org.polymap.openlayers.rap.widget.controls.NavigationControl;
 import org.polymap.openlayers.rap.widget.controls.PanZoomBarControl;
-import org.polymap.openlayers.rap.widget.controls.ScaleControl;
 import org.polymap.openlayers.rap.widget.controls.ScaleLineControl;
 import org.polymap.openlayers.rap.widget.layers.GridLayer;
 import org.polymap.openlayers.rap.widget.layers.Layer;
@@ -74,25 +73,25 @@ public class MapViewer
 
     private static Log log = LogFactory.getLog( MapViewer.class );
     
-    private IPanelSite          site;
+    private IPanelSite              site;
 
-    private OpenLayersWidget    olwidget;
-    
-    private String              srs;
+    private OpenLayersWidget        olwidget;
 
-    private OpenLayersMap       map;
+    private String                  srs;
 
-    private List<WMSLayer>      layers = new ArrayList();
+    private OpenLayersMap           map;
 
-    private List<WMSLayer>      visibleLayers = new ArrayList();
+    private List<WMSLayer>          layers = new ArrayList();
 
-    private Composite           contents;
-    
+    private List<WMSLayer>          visibleLayers = new ArrayList();
+
+    private Composite               contents;
+
     private List<IContributionItem> toolbarItems = new ArrayList();
 
-    private Composite           toolbar;
+    private Composite               toolbar;
 
-    private ReferencedEnvelope  bbox;
+    private ReferencedEnvelope      bbox;
 
     
     public void dispose() {
@@ -132,7 +131,9 @@ public class MapViewer
         
         if (layer instanceof WMSLayer) {
             layers.add( (WMSLayer)layer );
-            visibleLayer( layer, true );
+            if (!isBaseLayer) {
+                visibleLayer( layer, true );
+            }
         }
         return this;
     }
@@ -179,25 +180,30 @@ public class MapViewer
         Bounds maxExtent = new Bounds( 330000, 5820000, 477000, 6078174.895021 );
         olwidget.createMap( proj, proj, units, maxExtent, maxResolution );
         map = olwidget.getMap();
-        
+
+        map.addControl( new NavigationControl( true ) );
+        map.addControl( new PanZoomBarControl() );
+        map.addControl( new LayerSwitcherControl() );
+        map.addControl( new MousePositionControl() );
+        map.addControl( new ScaleLineControl() );
+//        map.addControl( new ScaleControl() );
+        map.addControl( new LoadingPanelControl() );
+
         //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
         WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
         addLayer( topo, true );
         //topo.setTileSize( new Size( 600, 600 ) );
 
-//        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
+        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
+        addLayer( osm, true );
 //        osm.setIsBaseLayer( true );
 //        osm.setTileSize( new Size( 600, 600 ) );
 //        osm.setBuffer( 0 );
 //        map.addLayer( osm );
 //        layers.add( osm );
 
-//        WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
-//        dop.setIsBaseLayer( true );
-//        dop.setTileSize( new Size( 400, 400 ) );
-//        dop.setBuffer( 0 );
-//        map.addLayer( dop );
-//        layers.add( dop );
+        WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
+        addLayer( dop, true );
 
 //        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasserquali" );
 //        wasser.setIsBaseLayer( false );
@@ -208,14 +214,6 @@ public class MapViewer
 //        hydranten.setIsBaseLayer( false );
 //        hydranten.setVisibility( false );
 //        map.addLayer( hydranten );
-
-        map.addControl( new NavigationControl() );
-        map.addControl( new PanZoomBarControl() );
-        map.addControl( new LayerSwitcherControl() );
-        map.addControl( new MousePositionControl() );
-        map.addControl( new ScaleLineControl() );
-        map.addControl( new ScaleControl() );
-        map.addControl( new LoadingPanelControl() );
 
        // map.setRestrictedExtend( maxExtent );
         map.zoomToExtent( maxExtent, true );

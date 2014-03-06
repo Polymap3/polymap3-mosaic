@@ -174,6 +174,7 @@ public class AzvPlugin
         // addressIndex
         addressSession = new SessionHolder( "Adressen" );
         final File addressStoreDir = new File( Polymap.getDataDir(), "org.polymap.azv.addresses" );
+        addressStoreDir.mkdirs();
         addressIndex = new CachedLazyInit( 10000, new Supplier<LuceneFullTextIndex>() {
             public LuceneFullTextIndex get() {
                 try {
