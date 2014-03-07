@@ -42,6 +42,8 @@ import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.rhei.batik.IPanelSite;
 
+import org.polymap.azv.model.OrtMixin;
+import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.openlayers.rap.widget.base.OpenLayersEventListener;
 import org.polymap.openlayers.rap.widget.base.OpenLayersObject;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
@@ -51,10 +53,10 @@ import org.polymap.openlayers.rap.widget.controls.DrawFeatureControl;
 import org.polymap.openlayers.rap.widget.layers.VectorLayer;
 
 /**
+ * Punkt digitalisieren. Setzt die Geometry im übergebenen MCase (siehe
+ * {@link OrtMixin}). Feuert ein {@link PropertyChangeEvent} mit dem Namen
+ * {@link #EVENT_NAME} und der Geometry als Value.
  * 
- * <p/>
- * Fires {@link PropertyChangeEvent} when feature was drawn to the map.
- *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class DrawFeatureMapAction
@@ -79,8 +81,11 @@ public class DrawFeatureMapAction
 
     private Button                  btn;
 
+    private IMosaicCase             mcase;
+
     
-    public DrawFeatureMapAction( MapViewer viewer, VectorLayer vectorLayer, String handler ) {
+    public DrawFeatureMapAction( IMosaicCase mcase, MapViewer viewer, VectorLayer vectorLayer, String handler ) {
+        this.mcase = mcase;
         this.site = viewer.getPanelSite();
         this.map = viewer.getMap();
         this.vectorLayer = vectorLayer;
@@ -193,9 +198,9 @@ public class DrawFeatureMapAction
             SimpleFeature feature = io.readFeature( new StringReader( payload.get( "features" ) ) );
             log.info( "Feature: " + feature );
             
-            //vectorLayer.destroyFeatures();
-            
             Point geom = (Point)feature.getDefaultGeometry();
+            mcase.as( OrtMixin.class ).setGeom( geom );
+
             EventManager.instance().publish( new PropertyChangeEvent( this, EVENT_NAME, null, geom ) );            
         }
         catch (IOException e) {

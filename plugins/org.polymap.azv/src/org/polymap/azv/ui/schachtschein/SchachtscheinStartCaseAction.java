@@ -18,6 +18,7 @@ import static org.polymap.azv.model.AdresseMixin.KEY_CITY;
 import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
 import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
 import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
+import static org.polymap.rhei.field.Validators.AND;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_CITY;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_NUMBER;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_POSTALCODE;
@@ -71,7 +72,6 @@ import org.polymap.rhei.field.IFormFieldLabel;
 import org.polymap.rhei.field.IFormFieldListener;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
-import org.polymap.rhei.field.Validators;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.fulltext.FullTextIndex;
 import org.polymap.rhei.fulltext.address.AddressFinder;
@@ -82,6 +82,7 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
 import org.polymap.azv.ui.map.AddressValidator;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
@@ -333,7 +334,7 @@ public class SchachtscheinStartCaseAction
             createField( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
                     .setField( new StringFormField() )
-                    .setValidator( Validators.AND( new PlzValidator(), new AddressValidator( FIELD_POSTALCODE ) ) ).create();
+                    .setValidator( AND( new PlzValidator(), new AddressValidator( FIELD_POSTALCODE ) ) ).create();
 
             createField( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
@@ -365,9 +366,11 @@ public class SchachtscheinStartCaseAction
 //                        case KEY_NUMBER: search.put( FIELD_NUMBER, (String)ev.getNewValue() ); break;
 //                    }
                     //
-                    if (formSite.isDirty() && formSite.isValid() ) {
-                        site.setSubmitEnabled( true );
-                
+                    boolean valid = formSite.isValid();
+                    boolean dirty = formSite.isDirty();
+                    site.setSubmitEnabled( valid & dirty );
+
+                    if (dirty && valid ) {
                         Map<String,String> search = new HashMap();
                         search.put( FIELD_POSTALCODE, (String)formSite.getFieldValue( KEY_POSTALCODE ) );
                         search.put( FIELD_CITY, (String)formSite.getFieldValue( KEY_CITY ) );
@@ -381,8 +384,8 @@ public class SchachtscheinStartCaseAction
                             Point geom = (Point)address.get( FIELD_GEOM );
                             log.info( "Point: " + geom );
                             
-//                            OrtMixin ort = mcase.get().as( OrtMixin.class );
-//                            ort.setGeom( geom );
+                            OrtMixin ort = mcase.get().as( OrtMixin.class );
+                            ort.setGeom( geom );
 
                             EventManager.instance().publish( new PropertyChangeEvent( this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
                         }

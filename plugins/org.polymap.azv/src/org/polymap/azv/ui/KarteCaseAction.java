@@ -16,8 +16,6 @@ package org.polymap.azv.ui;
 
 import java.beans.PropertyChangeEvent;
 
-import org.opengis.feature.Feature;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,7 +30,9 @@ import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
+import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
@@ -48,6 +48,7 @@ import org.polymap.azv.ui.map.HomeMapAction;
 import org.polymap.azv.ui.map.MapViewer;
 import org.polymap.azv.ui.map.PdfMapAction;
 import org.polymap.azv.ui.map.ScaleMapAction;
+import org.polymap.azv.ui.schachtschein.SchachtscheinStartCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -63,8 +64,8 @@ import org.polymap.openlayers.rap.widget.layers.VectorLayer;
 import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
 /**
+ * Stellt die Karte mit Toolbar/tools für Schachtschein und Leistungsauskunft dar.
  * 
- *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
 public class KarteCaseAction
@@ -155,14 +156,14 @@ public class KarteCaseAction
         mapViewer.addLayer( vectorLayer, false );
         
         // check if mcase has point
-        drawMCasePoint();
+        drawMosaicCasePoint();
         
         // toolbar
         createToolbar( body );        
     }
 
     
-    protected void drawMCasePoint() {
+    protected void drawMosaicCasePoint() {
         Point geom = mcase.get().as( OrtMixin.class ).getGeom();
         if (geom != null) {
             vectorLayer.destroyFeatures();
@@ -182,10 +183,15 @@ public class KarteCaseAction
     protected void createToolbar( Composite parent ) {
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
 
-        drawFeatureAction = new DrawFeatureMapAction( mapViewer, vectorLayer, DrawFeatureControl.HANDLER_POINT );
-        drawFeatureAction.addListener( this );
+        drawFeatureAction = new DrawFeatureMapAction( mcase.get(), mapViewer, vectorLayer, DrawFeatureControl.HANDLER_POINT );
         mapViewer.addToolbarItem( drawFeatureAction );
-        
+
+        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+            public boolean apply( PropertyChangeEvent input ) {
+                return input.getPropertyName().equals( DrawFeatureMapAction.EVENT_NAME );
+            }
+        });
+
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
             mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 500 ) );
             mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
@@ -194,15 +200,21 @@ public class KarteCaseAction
         }
     }
 
-    
+
+    /**
+     * Listen to changes of the location ({@link OrtMixin}) of the mcase. The event
+     * is triggered by {@link DrawFeatureMapAction} and
+     * {@link SchachtscheinStartCaseAction} and others.
+     * 
+     * @param ev
+     */
     @EventHandler(display=true)
-    protected void featureAdded( PropertyChangeEvent ev ) {
-        Feature feature = (Feature)ev.getNewValue();
-        Point point = (Point)feature.getDefaultGeometryProperty().getValue();
-        mcase.get().as( OrtMixin.class ).setGeom( point );
-        repo.get().commitChanges();
+    protected void ortGeomChanged( PropertyChangeEvent ev ) {
+//        Point geom = (Point)ev.getNewValue();
+//        mcase.get().as( OrtMixin.class ).setGeom( geom );
+//        repo.get().commi tChanges();
         
-        drawMCasePoint();
+        drawMosaicCasePoint();
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Ort der Maßnahme wurde festgelegt." ) );
         

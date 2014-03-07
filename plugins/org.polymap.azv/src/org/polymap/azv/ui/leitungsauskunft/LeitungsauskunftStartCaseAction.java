@@ -18,13 +18,27 @@ import static org.polymap.azv.model.AdresseMixin.KEY_CITY;
 import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
 import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
 import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
+import static org.polymap.rhei.field.Validators.AND;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_CITY;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_NUMBER;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_POSTALCODE;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_STREET;
+import static org.polymap.rhei.fulltext.FullTextIndex.FIELD_GEOM;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import java.beans.PropertyChangeEvent;
+
+import org.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.common.collect.Iterables;
+import com.vividsolutions.jts.geom.Point;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -58,12 +72,17 @@ import org.polymap.rhei.field.IFormFieldListener;
 import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
+import org.polymap.rhei.fulltext.FullTextIndex;
+import org.polymap.rhei.fulltext.address.AddressFinder;
 import org.polymap.rhei.um.ui.PlzValidator;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
+import org.polymap.azv.ui.map.AddressValidator;
+import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -282,20 +301,25 @@ public class LeitungsauskunftStartCaseAction
             Composite street = site.toolkit().createComposite( body );
             new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
-                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
+                    .setField( new StringFormField() )
+                    .setValidator( new AddressValidator( FIELD_STREET ) ).create();
 
             new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
+                    .setField( new StringFormField() )
+                    .setValidator( new AddressValidator( FIELD_NUMBER ) ).create();
 
             Composite city = site.toolkit().createComposite( body );
             new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
-                    .setField( new StringFormField() ).setValidator( new PlzValidator() ).create();
+                    .setField( new StringFormField() )
+                    .setValidator( AND( new PlzValidator(), new AddressValidator( FIELD_POSTALCODE ) ) )
+                    .create();
 
             new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() )/*.setValidator( new NotEmptyValidator() )*/.create();
+                    .setField( new StringFormField() )
+                    .setValidator( new AddressValidator( FIELD_CITY ) ).create();
 
             // address listener
             formSite.addFieldListener( fieldListener = new IFormFieldListener() {
@@ -303,14 +327,36 @@ public class LeitungsauskunftStartCaseAction
                     if (ev.getEventCode() != VALUE_CHANGE) {
                         return;
                     }
+
                     boolean valid = formSite.isValid();
                     boolean dirty = formSite.isDirty();
-                    log.info( "dirty=" + dirty + ", valid=" + valid );
                     site.setSubmitEnabled( valid & dirty );
                     
-//                    if (ev.getFieldName().equals( "name" )) {
-//                        caseStatus.put( "Bezeichnung", (String)ev.getNewValue() );
-//                    }
+                    if (dirty && valid) {
+                        site.setSubmitEnabled( true );
+                
+                        Map<String,String> search = new HashMap();
+                        search.put( FIELD_POSTALCODE, (String)formSite.getFieldValue( KEY_POSTALCODE ) );
+                        search.put( FIELD_CITY, (String)formSite.getFieldValue( KEY_CITY ) );
+                        search.put( FIELD_STREET, (String)formSite.getFieldValue( KEY_STREET ) );
+                        search.put( FIELD_NUMBER, (String)formSite.getFieldValue( KEY_NUMBER ) );
+                        
+                        FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
+                        Iterable<JSONObject> addresses = new AddressFinder( addressIndex ).maxResults( 1 ).find( search );
+                        JSONObject address = Iterables.getFirst( addresses, null );
+                        if (address != null) {
+                            Point geom = (Point)address.get( FIELD_GEOM );
+                            log.info( "Point: " + geom );
+                            
+                            OrtMixin ort = mcase.get().as( OrtMixin.class );
+                            ort.setGeom( geom );
+
+                            EventManager.instance().publish( new PropertyChangeEvent( this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
+                        }
+                        else {
+                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert leider nicht in unserer Datenbank." ) );                        
+                        }
+                    }
                 }
             });
 //            activateStatusAdapter( site.getPanelSite() );
