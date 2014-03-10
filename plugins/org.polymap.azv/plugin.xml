@@ -212,5 +212,32 @@
             name="An Bearbeitung">
       </caseAction>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.polymap.azv.ui.i18n.I18nEditor"
+            default="false"
+            id="org.polymap.azv.I18nEditor"
+            name="Texte &amp; Bezeichner">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.polymap.azv.actionSet"
+            label="AZV"
+            visible="true">
+         <action
+               class="org.polymap.azv.ui.i18n.OpenI18nEditorAction"
+               icon="resources/icons/attachment.png"
+               id="org.polymap.azv.openI18nEditorAction"
+               label="Texte"
+               menubarPath="azv"
+               style="push"
+               toolbarPath="azv"
+               tooltip="Texte und Bezeichner bearbeiten">
+         </action>
+      </actionSet>
+   </extension>
 
 </plugin>
