@@ -76,9 +76,9 @@ public class LeitungsauskunftPanel
 
     private static Log log = LogFactory.getLog( LeitungsauskunftPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "Leitungsauskunft" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "Leitungsauskunft" ); //$NON-NLS-1$
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftPanel" );
+    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftPanel" ); //$NON-NLS-1$
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase> mcase;
@@ -94,7 +94,7 @@ public class LeitungsauskunftPanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        site.setTitle( "Automatische Leitungsauskunft" );
+        site.setTitle( i18n.get( "title" ) );
         return false;
     }
 
@@ -127,30 +127,34 @@ public class LeitungsauskunftPanel
         mapViewer = new MapViewer();
         mapViewer.createContents( panelBody, getSite() );
         
+        mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
+
         // layers
-        WMSLayer kanal = new WMSLayer( "Kanal", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Kanal" );
-        mapViewer.addLayer( kanal, false );
-        
-        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
-        mapViewer.addLayer( wasser, false );
-        
-        WMSLayer alk = new WMSLayer( "ALK", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-ALK" );
-        mapViewer.addLayer( alk, false );
+        int suffix = 1;
+        while (i18n.contains( "layerName"+suffix )) { //$NON-NLS-1$
+            WMSLayer layer = new WMSLayer( i18n.get( "layerName"+suffix ),  //$NON-NLS-1$
+                    i18n.get( "layerWmsUrl"+suffix ), //$NON-NLS-1$
+                    i18n.get( "layerWmsName"+suffix ) ); //$NON-NLS-1$
+            //layer.setVisibility( false );
+            mapViewer.addLayer( layer, false );
+            mapViewer.addToolbarItem( new LayerMapAction( mapViewer, layer, i18n.get( "layerName"+suffix ), true ) ); //$NON-NLS-1$
+            suffix ++;
+        }
 
         // toolbar
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 250 ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 500 ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
-        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, kanal, "Kanal", true ) );
-        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, wasser, "Wasser", false ) );
-        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, alk, "ALK", false ) );
+//        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, kanal, "Kanal", true ) ); //$NON-NLS-1$
+//        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, wasser, "Wasser", false ) ); //$NON-NLS-1$
+//        mapViewer.addToolbarItem( new LayerMapAction( mapViewer, alk, "ALK", false ) ); //$NON-NLS-1$
         mapViewer.addToolbarItem( addressSearch = new AddressSearchMapAction( mapViewer ) );
         
         mapViewer.addToolbarItem( new ContributionItem() {
             public void fill( Composite parent ) {
-                Button btn = getSite().toolkit().createButton( parent, "A4", SWT.PUSH );
-                btn.setToolTipText( "PDF/A4 erzeugen" );
+                Button btn = getSite().toolkit().createButton( parent, i18n.get( "pdfA4" ), SWT.PUSH );
+                btn.setToolTipText( i18n.get( "pdfA4Tip" ) );
                 btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
                 btn.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( SelectionEvent ev ) {
@@ -162,8 +166,8 @@ public class LeitungsauskunftPanel
         
         mapViewer.addToolbarItem( new ContributionItem() {
             public void fill( Composite parent ) {
-                Button btn = getSite().toolkit().createButton( parent, "A3", SWT.PUSH );
-                btn.setToolTipText( "PDF/A3 erzeugen" );
+                Button btn = getSite().toolkit().createButton( parent, i18n.get( "pdfA3" ), SWT.PUSH );
+                btn.setToolTipText( i18n.get( "pdfA3Tip" ) );
                 btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
                 btn.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( SelectionEvent ev ) {
@@ -175,20 +179,20 @@ public class LeitungsauskunftPanel
         
         mapViewer.addToolbarItem( new ContributionItem() {
             public void fill( Composite parent ) {
-                Button btn = getSite().toolkit().createButton( parent, "Einzelauskunft" );
-                btn.setToolTipText( "Antrag auf Einzelauskunft durch den AZV" );
+                Button btn = getSite().toolkit().createButton( parent, i18n.get( "einzelauskunft" ) );
+                btn.setToolTipText( i18n.get( "einzelauskunftTip" ) );
                 btn.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( SelectionEvent ev ) {
                         try {
                             // create new case; commit/rollback inside CaseAction
-                            IMosaicCase newCase = repo.get().newCase( "", "" );
+                            IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
                             newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
                             //newCase.put( KEY_USER, user.get().username().get() );
                             mcase.set( newCase );
                             getContext().openPanel( CasePanel.ID );
                         }
                         catch (Exception e) {
-                            BatikApplication.handleError( "Einzelauskunft konnte nicht gestartet werden.", e );
+                            BatikApplication.handleError( i18n.get( "einzelauskunftFehler" ), e );
                         }
                     }
                 });
@@ -198,16 +202,16 @@ public class LeitungsauskunftPanel
     
     
     protected void createPDF( final Rectangle pageSize ) {
-        final String title = defaultIfEmpty( addressSearch.getSearchText(), "Leitungsauskunft" );
+        final String title = defaultIfEmpty( addressSearch.getSearchText(), "Leitungsauskunft" ); //$NON-NLS-1$
         
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
             @Override
             public String getFilename() {
-                return "Leistungsauskunft-" + AzvPlugin.df.format( new Date() ) + ".pdf";
+                return "Leistungsauskunft-" + AzvPlugin.df.format( new Date() ) + ".pdf"; //$NON-NLS-1$ //$NON-NLS-2$
             }
             @Override
             public String getContentType() {
-                return "application/pdf";
+                return "application/pdf"; //$NON-NLS-1$
             }
             @Override
             public InputStream getInputStream() throws Exception {
@@ -220,7 +224,7 @@ public class LeitungsauskunftPanel
                 return true;
             }
         });  
-        ExternalBrowser.open( "download_window", url,
+        ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
                 ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
     }
     

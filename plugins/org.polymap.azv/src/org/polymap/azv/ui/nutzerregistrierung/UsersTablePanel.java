@@ -91,9 +91,9 @@ public class UsersTablePanel
 
     private static Log log = LogFactory.getLog( UsersTablePanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "azv", "users" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "azv", "users" ); //$NON-NLS-1$ //$NON-NLS-2$
 
-    public static final IMessages       i18n = Messages.forPrefix( "UsersTablePanel" );
+    public static final IMessages       i18n = Messages.forPrefix( "UsersTablePanel" ); //$NON-NLS-1$
 
     /** Set by the {@link LoginPanel}. */
     @Context(scope="org.polymap.azv.ui")
@@ -138,8 +138,8 @@ public class UsersTablePanel
     @EventHandler(display=true)
     protected void userLoggedIn( PropertyAccessEvent ev ) {
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
-            getSite().setTitle( "Nutzer/Kunden" );
-            getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/users-filter.png" ) );
+            getSite().setTitle( i18n.get( "title" ) );
+            getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/users-filter.png" ) ); //$NON-NLS-1$
         }
     }
 
@@ -163,13 +163,13 @@ public class UsersTablePanel
         });
         
         UsersTableSearchField searchField = new UsersTableSearchField( viewer, tableArea, 
-                Arrays.asList( "name", "username", "firstname", "company", "street", "city" ) );
+                Arrays.asList( "name", "username", "firstname", "company", "street", "city" ) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
         FormDataFactory.filled().bottom( -1 ).applyTo( searchField.getControl() );
         FormDataFactory.filled().top( searchField.getControl() ).applyTo( viewer.getControl() );
         
         // form area
         formArea = tk.createComposite( contents );
-        tk.createLabel( formArea, "Wählen Sie einen Nutzer in der Tabelle." );
+        tk.createLabel( formArea, i18n.get( "nutzerWaehlen" ) );
     }
 
     
@@ -208,7 +208,7 @@ public class UsersTablePanel
         }
         
         // change btn
-        Button okBtn = tk.createButton( formArea, i18n.get( "okBtn" ), SWT.PUSH );
+        Button okBtn = tk.createButton( formArea, i18n.get( "okBtn" ), SWT.PUSH ); //$NON-NLS-1$
         okBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
         //okBtn.setEnabled( false );
         okBtn.addSelectionListener( new SelectionAdapter() {
@@ -217,18 +217,18 @@ public class UsersTablePanel
                     personForm.submit();
                     umrepo.commitChanges();
                     viewer.update( umuser, null );
-                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Nutzerdaten wurden aktualisiert." ) );
+                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okStatus" ) ) );
                 }
                 catch (Exception e) {
                     UserRepository.instance().revertChanges();
-                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, "Daten wurden nicht korrekt geändert." ) );
+                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, i18n.get( "fehlerStatus" ) ) );
                     throw new RuntimeException( e );
                 }
             }
         });
         
         // delete btn
-        Button deleteBtn = tk.createButton( formArea, i18n.get( "deleteBtn" ), SWT.PUSH );
+        Button deleteBtn = tk.createButton( formArea, i18n.get( "deleteBtn" ), SWT.PUSH ); //$NON-NLS-1$
         deleteBtn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_DISCARD );
         deleteBtn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
@@ -240,11 +240,11 @@ public class UsersTablePanel
                     umrepo.commitChanges();
 
                     viewer.reload();
-                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Nutzerdaten wurden gelöscht." ) );
+                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "geloeschtStatus" ) ) );
                 }
                 catch (Exception e) {
                     UserRepository.instance().revertChanges();
-                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, "Nutzer wurden nicht korrekt gelöscht." ) );
+                    getSite().setStatus( new Status( IStatus.ERROR, AzvPlugin.ID, i18n.get( "geloeschtFehlerStatus" ) ) );
                     throw new RuntimeException( e );
                 }
             }

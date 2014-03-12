@@ -40,12 +40,14 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.polymap.core.data.util.Geometries;
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.IPanelSite;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.openlayers.rap.widget.OpenLayersWidget;
 import org.polymap.openlayers.rap.widget.base.OpenLayersEventListener;
 import org.polymap.openlayers.rap.widget.base.OpenLayersObject;
@@ -73,6 +75,8 @@ public class MapViewer
 
     private static Log log = LogFactory.getLog( MapViewer.class );
     
+    public static final IMessages   i18n = Messages.forPrefix( "MapViewer" ); //$NON-NLS-1$
+
     private IPanelSite              site;
 
     private OpenLayersWidget        olwidget;
@@ -189,31 +193,31 @@ public class MapViewer
 //        map.addControl( new ScaleControl() );
         map.addControl( new LoadingPanelControl() );
 
-        //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
-        WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
-        addLayer( topo, true );
-        //topo.setTileSize( new Size( 600, 600 ) );
+        // layers
+        int suffix = 1;
+        while (i18n.contains( "layerName"+suffix )) { //$NON-NLS-1$
+            WMSLayer layer = new WMSLayer( i18n.get( "layerName"+suffix ),  //$NON-NLS-1$
+                    i18n.get( "layerWmsUrl"+suffix ), //$NON-NLS-1$
+                    i18n.get( "layerWmsName"+suffix ) ); //$NON-NLS-1$
+            addLayer( layer, true );
+            suffix ++;
+        }
 
-        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
-        addLayer( osm, true );
-//        osm.setIsBaseLayer( true );
-//        osm.setTileSize( new Size( 600, 600 ) );
-//        osm.setBuffer( 0 );
-//        map.addLayer( osm );
-//        layers.add( osm );
-
-        WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
-        addLayer( dop, true );
-
-//        WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasserquali" );
-//        wasser.setIsBaseLayer( false );
-//        wasser.setVisibility( true );
-//        map.addLayer( wasser );
-//        
-//        WMSLayer hydranten = new WMSLayer( "Hydranten", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Hydranten" );
-//        hydranten.setIsBaseLayer( false );
-//        hydranten.setVisibility( false );
-//        map.addLayer( hydranten );
+//        //OSMLayer osm = new OSMLayer( "OSM", "http://tile.openstreetmap.org/${z}/${x}/${y}.png", 9 );
+//        WMSLayer topo = new WMSLayer( "Topo MV", "http://www.geodaten-mv.de/dienste/gdimv_topomv", "gdimv_topomv" );
+//        addLayer( topo, true );
+//        //topo.setTileSize( new Size( 600, 600 ) );
+//
+//        WMSLayer osm = new WMSLayer( "OSM", "http://ows.terrestris.de/osm-basemap/service", "OSM-WMS-Deutschland" );
+//        addLayer( osm, true );
+////        osm.setIsBaseLayer( true );
+////        osm.setTileSize( new Size( 600, 600 ) );
+////        osm.setBuffer( 0 );
+////        map.addLayer( osm );
+////        layers.add( osm );
+//
+//        WMSLayer dop = new WMSLayer( "DOP", "http://www.geodaten-mv.de/dienste/adv_dop", "mv_dop" );
+//        addLayer( dop, true );
 
        // map.setRestrictedExtend( maxExtent );
         map.zoomToExtent( maxExtent, true );

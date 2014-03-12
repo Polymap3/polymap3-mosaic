@@ -14,6 +14,13 @@
  */
 package org.polymap.azv.ui;
 
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ABGEBROCHEN;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANBEARBEITUNG;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_BEANTRAGT;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_FREIGABE;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_STORNIERT;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,8 +31,9 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
+import org.polymap.core.runtime.IMessages;
 
-import static org.polymap.azv.AzvPlugin.*;
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvStatusMixin;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicCase2;
@@ -43,13 +51,15 @@ public class AzvStatusCaseTableColumn
 
     private static Log log = LogFactory.getLog( AzvStatusCaseTableColumn.class );
 
+    private static final IMessages  i18n = Messages.forPrefix( "StatusColumn" ); //$NON-NLS-1$
+
     private MosaicRepository2       repo;
 
     public AzvStatusCaseTableColumn( final MosaicRepository2 repo ) {
-        super( CasesTableViewer.createDescriptor( "azvstatus", String.class ) );
+        super( CasesTableViewer.createDescriptor( "azvstatus", String.class ) ); //$NON-NLS-1$
         this.repo = repo;
         setWeight( 1, 90 );
-        setHeader( "" );
+        setHeader( "" ); //$NON-NLS-1$
         setAlign( SWT.LEFT );
         setSortable( false );
 
@@ -65,31 +75,31 @@ public class AzvStatusCaseTableColumn
                 
                 azvStatus = AzvStatusMixin.ofCase( mcase );
                 if (azvStatus == null) {
-                    return "NEU";                    
+                    return i18n.get( "neu" );                    
                 }
                 else if (azvStatus.equals( EVENT_TYPE_ABGEBROCHEN )) {
-                    return "Abbruch";
+                    return i18n.get( "abbruch" );
                 }
                 else if (azvStatus.equals( EVENT_TYPE_STORNIERT )) {
-                    return "Storno";
+                    return i18n.get( "storno" );
                 }
                 else if (azvStatus.equals( EVENT_TYPE_BEANTRAGT )) {
-                    return "Antrag";
+                    return i18n.get( "antrag" );
                 }
                 else if (azvStatus.equals( EVENT_TYPE_FREIGABE )) {
-                    return "Freigabe";
+                    return i18n.get( "freigabe" );
                 }
                 else if (azvStatus.equals( EVENT_TYPE_ANFREIGABE )) {
-                    return "An Freigabe";
+                    return i18n.get( "anFreigabe" );
                 }
                 else if (azvStatus.equals( EVENT_TYPE_ANBEARBEITUNG )) {
-                    return "An Bearbeitung";
+                    return i18n.get( "anBearbeitung" );
                 }
                 else if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
-                    return "ERLEDIGT";
+                    return i18n.get( "erledigt" );
                 }
                 else {
-                    return "???";
+                    return i18n.get( "unknown" );
                 }
             }
             

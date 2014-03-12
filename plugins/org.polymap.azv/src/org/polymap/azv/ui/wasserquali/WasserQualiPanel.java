@@ -83,17 +83,13 @@ public class WasserQualiPanel
 
     private static Log log = LogFactory.getLog( WasserQualiPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "WasserQuali" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "WasserQuali" ); //$NON-NLS-1$
 
-    public static final IMessages       i18n = Messages.forPrefix( "WasserQualiPanel" );
+    public static final IMessages       i18n = Messages.forPrefix( "WasserQualiPanel" ); //$NON-NLS-1$
     
     public static final FilterFactory2  ff = MosaicUiPlugin.ff;
 
     private MapViewer                   mapViewer;
-
-//    private FeatureSource               addressFs;
-//
-//    private SimpleFeature               search;
 
     private Composite                   body;
 
@@ -109,8 +105,8 @@ public class WasserQualiPanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        site.setTitle( "Wasserhärten und -Qualitäten" );
-        site.setIcon( BatikPlugin.instance().imageForName( "resources/icons/waterdrop-filter.png" ) );
+        site.setTitle( i18n.get( "title" ) );
+        site.setIcon( BatikPlugin.instance().imageForName( "resources/icons/waterdrop-filter.png" ) ); //$NON-NLS-1$
         return false;
     }
 
@@ -136,14 +132,14 @@ public class WasserQualiPanel
 
     
     protected IPanelSection createWelcomeSection( Composite parent ) {
-        IPanelSection section = getSite().toolkit().createPanelSection( parent, "Wie gut ist mein Wasser?" );
-        getSite().toolkit().createFlowText( section.getBody(), i18n.get( "welcomeTxt" ) );
+        IPanelSection section = getSite().toolkit().createPanelSection( parent, i18n.get( "welcomeTitle" ) );
+        getSite().toolkit().createFlowText( section.getBody(), i18n.get( "welcomeTxt" ) ); //$NON-NLS-1$
         return section;
     }
 
 
     protected IPanelSection createAddressSection( Composite parent ) {
-        addressSection = getSite().toolkit().createPanelSection( parent, "Adresse eingeben" );
+        addressSection = getSite().toolkit().createPanelSection( parent, i18n.get( "addressTitle" ) );
         addressSection.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 10 ).columns( 1, 1 ).create() );
 
             AddressForm form = new AddressForm( getSite() ) {
@@ -151,10 +147,10 @@ public class WasserQualiPanel
                     try {
                         int count = Iterables.size( addresses );
                         if (count == 0) {
-                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert nicht." ) );                        
+                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n.get( "adresseExistiertNicht" ) ) );                        
                         }
                         else if (count > 1) {
-                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Die Angabe ist zu ungenau. Es exitieren mehrere solche Adressen." ) );                        
+                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n.get( "angabeZuUngenau" ) ) );                        
                         }
                         else {
                             showResult( Iterables.getFirst( addresses, null ) );
@@ -184,18 +180,18 @@ public class WasserQualiPanel
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );
         //mapViewer.addToolbarItem( new AddressSearchMapAction( mapViewer ) );
         
-        vectorLayer = new VectorLayer( "Markierung" );
+        vectorLayer = new VectorLayer( i18n.get( "ebeneMarkierung" ) );
         vectorLayer.setVisibility( true );
         vectorLayer.setIsBaseLayer( false );
         vectorLayer.setZIndex( 10000 );
 
         // style
         Style standard = new Style();
-        standard.setAttribute( "strokeColor", "#ff0000" );
-        standard.setAttribute( "strokeWidth", "4" );
-        standard.setAttribute( "pointRadius", "10" );
+        standard.setAttribute( "strokeColor", i18n.get( "strokeColor" ) ); //$NON-NLS-1$
+        standard.setAttribute( "strokeWidth", i18n.get( "strokeWidth" ) ); //$NON-NLS-1$
+        standard.setAttribute( "pointRadius", i18n.get( "pointRadius" ) ); //$NON-NLS-1$
         StyleMap styleMap = new StyleMap();
-        styleMap.setIntentStyle( "default", standard );
+        styleMap.setIntentStyle( "default", standard ); //$NON-NLS-1$
         vectorLayer.setStyleMap( styleMap );
         mapViewer.getMap().addLayer( vectorLayer );
         return section;
@@ -204,12 +200,12 @@ public class WasserQualiPanel
     
     protected void showResult( JSONObject address ) throws Exception {
         if (resultParent == null) {
-            IPanelSection resultSection = getSite().toolkit().createPanelSection( body, "Ihre Wasserqualität" );
+            IPanelSection resultSection = getSite().toolkit().createPanelSection( body, i18n.get( "resultTitle" ) );
             resultSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH, 
                     new PriorityConstraint( 4 ), 
                     new NeighborhoodConstraint( addressSection.getControl(), Neighborhood.BOTTOM, 1 ) );
             resultParent = resultSection.getBody();
-            getSite().toolkit().createLabel( resultSection.getBody(), "Bitte geben Sie einen Adresse ein." )
+            getSite().toolkit().createLabel( resultSection.getBody(), i18n.get( "adresseEingeben" ) )
                     .setLayoutData( FormDataFactory.filled().width( 300 ).create() );
         }        
         for (Control child : resultParent.getChildren()) {
@@ -217,8 +213,8 @@ public class WasserQualiPanel
         }
         
         if (resultFs == null) {
-            ILayer layer = ProjectRepository.instance().visit( Layers.finder( "wasserquali", "Wasserquali" ) );
-            assert layer != null : "Keine Ebene 'Wasserquali' gefunden!";
+            ILayer layer = ProjectRepository.instance().visit( Layers.finder( "wasserquali", "Wasserquali" ) ); //$NON-NLS-1$ //$NON-NLS-2$
+            assert layer != null : "Keine Ebene 'Wasserquali' gefunden!"; //$NON-NLS-1$
             resultFs = PipelineFeatureSource.forLayer( layer, false );
         }
 
@@ -226,13 +222,13 @@ public class WasserQualiPanel
         Filter filter = ff.contains( 
                 ff.property( resultFs.getSchema().getGeometryDescriptor().getLocalName() ), 
                 ff.literal( p ) );
-        log.info( "Filter: " + filter );
+        log.info( "Filter: " + filter ); //$NON-NLS-1$
         FeatureCollection results = resultFs.getFeatures( filter );
 
         // result form
         resultParent.setLayout( ColumnLayoutFactory.defaults().create() );
         if (results.isEmpty()) {
-            getSite().toolkit().createLabel( resultParent, "An diesem Ort liegen keine Daten vor." );
+            getSite().toolkit().createLabel( resultParent, i18n.get( "keineDaten" ) );
         }
         else {
             Iterator it = results.iterator();

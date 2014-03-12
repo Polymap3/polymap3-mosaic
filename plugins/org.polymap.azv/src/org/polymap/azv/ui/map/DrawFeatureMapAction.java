@@ -37,11 +37,13 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.ContributionItem;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.rhei.batik.IPanelSite;
 
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.OrtMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.openlayers.rap.widget.base.OpenLayersEventListener;
@@ -63,10 +65,12 @@ public class DrawFeatureMapAction
         extends ContributionItem
         implements OpenLayersEventListener {
 
-    public static final String      EVENT_NAME = "_ort_";
-
     private static Log log = LogFactory.getLog( DrawFeatureMapAction.class );
     
+    public static final IMessages   i18n = Messages.forPrefix( "KarteDigitalisieren" ); //$NON-NLS-1$
+
+    public static final String      EVENT_NAME = "_ort_"; //$NON-NLS-1$
+
     private IPanelSite              site;
     
     private OpenLayersMap           map;
@@ -114,8 +118,8 @@ public class DrawFeatureMapAction
     
     @Override
     public void fill( Composite parent ) {
-        btn = site.toolkit().createButton( parent, "Ort markieren", SWT.TOGGLE );
-        btn.setToolTipText( "Ort der Maßnahme per Klick in die Karte einzeichnen" );
+        btn = site.toolkit().createButton( parent, i18n.get( "buttonTitle" ), SWT.TOGGLE );
+        btn.setToolTipText( i18n.get( "buttonTip" ) );
         //btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/location.png" ) );
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {
@@ -137,20 +141,20 @@ public class DrawFeatureMapAction
             btn.setSelection( true );
         }
         if (isVectorLayerCreated) {
-            vectorLayer = new VectorLayer( "Markierung" );
+            vectorLayer = new VectorLayer( i18n.get( "ebeneMarkierung" ) );
             vectorLayer.setVisibility( true );
             vectorLayer.setIsBaseLayer( false );
             vectorLayer.setZIndex( 10000 );
 
             // style
             Style standard = new Style();
-            standard.setAttribute( "strokeColor", "#ff0000" );
-            standard.setAttribute( "strokeWidth", "4" );
-            standard.setAttribute( "pointRadius", "10" );
+            standard.setAttribute( "strokeColor", i18n.get( "strokeColor" ) ); //$NON-NLS-1$
+            standard.setAttribute( "strokeWidth", i18n.get( "strokeWidth" ) ); //$NON-NLS-1$
+            standard.setAttribute( "pointRadius", i18n.get( "pointRadius" ) ); //$NON-NLS-1$
             StyleMap styleMap = new StyleMap();
-            styleMap.setIntentStyle( "default", standard );
-            styleMap.setIntentStyle( "select", standard );
-            styleMap.setIntentStyle( "temporary", standard );
+            styleMap.setIntentStyle( "default", standard ); //$NON-NLS-1$
+            styleMap.setIntentStyle( "select", standard ); //$NON-NLS-1$
+            styleMap.setIntentStyle( "temporary", standard ); //$NON-NLS-1$
             vectorLayer.setStyleMap( styleMap );
 
             map.addLayer( vectorLayer );
@@ -162,7 +166,7 @@ public class DrawFeatureMapAction
 
         // register event handler
         Map<String, String> payload = new HashMap();
-        payload.put( "features", "new OpenLayers.Format.GeoJSON().write(event.feature, false)" );
+        payload.put( "features", "new OpenLayers.Format.GeoJSON().write(event.feature, false)" ); //$NON-NLS-1$ //$NON-NLS-2$
         drawControl.events.register( DrawFeatureMapAction.this, DrawFeatureControl.EVENT_ADDED, payload );
         drawControl.activate();
         vectorLayer.redraw();
@@ -193,10 +197,10 @@ public class DrawFeatureMapAction
     @Override
     public void process_event( OpenLayersObject src_obj, String event_name, HashMap<String, String> payload ) {
         try {
-            log.info( "JSON: " + payload.get( "features" ) );
+            log.info( "JSON: " + payload.get( "features" ) ); //$NON-NLS-1$ //$NON-NLS-2$
             FeatureJSON io = new FeatureJSON();
-            SimpleFeature feature = io.readFeature( new StringReader( payload.get( "features" ) ) );
-            log.info( "Feature: " + feature );
+            SimpleFeature feature = io.readFeature( new StringReader( payload.get( "features" ) ) ); //$NON-NLS-1$
+            log.info( "Feature: " + feature ); //$NON-NLS-1$
             
             Point geom = (Point)feature.getDefaultGeometry();
             mcase.as( OrtMixin.class ).setGeom( geom );
@@ -204,7 +208,7 @@ public class DrawFeatureMapAction
             EventManager.instance().publish( new PropertyChangeEvent( this, EVENT_NAME, null, geom ) );            
         }
         catch (IOException e) {
-            log.warn( "", e );
+            log.warn( "", e ); //$NON-NLS-1$
         }
     }
 

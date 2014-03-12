@@ -70,9 +70,9 @@ public class HydrantenPanel
 
     private static Log log = LogFactory.getLog( HydrantenPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "Hydranten" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "Hydranten" ); //$NON-NLS-1$
 
-    public static final IMessages       i18n = Messages.forPrefix( "HydrantenPanel" );
+    public static final IMessages       i18n = Messages.forPrefix( "HydrantenPanel" ); //$NON-NLS-1$
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase> mcase;
@@ -86,7 +86,7 @@ public class HydrantenPanel
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
-        site.setTitle( "Hydrantenpläne" );
+        site.setTitle( i18n.get( "title" ) );
         return false;
     }
 
@@ -113,7 +113,7 @@ public class HydrantenPanel
         mapViewer.createContents( panelBody, getSite() );
         
         // layers
-        WMSLayer hydranten = new WMSLayer( "Hydranten", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Hydranten" );
+        WMSLayer hydranten = new WMSLayer( i18n.get( "layerName" ), i18n.get( "layerWmsUrl" ), i18n.get( "layerWmsLayer" ) );
         hydranten.setIsBaseLayer( false );
         hydranten.setVisibility( true );
         mapViewer.addLayer( hydranten, false );
@@ -127,8 +127,8 @@ public class HydrantenPanel
         
         mapViewer.addToolbarItem( new ContributionItem() {
             public void fill( Composite parent ) {
-                Button btn = getSite().toolkit().createButton( parent, "A4", SWT.PUSH );
-                btn.setToolTipText( "PDF/A4 erzeugen" );
+                Button btn = getSite().toolkit().createButton( parent, i18n.get( "pdfA4" ), SWT.PUSH );
+                btn.setToolTipText( i18n.get( "pdfA4Tip" ) );
                 btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
                 btn.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( SelectionEvent ev ) {
@@ -140,8 +140,8 @@ public class HydrantenPanel
         
         mapViewer.addToolbarItem( new ContributionItem() {
             public void fill( Composite parent ) {
-                Button btn = getSite().toolkit().createButton( parent, "A3", SWT.PUSH );
-                btn.setToolTipText( "PDF/A3 erzeugen" );
+                Button btn = getSite().toolkit().createButton( parent, i18n.get( "pdfA3" ), SWT.PUSH );
+                btn.setToolTipText( i18n.get( "pdfA3Tip" ) );
                 btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
                 btn.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( SelectionEvent ev ) {
@@ -157,11 +157,11 @@ public class HydrantenPanel
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
             @Override
             public String getFilename() {
-                return "Hydranten-" + AzvPlugin.df.format( new Date() ) + ".pdf";
+                return i18n.get( "pdfFilename", AzvPlugin.df.format( new Date() ) ); 
             }
             @Override
             public String getContentType() {
-                return "application/pdf";
+                return "application/pdf"; //$NON-NLS-1$
             }
             @Override
             public InputStream getInputStream() throws Exception {
@@ -174,7 +174,7 @@ public class HydrantenPanel
                 return true;
             }
         });  
-        ExternalBrowser.open( "download_window", url,
+        ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
                 ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
     }
     

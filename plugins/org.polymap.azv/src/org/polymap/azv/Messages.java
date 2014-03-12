@@ -14,6 +14,9 @@
  */
 package org.polymap.azv;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import org.eclipse.rwt.RWT;
 
 import org.polymap.core.runtime.IMessages;
@@ -50,6 +53,10 @@ public class Messages {
 
     public static IMessages forPrefix( String prefix ) {
         return instance.forPrefix( prefix );
+    }
+
+    public static ResourceBundle resourceBundle() {
+        return instance.resourceBundle( Locale.GERMAN );
     }
 
 }

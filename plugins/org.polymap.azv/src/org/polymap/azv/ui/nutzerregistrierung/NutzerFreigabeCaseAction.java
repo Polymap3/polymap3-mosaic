@@ -91,7 +91,7 @@ public class NutzerFreigabeCaseAction
 
     private static final FastDateFormat df = AzvPlugin.df;
     
-    public static final IMessages       i18n = Messages.forPrefix( "NutzerFreigabe" );
+    public static final IMessages       i18n = Messages.forPrefix( "NutzerFreigabe" ); //$NON-NLS-1$
 
     
     private ICaseActionSite                 site;
@@ -113,10 +113,10 @@ public class NutzerFreigabeCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         IMosaicCase mycase = mcase.get();
-        log.info( "CASE:" + mycase );
+        log.info( "CASE:" + mycase ); //$NON-NLS-1$
         if (mycase != null && mycase.getNatures().contains( CASE_NUTZER )) {
             // user data
-            username = mycase.get( "user" );
+            username = mycase.get( "user" ); //$NON-NLS-1$
             um = UserRepository.instance();
             user = um.findUser( username );
             
@@ -136,13 +136,13 @@ public class NutzerFreigabeCaseAction
 
     @Override
     public void fillStatus( CaseStatus status ) {
-        status.put( i18n.get( "status" ), Joiner.on( " " ).skipNulls().join( user.salutation().get(), user.firstname().get(), user.name().get() ), 98  );
+        status.put( i18n.get( "status" ), Joiner.on( " " ).skipNulls().join( user.salutation().get(), user.firstname().get(), user.name().get() ), 98  ); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
 
     @Override
     public void fillContentArea( Composite parent ) {
-        IPanelSection personSection = site.toolkit().createPanelSection( parent, "Nutzerdaten" );
+        IPanelSection personSection = site.toolkit().createPanelSection( parent, i18n.get( "title" ) );
         personSection.addConstraint( new PriorityConstraint( 1 ), MIN_COLUMN_WIDTH );
         personSection.getBody().setLayout( new FillLayout() );
         
@@ -154,23 +154,23 @@ public class NutzerFreigabeCaseAction
             personForm.setEnabled( false );            
         }
         else {
-            site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen" )
-                    .setData( "no_user_yet", Boolean.TRUE );
+            site.toolkit().createLabel( personSection.getBody(), i18n.get( "nochKeinKunde" ) )
+                    .setData( "no_user_yet", Boolean.TRUE ); //$NON-NLS-1$
         }
         
         // normaler Nutzer
         if (!SecurityUtils.isUserInGroup( ROLE_MA )) {
-            IPanelSection txtSection = site.toolkit().createPanelSection( parent, "Ihr Antrag" );
+            IPanelSection txtSection = site.toolkit().createPanelSection( parent, i18n.get( "antragTitle" ) );
             txtSection.addConstraint( new PriorityConstraint( 10 ) );
             //txtSection.getBody().setLayout( new FillLayout() );
             
             if (mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
-                String roles = mcase.get().get( "roles" );
+                String roles = mcase.get().get( "roles" ); //$NON-NLS-1$
                 site.toolkit().createFlowText( txtSection.getBody(), 
-                        "Folgende Funktionen wurden für Sie freigeschaltet:\n\r * " + roles );                
+                        i18n.get( "freigeschalteteFunktionen", roles ) );                
             }
             else {
-                site.toolkit().createFlowText( txtSection.getBody(), i18n.get( "userTxt" ) );
+                site.toolkit().createFlowText( txtSection.getBody(), i18n.get( "userTxt" ) ); //$NON-NLS-1$
             }
         }
     }
@@ -192,7 +192,7 @@ public class NutzerFreigabeCaseAction
         // welcome
         Composite welcome = site.toolkit().createComposite( parent );
         welcome.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
-        site.toolkit().createFlowText( welcome, i18n.get( "welcomeTxt", UsersTablePanel.ID ) );
+        site.toolkit().createFlowText( welcome, i18n.get( "welcomeTxt", UsersTablePanel.ID ) ); //$NON-NLS-1$
         
         // left section
         Composite left = site.toolkit().createComposite( parent, SWT.BORDER );
@@ -206,7 +206,7 @@ public class NutzerFreigabeCaseAction
             createBtn( left, role ).setSelection( groups.contains( role ) );
         }
         
-        site.createSubmit( left, "Ok" );
+        site.createSubmit( left, i18n.get( "ok" ) );
 
         // right section
         Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
@@ -242,21 +242,21 @@ public class NutzerFreigabeCaseAction
         List<String> roles = um.groupsOf( user );
 
         MosaicRepository2 mosaic = repo.get();
-        mcase.get().put( "roles", Iterables.toString( roles ) );
-        mosaic.newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, "Nutzerrechte: " + um.groupsOf( user ), AzvPlugin.EVENT_TYPE_FREIGABE );
-        mosaic.closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, "Nutzerrechte: " + um.groupsOf( user ) );
+        mcase.get().put( "roles", Iterables.toString( roles ) ); //$NON-NLS-1$
+        mosaic.newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, i18n.get( "eventBeschreibung", um.groupsOf( user ) ), AzvPlugin.EVENT_TYPE_FREIGABE );
+        mosaic.closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, i18n.get( "eventBeschreibung", um.groupsOf( user ) ) );
         mosaic.commitChanges();
         
-        String salu = user.salutation().get() != null ? user.salutation().get() : "";
-        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
         Email email = new SimpleEmail();
-        email.setCharset( "ISO-8859-1" );
+        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
         email.addTo( user.email().get() )
-                .setSubject( i18n.get( "emailSubject") )
-                .setMsg( i18n.get( "email", header, roles ) );
+                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+                .setMsg( i18n.get( "email", header, roles ) ); //$NON-NLS-1$
         EmailService.instance().send( email );
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) ); //$NON-NLS-1$
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
                 site.getContext().closePanel( site.getPanelSite().getPath() );

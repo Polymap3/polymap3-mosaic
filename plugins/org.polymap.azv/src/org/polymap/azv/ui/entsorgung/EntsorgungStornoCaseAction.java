@@ -58,7 +58,7 @@ public class EntsorgungStornoCaseAction
 
     private static Log log = LogFactory.getLog( EntsorgungStornoCaseAction.class );
 
-    public static final IMessages           i18n = Messages.forPrefix( "EntsorgungStorno" );
+    public static final IMessages           i18n = Messages.forPrefix( "EntsorgungStorno" ); //$NON-NLS-1$
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -100,7 +100,7 @@ public class EntsorgungStornoCaseAction
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
         if (liste == null || liste.geschlossen().get()) {
-            status.put( "Status", "Antrag kann nicht mehr storniert werden." );
+            status.put( i18n.get( "vorgangStatusStatus" ), i18n.get( "keinStorno" ) );
             site.setSubmitEnabled( false );
         }
 //        if (mcase.get().getStatus().equals( IMosaicCaseEvent.TYPE_CLOSED )) {
@@ -128,24 +128,24 @@ public class EntsorgungStornoCaseAction
         liste.mcaseIds().get().remove( mcase.get().getId() );
         azvRepo.commitChanges();
         
-        repo.get().newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, "Antrag wurde storniert.", AzvPlugin.EVENT_TYPE_STORNIERT );
-        repo.get().closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, "Antrag wurde storniert." );
+        repo.get().newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, i18n.get( "eventStorniert" ), AzvPlugin.EVENT_TYPE_STORNIERT );
+        repo.get().closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, i18n.get( "eventStorniert" ) );
         repo.get().commitChanges();
         
         // email
         User user = mcase.get().as( NutzerMixin.class ).user();
         if (user != null) {
-            String salu = user.salutation().get() != null ? user.salutation().get() : "";
-            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+            String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
             Email email = new SimpleEmail();
-            email.setCharset( "ISO-8859-1" );
+            email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
             email.addTo( user.email().get() )
-                    .setSubject( i18n.get( "emailSubject") )
-                    .setMsg( i18n.get( "email", header, liste.name().get() ) );
+                    .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+                    .setMsg( i18n.get( "email", header, liste.name().get() ) ); //$NON-NLS-1$
             EmailService.instance().send( email );
         }
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Der Antrag wurde storniert." ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "statusStorniert" ) ) );
         
         // update panel action and status
         fillStatus( caseStatus );

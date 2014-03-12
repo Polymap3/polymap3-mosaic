@@ -88,7 +88,7 @@ public class AnBearbeitungCaseAction
     @Override
     public void submit() throws Exception {
         MosaicRepository2 mosaic = repo.get();
-        mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_ANBEARBEITUNG, "An Freigabe übermittelt", EVENT_TYPE_ANBEARBEITUNG );
+        mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_ANBEARBEITUNG, "An Bearbeitung übermittelt", EVENT_TYPE_ANBEARBEITUNG );
         mosaic.commitChanges();
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) );

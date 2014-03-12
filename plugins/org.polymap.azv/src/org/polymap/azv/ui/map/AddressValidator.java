@@ -18,12 +18,14 @@ import org.json.JSONObject;
 
 import com.google.common.collect.Iterables;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Timer;
 
 import org.polymap.rhei.field.IFormFieldValidator;
 import org.polymap.rhei.fulltext.FullTextIndex;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 
 /**
  * 
@@ -32,6 +34,8 @@ import org.polymap.azv.AzvPlugin;
  */
 public class AddressValidator
         implements IFormFieldValidator {
+
+    public static final IMessages   i18n = Messages.forPrefix( "AddressValidator" ); //$NON-NLS-1$
 
     private FullTextIndex   addressIndex = AzvPlugin.instance().addressIndex();
 
@@ -49,10 +53,10 @@ public class AddressValidator
                 return null;                    
             }
             Timer timer = new Timer();
-            Iterable<JSONObject> results = addressIndex.search( propName + ":" + fieldValue, 1 );
+            Iterable<JSONObject> results = addressIndex.search( propName + ":" + fieldValue, 1 ); //$NON-NLS-1$
             int count = Iterables.size( results );                
-            AddressForm.log.info( "Features for '" + propName + "'==" + fieldValue + ": " + count + " (" + timer.elapsedTime() + "ms)" );
-            return count == 0 ? "Dieser Wert existiert nicht in unserer Adressdatenbank: " + fieldValue : null;
+            AddressForm.log.info( "Features for '" + propName + "'==" + fieldValue + ": " + count + " (" + timer.elapsedTime() + "ms)" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+            return count == 0 ? i18n.get( "keineDaten", fieldValue) : null;
         }
         catch (Exception e) {
             throw new RuntimeException( e );

@@ -25,8 +25,11 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.ContributionItem;
 
+import org.polymap.core.runtime.IMessages;
+
 import org.polymap.rhei.batik.IPanelSite;
 
+import org.polymap.azv.Messages;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
 import org.polymap.openlayers.rap.widget.layers.Layer;
 
@@ -39,6 +42,8 @@ public class LayerMapAction
         extends ContributionItem {
 
     private static Log log = LogFactory.getLog( LayerMapAction.class );
+
+    public static final IMessages   i18n = Messages.forPrefix( "KarteLayer" ); //$NON-NLS-1$
 
     private IPanelSite          site;
     
@@ -66,7 +71,7 @@ public class LayerMapAction
     @Override
     public void fill( Composite parent ) {
         Button btn = site.toolkit().createButton( parent, label, SWT.TOGGLE );
-        btn.setToolTipText( "Ebene zu/abschalten: " + label );
+        btn.setToolTipText( i18n.get( "buttonTip", label ) );
         btn.setSelection( visible );
         //btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/expand.png" ) );
         btn.setEnabled( true );

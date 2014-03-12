@@ -25,8 +25,11 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.ContributionItem;
 
+import org.polymap.core.runtime.IMessages;
+
 import org.polymap.rhei.batik.IPanelSite;
 
+import org.polymap.azv.Messages;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
 
 /**
@@ -38,6 +41,8 @@ public class ScaleMapAction
         extends ContributionItem {
 
     private static Log log = LogFactory.getLog( ScaleMapAction.class );
+
+    public static final IMessages   i18n = Messages.forPrefix( "KarteScale" ); //$NON-NLS-1$
 
     private IPanelSite          site;
     
@@ -58,8 +63,8 @@ public class ScaleMapAction
     
     @Override
     public void fill( Composite parent ) {
-        Button btn = site.toolkit().createButton( parent, "1:" + scale, SWT.PUSH );
-        btn.setToolTipText( "Karte im Maßstab 1:" + scale );
+        Button btn = site.toolkit().createButton( parent, i18n.get( "button", scale ), SWT.PUSH );
+        btn.setToolTipText( i18n.get( "buttonTip", scale ) );
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {

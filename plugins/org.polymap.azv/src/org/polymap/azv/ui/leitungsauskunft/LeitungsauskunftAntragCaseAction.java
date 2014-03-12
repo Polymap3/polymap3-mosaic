@@ -62,7 +62,7 @@ public class LeitungsauskunftAntragCaseAction
 
     private static Log log = LogFactory.getLog( LeitungsauskunftAntragCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftAntrag" );
+    public static final IMessages               i18n = Messages.forPrefix( "LeitungsauskunftAntrag" ); //$NON-NLS-1$
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -117,7 +117,7 @@ public class LeitungsauskunftAntragCaseAction
     @Override
     public void submit() throws Exception {
         // dokumente
-        File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Leitungen" );
+        File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Leitungen" ); //$NON-NLS-1$
         for (File f : dir.listFiles()) {
             IMosaicDocument doc = repo.get().newDocument( mcase.get(), f.getName() );
             OutputStream out = doc.getOutputStream();
@@ -131,18 +131,18 @@ public class LeitungsauskunftAntragCaseAction
             }
         }
         // event, commit
-        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
+        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT ); //$NON-NLS-1$ //$NON-NLS-2$
         repo.get().commitChanges();
      
         User user = mcase.get().as( NutzerMixin.class ).user();
                 
-        String salu = user.salutation().get() != null ? user.salutation().get() : "";
-        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
         Email email = new SimpleEmail();
-        email.setCharset( "ISO-8859-1" );
+        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
         email.addTo( user.email().get() )
-                .setSubject( i18n.get( "emailSubject") )
-                .setMsg( i18n.get( "email", header ) );
+                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+                .setMsg( i18n.get( "email", header ) ); //$NON-NLS-1$
         EmailService.instance().send( email );
         
         fillAction( action );
@@ -158,13 +158,13 @@ public class LeitungsauskunftAntragCaseAction
     protected void updateEnabled() {
         action.setEnabled( false );
         if (mcase.get().getName().length() == 0) {
-            action.setToolTipText( "Es fehlt der Name der Maßnahme" );
+            action.setToolTipText( i18n.get( "keineBezeichnung" ) );
         }
-        else if (mcase.get().get( "point" ) == null) {
-            action.setToolTipText( "Es fehlt der Ort der Maßnahme" );
+        else if (mcase.get().get( "point" ) == null) { //$NON-NLS-1$
+            action.setToolTipText( i18n.get( "keinOrt" ) );
         }
         else {
-            action.setToolTipText( "" );
+            action.setToolTipText( "" ); //$NON-NLS-1$
             action.setEnabled( true );
         }
     }

@@ -100,7 +100,7 @@ public class EntsorgungCaseAction
 
     private static Log log = LogFactory.getLog( EntsorgungCaseAction.class );
 
-    public static final IMessages           i18n = Messages.forPrefix( "Entsorgung" );
+    public static final IMessages           i18n = Messages.forPrefix( "Entsorgung" ); //$NON-NLS-1$
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -178,13 +178,13 @@ public class EntsorgungCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        status.put( "Name", entsorgung.name.get(), 5 );
+        status.put( i18n.get( "vorgangStatusName" ), entsorgung.name.get(), 5 );
 
         AzvRepository azvRepo = AzvRepository.instance();
         String listeId = entsorgung.liste.get();
         if (listeId != null) {
             Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, listeId );
-            status.put( "Termin", liste.name().get(), 0 );
+            status.put( i18n.get( "vorgangStatusTermin" ), liste.name().get(), 0 );
         }
 
         //site.getPanelSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
@@ -196,7 +196,7 @@ public class EntsorgungCaseAction
         // contentSection
         this.contentArea = parent;
         if (contentSection == null) {
-            contentSection = site.toolkit().createPanelSection( parent, "Daten" );
+            contentSection = site.toolkit().createPanelSection( parent, i18n.get( "datenTitle" ) );
             contentSection.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
             contentSection.getBody().setLayout( new FillLayout() );
         }
@@ -210,13 +210,13 @@ public class EntsorgungCaseAction
             contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).columns( 1, 1 ).create() );
             contentForm.setEnabled( false );
 
-            IPanelSection sep = site.toolkit().createPanelSection( parent, "Status" );
+            IPanelSection sep = site.toolkit().createPanelSection( parent, i18n.get( "statusTitle" ) );
             sep.addConstraint( new PriorityConstraint( 0 ) );
             sep.getBody().setLayout( new FillLayout() );
-            site.toolkit().createFlowText( sep.getBody(), i18n.get( "dataTxt" ) );
+            site.toolkit().createFlowText( sep.getBody(), i18n.get( "dataTxt" ) ); //$NON-NLS-1$
         }
         else {
-            site.toolkit().createLabel( contentSection.getBody(), "Noch keine Daten." )
+            site.toolkit().createLabel( contentSection.getBody(), i18n.get( "keineDaten" ) )
                     .setForeground( MosaicUiPlugin.COLOR_RED.get() );
         }
     }
@@ -235,7 +235,7 @@ public class EntsorgungCaseAction
             entsorgung.name.set( user.name().get() );
         }
 
-        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt", RegisterPanel.ID ) )
+        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt", RegisterPanel.ID ) ) //$NON-NLS-1$
                 .setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
 
         Composite formContainer = site.toolkit().createComposite( parent );
@@ -244,14 +244,14 @@ public class EntsorgungCaseAction
         form.createContents( formContainer );
         site.setSubmitEnabled( false );
         
-        site.createSubmit( formContainer, "Entsorgung beantragen" );
+        site.createSubmit( formContainer, i18n.get( "beantragen" ) );
     }
 
     
     @Override
     public void submit() throws Exception {
         form.submit();
-        mcase.get().setName( Joiner.on( " " ).skipNulls().join( adresse.strasse.get(), adresse.nummer.get(), adresse.stadt.get() ) );
+        mcase.get().setName( Joiner.on( " " ).skipNulls().join( adresse.strasse.get(), adresse.nummer.get(), adresse.stadt.get() ) ); //$NON-NLS-1$
         
         AzvRepository azvRepo = AzvRepository.instance();
         String listeId = entsorgung.liste.get();
@@ -261,20 +261,20 @@ public class EntsorgungCaseAction
         azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), liste.name().get(), 
-                Joiner.on( " " ).skipNulls().join( liste.name().get(), adresse.strasse.get(), adresse.nummer.get(), adresse.stadt.get() ), 
+                Joiner.on( " " ).skipNulls().join( liste.name().get(), adresse.strasse.get(), adresse.nummer.get(), adresse.stadt.get() ),  //$NON-NLS-1$
                 AzvPlugin.EVENT_TYPE_BEANTRAGT  );
         repo.get().commitChanges();
 
         // email
         User user = nutzer.user();
         if (user != null) {
-            String salu = user.salutation().get() != null ? user.salutation().get() : "";
-            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+            String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
             Email email = new SimpleEmail();
-            email.setCharset( "ISO-8859-1" );
+            email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
             email.addTo( user.email().get() )
-                    .setSubject( i18n.get( "emailSubject") )
-                    .setMsg( i18n.get( "email", header, liste.name().get() ) );
+                    .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+                    .setMsg( i18n.get( "email", header, liste.name().get() ) ); //$NON-NLS-1$
             EmailService.instance().send( email );
         }
 
@@ -282,7 +282,7 @@ public class EntsorgungCaseAction
         fillStatus( caseStatus );
         fillAction( caseAction );
         fillContentArea( contentArea );
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Der Antrag wurde entgegen genommen. Sie erhalten eine EMail." ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "statusOk" ) ) );
     }
 
 
@@ -292,7 +292,7 @@ public class EntsorgungCaseAction
         
         // do not left 'empty' CasePanel after close button
         if (mcase.get().getName().isEmpty()) {
-            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Basisdaten eingegeben. Der Vorgang wurde daher komplett abgebrochen." ) );
+            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, i18n.get( "keineBasisdaten" ) ) );
             Polymap.getSessionDisplay().asyncExec( new Runnable() {
                 public void run() {
                     site.getContext().closePanel( site.getPanelSite().getPath() );
@@ -318,11 +318,11 @@ public class EntsorgungCaseAction
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_NAME ) )
-                    .setLabel( "Name" ).setToolTipText( "Ihr Name" )
+                    .setLabel( i18n.get( "name" ) ).setToolTipText( i18n.get( "nameTip" ) )
                     .setValidator( new NotEmptyValidator() ).create().setFocus();
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_KUNDENNUMMER ) )
-                    .setLabel( "Kundennummer" ).setToolTipText( "Ihre Kundennummer (siehe letzte Rechnung)" )
+                    .setLabel( i18n.get( "kundennummer" ) ).setToolTipText( i18n.get( "kundennummerTip" ) )
                     .create();
 
             Query<Entsorgungsliste> listen = AzvRepository.instance().findEntities( Entsorgungsliste.class, null, 0, -1 );
@@ -333,19 +333,19 @@ public class EntsorgungCaseAction
                 }
             }
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_LISTE ) )
-                    .setLabel( "Termin" ).setToolTipText( "Gewünschter Termin der Entsorgung" )
+                    .setLabel( i18n.get( "termin" ) ).setToolTipText( i18n.get( "terminTip" ) )
                     .setField( new PicklistFormField( picklistMap ) )
                     .setValidator( new NotEmptyValidator() ).create();
 
             new FormFieldBuilder( body, new KVPropertyAdapter( mcase.get(), KEY_BEMERKUNG ) )
-                    .setLabel( "Bemerkung" ).setToolTipText( "Besondere Hinweise für das Entsorgungsunternehmen" )
+                    .setLabel( i18n.get( "bemerkung" ) ).setToolTipText( i18n.get( "bemerkungTip" ) )
                     .setField( new TextFormField() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
     
             Composite street = site.toolkit().createComposite( body );
             Property prop = new KVPropertyAdapter( mcase.get(), KEY_STREET );
             new FormFieldBuilder( street, prop )
-                    .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
+                    .setLabel( i18n.get( "strasseHNr" ) ).setToolTipText( i18n.get( "strasseHNrTip" ) )
                     .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
 
             prop = new KVPropertyAdapter( mcase.get(), KEY_NUMBER );
@@ -356,7 +356,7 @@ public class EntsorgungCaseAction
             Composite city = site.toolkit().createComposite( body );
             prop = new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE );
             new FormFieldBuilder( city, prop )
-                    .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
+                    .setLabel( i18n.get( "plzOrt" ) ).setToolTipText( i18n.get( "plzOrtTip" ) )
                     .setField( new StringFormField() ).setValidator( new PlzValidator( new NotEmptyValidator() ) ).create();
 
             prop = new KVPropertyAdapter( mcase.get(), KEY_CITY );
@@ -380,10 +380,10 @@ public class EntsorgungCaseAction
                     if (ev.getFieldName().equals( KEY_LISTE )) {
                         String id = ev.getNewValue();
                         Entsorgungsliste liste = AzvRepository.instance().findEntity( Entsorgungsliste.class, id );
-                        caseStatus.put( "Termin", liste.name().get() );
+                        caseStatus.put( i18n.get( "vorgangStatusTermin" ), liste.name().get() );
                     }
                     else if (ev.getFieldName().equals( KEY_NAME )) {
-                        caseStatus.put( "Name", ev.getNewValue().toString() );
+                        caseStatus.put( i18n.get( "vorgangStatusName" ), ev.getNewValue().toString() );
                     }
                     else if (ev.getFieldName().equals( KEY_CITY )) {
                         city = ev.getNewValue();

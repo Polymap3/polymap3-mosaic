@@ -45,9 +45,9 @@ import org.polymap.azv.Messages;
 public class AzvLoginPanel
         extends DefaultPanel {
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "azvlogin" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "azvlogin" ); //$NON-NLS-1$
 
-    public static final IMessages       i18n = Messages.forPrefix( "LoginPanel" );
+    public static final IMessages       i18n = Messages.forPrefix( "LoginPanel" ); //$NON-NLS-1$
 
     private ContextProperty<UserPrincipal> user;
 
@@ -71,13 +71,13 @@ public class AzvLoginPanel
     
     @Override
     public void createContents( Composite parent ) {
-        getSite().setTitle( "Anmelden" );
+        getSite().setTitle( i18n.get( "title" ) );
         
         // welcome
-        IPanelSection welcomeSection = tk.createPanelSection( parent, "Anmelden" );
+        IPanelSection welcomeSection = tk.createPanelSection( parent, i18n.get( "sectionTitle" ) );
         welcomeSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
         welcomeSection.getBody().setLayout( new FillLayout() );
-        tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) );
+        tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) ); //$NON-NLS-1$
 
         // login
         IPanelSection section = tk.createPanelSection( parent, null );
@@ -86,12 +86,12 @@ public class AzvLoginPanel
         LoginForm loginForm = new LoginForm( getContext(), getSite(), user ) {
             protected boolean login( String name, String passwd ) {
                 if (super.login( name, passwd )) {
-                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Sie haben sich erfolgreich angemeldet." ) );
+                    getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "statusOk" ) ) );
                     getContext().closePanel( getSite().getPath() );
                     return true;
                 }
                 else {
-                    getSite().setStatus( new Status( IStatus.WARNING, UmPlugin.ID, "Nutzername oder Passwort sind nicht korrekt." ) );
+                    getSite().setStatus( new Status( IStatus.WARNING, UmPlugin.ID, i18n.get( "loginNichtKorrekt" ) ) );
                     return false;
                 }
             }

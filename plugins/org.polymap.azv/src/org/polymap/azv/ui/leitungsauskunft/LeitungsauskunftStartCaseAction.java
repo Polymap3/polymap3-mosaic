@@ -104,7 +104,7 @@ public class LeitungsauskunftStartCaseAction
 
     private static Log log = LogFactory.getLog( LeitungsauskunftStartCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftStart" );
+    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftStart" ); //$NON-NLS-1$
 
     private static final FastDateFormat df = AzvPlugin.df;
 
@@ -185,7 +185,7 @@ public class LeitungsauskunftStartCaseAction
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
         String id = mcase.get().getId();
-        status.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
+        status.put( i18n.get( "laufendeNr" ), StringUtils.right( id, 6 ) );
     }
 
 
@@ -197,7 +197,7 @@ public class LeitungsauskunftStartCaseAction
             nutzer.setSessionUser();
         }
 
-        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt" ) )
+        site.toolkit().createFlowText( parent, i18n.get( "welcomeTxt" ) ) //$NON-NLS-1$
                 .setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
 
         Composite formContainer = site.toolkit().createComposite( parent );
@@ -206,7 +206,7 @@ public class LeitungsauskunftStartCaseAction
         form.createContents( formContainer );
         site.setSubmitEnabled( false );
         
-        site.createSubmit( formContainer, "Übernehmen" );
+        site.createSubmit( formContainer, i18n.get( "übernehmen" ) );
     }
 
     
@@ -218,7 +218,7 @@ public class LeitungsauskunftStartCaseAction
         form = null;
         repo.get().commitChanges();
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "übernommen" ) ) );
         fillStatus( caseStatus );
 
         // create/reload form
@@ -245,7 +245,7 @@ public class LeitungsauskunftStartCaseAction
         
         // do not left 'empty' CasePanel after close button
         if (mcase.get().getName().isEmpty()) {
-            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Es wurden keine Basisdaten eingegeben.\nDer Vorgang wurde daher geschlossen." ) );
+            site.getPanelSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, i18n.get( "keineBasisdaten" ) ) );
             Polymap.getSessionDisplay().asyncExec( new Runnable() {
                 public void run() {
                     site.getContext().closePanel( site.getPanelSite().getPath() );
@@ -257,7 +257,7 @@ public class LeitungsauskunftStartCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        contentSection = site.toolkit().createPanelSection( parent, "Maßnahme" );
+        contentSection = site.toolkit().createPanelSection( parent, i18n.get( "sectionTitle" ) );
         contentSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
         contentSection.getBody().setLayout( new FillLayout() );
 
@@ -268,7 +268,7 @@ public class LeitungsauskunftStartCaseAction
             contentForm.setEnabled( false );
         }
         else {
-            site.toolkit().createLabel( contentSection.getBody(), "Noch keine Daten." )
+            site.toolkit().createLabel( contentSection.getBody(), i18n.get( "nochKeineDaten" ) )
                     .setForeground( MosaicUiPlugin.COLOR_RED.get() );
         }
     }
@@ -289,18 +289,18 @@ public class LeitungsauskunftStartCaseAction
             body = formSite.getPageBody();
             body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
-            new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) )
-                    .setLabel( "Bezeichnung" ).setToolTipText( "Bezeichnung der Maßnahme" )
+            new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "name" ) ) //$NON-NLS-1$
+                    .setLabel( i18n.get( "bezeichnung" ) ).setToolTipText( i18n.get( "bezeichnungTip" ) )
                     .setValidator( new NotEmptyValidator() ).create().setFocus();
             
-            new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "description" ) )
-                    .setLabel( "Beschreibung" ).setToolTipText( "Beschreibung der Maßnahme" )
+            new FormFieldBuilder( body, new BeanPropertyAdapter( mcase.get(), "description" ) ) //$NON-NLS-1$
+                    .setLabel( i18n.get( "beschreibung" ) ).setToolTipText( i18n.get( "beschreibungTip" ) )
                     .setField( new TextFormField() ).setValidator( new NotEmptyValidator() ).create()
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite street = site.toolkit().createComposite( body );
             new FormFieldBuilder( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
-                    .setLabel( "Straße / Nummer" ).setToolTipText( "Straße und Hausnummer" )
+                    .setLabel( i18n.get( "strasseHnr" ) ).setToolTipText( i18n.get( "strasseHnrTip" ) )
                     .setField( new StringFormField() )
                     .setValidator( new AddressValidator( FIELD_STREET ) ).create();
 
@@ -311,7 +311,7 @@ public class LeitungsauskunftStartCaseAction
 
             Composite city = site.toolkit().createComposite( body );
             new FormFieldBuilder( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
-                    .setLabel( "PLZ / Ort" ).setToolTipText( "Postleitzahl und Ortsname" )
+                    .setLabel( i18n.get( "plzOrt" ) ).setToolTipText( i18n.get( "plzOrtTip" ) )
                     .setField( new StringFormField() )
                     .setValidator( AND( new PlzValidator(), new AddressValidator( FIELD_POSTALCODE ) ) )
                     .create();
@@ -346,7 +346,7 @@ public class LeitungsauskunftStartCaseAction
                         JSONObject address = Iterables.getFirst( addresses, null );
                         if (address != null) {
                             Point geom = (Point)address.get( FIELD_GEOM );
-                            log.info( "Point: " + geom );
+                            log.info( "Point: " + geom ); //$NON-NLS-1$
                             
                             OrtMixin ort = mcase.get().as( OrtMixin.class );
                             ort.setGeom( geom );
@@ -354,7 +354,7 @@ public class LeitungsauskunftStartCaseAction
                             EventManager.instance().publish( new PropertyChangeEvent( this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
                         }
                         else {
-                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Diese Adresse existiert leider nicht in unserer Datenbank." ) );                        
+                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n.get( "adresseExistiertNicht" ) ) );                        
                         }
                     }
                 }

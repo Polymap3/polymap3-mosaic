@@ -15,7 +15,11 @@ package org.polymap.azv.ui;
 
 import org.apache.commons.lang.StringUtils;
 
+import org.polymap.core.runtime.IMessages;
+
 import org.polymap.rhei.field.IFormFieldValidator;
+
+import org.polymap.azv.Messages;
 
 /**
  * 
@@ -25,15 +29,17 @@ import org.polymap.rhei.field.IFormFieldValidator;
 public class NotEmptyValidator
         implements IFormFieldValidator {
 
-     public String validate( Object value ) {
+    public static final IMessages   i18n = Messages.forPrefix( "NotEmptyValidator" ); //$NON-NLS-1$
+
+    public String validate( Object value ) {
          if (value == null) {
-             return "Dieses Feld darf nicht leer sein";
+             return i18n.get( "msg" );
          }
          // wird auch für StringField verwendet, mit der Bedeutung: "nicht leer"
          else if (value instanceof String) {
              String str = (String)value;
-             if (str.length() == 0 || StringUtils.containsOnly( str, " \t\n\r" )) {
-                 return "Dieses Feld darf nicht leer sein";
+             if (str.length() == 0 || StringUtils.containsOnly( str, " \t\n\r" )) { //$NON-NLS-1$
+                 return i18n.get( "msg" );
              }
          }
         return null;

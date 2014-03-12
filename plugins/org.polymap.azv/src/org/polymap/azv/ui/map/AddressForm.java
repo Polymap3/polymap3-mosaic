@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.polymap.core.project.ILayer;
 import org.polymap.core.project.Layers;
 import org.polymap.core.project.ProjectRepository;
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.IPanelSite;
@@ -46,6 +47,7 @@ import org.polymap.rhei.fulltext.FullTextIndex;
 import org.polymap.rhei.fulltext.address.AddressFinder;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.azv.ui.NotEmptyValidator;
 
 /**
@@ -58,6 +60,8 @@ public abstract class AddressForm
 
     static Log log = LogFactory.getLog( AddressForm.class );
 
+    public static final IMessages       i18n = Messages.forPrefix( "AddressForm" ); //$NON-NLS-1$
+    
     private IPanelSite                  site;
     
     private IFormFieldListener          fieldListener;
@@ -75,13 +79,13 @@ public abstract class AddressForm
         this.site = site;
         
         try {
-            ILayer layer = ProjectRepository.instance().visit( Layers.finder( "adressen", "Adressen" ) );
-            assert layer != null : "Es konnte keine Ebene mit dem Namen 'Adressen' gefunden werden. Diese Ebene sollte die Adressdaten und Koordinaten enthalten.";
+            ILayer layer = ProjectRepository.instance().visit( Layers.finder( "adressen", "Adressen" ) ); //$NON-NLS-1$ //$NON-NLS-2$
+            assert layer != null : i18n.get( "keineEbene" );
             search = new JSONObject();
             // XXX Test only
-            search.put( FIELD_STREET, "Markt" );
-            search.put( FIELD_NUMBER, "1" );
-            search.put( FIELD_POSTALCODE, "01234" );
+            search.put( FIELD_STREET, "Markt" ); //$NON-NLS-1$
+            search.put( FIELD_NUMBER, "1" ); //$NON-NLS-1$
+            search.put( FIELD_POSTALCODE, "01234" ); //$NON-NLS-1$
         }
         catch (Exception e) {
             throw new RuntimeException( e );
@@ -99,14 +103,14 @@ public abstract class AddressForm
 
         Composite street = site.toolkit().createComposite( body );
         new FormFieldBuilder( street, new JsonPropertyAdapter( search, FIELD_STREET ) )
-                .setLabel( "Straße + Nr." ).setValidator( validator( FIELD_STREET ) ).create().setFocus();
+                .setLabel( i18n.get( "strasseHNr" ) ).setValidator( validator( FIELD_STREET ) ).create().setFocus();
 
         new FormFieldBuilder( street, new JsonPropertyAdapter( search, FIELD_NUMBER ) )
                 .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( validator( FIELD_NUMBER ) ).create();
 
         Composite city = site.toolkit().createComposite( body );
         new FormFieldBuilder( city, new JsonPropertyAdapter( search, FIELD_POSTALCODE ) )
-                .setLabel( "PLZ + Ort" ).setValidator( validator( FIELD_POSTALCODE ) ).create();
+                .setLabel( i18n.get( "plzOrt" ) ).setValidator( validator( FIELD_POSTALCODE ) ).create();
 
         new FormFieldBuilder( city, new JsonPropertyAdapter( search, FIELD_CITY ) )
                 .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( validator( FIELD_CITY ) ).create();
@@ -118,7 +122,7 @@ public abstract class AddressForm
                     if (formSite.isValid()) {
                         try {
                             formSite.submitEditor();
-                            log.info( "VALID: " + search );
+                            log.info( "VALID: " + search ); //$NON-NLS-1$
                             site.setStatus( Status.OK_STATUS );
                             
                             showResults( new AddressFinder( addressIndex ).maxResults( 1 ).find( search ) );

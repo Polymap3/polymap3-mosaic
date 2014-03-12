@@ -77,7 +77,7 @@ public class NutzerAnVorgangCaseAction
 
     private static Log log = LogFactory.getLog( NutzerAnVorgangCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "NutzerAnVorgang" );
+    public static final IMessages       i18n = Messages.forPrefix( "NutzerAnVorgang" ); //$NON-NLS-1$
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -134,7 +134,7 @@ public class NutzerAnVorgangCaseAction
         this.caseStatus = status;
         User user = nutzer.user();
         if (user != null) {
-            status.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
+            status.put( i18n.get( "vorgangStatusKunde" ), Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
         }
     }
 
@@ -155,7 +155,7 @@ public class NutzerAnVorgangCaseAction
     public void createContents( Composite parent ) {
         Composite welcome = site.toolkit().createComposite( parent );
         welcome.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
-        site.toolkit().createFlowText( welcome, i18n.get( "welcomeMsg", RegisterPanel.ID ) );
+        site.toolkit().createFlowText( welcome, i18n.get( "welcomeMsg", RegisterPanel.ID ) ); //$NON-NLS-1$
         
         Composite formContainer = site.toolkit().createComposite( parent );
         formContainer.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
@@ -172,9 +172,9 @@ public class NutzerAnVorgangCaseAction
         });
 
         UsersTableSearchField searchField = new UsersTableSearchField( viewer, formContainer, 
-                Arrays.asList( "name", "username", "firstname", "company", "street", "city" ) );
+                Arrays.asList( "name", "username", "firstname", "company", "street", "city" ) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
         
-        Button submitBtn = site.createSubmit( formContainer, "Kunden auswählen" );
+        Button submitBtn = site.createSubmit( formContainer, i18n.get( "submit" ) );
 
         // layout
         searchField.getControl().setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
@@ -193,7 +193,7 @@ public class NutzerAnVorgangCaseAction
             caseAction.setEnabled( false );
         }
         
-        caseStatus.put( "Kunde", Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
+        caseStatus.put( i18n.get( "vorgangStatusKunde" ), Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
 
         for (Control child : personSection.getBody().getChildren()) {
             child.dispose();
@@ -223,7 +223,7 @@ public class NutzerAnVorgangCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        personSection = site.toolkit().createPanelSection( parent, "Kundendaten" );
+        personSection = site.toolkit().createPanelSection( parent, i18n.get( "sectionTitle" ) );
         personSection.addConstraint( new PriorityConstraint( 1 ), AzvPlugin.MIN_COLUMN_WIDTH );
         personSection.getBody().setLayout( new FillLayout() );
         
@@ -235,8 +235,8 @@ public class NutzerAnVorgangCaseAction
             personForm.setEnabled( false );
         }
         else {
-            Label l = site.toolkit().createLabel( personSection.getBody(), "Noch kein Kunde zugewiesen." );
-            l.setData( "no_user_yet", Boolean.TRUE );
+            Label l = site.toolkit().createLabel( personSection.getBody(), i18n.get( "keinKunde" ) );
+            l.setData( "no_user_yet", Boolean.TRUE ); //$NON-NLS-1$
             l.setForeground( MosaicUiPlugin.COLOR_RED.get() );
         }
     }

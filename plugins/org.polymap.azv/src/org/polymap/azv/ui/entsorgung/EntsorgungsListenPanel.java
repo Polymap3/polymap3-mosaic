@@ -58,6 +58,7 @@ import org.eclipse.jface.window.Window;
 import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
 import org.polymap.core.qi4j.QiModule.EntityCreator;
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
@@ -83,6 +84,7 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.EntsorgungMixin;
@@ -107,7 +109,9 @@ public class EntsorgungsListenPanel
 
     private static Log log = LogFactory.getLog( EntsorgungsListenPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "azv", "entsorgungslisten" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "azv", "entsorgungslisten" ); //$NON-NLS-1$ //$NON-NLS-2$
+    
+    public static final IMessages       i18n = Messages.forPrefix( "EntsorgungsListen" ); //$NON-NLS-1$
     
     /** Set by the {@link LoginPanel}. */
     @Context(scope="org.polymap.azv.ui")
@@ -147,7 +151,7 @@ public class EntsorgungsListenPanel
                 }
             });
 
-            site.addToolbarAction( new Action( "Neue Liste" ) {
+            site.addToolbarAction( new Action( i18n.get( "neueListe" ) ) {
                 public void run() {
                     openNeueListeDialog();
                 }
@@ -173,15 +177,15 @@ public class EntsorgungsListenPanel
     protected void userLoggedIn( PropertyAccessEvent ev ) {
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_ENTSORGUNG )) {
-            getSite().setTitle( "Entsorgungslisten" );
-            getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
+            getSite().setTitle( i18n.get( "title" ) );
+            getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) ); //$NON-NLS-1$
         }
     }
 
     
     protected void openNeueListeDialog() {
         final InputDialog dialog = new InputDialog( BatikApplication.shellToParentOn(), 
-                "Eine neue Liste anlegen", "Name der Entsorgungsliste", "...", null );
+                i18n.get( "dialogTitle" ), i18n.get( "dialogBeschreibung" ), i18n.get( "dialogStandardwert" ), null );
         dialog.setBlockOnOpen( true );
         if (dialog.open() == Window.OK) {
             try {
@@ -197,7 +201,7 @@ public class EntsorgungsListenPanel
                 getSite().layout( true );
             }
             catch (Exception e) {
-                BatikApplication.handleError( "Die neue Liste konnte nicht angelegt werden.", e );
+                BatikApplication.handleError( i18n.get( "fehlerBeimAnlegen" ), e );
             }
         }
     }
@@ -233,7 +237,7 @@ public class EntsorgungsListenPanel
     
     
     protected void createListenSection( final Composite parent, final Entsorgungsliste liste ) {
-        final IPanelSection section = getSite().toolkit().createPanelSection( parent, "Liste: " + liste.name().get() );
+        final IPanelSection section = getSite().toolkit().createPanelSection( parent, i18n.get( "listenTitle" ) + liste.name().get() );
         int prio = (int)liste.angelegtAm().get().getTime();
         section.addConstraint( new PriorityConstraint( prio ), new MinWidthConstraint( 500, 1 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
@@ -242,8 +246,8 @@ public class EntsorgungsListenPanel
         Composite toolbar = getSite().toolkit().createComposite( section.getBody() );
         toolbar.setLayout( RowLayoutFactory.fillDefaults().spacing( 5 ).create() );
         
-        Button btn = getSite().toolkit().createButton( toolbar, "Drucken und abschließen" );
-        btn.setToolTipText( "Diese Liste als Excel/CSV exportieren und archivieren" );
+        Button btn = getSite().toolkit().createButton( toolbar, i18n.get( "abschliessen" ) );
+        btn.setToolTipText( i18n.get( "abschliessenTip" ) );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
                 exportListe( liste, section );
@@ -251,8 +255,8 @@ public class EntsorgungsListenPanel
             }
         });
 
-        btn = getSite().toolkit().createButton( toolbar, "Geschlossen", SWT.CHECK );
-        btn.setToolTipText( "Diese Liste ist geschlossen und kann nicht bebucht werden" );
+        btn = getSite().toolkit().createButton( toolbar, i18n.get( "geschlossen" ), SWT.CHECK );
+        btn.setToolTipText( i18n.get( "geschlossenTip" ) );
         btn.setSelection( BooleanUtils.isTrue( liste.geschlossen().get() ) );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
@@ -262,7 +266,7 @@ public class EntsorgungsListenPanel
                 }
                 catch (Exception e) {
                     //azvRepo.revertChanges();
-                    BatikApplication.handleError( "Liste konnte nicht geändert werden.", e );
+                    BatikApplication.handleError( i18n.get( "fehlerBeimAendern" ), e );
                 }
             }
         });
@@ -287,15 +291,15 @@ public class EntsorgungsListenPanel
         
         // viewer
         Filter filter = ff.and( 
-                ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ),
-                ff.equals( ff.property( "natures" ), ff.literal( AzvPlugin.CASE_ENTSORGUNG ) ) );
+                ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ), //$NON-NLS-1$
+                ff.equals( ff.property( "natures" ), ff.literal( AzvPlugin.CASE_ENTSORGUNG ) ) ); //$NON-NLS-1$
         
         final CasesTableViewer casesViewer = new CasesTableViewer( section.getBody(), mosaicRepo.get(), filter, SWT.NONE );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( toolbar ).height( 300 ).width( 400 ).create() );
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
-                log.info( "CASE: " + sel );
+                log.info( "CASE: " + sel ); //$NON-NLS-1$
                 mcase.set( sel );
                 getContext().openPanel( CasePanel.ID );
             }
@@ -313,18 +317,18 @@ public class EntsorgungsListenPanel
 
 
     protected void exportListe( final Entsorgungsliste liste, final IPanelSection section ) {
-        final String filename = liste.name().get() + ".csv";
+        final String filename = i18n.get( "exportFilename", liste.name().get() );
 
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
             Display display = Polymap.getSessionDisplay();
             @Override
             public InputStream getInputStream() throws Exception {
-                CsvPreference prefs = new CsvPreference( '"', ';', "\r\n" );
+                CsvPreference prefs = new CsvPreference( '"', ';', "\r\n" ); //$NON-NLS-1$
                 ByteArrayOutputStream buf = new ByteArrayOutputStream( 32*1024 );
-                Writer writer = new OutputStreamWriter( buf, "ISO-8859-1" );
+                Writer writer = new OutputStreamWriter( buf, "ISO-8859-1" ); //$NON-NLS-1$
                 CsvListWriter csvWriter = new CsvListWriter( writer, prefs );
                 
-                csvWriter.writeHeader( "Ort", "Straße", "Nr.", "Name", "Bemerkung" );
+                csvWriter.writeHeader( i18n.get( "csvOrt" ), i18n.get( "csvStrasse" ), i18n.get( "csvNummer" ), i18n.get( "csvName" ), i18n.get( "csvBemerkung" ) );
                 for (String id : liste.mcaseIds().get()) {
                     MosaicCase2 mcase = mosaicRepo.get().entity( MosaicCase2.class, id );
                     EntsorgungMixin entsorgung = mcase.as( EntsorgungMixin.class );
@@ -336,10 +340,10 @@ public class EntsorgungsListenPanel
                             StringUtils.defaultString( entsorgung.name.get() ), 
                             StringUtils.defaultString( entsorgung.bemerkung.get() ) );
                     
-                    mosaicRepo.get().closeCase( mcase, "Gedruckt", "Gedruckt in Liste: " + liste.name().get() );
+                    mosaicRepo.get().closeCase( mcase, i18n.get( "vorgangGedruckt" ), i18n.get( "vorgangGedrucktBeschreibung" ) + liste.name().get() );
                 }
                 csvWriter.close();
-                log.info( "CSV: " + buf.toString() );
+                log.info( "CSV: " + buf.toString() ); //$NON-NLS-1$
                 return new ByteArrayInputStream( buf.toByteArray() );
             }
             @Override
@@ -348,7 +352,7 @@ public class EntsorgungsListenPanel
             }
             @Override
             public String getContentType() {
-                return "application/csv";
+                return "application/csv"; //$NON-NLS-1$
             }
             @Override
             public boolean done( boolean success ) {
@@ -369,13 +373,13 @@ public class EntsorgungsListenPanel
                     catch (Exception e) {
                         mosaicRepo.get().rollbackChanges();
                         azvRepo.revertChanges();
-                        BatikApplication.handleError( "Liste konnte nicht gelöscht werden.", e );
+                        BatikApplication.handleError( i18n.get( "fehlerBeimLoeschen" ), e );
                     }                    
                 }
                 return true;
             }
         });
-        ExternalBrowser.open( "download_window", url,
+        ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
                 ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
     }
 

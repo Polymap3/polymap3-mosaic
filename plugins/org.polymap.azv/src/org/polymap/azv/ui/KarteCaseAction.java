@@ -30,6 +30,7 @@ import org.eclipse.ui.forms.widgets.ColumnLayoutData;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -42,6 +43,7 @@ import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.azv.ui.map.HomeMapAction;
@@ -74,6 +76,8 @@ public class KarteCaseAction
 
     private static Log log = LogFactory.getLog( KarteCaseAction.class );
 
+    public static final IMessages       i18n = Messages.forPrefix( "Karte" ); //$NON-NLS-1$
+    
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
     
@@ -114,7 +118,7 @@ public class KarteCaseAction
     public void fillContentArea( Composite parent ) {
         // section
         String hex = MosaicUiPlugin.rgbToHex( MosaicUiPlugin.COLOR_RED.get().getRGB() );
-        mapSection = site.toolkit().createPanelSection( parent, "Ort <span style=\"color:" + hex + ";\">(noch nicht markiert)</span>" );
+        mapSection = site.toolkit().createPanelSection( parent, i18n.get( "titleOhneMarkierung", hex ) ); 
         mapSection.addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
         Composite body = mapSection.getBody();
         body.setLayout( ColumnLayoutFactory.defaults().margins( 0 ).columns( 1, 1 ).spacing( 2 ).create() );
@@ -125,13 +129,15 @@ public class KarteCaseAction
         mapViewer.getControl().setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 500 ) );
 
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
-            WMSLayer alk = new WMSLayer( "ALK", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-ALK" );
-            alk.setVisibility( false );
-            mapViewer.addLayer( alk, false );
-
-            WMSLayer kanal = new WMSLayer( "Kanal", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Kanal" );
-            kanal.setVisibility( false );
-            mapViewer.addLayer( kanal, false );
+            int suffix = 1;
+            while (i18n.contains( "layerName"+suffix )) { //$NON-NLS-1$
+                WMSLayer layer = new WMSLayer( i18n.get( "layerName"+suffix ),  //$NON-NLS-1$
+                        i18n.get( "layerWmsUrl"+suffix ), //$NON-NLS-1$
+                        i18n.get( "layerWmsName"+suffix ) ); //$NON-NLS-1$
+                layer.setVisibility( false );
+                mapViewer.addLayer( layer, false );
+                suffix ++;
+            }
 
 //            WMSLayer wasser = new WMSLayer( "Wasser", "http://80.156.217.67:8080", "SESSION.Mosaic\\\\M-Wasser" );
 //            wasser.setVisibility( false );
@@ -139,18 +145,18 @@ public class KarteCaseAction
         }
         
         // vector layer
-        vectorLayer = new VectorLayer( "Markierung" );
+        vectorLayer = new VectorLayer( i18n.get( "layerMarkierung" ) );
         vectorLayer.setVisibility( true );
         vectorLayer.setIsBaseLayer( false );
         vectorLayer.setZIndex( 10000 );
 
         // style
         Style standard = new Style();
-        standard.setAttribute( "strokeColor", "#ff0000" );
-        standard.setAttribute( "strokeWidth", "4" );
-        standard.setAttribute( "pointRadius", "10" );
+        standard.setAttribute( "strokeColor", i18n.get( "strokeColor" ) ); //$NON-NLS-1$
+        standard.setAttribute( "strokeWidth", i18n.get( "strokeWidth" ) ); //$NON-NLS-1$
+        standard.setAttribute( "pointRadius", i18n.get( "pointRadius" ) ); //$NON-NLS-1$
         StyleMap styleMap = new StyleMap();
-        styleMap.setIntentStyle( "default", standard );
+        styleMap.setIntentStyle( "default", standard ); //$NON-NLS-1$
         vectorLayer.setStyleMap( styleMap );
         
         mapViewer.addLayer( vectorLayer, false );
@@ -175,7 +181,7 @@ public class KarteCaseAction
             mapViewer.getMap().setCenter( geom.getX(), geom.getY() );
             mapViewer.getMap().zoomTo( 10 );
             
-            mapSection.setTitle( "Ort" );
+            mapSection.setTitle( i18n.get( "title" ) );
         }
     }
     
@@ -195,8 +201,8 @@ public class KarteCaseAction
         if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
             mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 500 ) );
             mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
-            mapViewer.addToolbarItem( new PdfMapAction( mapViewer, "A4", PageSize.A4, mcase.get(), repo.get() ) );
-            mapViewer.addToolbarItem( new PdfMapAction( mapViewer, "A3", PageSize.A3, mcase.get(), repo.get() ) );
+            mapViewer.addToolbarItem( new PdfMapAction( mapViewer, i18n.get( "a4" ), PageSize.A4, mcase.get(), repo.get() ) );
+            mapViewer.addToolbarItem( new PdfMapAction( mapViewer, i18n.get( "a3" ), PageSize.A3, mcase.get(), repo.get() ) );
         }
     }
 
@@ -216,7 +222,7 @@ public class KarteCaseAction
         
         drawMosaicCasePoint();
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Ort der Maßnahme wurde festgelegt." ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "statusOk" ) ) );
         
         drawFeatureAction.deactivate();
     }

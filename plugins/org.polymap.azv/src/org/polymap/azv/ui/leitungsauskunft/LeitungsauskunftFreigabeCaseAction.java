@@ -60,7 +60,7 @@ public class LeitungsauskunftFreigabeCaseAction
 
     private static Log log = LogFactory.getLog( LeitungsauskunftFreigabeCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftFreigabe" );
+    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftFreigabe" ); //$NON-NLS-1$
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -89,22 +89,22 @@ public class LeitungsauskunftFreigabeCaseAction
     @Override
     public void submit() throws Exception {
         MosaicRepository2 mosaic = repo.get();
-        mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt.", EVENT_TYPE_FREIGABE );
-        mosaic.closeCase( mcase.get(), EVENT_TYPE_FREIGABE, "Die Leitungsauskunft wurde erteilt." );
+        mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_FREIGABE, i18n.get( "erteilt" ), EVENT_TYPE_FREIGABE );
+        mosaic.closeCase( mcase.get(), EVENT_TYPE_FREIGABE, i18n.get( "erteilt" ) );
         mosaic.commitChanges();
         
         User user = mcase.get().as( NutzerMixin.class ).user();
                 
-        String salu = user.salutation().get() != null ? user.salutation().get() : "";
-        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get();
+        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
         Email email = new SimpleEmail();
-        email.setCharset( "ISO-8859-1" );
+        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
         email.addTo( user.email().get() )
-                .setSubject( i18n.get( "emailSubject") )
-                .setMsg( i18n.get( "email", header ) );
+                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+                .setMsg( i18n.get( "email", header ) ); //$NON-NLS-1$
         EmailService.instance().send( email );
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) ); //$NON-NLS-1$
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
             public void run() {
                 site.getContext().closePanel( site.getPanelSite().getPath() );

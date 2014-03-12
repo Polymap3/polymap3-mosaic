@@ -25,9 +25,12 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.ContributionItem;
 
+import org.polymap.core.runtime.IMessages;
+
 import org.polymap.rhei.batik.BatikPlugin;
 import org.polymap.rhei.batik.IPanelSite;
 
+import org.polymap.azv.Messages;
 import org.polymap.openlayers.rap.widget.base_types.Bounds;
 import org.polymap.openlayers.rap.widget.base_types.OpenLayersMap;
 
@@ -40,6 +43,8 @@ public class HomeMapAction
         extends ContributionItem {
 
     private static Log log = LogFactory.getLog( HomeMapAction.class );
+
+    public static final IMessages   i18n = Messages.forPrefix( "KarteHome" ); //$NON-NLS-1$
 
     private IPanelSite          site;
     
@@ -58,7 +63,7 @@ public class HomeMapAction
     @Override
     public void fill( Composite parent ) {
         Button btn = site.toolkit().createButton( parent, null, SWT.PUSH );
-        btn.setToolTipText( "Gesamte Karte darstellen" );
+        btn.setToolTipText( i18n.get( "buttonTip" ) );
         btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/expand.png" ) );
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {

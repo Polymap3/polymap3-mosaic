@@ -49,6 +49,7 @@ import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.UIJob;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -58,6 +59,7 @@ import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 import org.polymap.rhei.fulltext.FullTextIndex;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.openlayers.rap.widget.base_types.Bounds;
 
 /**
@@ -69,6 +71,8 @@ public class AddressSearchMapAction
         extends ContributionItem {
 
     private static Log log = LogFactory.getLog( AddressSearchMapAction.class );
+
+    public static final IMessages   i18n = Messages.forPrefix( "AddressSuche" ); //$NON-NLS-1$
 
     private MapViewer               viewer;
 
@@ -87,7 +91,7 @@ public class AddressSearchMapAction
 
 
     public String getSearchText() {
-        return !searchTxt.getText().startsWith( "Suchen" ) ? searchTxt.getText() : null;
+        return !searchTxt.getText().startsWith( i18n.get( "hint" ) ) ? searchTxt.getText() : null;
     }
     
     
@@ -99,31 +103,31 @@ public class AddressSearchMapAction
         result.setLayoutData( RowDataFactory.swtDefaults().hint( 280, SWT.DEFAULT ).create() );
         result.setLayout( FormLayoutFactory.defaults().create() );
         
-        searchTxt = tk.createText( result, "Suchen: Ort, PLZ, Straße", SWT.SEARCH, SWT.CANCEL );
+        searchTxt = tk.createText( result, i18n.get( "hint" ), SWT.SEARCH, SWT.CANCEL );
         searchTxt.setLayoutData( FormDataFactory.filled().create() );
 
-        resultCountLbl = tk.createLabel( result, "" );
+        resultCountLbl = tk.createLabel( result, "" ); //$NON-NLS-1$
         resultCountLbl.moveAbove( searchTxt );
-        resultCountLbl.setToolTipText( "Noch keine Treffer\nGeben Sie zuerst eine Suche ein" );
+        resultCountLbl.setToolTipText( i18n.get( "keineTreffer" ) );
         resultCountLbl.setLayoutData( FormDataFactory.filled().top( 0, 7 ).clearLeft().width( 25 ).create() );
         resultCountLbl.setForeground( AzvPlugin.instance().discardColor.get() );
         resultCountLbl.setFont( JFaceResources.getFontRegistry().getBold( JFaceResources.DEFAULT_FONT ) ); 
         
-        searchTxt.setToolTipText( "Mit <Enter> das Ergebnisse in der Karte anzeigen\nBei mehreren Treffern wird das gesamte Gebiet angezeigt" );
+        searchTxt.setToolTipText( i18n.get( "suchenTip" ) );
         searchTxt.setForeground( Graphics.getColor( 0xa0, 0xa0, 0xa0 ) );
         searchTxt.addFocusListener( new FocusListener() {
             @Override
             public void focusLost( FocusEvent ev ) {
                 if (searchTxt.getText().length() == 0) {
-                    searchTxt.setText( "Suchen..." );
+                    searchTxt.setText( i18n.get( "hint" ) );
                     searchTxt.setForeground( Graphics.getColor( 0xa0, 0xa0, 0xa0 ) );
                     //clearBtn.setEnabled( false );
                 }
             }
             @Override
             public void focusGained( FocusEvent ev ) {
-                if (searchTxt.getText().startsWith( "Suchen" )) {
-                    searchTxt.setText( "" );
+                if (searchTxt.getText().startsWith( i18n.get( "hint" ) )) {
+                    searchTxt.setText( "" ); //$NON-NLS-1$
                     searchTxt.setForeground( Graphics.getColor( 0x00, 0x00, 0x00 ) );
                 }
             }
@@ -173,8 +177,8 @@ public class AddressSearchMapAction
                     zoomResults( results );
                 }
                 catch (Exception e) {
-                    log.warn( "", e );
-                    BatikApplication.handleError( "", e );
+                    log.warn( "", e ); //$NON-NLS-1$
+                    BatikApplication.handleError( "", e ); //$NON-NLS-1$
                 }
             }
         });
@@ -190,7 +194,7 @@ public class AddressSearchMapAction
         
         if (!bbox.isNull()) {
             bbox.expandBy( 100 );
-            log.info( "BBox: " + bbox );
+            log.info( "BBox: " + bbox ); //$NON-NLS-1$
             viewer.getMap().zoomToExtent( new Bounds( bbox.getMinX(), bbox.getMinY(), bbox.getMaxX(), bbox.getMaxY() ), true );
         }
     }
@@ -205,7 +209,7 @@ public class AddressSearchMapAction
         private String      searchTextValue = searchTxt.getText();
         
         public ProposalJob() {
-            super( "Proposals" );
+            super( i18n.get( "proposalsJobTitle" ) );
         }
 
         @Override
@@ -233,7 +237,7 @@ public class AddressSearchMapAction
         private String      searchTextValue = searchTxt.getText();
 
         public ResultCountJob() {
-            super( "Count results" );
+            super( i18n.get( "resultsJobTitle" ) );
         }
 
         @Override
@@ -246,9 +250,9 @@ public class AddressSearchMapAction
             // display results
             searchTxt.getDisplay().asyncExec( new Runnable() {
                 public void run() {
-                    String text = resultCount < 100 ? String.valueOf( resultCount ) : ">100";
+                    String text = resultCount < 100 ? String.valueOf( resultCount ) : ">100"; //$NON-NLS-1$
                     resultCountLbl.setText( text );
-                    resultCountLbl.setToolTipText( "Die aktuelle Suche ergibt " + text + " Treffer" );
+                    resultCountLbl.setToolTipText( i18n.get( "ergebnisTip", text ) ); 
                     
                     if (resultCount == 0 || resultCount > 100) {
                         resultCountLbl.setForeground( AzvPlugin.instance().discardColor.get() );
@@ -260,8 +264,8 @@ public class AddressSearchMapAction
                             zoomResults( results );
                         }
                         catch (Exception e) {
-                            log.warn( "", e );
-                            BatikApplication.handleError( "", e );
+                            log.warn( "", e ); //$NON-NLS-1$
+                            BatikApplication.handleError( "", e ); //$NON-NLS-1$
                         }
                     }
                 }

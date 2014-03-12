@@ -33,9 +33,12 @@ import org.eclipse.rwt.lifecycle.WidgetUtil;
 
 import org.eclipse.jface.action.ContributionItem;
 
+import org.polymap.core.runtime.IMessages;
+
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.app.BatikApplication;
 
+import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -52,6 +55,8 @@ public class PdfMapAction
 
     private static Log log = LogFactory.getLog( PdfMapAction.class );
     
+    public static final IMessages   i18n = Messages.forPrefix( "KartePDF" ); //$NON-NLS-1$
+
     private IMosaicCase         mcase;
 
     private MosaicRepository2   repo;
@@ -80,7 +85,7 @@ public class PdfMapAction
 
     public void fill( Composite parent ) {
         Button btn = site.toolkit().createButton( parent, title, SWT.PUSH );
-        btn.setToolTipText( "PDF erzeugen und als Dokument am Vorgang ablegen" );
+        btn.setToolTipText( i18n.get( "buttonTip" ) );
         btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
@@ -117,7 +122,7 @@ public class PdfMapAction
         }
         catch (Exception e) {
             repo.rollbackChanges();
-            BatikApplication.handleError( "Das Dokument konnte nicht erzeugt werden.", e );
+            BatikApplication.handleError( i18n.get( "fehler" ), e );
         }
     }
 

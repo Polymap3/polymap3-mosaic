@@ -49,6 +49,7 @@ import org.polymap.core.ui.SelectionAdapter;
 import org.polymap.core.workbench.PolymapWorkbench;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 
 /**
  * 
@@ -61,8 +62,10 @@ public class I18nEditor
 
     private static Log log = LogFactory.getLog( I18nEditor.class );
 
-    public static final String EDITOR_ID = "org.polymap.azv.I18nEditor";
+    public static final String          EDITOR_ID = "org.polymap.azv.I18nEditor";
     
+    public static final String          MESSAGES_DE_PROPERTIES = "org.polymap.azv.messages_de.properties";
+
     private CodeMirror                  editor;
 
     private ResourceBundleTreeViewer    tree;
@@ -91,7 +94,7 @@ public class I18nEditor
         
         // tree
         tree = new ResourceBundleTreeViewer( parent, SWT.NONE );
-        tree.setInput( new File( Polymap.getWorkspacePath().toFile(), "org.polymap.azv.messages_de.properties" ) );
+        tree.setInput( Messages.resourceBundle() /*new File( Polymap.getWorkspacePath().toFile(), MESSAGES_DE_PROPERTIES )*/ );
         FormDataFactory.filled().right( 30 ).applyTo( tree.getControl() );
         
         tree.addSelectionChangedListener( new ISelectionChangedListener() {
@@ -135,7 +138,8 @@ public class I18nEditor
     @Override
     public void doSave( IProgressMonitor monitor ) {
         try {
-            tree.getContentProvider().save( new File( Polymap.getWorkspacePath().toFile(), "org.polymap.azv.messages_de.properties" ) );
+            tree.getContentProvider().save( 
+                    new File( Polymap.getWorkspacePath().toFile(), MESSAGES_DE_PROPERTIES ), false );
             
             tree.getControl().getDisplay().asyncExec( new Runnable() {
                 public void run() {
@@ -180,23 +184,18 @@ public class I18nEditor
     public void prepareSave( OperationSupport os, IProgressMonitor monitor ) throws Exception {
     }
 
-
     @Override
     public void save( OperationSupport os, IProgressMonitor monitor ) {
         doSave( monitor );
     }
 
-
     @Override
     public void rollback( OperationSupport os, IProgressMonitor monitor ) {
-        // XXX Auto-generated method stub
         throw new RuntimeException( "not yet implemented." );
     }
 
-
     @Override
     public void revert( OperationSupport os, IProgressMonitor monitor ) {
-        // XXX Auto-generated method stub
         throw new RuntimeException( "not yet implemented." );
     }
         

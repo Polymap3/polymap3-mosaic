@@ -28,6 +28,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
@@ -37,6 +38,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
@@ -58,6 +60,8 @@ public class SchachtscheinAntragCaseAction
         implements ICaseAction {
 
     private static Log log = LogFactory.getLog( SchachtscheinAntragCaseAction.class );
+
+    public static final IMessages               i18n = Messages.forPrefix( "SchachtscheinAntrag" ); //$NON-NLS-1$
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>        mcase;
@@ -111,7 +115,7 @@ public class SchachtscheinAntragCaseAction
     @Override
     public void submit() throws Exception {
         // dokumente
-        File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Schachtschein" );
+        File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Schachtschein" ); //$NON-NLS-1$
         for (File f : dir.listFiles()) {
             IMosaicDocument doc = repo.get().newDocument( mcase.get(), f.getName() );
             OutputStream out = doc.getOutputStream();
@@ -125,12 +129,12 @@ public class SchachtscheinAntragCaseAction
             }
         }
         // events
-        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT );
+        repo.get().newCaseEvent( mcase.get(), "Beantragt", "", AzvPlugin.EVENT_TYPE_BEANTRAGT ); //$NON-NLS-1$ //$NON-NLS-2$
         repo.get().commitChanges();
 
         fillAction( action );
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, "Daten wurden übernommen" ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "übernommen" ) ) );
     }
 
 
@@ -138,13 +142,13 @@ public class SchachtscheinAntragCaseAction
     @EventHandler(display=true)
     protected void updateAction( PropertyChangeEvent ev ) {
         action.setEnabled( true );
-        action.setToolTipText( "Antrag abschicken" );
+        action.setToolTipText( i18n.get( "abschickenTip" ) );
         if (mcase.get().getName().length() == 0) {
-            action.setToolTipText( "Bitte geben Sie der Maßnahme eine Bezeichnung" );
+            action.setToolTipText( i18n.get( "keineBezeichnung" ) );
             action.setEnabled( false );
         }            
         else if (mcase.get().get( OrtMixin.KEY_POINT ) == null) {
-            action.setToolTipText( "Bitte geben Sie der Maßnahme einen Ort" );
+            action.setToolTipText( i18n.get( "keinOrt" ) );
             action.setEnabled( false );
         }
     }

@@ -92,9 +92,9 @@ public class DokumenteCaseAction
 
     private static Log log = LogFactory.getLog( DokumenteCaseAction.class );
 
-    private static final IMessages      i18n = Messages.forPrefix( "Dokumente" );
+    private static final IMessages      i18n = Messages.forPrefix( "Dokumente" ); //$NON-NLS-1$
     
-    private static final FastDateFormat df = FastDateFormat.getInstance( "dd.MM.yyyy" );
+    private static final FastDateFormat df = FastDateFormat.getInstance( i18n.get( "dateFormat" ) );
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -147,7 +147,7 @@ public class DokumenteCaseAction
     public void createContents( Composite parent ) {
         site.setShowSubmitButton( false );
 
-        Label txt = site.toolkit().createFlowText( parent , i18n.get( "welcomeText" ) );
+        Label txt = site.toolkit().createFlowText( parent , i18n.get( "welcomeText" ) ); //$NON-NLS-1$
         txt.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
 
         formContainer = site.toolkit().createComposite( parent );
@@ -161,7 +161,7 @@ public class DokumenteCaseAction
     
     @Override
     public void uploadStarted( String name, String contentType, InputStream in ) throws Exception {
-        log.info( "received: " + name );
+        log.info( "received: " + name ); //$NON-NLS-1$
         IMosaicDocument doc = repo.get().newDocument( mcase.get(), name );
         OutputStream out = null;
         try {
@@ -183,7 +183,7 @@ public class DokumenteCaseAction
 //                            }
 //                        });
 //                    formContainer.layout();
-                    site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "successText" ) ) );
+                    site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "successText" ) ) ); //$NON-NLS-1$
                     site.discard();
 
                     // update viewer
@@ -199,7 +199,7 @@ public class DokumenteCaseAction
             
         }
         catch (Exception e) {
-            BatikApplication.handleError( "Datei konnte nicht vollständig hochgeladen werden.", e );
+            BatikApplication.handleError( i18n.get( "fehlerBeimHochladen" ), e );
         }
         finally {
             IOUtils.closeQuietly( in );
@@ -210,12 +210,12 @@ public class DokumenteCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        section = site.toolkit().createPanelSection( parent, "Dokumente" );
+        section = site.toolkit().createPanelSection( parent, i18n.get( "title" ) );
         section.addConstraint( new PriorityConstraint( 5 ) );
         section.getBody().setLayout( FormLayoutFactory.defaults().create() );
         
         if (Iterables.isEmpty( repo.get().documents( mcase.get() ) )) {
-            site.toolkit().createLabel( section.getBody(), "Noch kein Dokument." );
+            site.toolkit().createLabel( section.getBody(), i18n.get( "keinDokument" ) );
         }
         else {
             createViewer();
@@ -261,7 +261,7 @@ public class DokumenteCaseAction
         // name column
         TableViewerColumn vcolumn = new TableViewerColumn( viewer, SWT.LEFT );
         vcolumn.getColumn().setResizable( true );
-        vcolumn.getColumn().setText( "Name" );
+        vcolumn.getColumn().setText( i18n.get( "columnName" ) );
         vcolumn.setLabelProvider( new ColumnLabelProvider() {
             public String getText( Object elm ) {
                 return ((IMosaicDocument)elm).getName();
@@ -272,7 +272,7 @@ public class DokumenteCaseAction
         // date column
         vcolumn = new TableViewerColumn( viewer, SWT.CENTER );
         vcolumn.getColumn().setResizable( true );
-        vcolumn.getColumn().setText( "Änderung" );
+        vcolumn.getColumn().setText( i18n.get( "columnAenderung" ) );
         vcolumn.setLabelProvider( new ColumnLabelProvider() {
             public String getText( Object elm ) {
                 return df.format( ((IMosaicDocument)elm).getLastModified() );
@@ -283,7 +283,7 @@ public class DokumenteCaseAction
         // size column
         vcolumn = new TableViewerColumn( viewer, SWT.RIGHT );
         vcolumn.getColumn().setResizable( true );
-        vcolumn.getColumn().setText( "Größe" );
+        vcolumn.getColumn().setText( i18n.get( "columnGroesse" ) );
         vcolumn.setLabelProvider( new ColumnLabelProvider() {
             public String getText( Object elm ) {
                 return FileUtils.byteCountToDisplaySize( ((IMosaicDocument)elm).getSize() );
@@ -319,7 +319,7 @@ public class DokumenteCaseAction
                         return true;
                     }
                 });
-                ExternalBrowser.open( "download_window", url,
+                ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
                         ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
             }
         });
