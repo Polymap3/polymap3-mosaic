@@ -142,7 +142,9 @@ public class SchachtscheinAntragCaseAction
     @EventHandler(display=true)
     protected void updateAction( PropertyChangeEvent ev ) {
         action.setEnabled( true );
+        action.setText( i18n.get( "abschicken" ) );
         action.setToolTipText( i18n.get( "abschickenTip" ) );
+
         if (mcase.get().getName().length() == 0) {
             action.setToolTipText( i18n.get( "keineBezeichnung" ) );
             action.setEnabled( false );

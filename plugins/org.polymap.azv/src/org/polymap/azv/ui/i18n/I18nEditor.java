@@ -14,8 +14,6 @@
  */
 package org.polymap.azv.ui.i18n;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -23,9 +21,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.rwt.widgets.codemirror.CodeMirror;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -66,7 +65,7 @@ public class I18nEditor
     
     public static final String          MESSAGES_DE_PROPERTIES = "org.polymap.azv.messages_de.properties";
 
-    private CodeMirror                  editor;
+    private Text                        editor;
 
     private ResourceBundleTreeViewer    tree;
 
@@ -105,33 +104,53 @@ public class I18nEditor
                 selectedKey = value != null ? key : null;
                 if (value != null) {
                     editor.setText( value );
+                    editor.setVisible( true );
                 }
                 else {
                     tree.expandToLevel( key, 1 );
-                    editor.setText( "Dieser Eintrag enthält mehrere Untereinträge." );
+                    editor.setVisible( false );
+                    //editor.setText( "Dieser Eintrag enthält mehrere Untereinträge." );
                 }
             }
         });
 
-        // editor
-        editor = new CodeMirror( parent, SWT.NONE );
-        editor.setText( "Wählen Sie einen Eintrag links aus dem Baum,\num den entsprechenden Text hier zu bearbeiten\n" );
+        editor = new Text( parent, SWT.MULTI | SWT.WRAP | SWT.BORDER );
+        editor.setVisible( false );
+//        editor.setText( "Wählen Sie einen Eintrag links aus dem Baum,\num den entsprechenden Text hier zu bearbeiten\n" );
         FormDataFactory.filled().left( tree.getControl() ).applyTo( editor );
         
-        editor.addPropertyChangeListener( new PropertyChangeListener() {
-            public void propertyChange( PropertyChangeEvent ev ) {
-                if (ev.getPropertyName().equals( CodeMirror.PROP_TEXT ) && selectedKey != null) {
-                    log.info( "Changed: " + editor.getText() );
-                    tree.setEntryValue( selectedKey, editor.getText() );
+        editor.addModifyListener( new ModifyListener() {
+            public void modifyText( ModifyEvent event ) {
+                log.info( "Changed: " + editor.getText() );
+                tree.setEntryValue( selectedKey, editor.getText() );
 
-                    tree.getControl().getDisplay().asyncExec( new Runnable() {
-                        public void run() {
-                            firePropertyChange( PROP_DIRTY );
-                        }
-                    });
-                }
+                tree.getControl().getDisplay().asyncExec( new Runnable() {
+                    public void run() {
+                        firePropertyChange( PROP_DIRTY );
+                    }
+                });
             }
         });
+        
+//        // editor
+//        editor = new CodeMirror( parent, SWT.NONE );
+//        editor.setText( "Wählen Sie einen Eintrag links aus dem Baum,\num den entsprechenden Text hier zu bearbeiten\n" );
+//        FormDataFactory.filled().left( tree.getControl() ).applyTo( editor );
+//        
+//        editor.addPropertyChangeListener( new PropertyChangeListener() {
+//            public void propertyChange( PropertyChangeEvent ev ) {
+//                if (ev.getPropertyName().equals( CodeMirror.PROP_TEXT ) && selectedKey != null) {
+//                    log.info( "Changed: " + editor.getText() );
+//                    tree.setEntryValue( selectedKey, editor.getText() );
+//
+//                    tree.getControl().getDisplay().asyncExec( new Runnable() {
+//                        public void run() {
+//                            firePropertyChange( PROP_DIRTY );
+//                        }
+//                    });
+//                }
+//            }
+//        });
     }
 
 
@@ -191,12 +210,10 @@ public class I18nEditor
 
     @Override
     public void rollback( OperationSupport os, IProgressMonitor monitor ) {
-        throw new RuntimeException( "not yet implemented." );
     }
 
     @Override
     public void revert( OperationSupport os, IProgressMonitor monitor ) {
-        throw new RuntimeException( "not yet implemented." );
     }
         
     

@@ -38,6 +38,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.forms.widgets.Section;
 
@@ -106,9 +108,9 @@ public class StartPanel
 
     private static Log log = LogFactory.getLog( StartPanel.class );
 
-    public static final PanelIdentifier ID = new PanelIdentifier( "start" );
+    public static final PanelIdentifier ID = new PanelIdentifier( "start" ); //$NON-NLS-1$
 
-    public static final IMessages       i18n = Messages.forPrefix( "StartPanel" );
+    public static final IMessages       i18n = Messages.forPrefix( "StartPanel" ); //$NON-NLS-1$
 
     /** Just for convenience, same as <code>getSite().toolkit()</code>. */
     private IPanelToolkit                   tk;
@@ -144,8 +146,8 @@ public class StartPanel
         if (site.getPath().size() == 1) {
             this.tk = site.toolkit();
             this.repo.set( MosaicRepository2.instance() );
-            site.setTitle( "GKU" ); //i18n.get( "title" ) );
-            site.setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
+            site.setTitle( i18n.get( "title" ) ); //i18n.get( "title" ) );
+            site.setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) ); //$NON-NLS-1$
 
             casesViewerDecorators.add( context.propagate( new MitarbeiterCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new NutzerCasesDecorator() ) );
@@ -201,37 +203,44 @@ public class StartPanel
     @EventHandler(display=true)
     protected void handleEvent( PropertyAccessEvent ev ) {
         for (Control btn : actionBtns) {
-            String role = (String)btn.getData( "role" );
+            String role = (String)btn.getData( "role" ); //$NON-NLS-1$
             btn.setEnabled( role == null || SecurityUtils.isUserInGroup( role ) );
         }
     }
     
     
     protected IPanelSection createWelcomeSection( Composite parent ) {
-        welcomeSection = tk.createPanelSection( parent, i18n.get( "welcomeTitle" ) );
-        welcomeSection.getControl().setData( "title", "welcome" );
+        welcomeSection = tk.createPanelSection( parent, i18n.get( "welcomeTitle" ) ); //$NON-NLS-1$
+        welcomeSection.getControl().setData( "title", "welcome" ); //$NON-NLS-1$ //$NON-NLS-2$
         welcomeSection.getBody().setLayout( new FillLayout() );
-        tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) );
+        tk.createFlowText( welcomeSection.getBody(), i18n.get( "welcomeText" ) ); //$NON-NLS-1$
         return welcomeSection;
     }
 
     
     protected void createCasesSection( Composite parent ) {
-        casesSection = tk.createPanelSection( parent, "Aktuelle Vorgänge" );
+        casesSection = tk.createPanelSection( parent, i18n.get( "aktuelleVorgaengeTitle" ) );
         casesSection.addConstraint( new PriorityConstraint( 5 ), AzvPlugin.MIN_COLUMN_WIDTH );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
-        Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
+        Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ); //$NON-NLS-1$
         casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
         casesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).create() );
-        casesViewer.getColumn( "created" ).sort( SWT.UP );
+        casesViewer.getColumn( "created" ).sort( SWT.UP ); //$NON-NLS-1$
+        
         casesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
-                log.info( "CASE: " + sel );
                 mcase.set( sel );
                 getContext().openPanel( CasePanel.ID );
+            }
+        });
+        casesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
+            public void selectionChanged( SelectionChangedEvent ev ) {
+                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                mcase.set( sel );
+                getContext().openPanel( CasePanel.ID );            
             }
         });
 
@@ -246,7 +255,7 @@ public class StartPanel
         
         // searchField
         FeatureTableSearchField searchField = new FeatureTableSearchField( 
-                casesViewer, casesSection.getBody(), Arrays.asList( "name", "created" ) );
+                casesViewer, casesSection.getBody(), Arrays.asList( "name", "created" ) ); //$NON-NLS-1$ //$NON-NLS-2$
         Composite searchCtrl = searchField.getControl();
         searchCtrl.setLayoutData( FormDataFactory.filled()
                 .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
@@ -264,22 +273,28 @@ public class StartPanel
         // normal user -> propable just a few open cases
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 150 ).create() );
 
-        IPanelSection closedCasesSection = tk.createPanelSection( parent, "Bearbeitete Vorgänge" );
+        IPanelSection closedCasesSection = tk.createPanelSection( parent, i18n.get( "bearbeiteteVorgängeTitle" ) );
         closedCasesSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH,
                 new PriorityConstraint( 0 ),
                 new NeighborhoodConstraint( casesSection.getControl(), Neighborhood.BOTTOM, 1 ) ); 
         closedCasesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
-        Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) );
+        Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) ); //$NON-NLS-1$
         final CasesTableViewer closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
         closedCasesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
         closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 150 ).create() );
         closedCasesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( closedCasesViewer.getSelected() );
-                log.info( "CASE: " + sel );
                 mcase.set( sel );
                 getContext().openPanel( CasePanel.ID );
+            }
+        });
+        casesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
+            public void selectionChanged( SelectionChangedEvent ev ) {
+                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                mcase.set( sel );
+                getContext().openPanel( CasePanel.ID );            
             }
         });
 
@@ -291,76 +306,71 @@ public class StartPanel
         for (ICasesViewerDecorator deco : casesViewerDecorators) {
             deco.fill( closedCasesViewer, filterBar );
         }
-        closedCasesViewer.getColumn( "created" ).sort( SWT.UP );
+        closedCasesViewer.getColumn( "created" ).sort( SWT.UP ); //$NON-NLS-1$
     }
     
     
     protected IPanelSection createActionsSection( Composite parent ) {
-        IPanelSection section = tk.createPanelSection( parent, "Anträge und Auskünfte", Section.TITLE_BAR );
-        section.getControl().setData( "title", "actions" );
+        IPanelSection section = tk.createPanelSection( parent, i18n.get( "antraegeTitle" ), Section.TITLE_BAR );
+        section.getControl().setData( "title", "actions" ); //$NON-NLS-1$ //$NON-NLS-2$
         Composite body = section.getBody();
         body.setLayout( ColumnLayoutFactory.defaults().columns( 1, 2 ).spacing( 10 ).create() );
 
-        actionBtns.add( createActionButton( body, "Wasserqualität", 
-                "Auskunftsersuchen zu Wasserhärten und Wasserqualitäten",
-                BatikPlugin.instance().imageForName( "resources/icons/waterdrop.png" ),
+        actionBtns.add( createActionButton( body, i18n.get( "wasserquali" ), i18n.get( "wasserqualiTip" ),
+                BatikPlugin.instance().imageForName( "resources/icons/waterdrop.png" ), //$NON-NLS-1$
                 null,
                 false, new Runnable() {
                     public void run() {
                         getContext().openPanel( WasserQualiPanel.ID );
                     }
         }));
-        actionBtns.add( createActionButton( body, "Entsorgung", 
-                "Antrag auf Entsorgung von dezentralen Abwasserbeseitigungsanlagen",
-                BatikPlugin.instance().imageForName( "resources/icons/truck.png" ),
+        actionBtns.add( createActionButton( body, i18n.get( "entsorgung" ), i18n.get( "entsorgungTip" ),
+                BatikPlugin.instance().imageForName( "resources/icons/truck.png" ), //$NON-NLS-1$
                 null, //AzvPlugin.ROLE_ENTSORGUNG,
                 false, new Runnable() {
                     public void run() {
-                        IMosaicCase newCase = repo.get().newCase( "", "" );
+                        IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
                         newCase.addNature( AzvPlugin.CASE_ENTSORGUNG );
                         mcase.set( newCase );
                         getContext().openPanel( CasePanel.ID );
                     }
         }));
-        actionBtns.add( createActionButton( body, "Schachtschein", 
-                "Antrag für einen Schachtschein",
-                BatikPlugin.instance().imageForName( "resources/icons/letter.png" ),
+        actionBtns.add( createActionButton( body, i18n.get( "schachtschein" ), i18n.get( "schachtscheinTip" ),
+                BatikPlugin.instance().imageForName( "resources/icons/letter.png" ), //$NON-NLS-1$
                 AzvPlugin.ROLE_SCHACHTSCHEIN,
                 true, new Runnable() {
                     public void run() {
                         try {
                             // create new case; commit/rollback inside CaseAction
-                            IMosaicCase newCase = repo.get().newCase( "", "" );
+                            IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
                             newCase.addNature( AzvPlugin.CASE_SCHACHTSCHEIN );
                             //newCase.put( KEY_USER, user.get().username().get() );
                             mcase.set( newCase );
                             getContext().openPanel( CasePanel.ID );
                         }
                         catch (Exception e) {
-                            BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                            BatikApplication.handleError( i18n.get( "schachtscheinFehler" ), e );
                         }
                     }
         }));
-        actionBtns.add( createActionButton( body, "Hydranten", "Hydrantentpläne",
-                BatikPlugin.instance().imageForName( "resources/icons/fire.png" ),
+        actionBtns.add( createActionButton( body, i18n.get( "hydranten" ), i18n.get( "hydrantenTip" ),
+                BatikPlugin.instance().imageForName( "resources/icons/fire.png" ), //$NON-NLS-1$
                 AzvPlugin.ROLE_HYDRANTEN,
                 true, new Runnable() {
                     public void run() {
                         getContext().openPanel( HydrantenPanel.ID );
                     }
         }));
-        actionBtns.add( createActionButton( body, "Dienstbarkeiten", 
-                "Auskunftsersuchen zu dinglichen Rechten auf privaten und öffentlichen Grundstücken (Leitungsrechte, beschränkte persönliche Dienstbarkeiten).",
-                BatikPlugin.instance().imageForName( "resources/icons/letters.png" ),
+        actionBtns.add( createActionButton( body, i18n.get( "dienstbarkeiten" ), i18n.get( "dienstbarkeitenTip" ),
+                BatikPlugin.instance().imageForName( "resources/icons/letters.png" ), //$NON-NLS-1$
                 null,  //AzvPlugin.ROLE_DIENSTBARKEITEN,
                 false, new Runnable() {
                     public void run() {
-                        getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) );
+                        getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) ); //$NON-NLS-1$
                     }
         }));
-        actionBtns.add( createActionButton( body, "Leitungsauskunft", 
-                "Auskunftsersuchen zum Bestand von technischen Anlagen der Wasserver- und Abwasserentsorgung (Leitungen, WW, KA, PW, usw.)",
-                BatikPlugin.instance().imageForName( "resources/icons/pipelines.png" ),
+        actionBtns.add( createActionButton( body, i18n.get( "leitungsauskunft" ), i18n.get( "leitungsauskunftTip" ),
+                BatikPlugin.instance().imageForName( "resources/icons/pipelines.png" ), //$NON-NLS-1$
                 AzvPlugin.ROLE_LEITUNGSAUSKUNFT,
                 true, new Runnable() {
                     public void run() {
@@ -370,14 +380,14 @@ public class StartPanel
                         else {
                             try {
                                 // create new case; commit/rollback inside CaseAction
-                                IMosaicCase newCase = repo.get().newCase( "", "" );
+                                IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
                                 newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
                                 //newCase.put( KEY_USER, user.get().username().get() );
                                 mcase.set( newCase );
                                 getContext().openPanel( CasePanel.ID );
                             }
                             catch (Exception e) {
-                                BatikApplication.handleError( "Schachtschein konnte nicht angelegt werden.", e );
+                                BatikApplication.handleError( i18n.get( "leitungsauskunftFehler" ), e );
                             }
                         }
                     }
@@ -410,7 +420,7 @@ public class StartPanel
                     task.run();
                 }
                 else {
-                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Sie haben keine Freigabe für diese Aktion." ) );
+                    getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n.get( "keineFreigabe" ) ) );
                 }
             }
         };
@@ -445,13 +455,13 @@ public class StartPanel
         getSite().layout( true );
 
         // adjust context: username and preferences
-        getSite().setTitle( i18n.get( "titleLoggedIn" ) );
-        getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) );
+        getSite().setTitle( i18n.get( "titleLoggedIn" ) ); //$NON-NLS-1$
+        getSite().setIcon( BatikPlugin.instance().imageForName( "resources/icons/house.png" ) ); //$NON-NLS-1$
 
         User umuser = UserRepository.instance().findUser( user.get().getName() );
         getContext().setUserName( umuser != null ? umuser.name().get() : user.get().getName() );
         if (!SecurityUtils.isAdmin()) {
-            getContext().addPreferencesAction( new Action( "Persönliche Daten" ) {
+            getContext().addPreferencesAction( new Action( i18n.get( "persoenlicheDaten" ) ) {
                 public void run() {
                     getContext().openPanel( UserSettingsPanel.ID );
                 }

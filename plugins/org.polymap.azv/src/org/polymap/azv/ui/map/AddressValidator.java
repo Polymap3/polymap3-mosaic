@@ -19,8 +19,6 @@ import org.json.JSONObject;
 import com.google.common.collect.Iterables;
 
 import org.polymap.core.runtime.IMessages;
-import org.polymap.core.runtime.Timer;
-
 import org.polymap.rhei.field.IFormFieldValidator;
 import org.polymap.rhei.fulltext.FullTextIndex;
 
@@ -52,10 +50,9 @@ public class AddressValidator
             if (fieldValue == null || fieldValue.toString().length() == 0) {
                 return null;                    
             }
-            Timer timer = new Timer();
+            //Timer timer = new Timer();
             Iterable<JSONObject> results = addressIndex.search( propName + ":" + fieldValue, 1 ); //$NON-NLS-1$
             int count = Iterables.size( results );                
-            AddressForm.log.info( "Features for '" + propName + "'==" + fieldValue + ": " + count + " (" + timer.elapsedTime() + "ms)" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
             return count == 0 ? i18n.get( "keineDaten", fieldValue) : null;
         }
         catch (Exception e) {

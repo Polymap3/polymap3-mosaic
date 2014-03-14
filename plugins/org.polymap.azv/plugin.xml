@@ -150,7 +150,7 @@
             priority="100">
       </caseAction>
       <caseAction
-            caseStateChange="false"
+            caseStateChange="true"
             class="org.polymap.azv.ui.entsorgung.EntsorgungStornoCaseAction"
             description="Diesen Antrag stornieren"
             icon="resources/icons/close.png"
@@ -168,11 +168,12 @@
             priority="120">
       </caseAction>
       <caseAction
+            caseStateChange="true"
             class="org.polymap.azv.ui.CloseCaseAction"
             description="Vorgang erfolglos schließen und archivieren"
             icon="resources/icons/close.png"
             id="org.polymap.azv.CloseCaseAction"
-            priority="1000">
+            priority="-1000">
       </caseAction>
       <caseAction
             class="org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftStartCaseAction"

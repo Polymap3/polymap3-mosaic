@@ -282,7 +282,8 @@ public class CasePanel
         body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
 
-        Button prev = null;
+        Button left = null;
+        Button right = null;
         for (final CaseActionHolder holder: caseActions) {
             final Action action = new Action() {};
             action.setText( holder.ext.getName() );
@@ -302,9 +303,20 @@ public class CasePanel
                 holder.btn = tk.createButton( body, null, SWT.TOGGLE );
                 fillToolbarBtn( holder, action );
 
-                FormDataFactory layoutData = FormDataFactory.filled().right( -1 );
-                if (prev != null) {
-                    layoutData.left( prev );
+                FormDataFactory layoutData = FormDataFactory.filled();
+                if (holder.ext.isCaseChangeAction()) {
+                    layoutData.clearLeft();
+                    if (right != null) {
+                        layoutData.right( right );
+                    }
+                    right = holder.btn;                    
+                }
+                else {
+                    layoutData.clearRight();
+                    if (left != null) {
+                        layoutData.left( left );
+                    }
+                    left = holder.btn;
                 }
                 holder.btn.setLayoutData( layoutData.create() );
                 holder.btn.addSelectionListener( new SelectionAdapter() {
@@ -317,7 +329,6 @@ public class CasePanel
                         }
                     }
                 });
-                prev = holder.btn;
             }
         }
     }
@@ -334,9 +345,9 @@ public class CasePanel
         }
         if (holder.ext.isCaseChangeAction()) {
             holder.btn.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_SUBMIT );
-            if (icon == null) {
-                holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
-            }
+//            if (icon == null) {
+//                holder.btn.setImage( BatikPlugin.instance().imageForName( "resources/icons/ok.png" ) );
+//            }
         }
         Image btnIcon = holder.btn.getImage();
         int displayWidth = BatikApplication.sessionDisplay().getClientArea().width;
