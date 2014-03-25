@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2013, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2013-2014, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -14,6 +14,9 @@
  */
 package org.polymap.azv.ui.map;
 
+import static com.google.common.collect.Iterables.concat;
+import static java.util.Collections.singleton;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,7 +27,6 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -32,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Rectangle;
+import com.vividsolutions.jts.geom.Envelope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -87,6 +90,9 @@ public class MapViewer
 
     private List<WMSLayer>          layers = new ArrayList();
 
+    private WMSLayer                visibleBaseLayer;
+
+    /** The currently visible layers, excluding the {@link #visibleBaseLayer}. */
     private List<WMSLayer>          visibleLayers = new ArrayList();
 
     private Composite               contents;
@@ -95,7 +101,11 @@ public class MapViewer
 
     private Composite               toolbar;
 
-    private ReferencedEnvelope      bbox;
+    private ReferencedEnvelope      mapExtent;
+    
+//    private float                   mapScale = -1;
+
+    private WMSLayer                dop;
 
     
     public void dispose() {
@@ -124,6 +134,17 @@ public class MapViewer
         return olwidget.getMap();
     }
 
+    public void zoomToExtent( Envelope envelope ) {
+        getMap().zoomToExtent( new Bounds( envelope.getMinX(), envelope.getMinY(), envelope.getMaxX(), envelope.getMaxY()), true );
+        try {
+            mapExtent = new ReferencedEnvelope( envelope, Geometries.crs( srs ) );
+            updateLayerVisibility();
+        }
+        catch (Exception e) {
+            throw new RuntimeException( e );
+        }
+    }
+
 
     public MapViewer addLayer( Layer layer, boolean isBaseLayer ) {
         layer.setIsBaseLayer( isBaseLayer );
@@ -136,21 +157,32 @@ public class MapViewer
         if (layer instanceof WMSLayer) {
             layers.add( (WMSLayer)layer );
             if (!isBaseLayer) {
-                visibleLayer( layer, true );
+                setLayerVisible( layer, true );
+            }
+            else {
+                visibleBaseLayer = visibleBaseLayer == null ? (WMSLayer)layer : visibleBaseLayer;
             }
         }
         return this;
     }
     
     
-    public MapViewer visibleLayer( Layer layer, boolean visible ) {
+    public MapViewer setLayerVisible( Layer layer, boolean visible ) {
         assert layers.contains( layer );
-        layer.setVisibility( visible );
-        if (visible) {
-            visibleLayers.add( (WMSLayer)layer );
-        } else {
-            visibleLayers.remove( layer );
+        
+        if (layer.isBaseLayer()) {
+            map.setBaseLayer( layer );
+            visibleBaseLayer = (WMSLayer)layer;
+        } 
+        else {
+            layer.setVisibility( visible );
+            if (visible) {
+                visibleLayers.add( (WMSLayer)layer );
+            } else {
+                visibleLayers.remove( layer );
+            }
         }
+        
         return this;
     }
     
@@ -200,6 +232,9 @@ public class MapViewer
                     i18n.get( "layerWmsUrl"+suffix ), //$NON-NLS-1$
                     i18n.get( "layerWmsName"+suffix ) ); //$NON-NLS-1$
             addLayer( layer, true );
+            if (layer.getName().toLowerCase().contains( "dop" )) {
+                dop = layer;
+            }
             suffix ++;
         }
 
@@ -229,7 +264,9 @@ public class MapViewer
         payload.put( "bottom", "event.object.getExtent().toArray()[1]" );
         payload.put( "right", "event.object.getExtent().toArray()[2]" );
         payload.put( "top", "event.object.getExtent().toArray()[3]" );
+        payload.put( "scale", map.getJSObjRef() + ".getScale()" );
         map.events.register( this, OpenLayersMap.EVENT_MOVEEND, payload );
+        map.events.register( this, OpenLayersMap.EVENT_ZOOMEND, payload );
 
         // after olwidget is initialized
         createToolbar();        
@@ -255,7 +292,8 @@ public class MapViewer
             // image
             int w = (int)(pageSize.getWidth() - pageSize.getBorderWidthLeft() - pageSize.getBorderWidthRight());
             int h = (int)(pageSize.getHeight() - pageSize.getBorderWidthTop() - pageSize.getBorderWidthBottom());
-            java.awt.Image image = new WmsMapImageCreator( visibleLayers ).createImage( bbox, w, h );
+            Iterable<WMSLayer> printLayers = concat( singleton( visibleBaseLayer ), visibleLayers );
+            java.awt.Image image = new WmsMapImageCreator( printLayers ).createImage( mapExtent, w, h );
 
             Image pdfImage = Image.getInstance( image, null, false );
             pdfImage.scalePercent( 80 );
@@ -284,7 +322,35 @@ public class MapViewer
         }
     }
     
+    
+    private WMSLayer    userDefinedBaseLayer;
+    
+    public void updateLayerVisibility() {
+        // XXX default map width if no layout yet
+        int imageWidth = olwidget.getSize().x > 0 ? olwidget.getSize().x : 500;
+        // XXX no geodetic CRS supported
+        double mapScale = mapExtent.getWidth() / (imageWidth / 90/*dpi*/ * 0.0254);
+        
+        if (mapScale <= 0 || dop == null) {
+            return;
+        }
+        else if (mapScale < 5000) {
+            if (visibleBaseLayer != dop) {
+                userDefinedBaseLayer = visibleBaseLayer;
+                setLayerVisible( dop, true );
+            }
+        }
+        else if (mapScale > 5000) {
+            // XXX das zurück umschalten funktioniert nicht, da das umschalten per
+            // layerSwitcher nicht ausgewertet wird
+            if (userDefinedBaseLayer != null && visibleBaseLayer != userDefinedBaseLayer) {
+                setLayerVisible( userDefinedBaseLayer, true );
+                userDefinedBaseLayer = null;
+            }
+        }
+    }
 
+    
     /*
      * Processes events triggered by the OpenLayers map. 
      */
@@ -296,13 +362,16 @@ public class MapViewer
         String left = payload.get( "left" );
         if (left != null) {
             try {
-                bbox = new ReferencedEnvelope(
+                mapExtent = new ReferencedEnvelope(
                         Double.parseDouble( payload.get( "left" ) ),
                         Double.parseDouble( payload.get( "right" ) ),
                         Double.parseDouble( payload.get( "bottom" ) ),
                         Double.parseDouble( payload.get( "top" ) ),
                         Geometries.crs( srs ) );
-                log.debug( "### process_event: bbox= " + bbox );
+//                mapScale = Float.parseFloat( payload.get( "scale" ) );
+//                log.info( "scale=" + mapScale + ", mapExtent= " + mapExtent );
+                
+                updateLayerVisibility();
             }
             catch (Exception e) {
                 log.error( "unhandled:", e );

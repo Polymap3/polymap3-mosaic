@@ -178,8 +178,10 @@ public class KarteCaseAction
             vectorLayer.addFeatures( vectorFeature );
             //vectorLayer.redraw();
 
-            mapViewer.getMap().setCenter( geom.getX(), geom.getY() );
-            mapViewer.getMap().zoomTo( 10 );
+            mapViewer.zoomToExtent( geom.buffer( 50 ).getEnvelopeInternal() );
+//            mapViewer.getMap().setCenter( geom.getX(), geom.getY() );
+//            mapViewer.getMap().zoomTo( 10 );
+            
             
             mapSection.setTitle( i18n.get( "title" ) );
         }

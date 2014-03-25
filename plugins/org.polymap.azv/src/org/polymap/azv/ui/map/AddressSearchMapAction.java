@@ -60,7 +60,6 @@ import org.polymap.rhei.fulltext.FullTextIndex;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.openlayers.rap.widget.base_types.Bounds;
 
 /**
  * Address search field using {@link AzvPlugin#addressIndex()}.
@@ -195,7 +194,7 @@ public class AddressSearchMapAction
         if (!bbox.isNull()) {
             bbox.expandBy( 100 );
             log.info( "BBox: " + bbox ); //$NON-NLS-1$
-            viewer.getMap().zoomToExtent( new Bounds( bbox.getMinX(), bbox.getMinY(), bbox.getMaxX(), bbox.getMaxY() ), true );
+            viewer.zoomToExtent( bbox );
         }
     }
     

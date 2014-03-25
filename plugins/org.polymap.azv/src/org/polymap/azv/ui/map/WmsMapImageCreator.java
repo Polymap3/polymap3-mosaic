@@ -77,7 +77,12 @@ public class WmsMapImageCreator {
         for (WMSLayer layer : layers) {
             try {
                 Descriptor descriptor = new Descriptor();
-                descriptor.wmsUrl = new URL( layer.getWmsUrl() );
+                String wmsUrl = layer.getWmsUrl();
+                if (wmsUrl.startsWith( ".." )) {
+                    // XXX get port from request
+                    wmsUrl = "http://localhost:8080" + wmsUrl.substring( 2 );
+                }
+                descriptor.wmsUrl = new URL( wmsUrl );
                 descriptor.layerNames = StringUtils.split( layer.getWmsLayers(), ", " );
                 descriptors.add( descriptor );
             }

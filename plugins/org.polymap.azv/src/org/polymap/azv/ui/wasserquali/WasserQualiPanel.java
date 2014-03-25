@@ -244,8 +244,10 @@ public class WasserQualiPanel
         vectorLayer.destroyFeatures();
         VectorFeature vectorFeature = new VectorFeature( new PointGeometry( p.getX(), p.getY() ) );
         vectorLayer.addFeatures( vectorFeature );
-        mapViewer.getMap().setCenter( p.getX(), p.getY() );
-        mapViewer.getMap().zoomTo( 8 );
+        
+        mapViewer.zoomToExtent( p.buffer( 500 ).getEnvelopeInternal() );
+//        mapViewer.getMap().setCenter( p.getX(), p.getY() );
+//        mapViewer.getMap().zoomTo( 8 );
     }
     
     

@@ -64,7 +64,7 @@ public class LayerMapAction
         this.site = viewer.getPanelSite();
         this.map = viewer.getMap();
         this.layer = layer;
-        viewer.visibleLayer( this.layer, this.visible = visible );
+        viewer.setLayerVisible( this.layer, this.visible = visible );
     }
 
     
@@ -77,7 +77,7 @@ public class LayerMapAction
         btn.setEnabled( true );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent ev ) {
-                viewer.visibleLayer( layer, visible = !visible );
+                viewer.setLayerVisible( layer, visible = !visible );
             }
         });
     }
