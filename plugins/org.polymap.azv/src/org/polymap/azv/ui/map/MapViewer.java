@@ -24,8 +24,6 @@ import java.util.List;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.net.URL;
-
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,6 +38,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.RowLayoutFactory;
 
 import org.polymap.core.data.util.Geometries;
@@ -48,6 +47,7 @@ import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.app.BatikApplication;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
@@ -282,7 +282,19 @@ public class MapViewer
     }
 
     
+    /**
+     * 
+     *
+     * @param pageSize
+     * @param title
+     * @return The generated PDF document, or null if map has no extent or other error.
+     */
     public byte[] createPdf( Rectangle pageSize, String title ) {
+        if (mapExtent == null) {
+            MessageDialog.openInformation( BatikApplication.shellToParentOn(), 
+                    i18n.get( "noExtentTitle" ), i18n.get( "noExtentMsg" ) );
+            return null;
+        }
         InputStream htmlIn = null; 
         try {
             // pdf
@@ -303,10 +315,9 @@ public class MapViewer
             pdf.document().add( pdfImage );
             
             // html footer
-            URL res = AzvPlugin.instance().getBundle().getResource( "resources/mapfooter.html" );
-            String html = IOUtils.toString( htmlIn = res.openStream(), "UTF8" );
+            String html = i18n.get( "pdfFooter" );
             html = StringUtils.replace( html, "{0}", title );
-            html = StringUtils.replace( html, "{1}", "???" );
+            html = StringUtils.replace( html, "{1}", "???" ); // scale
             html = StringUtils.replace( html, "{2}", AzvPlugin.df.format( new Date() ) );
             pdf.addHtml( html );
             

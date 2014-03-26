@@ -203,6 +203,11 @@ public class LeitungsauskunftPanel
     
     protected void createPDF( final Rectangle pageSize ) {
         final String title = defaultIfEmpty( addressSearch.getSearchText(), "Leitungsauskunft" ); //$NON-NLS-1$
+        // in Display thread to allow dialog to be displayed
+        final byte[] bytes = mapViewer.createPdf( pageSize, title );
+        if (bytes == null) {
+            return;
+        }
         
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
             @Override
@@ -215,8 +220,6 @@ public class LeitungsauskunftPanel
             }
             @Override
             public InputStream getInputStream() throws Exception {
-                byte[] bytes = mapViewer.createPdf( pageSize, title );
-                //FileUtils.writeByteArrayToFile( new File( "/tmp/bytes.pdf" ), bytes );
                 return new ByteArrayInputStream( bytes );
             }
             @Override

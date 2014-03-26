@@ -41,8 +41,6 @@ import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
 import org.polymap.core.runtime.IMessages;
 
-import org.polymap.rhei.batik.Context;
-import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanel;
@@ -54,8 +52,6 @@ import org.polymap.azv.ui.map.AddressSearchMapAction;
 import org.polymap.azv.ui.map.HomeMapAction;
 import org.polymap.azv.ui.map.MapViewer;
 import org.polymap.azv.ui.map.ScaleMapAction;
-import org.polymap.mosaic.server.model.IMosaicCase;
-import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.openlayers.rap.widget.layers.WMSLayer;
 
@@ -74,11 +70,11 @@ public class HydrantenPanel
 
     public static final IMessages       i18n = Messages.forPrefix( "HydrantenPanel" ); //$NON-NLS-1$
 
-    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
-    private ContextProperty<IMosaicCase> mcase;
-
-    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
-    private ContextProperty<MosaicRepository2> repo;
+//    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+//    private ContextProperty<IMosaicCase> mcase;
+//
+//    @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
+//    private ContextProperty<MosaicRepository2> repo;
 
     private MapViewer                   mapViewer;
 
@@ -154,6 +150,13 @@ public class HydrantenPanel
     
     
     protected void createPDF( final Rectangle pageSize ) {
+        String title = i18n.get( "pdfTitle", AzvPlugin.df.format( new Date() ) );
+        // in Display thread to allow dialog to be displayed
+        final byte[] bytes = mapViewer.createPdf( pageSize, title );
+        if (bytes == null) {
+            return;
+        }
+        
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
             @Override
             public String getFilename() {
@@ -165,8 +168,6 @@ public class HydrantenPanel
             }
             @Override
             public InputStream getInputStream() throws Exception {
-                byte[] bytes = mapViewer.createPdf( pageSize, mcase.get().getName() );
-                //FileUtils.writeByteArrayToFile( new File( "/tmp/bytes.pdf" ), bytes );
                 return new ByteArrayInputStream( bytes );
             }
             @Override

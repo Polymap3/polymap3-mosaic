@@ -42,6 +42,8 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -298,9 +300,9 @@ public class DokumenteCaseAction
         });
         viewer.setInput( mcase.get() );
         
-        viewer.addDoubleClickListener( new IDoubleClickListener() {
-            public void doubleClick( DoubleClickEvent ev ) {
-                final IMosaicDocument selected = new SelectionAdapter( ev.getSelection() ).first( IMosaicDocument.class );
+        viewer.addSelectionChangedListener( new ISelectionChangedListener() {
+            public void selectionChanged( SelectionChangedEvent ev ) {
+                final IMosaicDocument selected = SelectionAdapter.on( ev.getSelection() ).first( IMosaicDocument.class );
                 String url = DownloadServiceHandler.registerContent( new ContentProvider() {
                     @Override
                     public InputStream getInputStream() throws Exception {
@@ -321,6 +323,10 @@ public class DokumenteCaseAction
                 });
                 ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
                         ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
+            }
+        });
+        viewer.addDoubleClickListener( new IDoubleClickListener() {
+            public void doubleClick( DoubleClickEvent ev ) {
             }
         });
 

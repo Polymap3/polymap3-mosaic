@@ -98,6 +98,9 @@ public class PdfMapAction
     protected void createDocument() {
         try {            
             byte[] bytes = viewer.createPdf( pageSize, mcase.getName() );
+            if (bytes == null) {
+                return;
+            }
 
             // find next name
             String name = mcase.getName() + "-" + title + ".pdf";
