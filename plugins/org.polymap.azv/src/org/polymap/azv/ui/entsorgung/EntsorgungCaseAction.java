@@ -278,11 +278,18 @@ public class EntsorgungCaseAction
             EmailService.instance().send( email );
         }
 
-        // update panel action and status
-        fillStatus( caseStatus );
-        fillAction( caseAction );
-        fillContentArea( contentArea );
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "statusOk" ) ) );
+
+        Polymap.getSessionDisplay().asyncExec( new Runnable() {
+            public void run() {
+                site.getContext().closePanel( site.getPanelSite().getPath() );
+            }
+        });
+
+//        // update panel action and status
+//        fillStatus( caseStatus );
+//        fillAction( caseAction );
+//        fillContentArea( contentArea );
     }
 
 

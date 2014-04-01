@@ -326,8 +326,8 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, i18n.get( "entsorgung" ), i18n.get( "entsorgungTip" ),
                 BatikPlugin.instance().imageForName( "resources/icons/truck.png" ), //$NON-NLS-1$
-                null, //AzvPlugin.ROLE_ENTSORGUNG,
-                false, new Runnable() {
+                AzvPlugin.ROLE_ENTSORGUNG,
+                true, new Runnable() {
                     public void run() {
                         IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
                         newCase.addNature( AzvPlugin.CASE_ENTSORGUNG );
