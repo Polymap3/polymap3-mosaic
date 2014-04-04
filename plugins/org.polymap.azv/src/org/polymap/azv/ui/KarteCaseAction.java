@@ -50,7 +50,6 @@ import org.polymap.azv.ui.map.HomeMapAction;
 import org.polymap.azv.ui.map.MapViewer;
 import org.polymap.azv.ui.map.PdfMapAction;
 import org.polymap.azv.ui.map.ScaleMapAction;
-import org.polymap.azv.ui.schachtschein.SchachtscheinStartCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -212,7 +211,7 @@ public class KarteCaseAction
     /**
      * Listen to changes of the location ({@link OrtMixin}) of the mcase. The event
      * is triggered by {@link DrawFeatureMapAction} and
-     * {@link SchachtscheinStartCaseAction} and others.
+     * {@link StartCaseAction} and others.
      * 
      * @param ev
      */

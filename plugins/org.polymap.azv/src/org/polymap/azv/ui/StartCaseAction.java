@@ -214,7 +214,7 @@ public abstract class StartCaseAction
         form.createContents( formContainer );
         site.setSubmitEnabled( false );
         
-        site.createSubmit( formContainer, i18n( "übernehmen" ) );
+        site.createSubmit( formContainer, i18n( "uebernehmen" ) );
     }
 
     
@@ -226,7 +226,7 @@ public abstract class StartCaseAction
         form = null;
         repo.get().commitChanges();
         
-        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n( "übernommen" ) ) );
+        site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n( "uebernommen" ) ) );
         fillStatus( caseStatus );
         
         if (contentForm != null) {
@@ -369,7 +369,7 @@ public abstract class StartCaseAction
                             OrtMixin ort = mcase.get().as( OrtMixin.class );
                             ort.setGeom( geom );
 
-                            EventManager.instance().publish( new PropertyChangeEvent( this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
+                            EventManager.instance().publish( new PropertyChangeEvent( StartCaseAction.this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
                         }
                         else {
                             site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n( "adresseNichtGefunden" ) ) );                        

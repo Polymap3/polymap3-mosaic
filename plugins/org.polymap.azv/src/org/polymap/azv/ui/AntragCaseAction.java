@@ -42,7 +42,6 @@ import org.polymap.rhei.um.User;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.model.OrtMixin;
-import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
@@ -81,9 +80,10 @@ public abstract class AntragCaseAction
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
 
+        // updateAction() wenn mcase geändert (von StartCaseAction.submit())
         EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
-            public boolean apply( PropertyChangeEvent input ) {
-                return action != null && DrawFeatureMapAction.EVENT_NAME.equals( input.getPropertyName() );
+            public boolean apply( PropertyChangeEvent ev ) {
+                return action != null && mcase.get() == ev.getSource();  //DrawFeatureMapAction.EVENT_NAME.equals( ev.getPropertyName() );
             }
         });
         return true;
@@ -148,7 +148,10 @@ public abstract class AntragCaseAction
     }
 
 
-    /** Currently send be {@link DrawFeatureMapAction}. */
+    /**
+     * 
+     * 
+     */
     @EventHandler(display=true)
     protected void updateAction( PropertyChangeEvent ev ) {
         action.setEnabled( true );

@@ -209,7 +209,7 @@ public class EntsorgungCaseAction
             contentForm.setEnabled( false );
 
             IPanelSection sep = site.toolkit().createPanelSection( parent, i18n.get( "statusTitle" ) );
-            sep.addConstraint( new PriorityConstraint( 0 ) );
+            sep.addConstraint( new PriorityConstraint( 100 ) );
             sep.getBody().setLayout( new FillLayout() );
             site.toolkit().createFlowText( sep.getBody(), i18n.get( "dataTxt" ) ); //$NON-NLS-1$
         }
