@@ -25,8 +25,7 @@ import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
 
 /**
- * The interface an {@link IPanel} implementation can use to interact with the Mosaic
- * UI framework.
+ * The primary interface between an {@link ICaseAction} and the {@link CasePanel} framework.
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -35,17 +34,25 @@ public interface ICaseActionSite {
     public IPanelSite getPanelSite();
     
     public IAppContext getContext();
+
+    /**
+     * Specifies i fthe status 
+     * @return this
+     */
+    public ICaseActionSite setShowStatus( boolean show );
     
     /**
      * False specifies that no default submit/discard buttons should
      * be generated.
+     * @return this
      */
-    public void setShowSubmitButton( boolean show );
+    public ICaseActionSite setShowSubmitButton( boolean show );
     
     /**
      * Sets the status of the submit button.
+     * @return this
      */
-    public void setSubmitEnabled( boolean enabled );
+    public ICaseActionSite setSubmitEnabled( boolean enabled );
     
     public String getActionId();
     

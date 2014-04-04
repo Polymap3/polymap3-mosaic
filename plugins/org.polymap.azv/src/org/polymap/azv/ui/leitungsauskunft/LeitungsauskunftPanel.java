@@ -95,6 +95,7 @@ public class LeitungsauskunftPanel
     public boolean init( IPanelSite site, IAppContext context ) {
         super.init( site, context );
         site.setTitle( i18n.get( "title" ) );
+        site.setIcon( AzvPlugin.instance().imageForName( "resources/icons/pipelines-filter.png" ) );
         return false;
     }
 

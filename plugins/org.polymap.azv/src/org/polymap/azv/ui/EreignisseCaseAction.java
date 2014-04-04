@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Joiner;
 
-import org.eclipse.rwt.graphics.Graphics;
+import org.eclipse.swt.graphics.Color;
 
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
@@ -116,9 +116,10 @@ public class EreignisseCaseAction
         }
         @SuppressWarnings("hiding")
         IMosaicCase mcase = this.mcase.get();
-        site.getPanelSite().setTitle( "Vorgang: " + (mcase.getName().isEmpty() ? "[Neu angelegt]" : mcase.getName()) );
+        String title = Joiner.on( "," ).join( mcase.getNatures() );
+//        site.getPanelSite().setTitle( title );
         
-        caseStatus.put( "Art", Joiner.on( "," ).join( mcase.getNatures() ), 101, Graphics.getColor( 0xDD, 0xE1, 0xE3 ) );
+//        caseStatus.put( "Art", Joiner.on( "," ).join( mcase.getNatures() ), 101, Graphics.getColor( 0xDD, 0xE1, 0xE3 ) );
         if (mcase.getName() != null && !mcase.getName().isEmpty()) {
             caseStatus.put( "Bezeichnung", mcase.getName(), 100 );
         }
@@ -137,33 +138,46 @@ public class EreignisseCaseAction
 //            }
             
             String azvStatus = AzvStatusMixin.ofCase( mcase );
+            String statusTitle = null;
+            Color statusColor = null;
+            
             if (azvStatus == null) {
-                caseStatus.put( "Status", "NEU", -1, AzvPlugin.instance().openColor.get() );
+                statusTitle = "NEU";
+                statusColor = AzvPlugin.instance().openColor.get();
             }
             else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_ABGEBROCHEN )) {
-                caseStatus.put( "Status", "Abgebrochen", -1, AzvPlugin.instance().discardColor.get() );
+                statusTitle = "Abgebrochen"; 
+                statusColor = AzvPlugin.instance().discardColor.get();
             }
             else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_STORNIERT )) {
-                caseStatus.put( "Status", "Storniert", -1, AzvPlugin.instance().discardColor.get() );
+                statusTitle = "Storniert";
+                statusColor = AzvPlugin.instance().discardColor.get();
             }
             else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_BEANTRAGT )) {
-                caseStatus.put( "Status", "Beantragt", -1, AzvPlugin.instance().openColor.get() );
+                statusTitle = "Beantragt";
+                statusColor = AzvPlugin.instance().openColor.get();
             }
             else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_ANFREIGABE )) {
-                caseStatus.put( "Status", "An Freigabe", -1, AzvPlugin.instance().openColor.get() );
+                statusTitle = "An Freigabe";
+                statusColor = AzvPlugin.instance().openColor.get();
             }
             else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_ANBEARBEITUNG )) {
-                caseStatus.put( "Status", "An Bearbeitung", -1, AzvPlugin.instance().openColor.get() );
+                statusTitle = "An Bearbeitung";
+                statusColor = AzvPlugin.instance().openColor.get();
             }
             else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_FREIGABE )) {
-                caseStatus.put( "Status", "Freigegeben", -1, AzvPlugin.instance().okColor.get() );
+                statusTitle = "Freigegeben";
+                statusColor = AzvPlugin.instance().okColor.get();
             }
             else if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
-                caseStatus.put( "Status", "Erledigt", -1, AzvPlugin.instance().okColor.get() );
+                statusTitle = "Erledigt";
+                statusColor = AzvPlugin.instance().okColor.get();
             }
             else {
                 caseStatus.put( "Status", "???" );
             }
+            caseStatus.put( "Status", statusTitle, -1, statusColor );
+            site.getPanelSite().setTitle( title + " - " + statusTitle );
 //        }
     }
 

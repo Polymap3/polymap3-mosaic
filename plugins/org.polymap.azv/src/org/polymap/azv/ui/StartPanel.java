@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.Iterables;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -35,6 +34,10 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.rwt.lifecycle.WidgetUtil;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -56,7 +59,6 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.security.UserPrincipal;
-import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
 
@@ -70,8 +72,11 @@ import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.app.BatikApplication;
+import org.polymap.rhei.batik.layout.desktop.DesktopToolkit;
+import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
@@ -187,8 +192,7 @@ public class StartPanel
 //        createLoginSection( contents )
 //                .addConstraint( new PriorityConstraint( 10 ), AzvPlugin.MIN_COLUMN_WIDTH );
 
-        createActionsSection( contents )
-                .addConstraint( new PriorityConstraint( 0 ) );
+        createActionsSection( contents );
         
         // listen to PropertyAccessEvent
         EventManager.instance().subscribe( this, new EventFilter<PropertyAccessEvent>() {
@@ -220,7 +224,7 @@ public class StartPanel
     
     protected void createCasesSection( Composite parent ) {
         casesSection = tk.createPanelSection( parent, i18n.get( "aktuelleVorgaengeTitle" ) );
-        casesSection.addConstraint( new PriorityConstraint( 5 ), AzvPlugin.MIN_COLUMN_WIDTH );
+        casesSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ); //$NON-NLS-1$
@@ -229,13 +233,13 @@ public class StartPanel
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).create() );
         casesViewer.getColumn( "created" ).sort( SWT.UP ); //$NON-NLS-1$
         
-        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
-            public void doubleClick( DoubleClickEvent ev ) {
-                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
-                mcase.set( sel );
-                getContext().openPanel( CasePanel.ID );
-            }
-        });
+//        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
+//            public void doubleClick( DoubleClickEvent ev ) {
+//                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+//                mcase.set( sel );
+//                getContext().openPanel( CasePanel.ID );
+//            }
+//        });
         casesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
@@ -271,18 +275,18 @@ public class StartPanel
     
     protected void createClosedCasesSection( Composite parent ) {
         // normal user -> propable just a few open cases
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 150 ).create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).create() );
 
-        IPanelSection closedCasesSection = tk.createPanelSection( parent, i18n.get( "bearbeiteteVorgängeTitle" ) );
+        IPanelSection closedCasesSection = tk.createPanelSection( parent, i18n.get( "bearbeiteteVorgaengeTitle" ) );
         closedCasesSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH,
-                new PriorityConstraint( 0 ),
+                new PriorityConstraint( 100 ),
                 new NeighborhoodConstraint( casesSection.getControl(), Neighborhood.BOTTOM, 1 ) ); 
         closedCasesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) ); //$NON-NLS-1$
         final CasesTableViewer closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
         closedCasesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
-        closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 150 ).create() );
+        closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).create() );
         closedCasesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( closedCasesViewer.getSelected() );
@@ -290,9 +294,9 @@ public class StartPanel
                 getContext().openPanel( CasePanel.ID );
             }
         });
-        casesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
+        closedCasesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
-                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
+                IMosaicCase sel = Iterables.getOnlyElement( closedCasesViewer.getSelected() );
                 mcase.set( sel );
                 getContext().openPanel( CasePanel.ID );            
             }
@@ -310,11 +314,13 @@ public class StartPanel
     }
     
     
-    protected IPanelSection createActionsSection( Composite parent ) {
-        IPanelSection section = tk.createPanelSection( parent, i18n.get( "antraegeTitle" ), Section.TITLE_BAR );
-        section.getControl().setData( "title", "actions" ); //$NON-NLS-1$ //$NON-NLS-2$
-        Composite body = section.getBody();
-        body.setLayout( ColumnLayoutFactory.defaults().columns( 1, 2 ).spacing( 10 ).create() );
+    protected void createActionsSection( Composite parent ) {
+        IPanelSection section1 = tk.createPanelSection( parent, i18n.get( "auskuenfteTitle" ), Section.TITLE_BAR );
+        section1.addConstraint( new PriorityConstraint( 50 ) );
+        section1.getControl().setData( "title", "actions" ); //$NON-NLS-1$ //$NON-NLS-2$
+        Composite body = section1.getBody();
+//        body.setLayout( RowLayoutFactory.fillDefaults().type( SWT.VERTICAL ).fill( true ).justify( true ).create() );
+//        body.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 10 ).create() );
 
         actionBtns.add( createActionButton( body, i18n.get( "wasserquali" ), i18n.get( "wasserqualiTip" ),
                 BatikPlugin.instance().imageForName( "resources/icons/waterdrop.png" ), //$NON-NLS-1$
@@ -324,6 +330,14 @@ public class StartPanel
                         getContext().openPanel( WasserQualiPanel.ID );
                     }
         }));
+
+        IPanelSection section2 = tk.createPanelSection( parent, i18n.get( "antraegeTitle" ), Section.TITLE_BAR );
+        section2.addConstraint( new PriorityConstraint( 0 ), new NeighborhoodConstraint( section1, Neighborhood.BOTTOM, 100 ) );
+        section2.getControl().setData( "title", "actions" ); //$NON-NLS-1$ //$NON-NLS-2$
+        body = section2.getBody();
+//        body.setLayout( RowLayoutFactory.fillDefaults().type( SWT.VERTICAL ).spacing( 10 ).margins( 0, 10 ).create() );
+//        body.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 )..spacing( 15 ).create() );
+        
         actionBtns.add( createActionButton( body, i18n.get( "entsorgung" ), i18n.get( "entsorgungTip" ),
                 BatikPlugin.instance().imageForName( "resources/icons/truck.png" ), //$NON-NLS-1$
                 AzvPlugin.ROLE_ENTSORGUNG,
@@ -392,17 +406,27 @@ public class StartPanel
                         }
                     }
         }));
-        return section;
     }
 
     
     private Runnable          afterLogginTask;
     
+    private int               layoutPrio = 100;
+    
     private Control createActionButton( Composite client, String title, String tooltip, Image image, 
                 final String role, final boolean checkLogin, final Runnable task ) {
-            
-        Button result = tk.createButton( client, title, SWT.PUSH, SWT.LEFT );
-        result.setToolTipText( tooltip );
+        Composite container = tk.createComposite( client, SWT.BORDER );
+        container.setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CSS_FORM  );
+        container.setLayoutData( new ConstraintData( 
+                new MinWidthConstraint( 280, 1 ), new PriorityConstraint( layoutPrio-- ) ) );
+//        container.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).margins( 10 ).create() );
+        container.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 10 ).create() );
+        
+        Label msg = tk.createLabel( container, tooltip, SWT.WRAP );
+        msg.setLayoutData( FormDataFactory.filled().clearBottom().height( 80 ).create() );
+
+        Button result = tk.createButton( container, title, SWT.PUSH );
+        result.setLayoutData( FormDataFactory.filled().top( msg ).create() );
         result.setImage( image );
         result.addMouseListener( new MouseAdapter() {
             public void mouseUp( MouseEvent e ) {
@@ -451,6 +475,9 @@ public class StartPanel
             createClosedCasesSection( contents );
         }
 
+        welcomeSection.dispose();
+        welcomeSection = null;
+        
         contents.layout( true );
         getSite().layout( true );
 

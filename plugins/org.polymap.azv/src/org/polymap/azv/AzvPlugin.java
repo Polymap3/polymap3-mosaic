@@ -16,6 +16,7 @@ package org.polymap.azv;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -26,12 +27,19 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
 
 import com.google.common.base.Supplier;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.rwt.graphics.Graphics;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -39,6 +47,7 @@ import org.polymap.core.project.ILayer;
 import org.polymap.core.project.LayerFinder;
 import org.polymap.core.project.ProjectRepository;
 import org.polymap.core.runtime.CachedLazyInit;
+import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Lazy;
 import org.polymap.core.runtime.LockedLazyInit;
 import org.polymap.core.runtime.Polymap;
@@ -56,6 +65,8 @@ import org.polymap.rhei.fulltext.indexing.ToStringTransformer;
 import org.polymap.rhei.fulltext.lucene.LuceneFullTextIndex;
 import org.polymap.rhei.fulltext.update.LayerModificationWatcher;
 import org.polymap.rhei.fulltext.update.UpdateableFullTextIndex;
+import org.polymap.rhei.um.User;
+import org.polymap.rhei.um.email.EmailService;
 
 /**
  *
@@ -236,6 +247,31 @@ public class AzvPlugin
         
         super.stop( context );
         instance = null;
+    }
+
+
+    public static void sendEmail( User user, IMessages i18n ) throws EmailException {
+        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+        Email email = new SimpleEmail();
+        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
+        email.addTo( user.email().get() )
+                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+                .setMsg( i18n.get( "email", header ) ); //$NON-NLS-1$
+        EmailService.instance().send( email );
+    }
+
+
+    public Image imageForName( String resName ) {
+        ImageRegistry images = getImageRegistry();
+        Image image = images.get( resName );
+        if (image == null || image.isDisposed()) {
+            URL res = getBundle().getResource( resName );
+            assert res != null : "Image resource not found: " + resName;
+            images.put( resName, ImageDescriptor.createFromURL( res ) );
+            image = images.get( resName );
+        }
+        return image;
     }
     
 }

@@ -95,14 +95,17 @@ public class NutzerAnVorgangCaseAction
 
     private UsersTableViewer                viewer;
 
-    private IAction caseAction;
+    private IAction                         caseAction;
 
     
     @Override
     public boolean init( ICaseActionSite _site ) {
+        _site.setShowStatus( false );
         if (mcase.get() != null && repo.get() != null
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
             
+            _site.setShowStatus( true );
+
             if (mcase.get().getNatures().contains( AzvPlugin.CASE_NUTZER )) {
                 return false;
             }

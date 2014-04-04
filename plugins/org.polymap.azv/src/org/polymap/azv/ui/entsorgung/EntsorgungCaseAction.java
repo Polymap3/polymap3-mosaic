@@ -31,9 +31,6 @@ import org.opengis.feature.Property;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.SimpleEmail;
-
 import org.qi4j.api.query.Query;
 
 import com.google.common.base.Joiner;
@@ -67,7 +64,6 @@ import org.polymap.rhei.field.StringFormField;
 import org.polymap.rhei.field.TextFormField;
 import org.polymap.rhei.form.IFormEditorPageSite;
 import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.email.EmailService;
 import org.polymap.rhei.um.ui.PlzValidator;
 import org.polymap.rhei.um.ui.RegisterPanel;
 
@@ -132,6 +128,8 @@ public class EntsorgungCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )) {
+            
+            _site.getPanelSite().setIcon( AzvPlugin.instance().imageForName( "resources/icons/truck-filter.png" ) );
             
             // default setting from user
 //            UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
@@ -268,14 +266,7 @@ public class EntsorgungCaseAction
         // email
         User user = nutzer.user();
         if (user != null) {
-            String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
-            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            Email email = new SimpleEmail();
-            email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
-            email.addTo( user.email().get() )
-                    .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
-                    .setMsg( i18n.get( "email", header, liste.name().get() ) ); //$NON-NLS-1$
-            EmailService.instance().send( email );
+            AzvPlugin.sendEmail( user, i18n );
         }
 
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "statusOk" ) ) );

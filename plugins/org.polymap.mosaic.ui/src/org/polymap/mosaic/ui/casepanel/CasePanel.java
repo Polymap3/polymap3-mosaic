@@ -19,6 +19,8 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Joiner;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -88,6 +90,8 @@ public class CasePanel
 
     private Composite                       toolbarSection;
 
+    private Composite                       statusSection; 
+    
     private Button                          submitBtn;
 
     /** The action that currently has an open action section. */ 
@@ -97,6 +101,8 @@ public class CasePanel
 
     private CaseStatusViewer                statusViewer;
     
+    private boolean                         statusVisible = true;
+
     
     @Override
     public boolean init( IPanelSite site, IAppContext context ) {
@@ -129,7 +135,8 @@ public class CasePanel
 
     @Override
     public void createContents( Composite panelBody ) {
-        getSite().setTitle( "Vorgang: " + mcase.get() != null ? mcase.get().getName() : "" );
+        String title = Joiner.on( "," ).join( mcase.get().getNatures() );
+        getSite().setTitle( title );
         this.tk = getSite().toolkit();
         int margins = getSite().getLayoutPreference( LAYOUT_MARGINS_KEY );
         int spacing = getSite().getLayoutPreference( LAYOUT_SPACING_KEY );
@@ -168,9 +175,9 @@ public class CasePanel
         }
 
         // status area
-        Composite statusSection = tk.createComposite( panelBody );
-        statusSection.setLayoutData( FormDataFactory.filled().bottom( -1 ).create() );
+        statusSection = tk.createComposite( panelBody );
         createStatusSection( statusSection );
+        setShowStatus( statusVisible );
 
         // toolbar
         toolbarSection = tk.createComposite( panelBody );
@@ -261,9 +268,9 @@ public class CasePanel
     
     
     protected void createStatusSection( Composite body ) {
-        FillLayout layout = new FillLayout();
-        body.setLayout( layout );
+        body.setLayout( new FillLayout() );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_STATUS_SECTION );
+        body.setVisible( statusVisible );
 
         statusViewer = new CaseStatusViewer( getSite() );
         for (CaseActionHolder holder: caseActions) {
@@ -278,6 +285,18 @@ public class CasePanel
     }
     
     
+    protected void setShowStatus( boolean show ) {
+        statusVisible = show;
+        if (statusSection != null && !statusSection.isDisposed()) {
+            statusSection.setVisible( statusVisible );
+            statusSection.setLayoutData( statusVisible
+                    ? FormDataFactory.filled().bottom( -1 ).create()
+                    : FormDataFactory.filled().bottom( -1 ).height( 0 ).create() );
+//            statusSection.getParent().layout( true );
+        }
+    }
+
+
     protected void createToolbarSection( Composite body ) {
         body.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         body.setData( WidgetUtil.CUSTOM_VARIANT, MosaicUiPlugin.CSS_TOOLBAR_SECTION );
@@ -351,11 +370,12 @@ public class CasePanel
         }
         Image btnIcon = holder.btn.getImage();
         int displayWidth = BatikApplication.sessionDisplay().getClientArea().width;
-        if ((displayWidth > 720 && action.getText() != null) || btnIcon == null) {
+        if ((displayWidth > 720 || btnIcon == null) && action.getText() != null) {
             holder.btn.setText( action.getText().toUpperCase() );
         }
     }
 
+    
     private void activateAction( CaseActionHolder holder ) {
         if (activeAction != null) {
             discardActiveAction();
@@ -411,7 +431,6 @@ public class CasePanel
         }
     }
     
-    
     /**
      * 
      */
@@ -423,7 +442,7 @@ public class CasePanel
         public Action               action;
         public Button               btn;
         protected boolean           submitEnabled = true;
-        protected boolean           showSubmitButton = true;        
+        protected boolean           showSubmitButton = true;
 
         protected CaseActionHolder( CaseActionExtension ext, ICaseAction caseAction ) {
             this.ext = ext;
@@ -468,7 +487,13 @@ public class CasePanel
         }
 
         @Override
-        public void setShowSubmitButton( boolean show ) {
+        public ICaseActionSite setShowStatus( boolean show ) {
+            CasePanel.this.setShowStatus( show );
+            return this;
+        }
+
+        @Override
+        public CaseActionSite setShowSubmitButton( boolean show ) {
             holder.showSubmitButton = show;
 //            if (submitBtn != null && !submitBtn.isDisposed()) {
 //                submitBtn.dispose();
@@ -476,12 +501,14 @@ public class CasePanel
 //                discardBtn.dispose();
 //                discardBtn = null;
 //            }
+            return this;
         }
 
         @Override
-        public void setSubmitEnabled( boolean enabled ) {
+        public CaseActionSite setSubmitEnabled( boolean enabled ) {
             holder.submitEnabled = enabled;
             holder.updateEnabled();
+            return this;
         }
 
         @Override
