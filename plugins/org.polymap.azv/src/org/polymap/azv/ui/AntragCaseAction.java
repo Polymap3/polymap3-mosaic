@@ -92,8 +92,8 @@ public abstract class AntragCaseAction
     
     @Override
     public void dispose() {
-        action = null;
         EventManager.instance().unsubscribe( this );
+        action = null;
     }
 
     
@@ -117,10 +117,10 @@ public abstract class AntragCaseAction
         File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Schachtschein" ); //$NON-NLS-1$
         for (File f : dir.listFiles()) {
             IMosaicDocument doc = repo.get().newDocument( mcase.get(), f.getName() );
-            OutputStream out = doc.getOutputStream();
-            FileInputStream in = new FileInputStream( f );
+            OutputStream out = null; 
+            FileInputStream in = null;
             try {
-                IOUtils.copy( in, out );
+                IOUtils.copy( in = new FileInputStream( f ), out = doc.getOutputStream() );
             }
             finally {
                 IOUtils.closeQuietly( out );

@@ -418,12 +418,12 @@ public class StartPanel
         Composite container = tk.createComposite( client, SWT.BORDER );
         container.setData( WidgetUtil.CUSTOM_VARIANT, DesktopToolkit.CSS_FORM  );
         container.setLayoutData( new ConstraintData( 
-                new MinWidthConstraint( 280, 1 ), new PriorityConstraint( layoutPrio-- ) ) );
+                new MinWidthConstraint( 300, 1 ), new PriorityConstraint( layoutPrio-- ) ) );
 //        container.setLayout( ColumnLayoutFactory.defaults().columns( 1, 1 ).spacing( 5 ).margins( 10 ).create() );
         container.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 10 ).create() );
         
         Label msg = tk.createLabel( container, tooltip, SWT.WRAP );
-        msg.setLayoutData( FormDataFactory.filled().clearBottom().height( 80 ).create() );
+        msg.setLayoutData( FormDataFactory.filled().clearBottom()/*.height( 50 )*/.create() );
 
         Button result = tk.createButton( container, title, SWT.PUSH );
         result.setLayoutData( FormDataFactory.filled().top( msg ).create() );

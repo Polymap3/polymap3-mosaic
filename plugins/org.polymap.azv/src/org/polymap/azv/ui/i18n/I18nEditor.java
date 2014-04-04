@@ -83,7 +83,7 @@ public class I18nEditor
 
     @Override
     public void dispose() {
-        OperationSupport.instance().addOperationSaveListener( this );
+        OperationSupport.instance().removeOperationSaveListener( this );
     }
 
 
