@@ -82,7 +82,7 @@ public abstract class AddressForm
             ILayer layer = ProjectRepository.instance().visit( Layers.finder( "adressen", "Adressen" ) ); //$NON-NLS-1$ //$NON-NLS-2$
             assert layer != null : i18n.get( "keineEbene" );
             search = new JSONObject();
-            // XXX Test only
+            // FIXME Test only
             search.put( FIELD_STREET, "Markt" ); //$NON-NLS-1$
             search.put( FIELD_NUMBER, "1" ); //$NON-NLS-1$
             search.put( FIELD_POSTALCODE, "01234" ); //$NON-NLS-1$
