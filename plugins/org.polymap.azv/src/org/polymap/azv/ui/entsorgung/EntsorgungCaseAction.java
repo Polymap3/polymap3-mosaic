@@ -176,7 +176,7 @@ public class EntsorgungCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        status.put( i18n.get( "vorgangStatusName" ), entsorgung.name.get(), 5 );
+//        status.put( i18n.get( "vorgangStatusName" ), entsorgung.name.get(), 5 );
 
         AzvRepository azvRepo = AzvRepository.instance();
         String listeId = entsorgung.liste.get();
@@ -380,9 +380,9 @@ public class EntsorgungCaseAction
                         Entsorgungsliste liste = AzvRepository.instance().findEntity( Entsorgungsliste.class, id );
                         caseStatus.put( i18n.get( "vorgangStatusTermin" ), liste.name().get() );
                     }
-                    else if (ev.getFieldName().equals( KEY_NAME )) {
-                        caseStatus.put( i18n.get( "vorgangStatusName" ), ev.getNewValue().toString() );
-                    }
+//                    else if (ev.getFieldName().equals( KEY_NAME )) {
+//                        caseStatus.put( i18n.get( "vorgangStatusName" ), ev.getNewValue().toString() );
+//                    }
                     else if (ev.getFieldName().equals( KEY_CITY )) {
                         city = ev.getNewValue();
                     }

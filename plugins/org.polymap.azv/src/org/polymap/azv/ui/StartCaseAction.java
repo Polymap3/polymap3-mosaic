@@ -193,7 +193,7 @@ public abstract class StartCaseAction
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
         status.put( i18n( "laufendeNr" ), StringUtils.right( mcase.get().getId(), 6 ) );
-        status.put( i18n( "ort" ), mcase.get().as( AdresseMixin.class ).adresse(), 1 );
+        //status.put( i18n( "ort" ), mcase.get().as( AdresseMixin.class ).adresse(), 1 );
     }
 
 

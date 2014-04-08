@@ -119,11 +119,11 @@ public class EreignisseCaseAction
         String title = Joiner.on( "," ).join( mcase.getNatures() );
 //        site.getPanelSite().setTitle( title );
         
-//        caseStatus.put( "Art", Joiner.on( "," ).join( mcase.getNatures() ), 101, Graphics.getColor( 0xDD, 0xE1, 0xE3 ) );
-        if (mcase.getName() != null && !mcase.getName().isEmpty()) {
-            caseStatus.put( "Bezeichnung", mcase.getName(), 100 );
-        }
         caseStatus.put( "Angelegt", df.format( mcase.getCreated() ), 99 );
+//        caseStatus.put( "Art", Joiner.on( "," ).join( mcase.getNatures() ), 101, Graphics.getColor( 0xDD, 0xE1, 0xE3 ) );
+//        if (mcase.getName() != null && !mcase.getName().isEmpty()) {
+//            caseStatus.put( "Bezeichnung", mcase.getName(), 100 );
+//        }
         
         // set status field only if mcase status has changed or status field is empty;
         // don't change if other party has set (before my event arrived)
