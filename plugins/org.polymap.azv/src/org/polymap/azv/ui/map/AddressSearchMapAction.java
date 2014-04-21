@@ -108,7 +108,7 @@ public class AddressSearchMapAction
         resultCountLbl = tk.createLabel( result, "" ); //$NON-NLS-1$
         resultCountLbl.moveAbove( searchTxt );
         resultCountLbl.setToolTipText( i18n.get( "keineTreffer" ) );
-        resultCountLbl.setLayoutData( FormDataFactory.filled().top( 0, 7 ).clearLeft().width( 25 ).create() );
+        resultCountLbl.setLayoutData( FormDataFactory.filled().top( 0, 7 ).clearLeft().width( 35 ).create() );
         resultCountLbl.setForeground( AzvPlugin.instance().discardColor.get() );
         resultCountLbl.setFont( JFaceResources.getFontRegistry().getBold( JFaceResources.DEFAULT_FONT ) ); 
         

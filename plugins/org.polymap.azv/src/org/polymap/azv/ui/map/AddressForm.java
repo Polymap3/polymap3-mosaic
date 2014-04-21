@@ -83,9 +83,9 @@ public abstract class AddressForm
             assert layer != null : i18n.get( "keineEbene" );
             search = new JSONObject();
             // FIXME Test only
-            search.put( FIELD_STREET, "Markt" ); //$NON-NLS-1$
-            search.put( FIELD_NUMBER, "1" ); //$NON-NLS-1$
-            search.put( FIELD_POSTALCODE, "01234" ); //$NON-NLS-1$
+            search.put( FIELD_STREET, "Vorsee" ); //$NON-NLS-1$
+            search.put( FIELD_CITY, "Ahlbeck" ); //$NON-NLS-1$
+            search.put( FIELD_POSTALCODE, "17375" ); //$NON-NLS-1$
         }
         catch (Exception e) {
             throw new RuntimeException( e );

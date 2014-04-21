@@ -222,6 +222,7 @@ public class AzvPlugin
                     addressWatcher.addTransformer( new Feature2JsonTransformer( layer ) );
                     addressWatcher.addTransformer( new ToStringTransformer() );
                     addressWatcher.addTransformer( new AddressFeatureTransformer() );
+                    addressWatcher.setCommitOnException( true );
                 } 
                 else {
                     log.warn( "Es existiert keine Ebene für Adressdaten! (Ebenenname: Adressen)" );
