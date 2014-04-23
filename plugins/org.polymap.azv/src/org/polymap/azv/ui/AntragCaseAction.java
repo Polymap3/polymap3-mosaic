@@ -116,7 +116,7 @@ public abstract class AntragCaseAction
         // dokumente
         File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Schachtschein" ); //$NON-NLS-1$
         for (File f : dir.listFiles()) {
-            IMosaicDocument doc = repo.get().newDocument( mcase.get(), f.getName() );
+            IMosaicDocument doc = repo.get().newDocument( mcase.get(), DokumenteCaseAction.OUTGOING_PREFIX + f.getName() );
             OutputStream out = null; 
             FileInputStream in = null;
             try {

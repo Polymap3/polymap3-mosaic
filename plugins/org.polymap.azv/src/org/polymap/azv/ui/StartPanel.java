@@ -230,7 +230,7 @@ public class StartPanel
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ); //$NON-NLS-1$
         casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
         casesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).width( 420 ).create() );
         casesViewer.getColumn( "created" ).sort( SWT.UP ); //$NON-NLS-1$
         
 //        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
@@ -275,18 +275,18 @@ public class StartPanel
     
     protected void createClosedCasesSection( Composite parent ) {
         // normal user -> propable just a few open cases
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).width( 420 ).create() );
 
         IPanelSection closedCasesSection = tk.createPanelSection( parent, i18n.get( "bearbeiteteVorgaengeTitle" ) );
         closedCasesSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH,
                 new PriorityConstraint( 100 ),
-                new NeighborhoodConstraint( casesSection.getControl(), Neighborhood.BOTTOM, 1 ) ); 
+                new NeighborhoodConstraint( casesSection.getControl(), Neighborhood.BOTTOM, 1 ) );
         closedCasesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) ); //$NON-NLS-1$
         final CasesTableViewer closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
         closedCasesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
-        closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).create() );
+        closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).width( 420 ).create() );
         closedCasesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( closedCasesViewer.getSelected() );

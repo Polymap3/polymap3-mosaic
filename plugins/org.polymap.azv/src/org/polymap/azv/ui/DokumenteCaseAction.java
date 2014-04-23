@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2013, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2013-2014, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -22,6 +22,7 @@ import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +48,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -58,6 +61,7 @@ import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
+import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
 import org.polymap.core.ui.FormDataFactory;
 import org.polymap.core.ui.FormLayoutFactory;
@@ -70,7 +74,9 @@ import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
+import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
@@ -84,7 +90,7 @@ import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 
 /**
- * Dokumente hochladen an Vorgang.
+ * Dokumente am Vorgang: "Beigebrachte" und "von GKU"
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
@@ -97,6 +103,9 @@ public class DokumenteCaseAction
     private static final IMessages      i18n = Messages.forPrefix( "Dokumente" ); //$NON-NLS-1$
     
     private static final FastDateFormat df = FastDateFormat.getInstance( i18n.get( "dateFormat" ) );
+    
+    /** Präfix für Namen der Dokumente "von GKU". */
+    public static final String          OUTGOING_PREFIX = "__";
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
@@ -106,11 +115,19 @@ public class DokumenteCaseAction
 
     private ICaseActionSite                 site;
 
-    private TableViewer                     viewer;
+    /** "Beigebrachte" Dokumente */
+    private TableViewer                     viewer1;
+
+    /** "Von GKU" Dokumente */
+    private TableViewer                     viewer2;
 
     private Display                         display;
 
-    private IPanelSection                   section;
+    /** Home of {@link #viewer} */
+    private IPanelSection                   section1;
+
+    /** Home of {@link #viewer} */
+    private IPanelSection                   section2;
 
     private Composite                       formContainer;
 
@@ -120,9 +137,19 @@ public class DokumenteCaseAction
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
-        return mcase.get() != null && repo.get() != null
+        if (mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )
-                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT ));
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT ))) {
+
+            // listen to changes of the mcase
+            EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
+                public boolean apply( PropertyChangeEvent input ) {
+                    return input.getSource() == mcase.get();
+                }
+            });
+            return true;
+        }
+        return false;
     }
 
 
@@ -164,6 +191,10 @@ public class DokumenteCaseAction
     @Override
     public void uploadStarted( String name, String contentType, InputStream in ) throws Exception {
         log.info( "received: " + name ); //$NON-NLS-1$
+        
+        final boolean isOutgoing = SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA );
+        name = isOutgoing ? OUTGOING_PREFIX + name : name;
+        
         IMosaicDocument doc = repo.get().newDocument( mcase.get(), name );
         OutputStream out = null;
         try {
@@ -188,17 +219,19 @@ public class DokumenteCaseAction
                     site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "successText" ) ) ); //$NON-NLS-1$
                     site.discard();
 
-                    // update viewer
+                    // update/create viewer
+                    TableViewer viewer = isOutgoing ? viewer2 : viewer1; 
                     if (viewer != null) {
                         viewer.refresh();
                     }
+                    else if (isOutgoing) {
+                        createViewer2();
+                    }
                     else {
-                        createViewer();
+                        createViewer1();
                     }
                 }
             });
-            
-            
         }
         catch (Exception e) {
             BatikApplication.handleError( i18n.get( "fehlerBeimHochladen" ), e );
@@ -212,15 +245,30 @@ public class DokumenteCaseAction
 
     @Override
     public void fillContentArea( Composite parent ) {
-        section = site.toolkit().createPanelSection( parent, i18n.get( "title" ) );
-        section.addConstraint( new PriorityConstraint( 5 ) );
-        section.getBody().setLayout( FormLayoutFactory.defaults().create() );
+        // "Beigebrachte"
+        section1 = site.toolkit().createPanelSection( parent, i18n.get( "title1" ) );
+        section1.addConstraint( new PriorityConstraint( 5 ) );
+        section1.getBody().setLayout( FormLayoutFactory.defaults().create() );
         
         if (Iterables.isEmpty( repo.get().documents( mcase.get() ) )) {
-            site.toolkit().createLabel( section.getBody(), i18n.get( "keinDokument" ) );
+            site.toolkit().createLabel( section1.getBody(), i18n.get( "keinDokument" ) );
         }
         else {
-            createViewer();
+            createViewer1();
+        }
+
+        // "von GKU"
+        section2 = site.toolkit().createPanelSection( parent, i18n.get( "title2" ) );
+        section2.addConstraint( 
+                new PriorityConstraint( 5 ), 
+                new NeighborhoodConstraint( section1, Neighborhood.BOTTOM, 100 ) );
+        section2.getBody().setLayout( FormLayoutFactory.defaults().create() );
+        
+        if (Iterables.isEmpty( repo.get().documents( mcase.get() ) )) {
+            site.toolkit().createLabel( section2.getBody(), i18n.get( "keinDokument" ) );
+        }
+        else {
+            createViewer2();
         }
         
 //        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
@@ -229,30 +277,44 @@ public class DokumenteCaseAction
 //            }
 //        });
     }
-    
-    
+
+
     @EventHandler(display=true,delay=500)
     protected void mcaseChanged( List<PropertyChangeEvent> evs ) {
-        if (viewer != null && !viewer.getControl().isDisposed()) {
-            viewer.setInput( mcase.get() );            
+        if (viewer1 != null && !viewer1.getControl().isDisposed()) {
+            viewer1.setInput( mcase.get() );            
+        }
+        if (viewer2 != null && !viewer2.getControl().isDisposed()) {
+            viewer2.setInput( mcase.get() );            
         }
     }
-    
-    
-    protected void createViewer() {
-        for (Control child : section.getBody().getChildren()) {
+
+
+    protected void createViewer1() {
+        viewer1 = createViewer( section1, new ViewerFilter() {
+            public boolean select( Viewer _viewer, Object _parentElm, Object _elm ) {
+                return !((IMosaicDocument)_elm).getName().startsWith( OUTGOING_PREFIX );
+            }
+        });
+    }
+
+
+    protected void createViewer2() {
+        viewer2 = createViewer( section2, new ViewerFilter() {
+            public boolean select( Viewer _viewer, Object _parentElm, Object _elm ) {
+                return ((IMosaicDocument)_elm).getName().startsWith( OUTGOING_PREFIX );
+            }
+        });
+    }
+
+
+    protected TableViewer createViewer( IPanelSection _section, ViewerFilter filter ) {
+        for (Control child : _section.getBody().getChildren()) {
             child.dispose();
         }
         
-        //
-        EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {
-            public boolean apply( PropertyChangeEvent input ) {
-                return input.getSource() == mcase.get();
-            }
-        });
-
         // viewer
-        viewer = new TableViewer( section.getBody(), SWT.NONE /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );
+        TableViewer viewer = new TableViewer( _section.getBody(), SWT.NONE /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
 
         viewer.getTable().setLinesVisible( true );
@@ -266,7 +328,7 @@ public class DokumenteCaseAction
         vcolumn.getColumn().setText( i18n.get( "columnName" ) );
         vcolumn.setLabelProvider( new ColumnLabelProvider() {
             public String getText( Object elm ) {
-                return ((IMosaicDocument)elm).getName();
+                return StringUtils.removeStart( ((IMosaicDocument)elm).getName(), OUTGOING_PREFIX );
             }
         });
         layout.addColumnData( new ColumnWeightData( 4, 120, true ) );            
@@ -293,6 +355,7 @@ public class DokumenteCaseAction
         });
         layout.addColumnData( new ColumnWeightData( 1, 90, true ) );            
 
+        viewer.addFilter( filter );
         viewer.setContentProvider( new ArrayContentProvider() {
             public Object[] getElements( Object input ) {
                 return Iterables.toArray( repo.get().documents( mcase.get() ), Object.class );
@@ -338,6 +401,7 @@ public class DokumenteCaseAction
 //        List<IMosaicDocument> documents = ImmutableList.copyOf( repo.documents( mcase.get() ) );
 //        viewer.setInput( model = new SetModel() );
 //        model.addAll( documents );
+        return viewer;
     }
     
 }

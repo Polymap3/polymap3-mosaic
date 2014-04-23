@@ -39,6 +39,7 @@ import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.app.BatikApplication;
 
 import org.polymap.azv.Messages;
+import org.polymap.azv.ui.DokumenteCaseAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicDocument;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -107,7 +108,7 @@ public class PdfMapAction
             int c = 1;
             IMosaicDocument doc = null;
             do { try {
-                    doc = repo.newDocument( mcase, name );
+                    doc = repo.newDocument( mcase, DokumenteCaseAction.OUTGOING_PREFIX + name );
                 } catch (Exception e) {
                     name = mcase.getName() + "-" + title + "-" + c++ + ".pdf"; 
                 }
