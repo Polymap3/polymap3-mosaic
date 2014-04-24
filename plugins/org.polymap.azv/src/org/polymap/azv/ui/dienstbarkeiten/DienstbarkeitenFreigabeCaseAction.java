@@ -12,9 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui.leitungsauskunft;
+package org.polymap.azv.ui.dienstbarkeiten;
 
-import static org.polymap.azv.AzvPlugin.CASE_LEITUNGSAUSKUNFT;
+import static org.polymap.azv.AzvPlugin.CASE_DIENSTBARKEITEN;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
 import static org.polymap.azv.AzvPlugin.ROLE_BL;
 
@@ -34,13 +34,13 @@ import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LeitungsauskunftFreigabeCaseAction
+public class DienstbarkeitenFreigabeCaseAction
         extends FreigabeCaseAction
         implements ICaseAction {
 
-    private static Log log = LogFactory.getLog( LeitungsauskunftFreigabeCaseAction.class );
+    private static Log log = LogFactory.getLog( DienstbarkeitenFreigabeCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftFreigabe" ); //$NON-NLS-1$
+    public static final IMessages       i18n = Messages.forPrefix( "DienstbarkeitenFreigabe" ); //$NON-NLS-1$
 
     
     @Override
@@ -48,7 +48,7 @@ public class LeitungsauskunftFreigabeCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && SecurityUtils.isUserInGroup( ROLE_BL )
-                && mcase.get().getNatures().contains( CASE_LEITUNGSAUSKUNFT )
+                && mcase.get().getNatures().contains( CASE_DIENSTBARKEITEN )
                 && EVENT_TYPE_ANFREIGABE.equals( AzvStatusMixin.ofCase( mcase.get() ))) {
             return true;
         }

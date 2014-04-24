@@ -212,6 +212,29 @@
             id="org.polymap.azv.caseAction2"
             name="An Bearbeitung">
       </caseAction>
+      <caseAction
+            class="org.polymap.azv.ui.dienstbarkeiten.DienstbarkeitenStartCaseAction"
+            description="Bezeichnung und Ort der Maßnahme eingeben/ändern"
+            icon="resources/icons/letters-filter.png"
+            id="org.polymap.azv.DienstbarkeitenStartCaseAction"
+            name="Maßnahme"
+            priority="-20">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.dienstbarkeiten.DienstbarkeitenAntragCaseAction"
+            id="org.polymap.azv.DienstbarkeitenAntragCaseAction"
+            name="Auskunft beantragen"
+            priority="10">
+      </caseAction>
+      <caseAction
+            caseStateChange="true"
+            class="org.polymap.azv.ui.dienstbarkeiten.DienstbarkeitenFreigabeCaseAction"
+            description="Nutzer per E-Mail informieren und Vorgang schließen"
+            id="org.polymap.azv.DienstbarkeitenFreigabeCaseAction"
+            name="Freigeben"
+            priority="10">
+      </caseAction>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

@@ -101,7 +101,8 @@ public class KarteCaseAction
         this.site = _site;
         return mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )
-                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT ));
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT )
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_DIENSTBARKEITEN ));
     }
 
 

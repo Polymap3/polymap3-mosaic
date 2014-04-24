@@ -1,6 +1,6 @@
 /* 
  * polymap.org
- * Copyright (C) 2013, Falko Bräutigam. All rights reserved.
+ * Copyright (C) 2013-2014, Falko Bräutigam. All rights reserved.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -12,21 +12,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui.leitungsauskunft;
-
-import static org.polymap.azv.AzvPlugin.CASE_LEITUNGSAUSKUNFT;
-import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
-import static org.polymap.azv.AzvPlugin.ROLE_BL;
+package org.polymap.azv.ui.dienstbarkeiten;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.polymap.core.runtime.IMessages;
-import org.polymap.core.security.SecurityUtils;
 
+import org.polymap.core.runtime.IMessages;
+import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.AzvStatusMixin;
-import org.polymap.azv.ui.FreigabeCaseAction;
-import org.polymap.mosaic.ui.casepanel.ICaseAction;
+import org.polymap.azv.ui.AntragCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 
 /**
@@ -34,31 +28,29 @@ import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class LeitungsauskunftFreigabeCaseAction
-        extends FreigabeCaseAction
-        implements ICaseAction {
+public class DienstbarkeitenAntragCaseAction
+        extends AntragCaseAction {
 
-    private static Log log = LogFactory.getLog( LeitungsauskunftFreigabeCaseAction.class );
+    private static Log log = LogFactory.getLog( DienstbarkeitenAntragCaseAction.class );
 
-    public static final IMessages       i18n = Messages.forPrefix( "LeitungsauskunftFreigabe" ); //$NON-NLS-1$
+    public static final IMessages               i18n = Messages.forPrefix( "DienstbarkeitenAntrag" ); //$NON-NLS-1$
 
     
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
-                && SecurityUtils.isUserInGroup( ROLE_BL )
-                && mcase.get().getNatures().contains( CASE_LEITUNGSAUSKUNFT )
-                && EVENT_TYPE_ANFREIGABE.equals( AzvStatusMixin.ofCase( mcase.get() ))) {
+                && mcase.get().getNatures().contains( AzvPlugin.CASE_DIENSTBARKEITEN )) {
+            super.init( _site );
             return true;
         }
         return false;
     }
 
-
+    
     @Override
     protected IMessages i18n() {
         return i18n;
     }
-    
+
 }

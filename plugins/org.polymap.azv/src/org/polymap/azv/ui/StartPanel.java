@@ -89,6 +89,7 @@ import org.polymap.rhei.um.ui.UserSettingsPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.ui.dienstbarkeiten.DienstbarkeitenCasesDecorator;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
 import org.polymap.azv.ui.hydranten.HydrantenPanel;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftCasesDecorator;
@@ -161,6 +162,7 @@ public class StartPanel
             casesViewerDecorators.add( context.propagate( new NutzerCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new SchachtscheinCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new LeitungsauskunftCasesDecorator() ) );
+            casesViewerDecorators.add( context.propagate( new DienstbarkeitenCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new EntsorgungCasesDecorator() ) );
             
             user.addListener( this, new EventFilter<PropertyAccessEvent>() {
@@ -403,10 +405,19 @@ public class StartPanel
         }));
         actionBtns.add( createActionButton( body, i18n.get( "dienstbarkeiten" ), i18n.get( "dienstbarkeitenTip" ),
                 BatikPlugin.instance().imageForName( "resources/icons/letters.png" ), //$NON-NLS-1$
-                null,  //AzvPlugin.ROLE_DIENSTBARKEITEN,
-                false, new Runnable() {
+                AzvPlugin.ROLE_DIENSTBARKEITEN,
+                true, new Runnable() {
                     public void run() {
-                        getSite().setStatus( new Status( IStatus.INFO, AzvPlugin.ID, "Noch keine Dienstbarkeiten verfügbar." ) ); //$NON-NLS-1$
+                        try {
+                            // create new case; commit/rollback inside CaseAction
+                            IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
+                            newCase.addNature( AzvPlugin.CASE_DIENSTBARKEITEN );
+                            mcase.set( newCase );
+                            getContext().openPanel( CasePanel.ID );
+                        }
+                        catch (Exception e) {
+                            BatikApplication.handleError( i18n.get( "dienstbarkeitenFehler" ), e );
+                        }
                     }
         }));
         actionBtns.add( createActionButton( body, i18n.get( "leitungsauskunft" ), i18n.get( "leitungsauskunftTip" ),

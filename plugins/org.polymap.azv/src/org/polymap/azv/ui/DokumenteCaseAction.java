@@ -139,7 +139,8 @@ public class DokumenteCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_SCHACHTSCHEIN )
-                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT ))) {
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_LEITUNGSAUSKUNFT )
+                 || mcase.get().getNatures().contains( AzvPlugin.CASE_DIENSTBARKEITEN ))) {
 
             // listen to changes of the mcase
             EventManager.instance().subscribe( this, new EventFilter<PropertyChangeEvent>() {

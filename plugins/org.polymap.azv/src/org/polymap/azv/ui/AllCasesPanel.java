@@ -61,6 +61,7 @@ import org.polymap.rhei.um.ui.LoginPanel;
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.ui.dienstbarkeiten.DienstbarkeitenCasesDecorator;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftCasesDecorator;
 import org.polymap.azv.ui.nutzerregistrierung.NutzerCasesDecorator;
@@ -122,6 +123,7 @@ public class AllCasesPanel
             casesViewerDecorators.add( context.propagate( new SchachtscheinCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new LeitungsauskunftCasesDecorator() ) );
             casesViewerDecorators.add( context.propagate( new EntsorgungCasesDecorator() ) );
+            casesViewerDecorators.add( context.propagate( new DienstbarkeitenCasesDecorator() ) );
             return true;
         }
         return false;
