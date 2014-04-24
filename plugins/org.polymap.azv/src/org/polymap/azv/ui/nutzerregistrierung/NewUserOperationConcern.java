@@ -17,6 +17,8 @@ package org.polymap.azv.ui.nutzerregistrierung;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Joiner;
+
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IAdaptable;
@@ -67,6 +69,9 @@ public class NewUserOperationConcern
                                 "Ein neuer Nutzer wurde angelegt. Authentizität und Rechte müssen bestätigt werden." );
                         newCase.addNature( AzvPlugin.CASE_NUTZER );
                         newCase.as( NutzerMixin.class ).username.set( user.username().get() );
+                        
+                        String roles = Joiner.on( ',' ).join( UserPermissionsSection.instance().getRoles() );
+                        newCase.put( "roles", roles );
                         repo.commitChanges();
                         
 //                        MosaicRemoteServer mosaic = MosaicRemoteServer.instance();

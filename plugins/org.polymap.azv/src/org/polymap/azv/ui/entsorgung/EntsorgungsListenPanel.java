@@ -167,7 +167,7 @@ public class EntsorgungsListenPanel
         super.dispose();
         mcase.set( null );
         if (panelListener != null) {
-            getContext().removeEventHandler( panelListener );
+            getContext().removeListener( panelListener );
             panelListener = null;
         }
     }
@@ -226,7 +226,7 @@ public class EntsorgungsListenPanel
                     }
                 }
             };
-            getContext().addEventHandler( panelListener, new EventFilter<PanelChangeEvent>() {
+            getContext().addListener( panelListener, new EventFilter<PanelChangeEvent>() {
                 public boolean apply( PanelChangeEvent input ) {
                     return input.getSource() == EntsorgungsListenPanel.this
                             && input.getType() == PanelChangeEvent.TYPE.ACTIVATING;

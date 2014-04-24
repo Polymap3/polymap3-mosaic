@@ -35,9 +35,9 @@ import org.apache.commons.mail.Email;
 import org.apache.commons.mail.SimpleEmail;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -193,30 +193,39 @@ public class NutzerFreigabeCaseAction
         Composite welcome = site.toolkit().createComposite( parent );
         welcome.setLayoutData( new ConstraintData( AzvPlugin.MIN_COLUMN_WIDTH, new PriorityConstraint( 100 ) ) );
         site.toolkit().createFlowText( welcome, i18n.get( "welcomeTxt", UsersTablePanel.ID ) ); //$NON-NLS-1$
-        
-        // left section
-        Composite left = site.toolkit().createComposite( parent, SWT.BORDER );
-        left.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).columns( 1, 1 ).create() );
-        Set<String> groups = new HashSet( um.groupsOf( user ) );
 
-        List<String> roles = Lists.newArrayList( 
+        // beantragte Rechte im user initialisieren
+        String requestedRoles = mcase.get().get( "roles" );
+        if (requestedRoles != null) {
+            for (String role : Splitter.on( ',' ).split( requestedRoles ) ) {
+                um.asignGroup( user, role );
+            }
+        }
+        Set<String> roles = new HashSet( um.groupsOf( user ) );
+        
+        // MA, BL Rechte
+        Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
+        right.setLayoutData( new ConstraintData( new PriorityConstraint( 10 ) ) );
+        right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).create() );
+        
+        List<String> allRoles = Lists.newArrayList( ROLE_MA, ROLE_BL );
+        for (final String role : allRoles) {
+            createBtn( right, role ).setSelection( roles.contains( role ) );
+        }
+
+        // normale Rechte
+        Composite left = site.toolkit().createComposite( parent, SWT.BORDER );
+        left.setLayoutData( new ConstraintData( new NeighborhoodConstraint( right, Neighborhood.BOTTOM, 10 ) ) );
+        left.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).columns( 1, 1 ).create() );
+
+        allRoles = Lists.newArrayList( 
                 ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN,
                 ROLE_ENTSORGUNG, ROLE_HYDRANTEN );
-        for (final String role : roles) {
-            createBtn( left, role ).setSelection( groups.contains( role ) );
+        for (final String role : allRoles) {
+            createBtn( left, role ).setSelection( roles.contains( role ) );
         }
         
         site.createSubmit( left, i18n.get( "ok" ) );
-
-        // right section
-        Composite right = site.toolkit().createComposite( parent, SWT.BORDER );
-        right.setLayoutData( new ConstraintData( new PriorityConstraint( 10 ), new NeighborhoodConstraint( left, Neighborhood.TOP, 10 ) ) );
-        right.setLayout( ColumnLayoutFactory.defaults().margins( 20, 10 ).spacing( 5 ).create() );
-        
-        roles = Lists.newArrayList( ROLE_MA, ROLE_BL );
-        for (final String role : roles) {
-            createBtn( left, role ).setSelection( groups.contains( role ) );
-        }
     }
 
     

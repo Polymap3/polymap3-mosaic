@@ -181,7 +181,6 @@ public class UsersTablePanel
         if (umuser == null) {
             return;
         }
-
         final PersonForm personForm = new PersonForm( getSite(), umuser );
         personForm.createContents( formArea );
 

@@ -18,6 +18,7 @@ import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.opengis.filter.Filter;
@@ -53,7 +54,6 @@ import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
 import org.polymap.core.data.ui.featuretable.FeatureTableSearchField;
 import org.polymap.core.model.Entity;
 import org.polymap.core.runtime.IMessages;
-import org.polymap.core.runtime.entity.IEntityStateListener;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -69,6 +69,7 @@ import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
+import org.polymap.rhei.batik.PanelChangeEvent;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
 import org.polymap.rhei.batik.app.BatikApplication;
@@ -83,6 +84,7 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
 import org.polymap.rhei.um.ui.LoginPanel;
+import org.polymap.rhei.um.ui.RegisterPanel;
 import org.polymap.rhei.um.ui.UserSettingsPanel;
 
 import org.polymap.azv.AzvPlugin;
@@ -92,6 +94,7 @@ import org.polymap.azv.ui.hydranten.HydrantenPanel;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftCasesDecorator;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftPanel;
 import org.polymap.azv.ui.nutzerregistrierung.NutzerCasesDecorator;
+import org.polymap.azv.ui.nutzerregistrierung.UserPermissionsSection;
 import org.polymap.azv.ui.schachtschein.SchachtscheinCasesDecorator;
 import org.polymap.azv.ui.wasserquali.WasserQualiPanel;
 import org.polymap.mosaic.server.model.IMosaicCase;
@@ -142,7 +145,7 @@ public class StartPanel
     
     private List<ICasesViewerDecorator>     casesViewerDecorators = new ArrayList();
     
-    private IEntityStateListener            casesListener;
+    private Object                          panelListener;
 
 
     @Override
@@ -163,6 +166,28 @@ public class StartPanel
             user.addListener( this, new EventFilter<PropertyAccessEvent>() {
                 public boolean apply( PropertyAccessEvent input ) {
                     return input.getType() == PropertyAccessEvent.TYPE.SET;
+                }
+            });
+            
+            
+            // RegisterPanel erweitern für Beantragte Rechte
+            context.addListener( panelListener = new Object() {
+                @EventHandler(display=true)
+                public void panelChanged( PanelChangeEvent ev ) {
+                    if (ev.getSource() instanceof RegisterPanel && ev.getType() == PanelChangeEvent.TYPE.ACTIVATED) {
+                        log.info( "PANEL changed: " + ev );
+                        RegisterPanel panel = ev.getPanel();
+                        Composite parent = panel.getPanelContainer();
+                        
+                        IPanelSection section = panel.getSite().toolkit().createPanelSection( parent, "Beantragte Rechte" );
+                        section.addConstraint( new PriorityConstraint( 5 ), AzvPlugin.MIN_COLUMN_WIDTH,
+                                new NeighborhoodConstraint( panel.getPersonSection(), Neighborhood.TOP, 100 ) );
+                        new UserPermissionsSection( getSite(), Collections.EMPTY_SET ).createContent( section.getBody() );
+                        
+                        panel.getPersonSection().setTitle( "Angaben zur Person/Firma" );
+                        
+                        panel.getSite().layout( true );
+                    }
                 }
             });
             return true;
@@ -274,8 +299,9 @@ public class StartPanel
 
     
     protected void createClosedCasesSection( Composite parent ) {
-        // normal user -> propable just a few open cases
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).width( 420 ).create() );
+        int displayHeight = BatikApplication.sessionDisplay().getBounds().height;
+        int tableHeight = (displayHeight - (3*65) - (2*75)) / 2;  // margins, titles+icons
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( tableHeight ).width( 420 ).create() );
 
         IPanelSection closedCasesSection = tk.createPanelSection( parent, i18n.get( "bearbeiteteVorgaengeTitle" ) );
         closedCasesSection.addConstraint( AzvPlugin.MIN_COLUMN_WIDTH,
@@ -286,7 +312,7 @@ public class StartPanel
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) ); //$NON-NLS-1$
         final CasesTableViewer closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
         closedCasesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
-        closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 180 ).width( 420 ).create() );
+        closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( tableHeight ).width( 420 ).create() );
         closedCasesViewer.addDoubleClickListener( new IDoubleClickListener() {
             public void doubleClick( DoubleClickEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( closedCasesViewer.getSelected() );
@@ -423,8 +449,11 @@ public class StartPanel
         container.setLayout( FormLayoutFactory.defaults().spacing( 5 ).margins( 10 ).create() );
         
         Label msg = tk.createLabel( container, tooltip, SWT.WRAP );
-        msg.setLayoutData( FormDataFactory.filled().clearBottom()/*.height( 50 )*/.create() );
-
+        int displayWidth = BatikApplication.sessionDisplay().getBounds().width;
+        FormDataFactory.filled().clearBottom()
+                // Texte brauchen 3 Zeilen wenn 2 Spalten oder Display zu schmal
+                .height( displayWidth < 1100 || displayWidth > 1300 ? 50 : 35 ).applyTo( msg );
+        
         Button result = tk.createButton( container, title, SWT.PUSH );
         result.setLayoutData( FormDataFactory.filled().top( msg ).create() );
         result.setImage( image );
