@@ -74,7 +74,7 @@ public class AnFreigabeCaseAction
             Set<String> natures = mcase.get().getNatures();
             String azvStatus = mcase.get().as( AzvStatusMixin.class ).azvStatus();
             if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
-                    && (natures.contains( CASE_LEITUNGSAUSKUNFT ) || natures.contains( CASE_SCHACHTSCHEIN ))
+                    && natures.contains( CASE_SCHACHTSCHEIN )
                     && (EVENT_TYPE_BEANTRAGT.equals( azvStatus ) || EVENT_TYPE_ANBEARBEITUNG.equals( azvStatus ))) {
                 return true;
             }

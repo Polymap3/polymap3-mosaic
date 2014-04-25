@@ -15,7 +15,6 @@
 package org.polymap.azv.ui.leitungsauskunft;
 
 import static org.polymap.azv.AzvPlugin.CASE_LEITUNGSAUSKUNFT;
-import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
 import static org.polymap.azv.AzvPlugin.ROLE_BL;
 
 import org.apache.commons.logging.Log;
@@ -24,7 +23,6 @@ import org.polymap.core.runtime.IMessages;
 import org.polymap.core.security.SecurityUtils;
 
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.AzvStatusMixin;
 import org.polymap.azv.ui.FreigabeCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
@@ -49,7 +47,8 @@ public class LeitungsauskunftFreigabeCaseAction
         if (mcase.get() != null && repo.get() != null
                 && SecurityUtils.isUserInGroup( ROLE_BL )
                 && mcase.get().getNatures().contains( CASE_LEITUNGSAUSKUNFT )
-                && EVENT_TYPE_ANFREIGABE.equals( AzvStatusMixin.ofCase( mcase.get() ))) {
+                //&& EVENT_TYPE_ANFREIGABE.equals( AzvStatusMixin.ofCase( mcase.get() ))
+                ) {
             return true;
         }
         return false;
