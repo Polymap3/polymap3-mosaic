@@ -24,7 +24,7 @@ import org.polymap.core.runtime.IMessages;
 import org.polymap.core.security.SecurityUtils;
 
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.AzvStatusMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.azv.ui.FreigabeCaseAction;
 import org.polymap.mosaic.ui.casepanel.ICaseActionSite;
 
@@ -46,7 +46,7 @@ public class SchachtscheinFreigabeCaseAction
         if (mcase.get() != null && repo.get() != null
                 && SecurityUtils.isUserInGroup( ROLE_BL )
                 && mcase.get().getNatures().contains( CASE_SCHACHTSCHEIN )
-                && EVENT_TYPE_ANFREIGABE.equals( AzvStatusMixin.ofCase( mcase.get() ))) {
+                && EVENT_TYPE_ANFREIGABE.equals( AzvVorgang.azvStatusOf( mcase.get() ))) {
             super.init( _site );
             return true;
         }

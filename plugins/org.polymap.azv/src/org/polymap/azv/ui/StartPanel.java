@@ -257,9 +257,13 @@ public class StartPanel
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ); //$NON-NLS-1$
         casesViewer = new CasesTableViewer( casesSection.getBody(), repo.get(), filter, SWT.NONE );
         casesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( 400 ).width( 420 ).create() );
         casesViewer.getColumn( "created" ).sort( SWT.UP ); //$NON-NLS-1$
-        
+
+        // table layout
+        int displayHeight = BatikApplication.sessionDisplay().getBounds().height;
+        int tableHeight = (displayHeight - (2*65) - (2*75));  // margins, titles+icons
+        FormDataFactory.filled().top( -1 ).height( tableHeight ).width( 420 ).applyTo( casesViewer.getTable() );
+
 //        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
 //            public void doubleClick( DoubleClickEvent ev ) {
 //                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );

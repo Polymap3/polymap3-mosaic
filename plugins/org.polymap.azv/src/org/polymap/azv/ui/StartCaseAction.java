@@ -79,7 +79,7 @@ import org.polymap.rhei.um.ui.PlzValidator;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.model.AdresseMixin;
-import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.azv.model.OrtMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
 import org.polymap.azv.ui.map.AddressValidator;
@@ -142,7 +142,7 @@ public abstract class StartCaseAction
                 && mcase.get().getName().length() == 0) {
 
             // Adresse vom Nutzer eintragen
-            User user = mcase.get().as( NutzerMixin.class ).setSessionUser();
+            User user = mcase.get().as( AzvVorgang.class ).setSessionUser();
             AdresseMixin address = mcase.get().as( AdresseMixin.class );
             address.setAdresseVonNutzer( user );
 
@@ -200,9 +200,9 @@ public abstract class StartCaseAction
     @Override
     public void createContents( Composite parent ) {
         // noch kein Nutzer am Vorgang -> Nutzer/Adresse vom user eintragen
-        NutzerMixin nutzer = mcase.get().as( NutzerMixin.class );
-        if (nutzer.user() == null) {
-            nutzer.setSessionUser();
+        AzvVorgang vorgang = mcase.get().as( AzvVorgang.class );
+        if (vorgang.user() == null) {
+            vorgang.setSessionUser();
         }
 
         site.toolkit().createFlowText( parent /*welcome.getBody()*/, i18n( "welcomeTxt" ) ) //$NON-NLS-1$

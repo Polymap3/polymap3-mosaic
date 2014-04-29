@@ -24,6 +24,7 @@ import org.geotools.data.FeatureSource;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.type.AttributeDescriptorImpl;
 import org.geotools.feature.type.AttributeTypeImpl;
+import org.opengis.feature.Feature;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
@@ -138,6 +139,11 @@ public class CasesTableViewer
 
     public IMosaicCase entity( String fid ) {
         return repo.entity( MosaicCase2.class, fid );    
+    }
+    
+    
+    public IMosaicCase entity( Feature entityState ) {
+        return repo.entityForState( MosaicCase2.class, entityState );    
     }
     
     

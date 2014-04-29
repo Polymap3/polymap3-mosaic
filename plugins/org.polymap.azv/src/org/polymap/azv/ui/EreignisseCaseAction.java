@@ -34,7 +34,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
-import org.polymap.azv.model.AzvStatusMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -137,7 +137,7 @@ public class EreignisseCaseAction
 //                caseStatus.put( "Status", "Anlegen", -1, AzvPlugin.instance().openColor.get() );
 //            }
             
-            String azvStatus = AzvStatusMixin.ofCase( mcase );
+            String azvStatus = AzvVorgang.azvStatusOf( mcase );
             String statusTitle = null;
             Color statusColor = null;
             

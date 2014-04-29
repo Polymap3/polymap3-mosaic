@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.apache.commons.vfs2.FileObject;
 
 import com.google.common.base.Supplier;
 
@@ -75,6 +76,8 @@ import org.polymap.rhei.fulltext.update.LayerModificationWatcher;
 import org.polymap.rhei.fulltext.update.UpdateableFullTextIndex;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.email.EmailService;
+
+import org.polymap.mosaic.server.model2.MosaicRepository2;
 
 /**
  *
@@ -192,6 +195,7 @@ public class AzvPlugin
 //        saveMessages( new File( "/tmp/org.polymap.azv.messages_de.properties" ) );
         
 //        mosaicRepo = MosaicRepository2.instance();
+        MosaicRepository2.setDocumentNameMapper( new DocumentNameMapper() );
         
         // addressIndex
         addressSession = new SessionHolder( "Adressen" );
@@ -262,18 +266,6 @@ public class AzvPlugin
     }
 
 
-    public static void sendEmail( User user, IMessages i18n ) throws EmailException {
-        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
-        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-        Email email = new SimpleEmail();
-        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
-        email.addTo( user.email().get() )
-                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
-                .setMsg( i18n.get( "email", header ) ); //$NON-NLS-1$
-        EmailService.instance().send( email );
-    }
-
-
     public Image imageForName( String resName ) {
         ImageRegistry images = getImageRegistry();
         Image image = images.get( resName );
@@ -303,4 +295,21 @@ public class AzvPlugin
         }
     }
 
+
+    public static void sendEmail( User user, IMessages i18n ) throws EmailException {
+        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+        Email email = new SimpleEmail();
+        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
+        email.addTo( user.email().get() )
+                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+                .setMsg( i18n.get( "email", header ) ); //$NON-NLS-1$
+        EmailService.instance().send( email );
+    }
+
+    
+    public static FileObject docsRoot() {
+        return MosaicRepository2.documentsRoot;
+    }
+    
 }

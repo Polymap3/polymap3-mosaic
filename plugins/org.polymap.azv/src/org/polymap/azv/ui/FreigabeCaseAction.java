@@ -28,7 +28,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.um.User;
 import org.polymap.azv.AzvPlugin;
-import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -75,7 +75,7 @@ public abstract class FreigabeCaseAction
         mosaic.closeCase( mcase.get(), EVENT_TYPE_FREIGABE, i18n().get( "freigegeben" ) );
         mosaic.commitChanges();
         
-        User user = mcase.get().as( NutzerMixin.class ).user();
+        User user = mcase.get().as( AzvVorgang.class ).user();
         AzvPlugin.sendEmail( user, i18n() );
                 
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n().get( "okTxt" ) ) ); //$NON-NLS-1$

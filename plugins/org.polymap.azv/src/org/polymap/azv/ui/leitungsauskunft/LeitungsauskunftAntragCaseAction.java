@@ -49,6 +49,12 @@ public class LeitungsauskunftAntragCaseAction
 
     
     @Override
+    protected String docsTemplateDir() {
+        return "Vorlagen/Leitungsauskunft";
+    }
+
+
+    @Override
     protected IMessages i18n() {
         return i18n;
     }

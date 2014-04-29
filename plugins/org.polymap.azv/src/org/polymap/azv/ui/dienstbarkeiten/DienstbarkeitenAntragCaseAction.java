@@ -49,6 +49,12 @@ public class DienstbarkeitenAntragCaseAction
 
     
     @Override
+    protected String docsTemplateDir() {
+        return "Vorlagen/Dienstbarkeiten";
+    }
+
+
+    @Override
     protected IMessages i18n() {
         return i18n;
     }

@@ -60,7 +60,7 @@ import org.polymap.rhei.um.ui.LoginPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.azv.ui.dienstbarkeiten.DienstbarkeitenCasesDecorator;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
 import org.polymap.azv.ui.leitungsauskunft.LeitungsauskunftCasesDecorator;
@@ -207,8 +207,8 @@ public class AllCasesPanel
                 @Override
                 public String getText( Object elm ) {
                     IMosaicCase mc = viewer.entity( ((IFeatureTableElement)elm).fid() );
-                    String username = mc.get( NutzerMixin.KEY_USER );
-                    //String username = mc.as( NutzerMixin.class ).username.get();
+                    String username = mc.get( AzvVorgang.KEY_USER );
+                    //String username = mc.as( AzvVorgang.class ).username.get();
                     return defaultString( username, "-" );
                 }
             });

@@ -34,7 +34,7 @@ import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
 import org.polymap.core.runtime.IMessages;
 
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.AzvStatusMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicCase2;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -73,7 +73,7 @@ public class AzvStatusCaseTableColumn
                 String fid = ((IFeatureTableElement)elm).fid();
                 mcase = repo.entity( MosaicCase2.class, fid );
                 
-                azvStatus = AzvStatusMixin.ofCase( mcase );
+                azvStatus = AzvVorgang.azvStatusOf( mcase );
                 if (azvStatus == null) {
                     return i18n.get( "neu" );                    
                 }

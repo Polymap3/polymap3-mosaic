@@ -30,8 +30,7 @@ import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
-import org.polymap.azv.model.AzvStatusMixin;
-import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -65,7 +64,7 @@ public class MitarbeiterCasesDecorator
                     return true;
                 }
                 // Mitarbeiter: beantragt 
-                String azvStatus = AzvStatusMixin.ofCase( mcase );
+                String azvStatus = AzvVorgang.azvStatusOf( mcase );
                 if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) 
                         && (EVENT_TYPE_BEANTRAGT.equals( azvStatus ) 
                         || EVENT_TYPE_ANBEARBEITUNG.equals( azvStatus ))) {
@@ -78,7 +77,7 @@ public class MitarbeiterCasesDecorator
                 }
                 // Kunde: meine Vorgänge
                 else {
-                    String caseuser = mcase.get( NutzerMixin.KEY_USER );
+                    String caseuser = mcase.get( AzvVorgang.KEY_USER );
                     return caseuser != null && caseuser.equals( username );
                 }
             }

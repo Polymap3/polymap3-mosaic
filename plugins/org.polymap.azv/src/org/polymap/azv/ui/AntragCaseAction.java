@@ -15,13 +15,13 @@
 package org.polymap.azv.ui;
 
 import java.beans.PropertyChangeEvent;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.vfs2.FileObject;
 
 import org.eclipse.jface.action.IAction;
 
@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.runtime.IMessages;
-import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
@@ -40,7 +39,7 @@ import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.um.User;
 
 import org.polymap.azv.AzvPlugin;
-import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.azv.model.OrtMixin;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicDocument;
@@ -76,6 +75,9 @@ public abstract class AntragCaseAction
     protected abstract IMessages i18n();
     
 
+    protected abstract String docsTemplateDir();
+
+    
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
@@ -114,13 +116,15 @@ public abstract class AntragCaseAction
     @Override
     public void submit() throws Exception {
         // dokumente
-        File dir = new File( Polymap.getWorkspacePath().toFile(), "Dokumente/Schachtschein" ); //$NON-NLS-1$
-        for (File f : dir.listFiles()) {
-            IMosaicDocument doc = repo.get().newDocument( mcase.get(), DokumenteCaseAction.OUTGOING_PREFIX + f.getName() );
+//        File dir = new File( Polymap.getWorkspacePath().toFile(), __"Dokumente/Schachtschein" ); //$NON-NLS-1$
+        FileObject dir = AzvPlugin.docsRoot().resolveFile( docsTemplateDir() );
+        dir.createFolder();
+        for (FileObject f : dir.getChildren()) {
+            IMosaicDocument doc = repo.get().newDocument( mcase.get(), DokumenteCaseAction.OUTGOING_PREFIX + f.getName().getBaseName() );
             OutputStream out = null; 
-            FileInputStream in = null;
+            InputStream in = null;
             try {
-                IOUtils.copy( in = new FileInputStream( f ), out = doc.getOutputStream() );
+                IOUtils.copy( in = f.getContent().getInputStream(), out = doc.getOutputStream() );
             }
             finally {
                 IOUtils.closeQuietly( out );
@@ -132,7 +136,7 @@ public abstract class AntragCaseAction
         repo.get().commitChanges();
 
         // email
-        User user = mcase.get().as( NutzerMixin.class ).user();        
+        User user = mcase.get().as( AzvVorgang.class ).user();        
         AzvPlugin.sendEmail( user, i18n() );
 
         // status

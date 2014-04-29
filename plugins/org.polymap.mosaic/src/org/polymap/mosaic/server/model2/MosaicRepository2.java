@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
-
 import com.google.common.collect.Iterables;
 
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -54,6 +53,7 @@ import org.polymap.core.runtime.SessionSingleton;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.runtime.recordstore.lucene.LuceneRecordStore;
 
+import org.polymap.mosaic.server.document.IDocumentNameMapper;
 import org.polymap.mosaic.server.document.SimpleFilesystemMapper;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
@@ -72,10 +72,12 @@ public class MosaicRepository2
     
     public static final String              NAMESPACE = "http://polymap.org/mosaic";
 
+    public static final String              PROP_ROOT_URI = "org.polymap.mosaic.docsRootURI";
+    
     public static final FilterFactory2      ff = CommonFactoryFinder.getFilterFactory2( null );
 
     private static final Object             initlock = new Object();
-    
+
     /** The backend store for features of data and metadata. */
     private static LuceneRecordStore        lucenestore;
 
@@ -91,11 +93,11 @@ public class MosaicRepository2
      */
     private static Map<UnitOfWork,MosaicRepository2> sessions = new ConcurrentReferenceHashMap( 32, ReferenceType.WEAK, ReferenceType.WEAK );
 
-    private static StandardFileSystemManager    fsManager;
+    public static StandardFileSystemManager fsManager;
     
-    private static FileObject               documentsRoot;
+    public static FileObject                documentsRoot;
 
-    private static SimpleFilesystemMapper   documentsNameMapper;
+    private static IDocumentNameMapper      documentNameMapper = new SimpleFilesystemMapper();
 
 //    /** {@link IService} based on the local {@link #datastore}. */
 //    private static RServiceImpl         service;
@@ -110,6 +112,11 @@ public class MosaicRepository2
     }
     
     
+    public static void setDocumentNameMapper( IDocumentNameMapper mapper ) {
+        documentNameMapper = mapper;    
+    }
+    
+    
     /**
      * Initialize global, underlying store and EntityRepository.
      */
@@ -120,12 +127,14 @@ public class MosaicRepository2
                 File luceneDir = new File( dataDir, "org.polymap.mosaic.data" );
                 luceneDir.mkdir();
                 lucenestore = new LuceneRecordStore( luceneDir, clean );
+                // optimize index: merge and expunge deleted docs
+                lucenestore.prepareUpdate().apply( true );
             }
             else {
                 lucenestore = new LuceneRecordStore();
             }
-            // Cache<Object,Document> documentCache = CacheConfig.DEFAULT.initSize( 10000 ).create();
-            // store.setDocumentCache( documentCache );
+//            Cache<Object,Document> documentCache = CacheConfig.DEFAULT.initSize( 10000 ).createCache();
+//            lucenestore.setDocumentCache( documentCache );
 
             // Feature DataStore
             datastore = new RDataStore( lucenestore, new LuceneQueryDialect() );
@@ -138,21 +147,21 @@ public class MosaicRepository2
                     .create();
             
             // Documents store
-            fsManager = new StandardFileSystemManager();
             URL config = MosaicRepository2.class.getResource( "vfs_config.xml" );
+            fsManager = new StandardFileSystemManager();
             fsManager.setConfiguration( config );
             fsManager.init();
 
-            String rootUri = dataDir != null
-                    ? "file://" + dataDir.getAbsolutePath() + "/org.polymap.mosaic.documents"
-                    : "file:///tmp/org.polymap.mosaic.documents";
-//            rootUri = System.getProperty( PROP_ROOT_URI );
-//            if (rootUri == null) {
-//                throw new IllegalStateException( "System property is missing: " + PROP_ROOT_URI + " (allows to set the WebDAV URL of the remote server, i.e. webdav://admin:login@localhost:10080/webdav/Mosaic)" );
-//            }
+            String rootUri = System.getProperty( PROP_ROOT_URI );
+            if (rootUri == null) {
+                log.warn( "System property is missing: " + PROP_ROOT_URI + " (allows to set the WebDAV URL of the remote server, i.e. webdav://admin:login@localhost:10080/webdav/Mosaic)" );
+                rootUri = dataDir != null
+                        ? "file://" + dataDir.getAbsolutePath() + "/org.polymap.mosaic.documents"
+                        : "file:///tmp/org.polymap.mosaic.documents";
+            }
+            log.info( "Mosaic: document root: " + rootUri );
             documentsRoot = fsManager.resolveFile( rootUri );
             documentsRoot.createFolder();
-            documentsNameMapper = new SimpleFilesystemMapper();
 //            for (FileObject child : documentsRoot.getChildren()) {
 //                log.info( "DOCUMENTS: " + child );
 //            }
@@ -429,7 +438,7 @@ public class MosaicRepository2
 
     public IMosaicDocument newDocument( IMosaicCase mcase, String name ) {
         try {
-            String path = documentsNameMapper.documentPath( mcase, name );
+            String path = documentNameMapper.documentPath( mcase, name );
             FileObject file = documentsRoot.resolveFile( path );
             if (file.exists()) {
                 throw new IllegalArgumentException( "Dokument existiert bereits: " + path );
@@ -451,7 +460,7 @@ public class MosaicRepository2
     
     public Iterable<IMosaicDocument> documents( IMosaicCase mcase ) {
         try {
-            String path = documentsNameMapper.documentPath( mcase, null );
+            String path = documentNameMapper.documentPath( mcase, null );
             FileObject dir = documentsRoot.resolveFile( path );
             dir.createFolder();
             return Iterables.transform( Arrays.asList( dir.getChildren() ), MosaicDocument.toDocument );

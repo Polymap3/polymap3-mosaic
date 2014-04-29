@@ -14,20 +14,22 @@
  */
 package org.polymap.mosaic.server.model2;
 
+import static org.polymap.mosaic.server.model2.MosaicRepository2.ff;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-
 import java.beans.PropertyChangeEvent;
 
 import javax.annotation.Nullable;
 
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.Point;
@@ -42,6 +44,8 @@ import org.polymap.core.model2.Property;
 import org.polymap.core.model2.runtime.event.PropertyChangeSupport;
 import org.polymap.core.model2.store.feature.SRS;
 import org.polymap.core.project.IMap;
+import org.polymap.core.runtime.CachedLazyInit;
+import org.polymap.core.runtime.Lazy;
 import org.polymap.core.runtime.event.EventManager;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
@@ -96,6 +100,10 @@ public class MosaicCase2
     protected Property<String>          dataMapId;
     
     protected Property<String>          documentsDir;
+    
+    private Lazy<Collection<IMosaicCaseEvent>> events = new CachedLazyInit( 1024 );
+
+    private Lazy<Map<String,MosaicCaseKeyValue>> keyValues = new CachedLazyInit( 1024 ); 
     
 
     protected MosaicRepository2 repo() {
@@ -184,6 +192,8 @@ public class MosaicCase2
 //                            "Der Wert \"" + key + "\" wurde angelegt mit: " + value, "Wert"  );
                 }
             });
+            // XXX race cond between getKeyValue() and this put()
+            keyValues.clear(); //get().put( key, current );
         }
         EventManager.instance().publish( new PropertyChangeEvent( this, key, null, value ) );
         return null;
@@ -191,37 +201,42 @@ public class MosaicCase2
 
     @Override
     public String get( String key ) {
-        MosaicRepository2 repo = repo();
-        FilterFactory2 ff = MosaicRepository2.ff;
-        Filter filter = ff.and(
-                ff.equals( ff.property( "key" ), ff.literal( key ) ),
-                ff.equals( ff.property( "caseId" ), ff.literal( getId() ) ) );
-        Collection<MosaicCaseKeyValue> result = repo.query( MosaicCaseKeyValue.class, filter ).maxResults( 2 ).execute();
-        assert result.size() < 2;
-        return result.size() == 1 ? Iterables.getOnlyElement( result, null ).value.get() : null;
+        MosaicCaseKeyValue result = getKeyValue( key );
+        return result != null ? result.value.get() : null;
     }
 
     protected MosaicCaseKeyValue getKeyValue( String key ) {
-        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
-        FilterFactory2 ff = MosaicRepository2.ff;
-        Filter filter = ff.and(
-                ff.equals( ff.property( "key" ), ff.literal( key ) ),
-                ff.equals( ff.property( "caseId" ), ff.literal( getId() ) ) );
-        Collection<MosaicCaseKeyValue> result = repo.query( MosaicCaseKeyValue.class, filter ).maxResults( 2 ).execute();
-        assert result.size() < 2;
-        return result.size() == 1 ? Iterables.getOnlyElement( result, null ) : null;
+        return keyValues.get( new Supplier<Map<String,MosaicCaseKeyValue>>() {
+            public Map<String,MosaicCaseKeyValue> get() {
+                Filter filter = ff.equals( ff.property( "caseId" ), ff.literal( getId() ) );
+                Collection<MosaicCaseKeyValue> rs = repo().query( MosaicCaseKeyValue.class, filter ).execute();
+                
+                Map<String, MosaicCaseKeyValue> result = new HashMap( 32 );
+                for (MosaicCaseKeyValue keyValue : rs) {
+                    result.put( keyValue.key.get(), keyValue );
+                }
+                return result;
+            }
+        }).get( key );
+        
+//        FilterFactory2 ff = MosaicRepository2.ff;
+//        Filter filter = ff.and(
+//                ff.equals( ff.property( "key" ), ff.literal( key ) ),
+//                ff.equals( ff.property( "caseId" ), ff.literal( getId() ) ) );
+//        Collection<MosaicCaseKeyValue> results = repo().query( MosaicCaseKeyValue.class, filter ).maxResults( 2 ).execute();
+//        // check multiple elms
+//        MosaicCaseKeyValue result = Iterables.getOnlyElement( results, null );
+//        return result.size() == 1 ?  : null;
     }
     
     @Override
     public Iterable<IMosaicCaseEvent> getEvents() {
-        MosaicRepository2 repo = MosaicRepository2.session( context.getUnitOfWork() );
-        FilterFactory2 ff = MosaicRepository2.ff;
-        Filter filter = ff.equals( ff.property( "caseId" ), ff.literal( getId() ) );
-        
-        Collection<MosaicCaseEvent2> result = repo.query( MosaicCaseEvent2.class, filter ).execute();
-        return Iterables.transform( result, new Function<MosaicCaseEvent2,IMosaicCaseEvent>() {
-            public IMosaicCaseEvent apply( MosaicCaseEvent2 input ) {
-                return input;
+        return events.get( new Supplier<Collection<IMosaicCaseEvent>>() {
+            public Collection<IMosaicCaseEvent> get() {
+                Filter filter = ff.equals( ff.property( "caseId" ), ff.literal( getId() ) );
+                
+                Collection<MosaicCaseEvent2> result = repo().query( MosaicCaseEvent2.class, filter ).execute();
+                return new ArrayList( result );
             }
         });
 
@@ -236,7 +251,7 @@ public class MosaicCase2
     @Override
     public void addEvent( IMosaicCaseEvent event ) {
         ((MosaicCaseEvent2)event).caseId.set( getId() );
-//        eventIds.add( event.getId() );
+        events.clear();
         
         lastModified.set( new Date() );
         PropertyChangeEvent ev = new PropertyChangeEvent( this, "events", null, event );

@@ -35,6 +35,7 @@ public class SimpleFilesystemMapper
 
     public static final Pattern     notAllowed = Pattern.compile( "[^a-zA-Z0-9.-_]" ); 
 
+    
     @Override
     public String documentPath( IMosaicCase mcase, String name ) {
         return Joiner.on( "/").skipNulls().join( normalize( mcase.getId() ), normalize( name ) );

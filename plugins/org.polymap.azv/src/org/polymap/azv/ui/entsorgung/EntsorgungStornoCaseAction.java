@@ -37,7 +37,7 @@ import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
 import org.polymap.azv.model.EntsorgungMixin;
 import org.polymap.azv.model.Entsorgungsliste;
-import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -133,7 +133,7 @@ public class EntsorgungStornoCaseAction
         repo.get().commitChanges();
         
         // email
-        User user = mcase.get().as( NutzerMixin.class ).user();
+        User user = mcase.get().as( AzvVorgang.class ).user();
         if (user != null) {
             String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
             String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$

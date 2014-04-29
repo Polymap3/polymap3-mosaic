@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.polymap.core.data.ui.featuretable.IFeatureTableElement;
+import org.polymap.core.data.ui.featuretable.SimpleFeatureTableElement;
 
 import org.polymap.mosaic.server.model.IMosaicCase;
 
@@ -40,7 +41,7 @@ public abstract class CasesViewerFilter
     public final boolean select( Viewer viewer, Object parentElm, Object elm ) {
         CasesTableViewer casesViewer = (CasesTableViewer)viewer;
         IFeatureTableElement ftelm = (IFeatureTableElement)elm;
-        return apply( casesViewer, casesViewer.entity( ftelm.fid() ) );
+        return apply( casesViewer, casesViewer.entity( ((SimpleFeatureTableElement)ftelm).feature() ) );
     }
     
 }

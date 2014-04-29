@@ -71,9 +71,9 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.AzvRepository;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.azv.model.EntsorgungMixin;
 import org.polymap.azv.model.Entsorgungsliste;
-import org.polymap.azv.model.NutzerMixin;
 import org.polymap.azv.ui.NotEmptyValidator;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
@@ -103,7 +103,7 @@ public class EntsorgungCaseAction
 
     private EntsorgungMixin                 entsorgung;
     
-    private NutzerMixin                     nutzer;
+    private AzvVorgang                      azvVorgang;
     
     private AdresseMixin                    adresse;
     
@@ -135,7 +135,7 @@ public class EntsorgungCaseAction
 //            UserPrincipal principal = (UserPrincipal)Polymap.instance().getUser();
             entsorgung = mcase.get().as( EntsorgungMixin.class );
             adresse = mcase.get().as( AdresseMixin.class );
-            nutzer = mcase.get().as( NutzerMixin.class );
+            azvVorgang = mcase.get().as( AzvVorgang.class );
             
 //            if (principal != null
 //                    && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
@@ -223,9 +223,9 @@ public class EntsorgungCaseAction
     @Override
     public void createContents( Composite parent ) {
         // noch kein Nutzer am Vorgang -> session user eintragen
-        User user = nutzer.user();
+        User user = azvVorgang.user();
         if (user == null && Polymap.instance().getUser() != null) {
-            user = nutzer.setSessionUser();
+            user = azvVorgang.setSessionUser();
         }
         // noch keine Adresse -> vom Nutzer
         if (entsorgung.name.get() == null && user != null) {
@@ -264,7 +264,7 @@ public class EntsorgungCaseAction
         repo.get().commitChanges();
 
         // email
-        User user = nutzer.user();
+        User user = azvVorgang.user();
         if (user != null) {
             AzvPlugin.sendEmail( user, i18n );
         }

@@ -15,7 +15,9 @@ Require-Bundle: org.polymap.core;bundle-version="3.2.0",
  org.polymap.core.catalog;bundle-version="3.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.polymap.mosaic,
+Export-Package: org.apache.commons.vfs2,
+ org.polymap.mosaic,
+ org.polymap.mosaic.server.document,
  org.polymap.mosaic.server.model,
  org.polymap.mosaic.server.model2
 Bundle-ClassPath: lib/commons-vfs2-2.0.jar,

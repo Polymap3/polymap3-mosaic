@@ -56,7 +56,7 @@ import org.polymap.rhei.um.ui.UsersTableViewer;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.NutzerMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -82,7 +82,7 @@ public class NutzerAnVorgangCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
     
-    private NutzerMixin                     nutzer;
+    private AzvVorgang                      vorgang;
 
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2>  repo;
@@ -116,8 +116,8 @@ public class NutzerAnVorgangCaseAction
             
             
             this.site = _site;
-            this.nutzer = mcase.get().as( NutzerMixin.class );
-            if (nutzer.username.get() == null) {
+            this.vorgang = mcase.get().as( AzvVorgang.class );
+            if (vorgang.username.get() == null) {
                 // open action
                 Polymap.getSessionDisplay().asyncExec( new Runnable() {
                     public void run() {
@@ -135,7 +135,7 @@ public class NutzerAnVorgangCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         this.caseStatus = status;
-        User user = nutzer.user();
+        User user = vorgang.user();
         if (user != null) {
             status.put( i18n.get( "vorgangStatusKunde" ), Joiner.on( ' ' ).skipNulls().join( user.firstname().get(), user.name().get() ), 101 );
         }
@@ -189,7 +189,7 @@ public class NutzerAnVorgangCaseAction
     @Override
     public void submit() throws Exception {
         User user = new SelectionAdapter( viewer.getSelection() ).first( User.class );
-        nutzer.username.set( user.username().get() );
+        vorgang.username.set( user.username().get() );
         repo.get().commitChanges();
         
         if (caseAction != null) {
@@ -230,7 +230,7 @@ public class NutzerAnVorgangCaseAction
         personSection.addConstraint( new PriorityConstraint( 1 ), AzvPlugin.MIN_COLUMN_WIDTH );
         personSection.getBody().setLayout( new FillLayout() );
         
-        User user = nutzer.user();
+        User user = vorgang.user();
         if (user != null) {
             PersonForm personForm = new PersonForm( site.getPanelSite(), user );
             personForm.createContents( personSection );

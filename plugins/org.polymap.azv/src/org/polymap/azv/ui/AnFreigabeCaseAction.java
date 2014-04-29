@@ -35,7 +35,7 @@ import org.polymap.rhei.batik.ContextProperty;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.model.AzvStatusMixin;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
@@ -72,7 +72,7 @@ public class AnFreigabeCaseAction
         this.site = _site;
         if (mcase.get() != null && repo.get() != null) {
             Set<String> natures = mcase.get().getNatures();
-            String azvStatus = mcase.get().as( AzvStatusMixin.class ).azvStatus();
+            String azvStatus = AzvVorgang.azvStatusOf( mcase.get() );
             if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                     && natures.contains( CASE_SCHACHTSCHEIN )
                     && (EVENT_TYPE_BEANTRAGT.equals( azvStatus ) || EVENT_TYPE_ANBEARBEITUNG.equals( azvStatus ))) {

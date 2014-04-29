@@ -134,6 +134,10 @@ public class KarteCaseAction
                 WMSLayer layer = new WMSLayer( i18n.get( "layerName"+suffix ),  //$NON-NLS-1$
                         i18n.get( "layerWmsUrl"+suffix ), //$NON-NLS-1$
                         i18n.get( "layerWmsName"+suffix ) ); //$NON-NLS-1$
+                String format = i18n.get( "layerWmsFormat"+suffix );
+                if (format != null && format.length() > 0) {
+                    layer.setFormat( format );
+                }
                 layer.setVisibility( false );
                 mapViewer.addLayer( layer, false );
                 suffix ++;

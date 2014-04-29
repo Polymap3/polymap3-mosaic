@@ -49,6 +49,12 @@ public class SchachtscheinAntragCaseAction
 
 
     @Override
+    protected String docsTemplateDir() {
+        return "Vorlagen/Schachtschein";
+    }
+
+
+    @Override
     protected IMessages i18n() {
         return i18n;
     }
