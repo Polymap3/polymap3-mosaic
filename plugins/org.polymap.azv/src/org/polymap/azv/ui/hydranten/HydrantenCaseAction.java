@@ -14,7 +14,6 @@
  */
 package org.polymap.azv.ui.hydranten;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -102,9 +101,9 @@ public class HydrantenCaseAction
     
     @Override
     public void fillStatus( CaseStatus status ) {
-        CaseStatus caseStatus = status;
-        String id = mcase.get().getId();
-        caseStatus.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
+//        CaseStatus caseStatus = status;
+//        String id = mcase.get().getId();
+//        caseStatus.put( "Laufende Nr.", StringUtils.right( id, 6 ) );
     }
 
     

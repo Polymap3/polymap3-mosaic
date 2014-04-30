@@ -32,7 +32,7 @@ public class DocumentNameMapper
 
     private static Log log = LogFactory.getLog( DocumentNameMapper.class );
 
-    public static final FastDateFormat df = FastDateFormat.getInstance( "yyyy/MM/yyyy-MM-dd" );
+    public static final FastDateFormat df = FastDateFormat.getInstance( "yyyy/MM/" );
 
     
     @Override
@@ -45,7 +45,7 @@ public class DocumentNameMapper
             laufendeNr = normalize( mcase.getId() );
         }
         
-        return df.format( mcase.getCreated() ) + "-" + laufendeNr + (name != null ? "/"+name : "");
+        return df.format( mcase.getCreated() ) + laufendeNr + (name != null ? "/"+name : "");
     }
     
 }

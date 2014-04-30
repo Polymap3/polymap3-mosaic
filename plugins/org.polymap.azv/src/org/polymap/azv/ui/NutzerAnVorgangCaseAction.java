@@ -99,34 +99,33 @@ public class NutzerAnVorgangCaseAction
 
     
     @Override
-    public boolean init( ICaseActionSite _site ) {
-        _site.setShowStatus( false );
-        if (mcase.get() != null && repo.get() != null
-                && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
-            
-            _site.setShowStatus( true );
-
-            if (mcase.get().getNatures().contains( AzvPlugin.CASE_NUTZER )) {
-                return false;
-            }
-//            else if (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG )
-//                    && mcase.get().get( EntsorgungCaseAction.KEY_NAME ) != null) {
-//                return false;
-//            }
-            
-            
+    public boolean init( ICaseActionSite _site ) {        
+        if (mcase.get() != null && repo.get() != null) {
             this.site = _site;
             this.vorgang = mcase.get().as( AzvVorgang.class );
-            if (vorgang.username.get() == null) {
-                // open action
-                Polymap.getSessionDisplay().asyncExec( new Runnable() {
-                    public void run() {
-                        site.activateCaseAction( site.getActionId() );
-                        site.setSubmitEnabled( false );
-                    }
-                });
+            
+            // Mitarbeiter (und Admin)
+            if (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
+                if (mcase.get().getNatures().contains( AzvPlugin.CASE_NUTZER )) {
+                    return false;
+                }
+
+                if (vorgang.username.get() == null) {
+                    // open action
+                    Polymap.getSessionDisplay().asyncExec( new Runnable() {
+                        public void run() {
+                            site.activateCaseAction( site.getActionId() );
+                            site.setSubmitEnabled( false );
+                        }
+                    });
+                }
+                return true;
             }
-            return true;
+            // normale Nutzer
+            else {
+                // Status nur zeigen wenn nicht "NEU"
+                site.setShowStatus( vorgang.azvStatus() != null );
+            }
         }
         return false;
     }

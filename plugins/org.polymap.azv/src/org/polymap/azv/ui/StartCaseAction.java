@@ -33,7 +33,6 @@ import java.beans.PropertyChangeEvent;
 
 import org.json.JSONObject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -192,7 +191,7 @@ public abstract class StartCaseAction
     @Override
     public void fillStatus( CaseStatus status ) {
         caseStatus = status;
-        status.put( i18n( "laufendeNr" ), StringUtils.right( mcase.get().getId(), 6 ) );
+        //status.put( i18n( "laufendeNr" ), StringUtils.right( mcase.get().getId(), 6 ) );
         //status.put( i18n( "ort" ), mcase.get().as( AdresseMixin.class ).adresse(), 1 );
     }
 
@@ -275,12 +274,44 @@ public abstract class StartCaseAction
             contentForm.createContents( contentSection.getBody() );
             contentForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
             contentForm.setEnabled( false );
+
+//            casedataForm = new CasedataForm();
+//            casedataForm.createContents( contentSection.getBody() );
+//            casedataForm.getBody().setLayout( ColumnLayoutFactory.defaults().spacing( 3 ).margins( 8 ).create() );
+//            casedataForm.setEnabled( false );
         }
         else {
             site.toolkit().createLabel( contentSection.getBody(), i18n( "nochKeineDaten" ) )
                     .setForeground( MosaicUiPlugin.COLOR_RED.get() );
         }
     }
+
+    
+//    /**
+//     * 
+//     */
+//    public class CasedataForm
+//            extends FormContainer {
+//
+//        private IFormFieldListener      fieldListener;
+//        
+//        private Composite               body;
+//        
+//        
+//        public Composite getBody() {
+//            return body;
+//        }
+//        
+//        @Override
+//        public void createFormContent( final IFormEditorPageSite formSite ) {
+//            body = formSite.getPageBody();
+//            body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
+//
+//            createField( body, new KVPropertyAdapter( mcase.get(), AzvVorgang.KEY_NUMMER ) )
+//                    .setLabel( i18n( "laufendeNr" ) ).setToolTipText( i18n( "laufendeNrTip" ) )
+//                    .setEnabled( false ).create();
+//        }
+//    }
 
 
     /**
@@ -292,12 +323,12 @@ public abstract class StartCaseAction
         private IFormFieldListener      fieldListener;
         
         private Composite               body;
-
+        
         
         public Composite getBody() {
             return body;
         }
-
+        
         @Override
         public void createFormContent( final IFormEditorPageSite formSite ) {
             body = formSite.getPageBody();

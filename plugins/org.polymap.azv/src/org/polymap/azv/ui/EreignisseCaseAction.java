@@ -120,6 +120,7 @@ public class EreignisseCaseAction
 //        site.getPanelSite().setTitle( title );
         
         caseStatus.put( "Angelegt", df.format( mcase.getCreated() ), 99 );
+        caseStatus.put( "Nummer", mcase.as( AzvVorgang.class ).laufendeNr.get(), 98 );
 //        caseStatus.put( "Art", Joiner.on( "," ).join( mcase.getNatures() ), 101, Graphics.getColor( 0xDD, 0xE1, 0xE3 ) );
 //        if (mcase.getName() != null && !mcase.getName().isEmpty()) {
 //            caseStatus.put( "Bezeichnung", mcase.getName(), 100 );

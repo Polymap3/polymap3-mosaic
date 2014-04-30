@@ -21,9 +21,12 @@ import static org.polymap.azv.AzvPlugin.EVENT_TYPE_BEANTRAGT;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_FREIGABE;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_STORNIERT;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang.time.FastDateFormat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -42,6 +45,7 @@ import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicCase2;
+import org.polymap.mosaic.server.model2.MosaicRepository2;
 
 /**
  * Erweitert einen Vorgang {@link MosaicCase2} um Properties, die für alle
@@ -59,6 +63,9 @@ public class AzvVorgang
             EVENT_TYPE_BEANTRAGT, EVENT_TYPE_ANFREIGABE, EVENT_TYPE_ANBEARBEITUNG, 
             EVENT_TYPE_FREIGABE, EVENT_TYPE_STORNIERT, EVENT_TYPE_ABGEBROCHEN );
 
+    private static final LaufendeNrBuilder  LAUFENDE_NR_BUILDER = new LaufendeNrBuilder();
+    
+    
     public static String azvStatusOf( IMosaicCase mcase ) {
         for (IMosaicCaseEvent event : Lists.reverse( ImmutableList.copyOf( mcase.getEvents() ))) {
             if (AZV_STATUS.contains( event.getEventType() )) {
@@ -68,6 +75,33 @@ public class AzvVorgang
         return null;
     }
 
+    
+    public static IMosaicCase newCase( MosaicRepository2 repo, String name, String description, String nature ) {
+        assert name != null && description != null && nature != null;
+        IMosaicCase newCase = repo.newCase( name, description );
+        newCase.addNature( nature );
+        newCase.put( KEY_NUMMER, LAUFENDE_NR_BUILDER.next() );
+        return newCase;
+    }
+    
+    
+    static class LaufendeNrBuilder {
+        public static final FastDateFormat df1 = FastDateFormat.getInstance( "dd" );
+        public static final FastDateFormat df2 = FastDateFormat.getInstance( "yyyyMMdd" );
+        private String      day;
+        private int         count;
+        
+        public synchronized String next() {
+            String today = df1.format( new Date() );
+            if (day == null || !today.equals( day )) {
+                day = today;
+                count = 0;
+            }
+            return df2.format( new Date() ) + count++;
+        }
+    }
+    
+    
     // instance *******************************************
     
     /**

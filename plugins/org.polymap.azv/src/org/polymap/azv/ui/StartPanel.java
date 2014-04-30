@@ -14,6 +14,10 @@
  */
 package org.polymap.azv.ui;
 
+import static org.polymap.azv.AzvPlugin.CASE_DIENSTBARKEITEN;
+import static org.polymap.azv.AzvPlugin.CASE_ENTSORGUNG;
+import static org.polymap.azv.AzvPlugin.CASE_LEITUNGSAUSKUNFT;
+import static org.polymap.azv.AzvPlugin.CASE_SCHACHTSCHEIN;
 import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
 
 import java.util.ArrayList;
@@ -89,6 +93,7 @@ import org.polymap.rhei.um.ui.UserSettingsPanel;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
+import org.polymap.azv.model.AzvVorgang;
 import org.polymap.azv.ui.dienstbarkeiten.DienstbarkeitenCasesDecorator;
 import org.polymap.azv.ui.entsorgung.EntsorgungCasesDecorator;
 import org.polymap.azv.ui.hydranten.HydrantenPanel;
@@ -375,9 +380,7 @@ public class StartPanel
                 AzvPlugin.ROLE_ENTSORGUNG,
                 true, new Runnable() {
                     public void run() {
-                        IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
-                        newCase.addNature( AzvPlugin.CASE_ENTSORGUNG );
-                        mcase.set( newCase );
+                        mcase.set( AzvVorgang.newCase( repo.get(), "", "", CASE_ENTSORGUNG ) );
                         getContext().openPanel( CasePanel.ID );
                     }
         }));
@@ -388,10 +391,8 @@ public class StartPanel
                     public void run() {
                         try {
                             // create new case; commit/rollback inside CaseAction
-                            IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
-                            newCase.addNature( AzvPlugin.CASE_SCHACHTSCHEIN );
+                            mcase.set( AzvVorgang.newCase( repo.get(), "", "", CASE_SCHACHTSCHEIN ) );
                             //newCase.put( KEY_USER, user.get().username().get() );
-                            mcase.set( newCase );
                             getContext().openPanel( CasePanel.ID );
                         }
                         catch (Exception e) {
@@ -414,9 +415,7 @@ public class StartPanel
                     public void run() {
                         try {
                             // create new case; commit/rollback inside CaseAction
-                            IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
-                            newCase.addNature( AzvPlugin.CASE_DIENSTBARKEITEN );
-                            mcase.set( newCase );
+                            mcase.set( AzvVorgang.newCase( repo.get(), "", "", CASE_DIENSTBARKEITEN ) );
                             getContext().openPanel( CasePanel.ID );
                         }
                         catch (Exception e) {
@@ -435,10 +434,7 @@ public class StartPanel
                         else {
                             try {
                                 // create new case; commit/rollback inside CaseAction
-                                IMosaicCase newCase = repo.get().newCase( "", "" ); //$NON-NLS-1$ //$NON-NLS-2$
-                                newCase.addNature( AzvPlugin.CASE_LEITUNGSAUSKUNFT );
-                                //newCase.put( KEY_USER, user.get().username().get() );
-                                mcase.set( newCase );
+                                mcase.set( AzvVorgang.newCase( repo.get(), "", "", CASE_LEITUNGSAUSKUNFT ) );
                                 getContext().openPanel( CasePanel.ID );
                             }
                             catch (Exception e) {
