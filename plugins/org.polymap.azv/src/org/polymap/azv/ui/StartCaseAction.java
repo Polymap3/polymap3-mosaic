@@ -403,7 +403,7 @@ public abstract class StartCaseAction
                             EventManager.instance().publish( new PropertyChangeEvent( StartCaseAction.this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
                         }
                         else {
-                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n( "adresseNichtGefunden" ) ) );                        
+                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n( "adresseExistiertNicht" ) ) );                        
                         }
                     }
                 }

@@ -19,6 +19,8 @@ import static org.polymap.rhei.fulltext.address.Address.FIELD_NUMBER;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_POSTALCODE;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_STREET;
 
+import java.util.List;
+
 import org.json.JSONObject;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +34,7 @@ import org.polymap.core.project.ILayer;
 import org.polymap.core.project.Layers;
 import org.polymap.core.project.ProjectRepository;
 import org.polymap.core.runtime.IMessages;
+import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.ui.ColumnLayoutFactory;
 
 import org.polymap.rhei.batik.IPanelSite;
@@ -102,34 +105,39 @@ public abstract class AddressForm
         body.setLayout( ColumnLayoutFactory.defaults().spacing( 5 ).margins( 10, 10 ).columns( 1, 1 ).create() );
 
         Composite street = site.toolkit().createComposite( body );
-        new FormFieldBuilder( street, new JsonPropertyAdapter( search, FIELD_STREET ) )
+        createField( street, new JsonPropertyAdapter( search, FIELD_STREET ) )
                 .setLabel( i18n.get( "strasseHNr" ) ).setValidator( validator( FIELD_STREET ) ).create().setFocus();
 
-        new FormFieldBuilder( street, new JsonPropertyAdapter( search, FIELD_NUMBER ) )
+        createField( street, new JsonPropertyAdapter( search, FIELD_NUMBER ) )
                 .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( validator( FIELD_NUMBER ) ).create();
 
         Composite city = site.toolkit().createComposite( body );
-        new FormFieldBuilder( city, new JsonPropertyAdapter( search, FIELD_POSTALCODE ) )
+        createField( city, new JsonPropertyAdapter( search, FIELD_POSTALCODE ) )
                 .setLabel( i18n.get( "plzOrt" ) ).setValidator( validator( FIELD_POSTALCODE ) ).create();
 
-        new FormFieldBuilder( city, new JsonPropertyAdapter( search, FIELD_CITY ) )
+        createField( city, new JsonPropertyAdapter( search, FIELD_CITY ) )
                 .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( validator( FIELD_CITY ) ).create();
 
         // field listener
         formSite.addFieldListener( fieldListener = new IFormFieldListener() {
+            
+            @Override
             public void fieldChange( FormFieldEvent ev ) {
-                if (ev.getEventCode() == VALUE_CHANGE) {
-                    if (formSite.isValid()) {
-                        try {
-                            formSite.submitEditor();
-                            log.info( "VALID: " + search ); //$NON-NLS-1$
-                            site.setStatus( Status.OK_STATUS );
-                            
-                            showResults( new AddressFinder( addressIndex ).maxResults( 1 ).find( search ) );
-                        }
-                        catch (Exception e) {
-                            throw new RuntimeException( e );
-                        }
+                log.info( "ev: " + ev ); //$NON-NLS-1$
+            }
+
+            @EventHandler(display=true,delay=750)
+            public void fieldChanges( List<FormFieldEvent> ev ) {
+                if (formSite.isValid()) {
+                    try {
+                        formSite.submitEditor();
+                        log.info( "VALID: " + search ); //$NON-NLS-1$
+                        site.setStatus( Status.OK_STATUS );
+
+                        showResults( new AddressFinder( addressIndex ).maxResults( 2 ).find( search ) );
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException( e );
                     }
                 }
             }
@@ -142,22 +150,4 @@ public abstract class AddressForm
         return Validators.AND( new NotEmptyValidator(), new AddressValidator( propName ) );
     }
     
-    
-//    protected Iterable<JSONObject> findAddress() {
-//        StringBuilder query = new StringBuilder( 256 );
-//        for (String propName : new String[] {FIELD_CITY, FIELD_NUMBER, FIELD_POSTALCODE, FIELD_STREET}) {
-//            Object value = search.opt( propName );
-//            if (value != null) {
-//                query.append( query.length() > 0 ? " AND " : "" );
-//                query.append( propName ).append( ":" ).append( value.toString() );
-//            }
-//        }
-//        try {
-//            return addressIndex.search( query.toString(), 1 );
-//        }
-//        catch (Exception e) {
-//            throw new RuntimeException( e );
-//        }
-//    }
-
 }

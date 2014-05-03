@@ -81,6 +81,7 @@ import org.polymap.rhei.batik.layout.desktop.DesktopToolkit;
 import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.IPanelToolkit;
+import org.polymap.rhei.batik.toolkit.MaxWidthConstraint;
 import org.polymap.rhei.batik.toolkit.MinWidthConstraint;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
@@ -256,7 +257,8 @@ public class StartPanel
     
     protected void createCasesSection( Composite parent ) {
         casesSection = tk.createPanelSection( parent, i18n.get( "aktuelleVorgaengeTitle" ) );
-        casesSection.addConstraint( new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH );
+        casesSection.addConstraint( 
+                new PriorityConstraint( 100 ), AzvPlugin.MIN_COLUMN_WIDTH, new MaxWidthConstraint( 1000, 0 ) );
         casesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ); //$NON-NLS-1$

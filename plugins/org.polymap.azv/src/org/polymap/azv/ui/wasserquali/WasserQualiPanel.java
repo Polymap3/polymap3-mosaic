@@ -147,10 +147,10 @@ public class WasserQualiPanel
                     try {
                         int count = Iterables.size( addresses );
                         if (count == 0) {
-                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n.get( "adresseExistiertNicht" ) ) );                        
+                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, WasserQualiPanel.i18n.get( "adresseExistiertNicht" ) ) );                        
                         }
                         else if (count > 1) {
-                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n.get( "angabeZuUngenau" ) ) );                        
+                            getSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, WasserQualiPanel.i18n.get( "angabeZuUngenau" ) ) );                        
                         }
                         else {
                             showResult( Iterables.getFirst( addresses, null ) );
