@@ -14,7 +14,6 @@
  */
 package org.polymap.azv.model;
 
-import java.util.Collection;
 import java.util.Date;
 
 import org.qi4j.api.common.Optional;
@@ -50,8 +49,8 @@ public interface Entsorgungsliste
     @UseDefaults
     Property<Boolean>           geschlossen();
     
-    @Optional
-    @UseDefaults
-    Property<Collection<String>> mcaseIds();
+//    @Optional
+//    @UseDefaults
+//    Property<Collection<String>> mcaseIds();
 
 }

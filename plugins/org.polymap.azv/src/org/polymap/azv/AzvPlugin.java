@@ -14,7 +14,9 @@
  */
 package org.polymap.azv;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -41,6 +43,7 @@ import org.apache.commons.mail.SimpleEmail;
 import org.apache.commons.vfs2.FileObject;
 
 import com.google.common.base.Supplier;
+import com.google.common.collect.Lists;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -121,6 +124,7 @@ public class AzvPlugin
     public static final String      EVENT_TYPE_ANFREIGABE = "An Freigabe";
     public static final String      EVENT_TYPE_ANBEARBEITUNG = "An Bearbeitung";
     public static final String      EVENT_TYPE_FREIGABE = "Freigabe";
+    public static final String      EVENT_TYPE_ERLEDIGT = "Erledigt";
 
     public static final MinWidthConstraint MIN_COLUMN_WIDTH = new MinWidthConstraint( 420, 1 );
 
@@ -296,14 +300,18 @@ public class AzvPlugin
     }
 
 
-    public static void sendEmail( User user, IMessages i18n ) throws EmailException {
+    public static void sendEmail( User user, IMessages i18n, String... args ) throws EmailException {
         String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
         String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+        
+        LinkedList<String> allargs = Lists.newLinkedList( Arrays.asList( args ) );
+        allargs.add( 0, header );
+        
         Email email = new SimpleEmail();
         email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
         email.addTo( user.email().get() )
                 .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
-                .setMsg( i18n.get( "email", header ) ); //$NON-NLS-1$
+                .setMsg( i18n.get( "email", allargs.toArray() ) ); //$NON-NLS-1$
         EmailService.instance().send( email );
     }
 

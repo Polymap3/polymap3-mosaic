@@ -170,7 +170,8 @@ public class EreignisseCaseAction
                 statusTitle = "Freigegeben";
                 statusColor = AzvPlugin.instance().okColor.get();
             }
-            else if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
+            else if (azvStatus.equals( AzvPlugin.EVENT_TYPE_ERLEDIGT )
+                    || IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
                 statusTitle = "Erledigt";
                 statusColor = AzvPlugin.instance().okColor.get();
             }

@@ -31,8 +31,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.polymap.core.data.ui.featuretable.DefaultFeatureTableColumn;
 import org.polymap.core.data.ui.featuretable.FeatureTableFilterBar;
@@ -55,6 +55,7 @@ import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
 import org.polymap.rhei.batik.PropertyAccessEvent;
+import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.ConstraintLayout;
 import org.polymap.rhei.um.ui.LoginPanel;
 
@@ -141,22 +142,28 @@ public class AllCasesPanel
     
     @Override
     public void createContents( Composite panelBody ) {
-        ((ConstraintLayout)panelBody.getLayout()).marginHeight /= 2;
-        int panelHeight = panelBody.getParent().getSize().y;
-        log.info( "panelHeight: " + panelHeight );
+        int margins = ((ConstraintLayout)panelBody.getLayout()).marginHeight /= 2;
+//        int panelHeight = panelBody.getParent().getSize().y;
+//        log.info( "panelHeight: " + panelHeight );
+        
+        // table layout
+        int displayHeight = BatikApplication.sessionDisplay().getBounds().height;
+        int tableHeight = (displayHeight - 120 - 30 - (margins*2));  // banner + filterbar + margins
+
+        
         contents = getSite().toolkit().createComposite( panelBody );
         contents.setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         //Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) );
         casesViewer = new CasesTableViewer( contents, repo.get(), Filter.INCLUDE, SWT.NONE );
-        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( panelHeight-80 )/*.width( 300 )*/.create() );
+        casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( tableHeight )/*.width( 300 )*/.create() );
         
         casesViewer.addColumn( new UserColumn( casesViewer ) );
         casesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
         casesViewer.getColumn( "created" ).sort( SWT.UP );
 
-        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
-            public void doubleClick( DoubleClickEvent ev ) {
+        casesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
+            public void selectionChanged( SelectionChangedEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
                 log.info( "CASE: " + sel );
                 mcase.set( sel );

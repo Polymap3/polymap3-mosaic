@@ -14,9 +14,11 @@
  */
 package org.polymap.azv.ui.entsorgung;
 
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ERLEDIGT;
 import static org.polymap.mosaic.ui.MosaicUiPlugin.ff;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -51,15 +53,14 @@ import org.eclipse.rwt.widgets.ExternalBrowser;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.RowLayoutFactory;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
 import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
 import org.polymap.core.qi4j.QiModule.EntityCreator;
 import org.polymap.core.runtime.IMessages;
-import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
 import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.security.SecurityUtils;
@@ -87,7 +88,7 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.AzvRepository;
-import org.polymap.azv.model.EntsorgungMixin;
+import org.polymap.azv.model.EntsorgungVorgang;
 import org.polymap.azv.model.Entsorgungsliste;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
@@ -250,6 +251,15 @@ public class EntsorgungsListenPanel
         btn.setToolTipText( i18n.get( "abschliessenTip" ) );
         btn.addSelectionListener( new SelectionAdapter() {
             public void widgetSelected( SelectionEvent e ) {
+                closeListe( liste, section );
+                getSite().layout( true );
+            }
+        });
+
+        btn = getSite().toolkit().createButton( toolbar, i18n.get( "export" ) );
+        btn.setToolTipText( i18n.get( "exportTip" ) );
+        btn.addSelectionListener( new SelectionAdapter() {
+            public void widgetSelected( SelectionEvent e ) {
                 exportListe( liste, section );
                 getSite().layout( true );
             }
@@ -296,8 +306,8 @@ public class EntsorgungsListenPanel
         
         final CasesTableViewer casesViewer = new CasesTableViewer( section.getBody(), mosaicRepo.get(), filter, SWT.NONE );
         casesViewer.getTable().setLayoutData( FormDataFactory.filled().top( toolbar ).height( 300 ).width( 400 ).create() );
-        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
-            public void doubleClick( DoubleClickEvent ev ) {
+        casesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
+            public void selectionChanged( SelectionChangedEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
                 log.info( "CASE: " + sel ); //$NON-NLS-1$
                 mcase.set( sel );
@@ -306,10 +316,13 @@ public class EntsorgungsListenPanel
         });
         // filter liste
         casesViewer.addFilter( new CasesViewerFilter() {
-            protected boolean apply( CasesTableViewer viewer, IMosaicCase mcase ) {
+            protected boolean apply( CasesTableViewer viewer, @SuppressWarnings("hiding") IMosaicCase mcase ) {
                 // beantragte + in liste
+                String listeId = mcase.get( EntsorgungVorgang.KEY_LISTE );
+                return liste.id().equals( listeId );
+
                 // no cache this may change as the liste changes
-                return liste.mcaseIds().get().contains( mcase.getId() );
+                //return liste.mcaseIds().get().contains( mcase.getId() );
             }
         });
         casesViewers.add( casesViewer );
@@ -320,7 +333,7 @@ public class EntsorgungsListenPanel
         final String filename = i18n.get( "exportFilename", liste.name().get() );
 
         String url = DownloadServiceHandler.registerContent( new ContentProvider() {
-            Display display = Polymap.getSessionDisplay();
+            Display display = BatikApplication.sessionDisplay();
             @Override
             public InputStream getInputStream() throws Exception {
                 CsvPreference prefs = new CsvPreference( '"', ';', "\r\n" ); //$NON-NLS-1$
@@ -329,18 +342,26 @@ public class EntsorgungsListenPanel
                 CsvListWriter csvWriter = new CsvListWriter( writer, prefs );
                 
                 csvWriter.writeHeader( i18n.get( "csvOrt" ), i18n.get( "csvStrasse" ), i18n.get( "csvNummer" ), i18n.get( "csvName" ), i18n.get( "csvBemerkung" ) );
-                for (String id : liste.mcaseIds().get()) {
-                    MosaicCase2 mcase = mosaicRepo.get().entity( MosaicCase2.class, id );
-                    EntsorgungMixin entsorgung = mcase.as( EntsorgungMixin.class );
-                    AdresseMixin adresse = mcase.as( AdresseMixin.class );
-                    csvWriter.write( 
-                            StringUtils.defaultString( adresse.stadt.get() ), 
-                            StringUtils.defaultString( adresse.strasse.get() ), 
-                            StringUtils.defaultString( adresse.nummer.get() ), 
-                            StringUtils.defaultString( entsorgung.name.get() ), 
-                            StringUtils.defaultString( entsorgung.bemerkung.get() ) );
-                    
-                    mosaicRepo.get().closeCase( mcase, i18n.get( "vorgangGedruckt" ), i18n.get( "vorgangGedrucktBeschreibung" ) + liste.name().get() );
+
+                // alle offenen Entsorgungsvorgänge
+                Filter filter = ff.and(
+                        ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ), //$NON-NLS-1$
+                        ff.equals( ff.property( "natures" ), ff.literal( AzvPlugin.CASE_ENTSORGUNG ) ) ); //$NON-NLS-1$
+                Collection<MosaicCase2> rs = mosaicRepo.get().query( MosaicCase2.class, filter ).execute();
+                
+                for (MosaicCase2 candidate : rs) {
+                    EntsorgungVorgang entsorgung = candidate.as( EntsorgungVorgang.class );
+                    if (liste.id().equals( entsorgung.liste.get() )) {
+                        AdresseMixin adresse = candidate.as( AdresseMixin.class );
+                        csvWriter.write( 
+                                StringUtils.defaultString( adresse.stadt.get() ), 
+                                StringUtils.defaultString( adresse.strasse.get() ), 
+                                StringUtils.defaultString( adresse.nummer.get() ), 
+                                StringUtils.defaultString( entsorgung.name.get() ), 
+                                StringUtils.defaultString( entsorgung.bemerkung.get() ) );
+
+                        //mosaicRepo.get().closeCase( candidate, i18n.get( "vorgangGedruckt" ), i18n.get( "vorgangGedrucktBeschreibung" ) + liste.name().get() );
+                    }
                 }
                 csvWriter.close();
                 log.info( "CSV: " + buf.toString() ); //$NON-NLS-1$
@@ -356,31 +377,49 @@ public class EntsorgungsListenPanel
             }
             @Override
             public boolean done( boolean success ) {
-                if (success) {
-                    try {
-                        mosaicRepo.get().commitChanges();
-                        
-                        azvRepo.removeEntity( liste );
-                        azvRepo.commitChanges();
-                        
-                        display.asyncExec( new Runnable() {
-                            public void run() {
-                                section.getBody().getParent().getParent().layout();
-                                section.dispose();
-                            }
-                        });
-                    }
-                    catch (Exception e) {
-                        mosaicRepo.get().rollbackChanges();
-                        azvRepo.revertChanges();
-                        BatikApplication.handleError( i18n.get( "fehlerBeimLoeschen" ), e );
-                    }                    
-                }
                 return true;
             }
         });
         ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
                 ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
+    }
+
+
+    protected void closeListe( final Entsorgungsliste liste, final IPanelSection section ) {
+        try {
+            MosaicRepository2 mosaic = mosaicRepo.get();
+            // alle offenen Entsorgungsvorgänge für diese Liste schließen
+            Filter filter = ff.and(
+                    ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_OPEN ) ), //$NON-NLS-1$
+                    ff.equals( ff.property( "natures" ), ff.literal( AzvPlugin.CASE_ENTSORGUNG ) ) ); //$NON-NLS-1$
+            Collection<MosaicCase2> rs = mosaic.query( MosaicCase2.class, filter ).execute();
+            
+            for (MosaicCase2 candidate : rs) {
+                EntsorgungVorgang entsorgung = candidate.as( EntsorgungVorgang.class );
+                if (liste.id().equals( entsorgung.liste.get() )) {
+                    String description = i18n.get( "vorgangGedrucktBeschreibung" ) + liste.name().get();
+                    mosaic.newCaseEvent( mcase.get(), EVENT_TYPE_ERLEDIGT, description, EVENT_TYPE_ERLEDIGT );
+                    mosaic.closeCase( candidate, EVENT_TYPE_ERLEDIGT, description );
+                }
+            }
+            mosaic.commitChanges();
+
+            // Liste selber löschen
+            azvRepo.removeEntity( liste );
+            azvRepo.commitChanges();
+
+            BatikApplication.sessionDisplay().asyncExec( new Runnable() {
+                public void run() {
+                    section.getBody().getParent().getParent().layout();
+                    section.dispose();
+                }
+            });
+        }
+        catch (Exception e) {
+            mosaicRepo.get().rollbackChanges();
+            azvRepo.revertChanges();
+            BatikApplication.handleError( i18n.get( "fehlerBeimLoeschen" ), e );
+        }                    
     }
 
 }

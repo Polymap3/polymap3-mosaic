@@ -14,15 +14,11 @@
  */
 package org.polymap.azv.ui.entsorgung;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.SimpleEmail;
-
 import org.qi4j.api.query.Query;
 
 import com.google.common.collect.Iterables;
@@ -48,12 +44,10 @@ import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.email.EmailService;
-
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
-import org.polymap.azv.model.EntsorgungMixin;
+import org.polymap.azv.model.EntsorgungVorgang;
 import org.polymap.azv.model.Entsorgungsliste;
 import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
@@ -80,7 +74,7 @@ public class EntsorgungFreigabeCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
     
-    private EntsorgungMixin                 entsorgung;
+    private EntsorgungVorgang               entsorgung;
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
@@ -99,7 +93,7 @@ public class EntsorgungFreigabeCaseAction
     @Override
     public boolean init( ICaseActionSite _site ) {
         this.site = _site;
-        this.entsorgung = mcase.get().as( EntsorgungMixin.class );
+        this.entsorgung = mcase.get().as( EntsorgungVorgang.class );
 
         if (mcase.get() != null && repo.get() != null
                 && mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG )
@@ -107,11 +101,11 @@ public class EntsorgungFreigabeCaseAction
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )
                 && SecurityUtils.isUserInGroup( AzvPlugin.ROLE_ENTSORGUNG )) {
 
-            Polymap.getSessionDisplay().asyncExec( new Runnable() {
-                public void run() {
-                    site.activateCaseAction( site.getActionId() );
-                }
-            });
+//            Polymap.getSessionDisplay().asyncExec( new Runnable() {
+//                public void run() {
+//                    site.activateCaseAction( site.getActionId() );
+//                }
+//            });
             return true;
         }
         return false;
@@ -163,19 +157,22 @@ public class EntsorgungFreigabeCaseAction
 
     @Override
     public void submit() throws Exception {
-        String prevListeId = entsorgung.liste.get();
-        if (prevListeId != null) {
-            Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, prevListeId );
-            Collection<String> mcaseIds = liste.mcaseIds().get();
-            mcaseIds.remove( mcase.get().getId() );
-            liste.mcaseIds().set( mcaseIds );
-            //mcase.get().put( EntsorgungCaseAction.KEY_LISTE, null );
-        }
+//        String prevListeId = entsorgung.liste.get();
+//        if (prevListeId != null) {
+//            Entsorgungsliste liste = azvRepo.findEntity( Entsorgungsliste.class, prevListeId );
+//            Collection<String> mcaseIds = liste.mcaseIds().get();
+//            mcaseIds.remove( mcase.get().getId() );
+//            liste.mcaseIds().set( mcaseIds );
+//            //mcase.get().put( EntsorgungCaseAction.KEY_LISTE, null );
+//        }
         
         Entsorgungsliste liste = listen.get( list.getItem( list.getSelectionIndex() ) );
-        liste.mcaseIds().get().add( mcase.get().getId() );
-        entsorgung.name.set( liste.id() );
-        azvRepo.commitChanges();
+        log.info( "Neue Liste: " + liste.name().get() + " / " + liste.id() );
+        entsorgung.liste.set( liste.id() );
+        log.info( "Neue Liste am Vorgang: " + entsorgung.liste.get() );
+        
+//        liste.mcaseIds().get().add( mcase.get().getId() );
+//        azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), "Neuer Termin",  //$NON-NLS-1$
                 "Entsorgung wurde der Liste zugeordnet: " + liste.name().get(),  //$NON-NLS-1$
@@ -185,14 +182,7 @@ public class EntsorgungFreigabeCaseAction
         // email
         User user = mcase.get().as( AzvVorgang.class ).user();
         if (user != null) {
-            String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
-            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            Email email = new SimpleEmail();
-            email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
-            email.addTo( user.email().get() )
-                    .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
-                    .setMsg( i18n.get( "email", header, liste.name().get() ) ); //$NON-NLS-1$
-            EmailService.instance().send( email );
+            AzvPlugin.sendEmail( user, i18n, liste.name().get() );
         }
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) ); //$NON-NLS-1$

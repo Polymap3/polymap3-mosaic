@@ -16,8 +16,8 @@ package org.polymap.azv.ui.entsorgung;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.SimpleEmail;
+
+import org.qi4j.api.unitofwork.NoSuchEntityException;
 
 import org.eclipse.jface.action.IAction;
 
@@ -30,12 +30,10 @@ import org.polymap.core.security.SecurityUtils;
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
 import org.polymap.rhei.um.User;
-import org.polymap.rhei.um.email.EmailService;
-
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvRepository;
-import org.polymap.azv.model.EntsorgungMixin;
+import org.polymap.azv.model.EntsorgungVorgang;
 import org.polymap.azv.model.Entsorgungsliste;
 import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
@@ -63,7 +61,7 @@ public class EntsorgungStornoCaseAction
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<IMosaicCase>    mcase;
     
-    private EntsorgungMixin                 entsorgung;
+    private EntsorgungVorgang                 entsorgung;
     
     @Context(scope=MosaicUiPlugin.CONTEXT_PROPERTY_SCOPE)
     private ContextProperty<MosaicRepository2> repo;
@@ -86,9 +84,13 @@ public class EntsorgungStornoCaseAction
                 && (mcase.get().getNatures().contains( AzvPlugin.CASE_ENTSORGUNG ) )
                 && !SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
 
-            entsorgung = mcase.get().as( EntsorgungMixin.class );
+            entsorgung = mcase.get().as( EntsorgungVorgang.class );
             if (entsorgung.liste.get() != null) {
-                liste = azvRepo.findEntity( Entsorgungsliste.class, entsorgung.liste.get() );
+                try {
+                    liste = azvRepo.findEntity( Entsorgungsliste.class, entsorgung.liste.get() );
+                }
+                catch (NoSuchEntityException e) {
+                }
                 return true;
             }
         }
@@ -125,8 +127,8 @@ public class EntsorgungStornoCaseAction
     
     @Override
     public void submit() throws Exception {
-        liste.mcaseIds().get().remove( mcase.get().getId() );
-        azvRepo.commitChanges();
+//        liste.mcaseIds().get().remove( mcase.get().getId() );
+//        azvRepo.commitChanges();
         
         repo.get().newCaseEvent( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, i18n.get( "eventStorniert" ), AzvPlugin.EVENT_TYPE_STORNIERT );
         repo.get().closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_STORNIERT, i18n.get( "eventStorniert" ) );
@@ -135,14 +137,7 @@ public class EntsorgungStornoCaseAction
         // email
         User user = mcase.get().as( AzvVorgang.class ).user();
         if (user != null) {
-            String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
-            String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-            Email email = new SimpleEmail();
-            email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
-            email.addTo( user.email().get() )
-                    .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
-                    .setMsg( i18n.get( "email", header, liste.name().get() ) ); //$NON-NLS-1$
-            EmailService.instance().send( email );
+            AzvPlugin.sendEmail( user, i18n, liste.name().get() );
         }
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "statusStorniert" ) ) );

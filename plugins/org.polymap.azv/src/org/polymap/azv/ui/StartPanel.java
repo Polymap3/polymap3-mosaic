@@ -271,13 +271,6 @@ public class StartPanel
         int tableHeight = (displayHeight - (2*65) - (2*75));  // margins, titles+icons
         FormDataFactory.filled().top( -1 ).height( tableHeight ).width( 420 ).applyTo( casesViewer.getTable() );
 
-//        casesViewer.addDoubleClickListener( new IDoubleClickListener() {
-//            public void doubleClick( DoubleClickEvent ev ) {
-//                IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );
-//                mcase.set( sel );
-//                getContext().openPanel( CasePanel.ID );
-//            }
-//        });
         casesViewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
                 IMosaicCase sel = Iterables.getOnlyElement( casesViewer.getSelected() );

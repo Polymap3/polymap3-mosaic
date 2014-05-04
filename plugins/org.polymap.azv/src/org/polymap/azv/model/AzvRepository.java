@@ -21,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.qi4j.api.query.Query;
 import org.qi4j.api.query.grammar.BooleanExpression;
-import org.qi4j.api.service.ServiceReference;
 import org.qi4j.api.unitofwork.ConcurrentEntityModificationException;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -34,8 +33,6 @@ import org.polymap.core.qi4j.QiModule;
 import org.polymap.core.qi4j.QiModuleAssembler;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.entity.ConcurrentModificationException;
-
-import org.polymap.rhei.data.entitystore.lucene.LuceneEntityStoreService;
 
 import sun.security.acl.PrincipalImpl;
 
@@ -87,8 +84,8 @@ public class AzvRepository
     public void init( final Session session ) {
         try {
             // build the queryProvider
-            ServiceReference<LuceneEntityStoreService> storeService = assembler.getModule().serviceFinder().findService( LuceneEntityStoreService.class );
-            LuceneEntityStoreService luceneStore = storeService.get();
+//            ServiceReference<LuceneEntityStoreService> storeService = assembler.getModule().serviceFinder().findService( LuceneEntityStoreService.class );
+//            LuceneEntityStoreService luceneStore = storeService.get();
 
 //            azvService = new AzvService( new BiotopEntityProvider( this ) );
         }

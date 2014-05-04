@@ -18,6 +18,7 @@ import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ABGEBROCHEN;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANBEARBEITUNG;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_BEANTRAGT;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ERLEDIGT;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_FREIGABE;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_STORNIERT;
 
@@ -61,7 +62,7 @@ public class AzvVorgang
 
     public static final Set<String>     AZV_STATUS = Sets.newHashSet( 
             EVENT_TYPE_BEANTRAGT, EVENT_TYPE_ANFREIGABE, EVENT_TYPE_ANBEARBEITUNG, 
-            EVENT_TYPE_FREIGABE, EVENT_TYPE_STORNIERT, EVENT_TYPE_ABGEBROCHEN );
+            EVENT_TYPE_FREIGABE, EVENT_TYPE_STORNIERT, EVENT_TYPE_ABGEBROCHEN, EVENT_TYPE_ERLEDIGT );
 
     private static final LaufendeNrBuilder  LAUFENDE_NR_BUILDER = new LaufendeNrBuilder();
     

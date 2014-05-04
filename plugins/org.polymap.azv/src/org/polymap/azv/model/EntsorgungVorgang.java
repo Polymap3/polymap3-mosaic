@@ -27,7 +27,7 @@ import org.polymap.mosaic.server.model2.MosaicCase2;
  * 
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class EntsorgungMixin
+public class EntsorgungVorgang
         extends KeyValuePropertyMixin {
 
     public static final String      KEY_LISTE = "liste";

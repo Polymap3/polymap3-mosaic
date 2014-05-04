@@ -18,6 +18,7 @@ import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ABGEBROCHEN;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANBEARBEITUNG;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ANFREIGABE;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_BEANTRAGT;
+import static org.polymap.azv.AzvPlugin.EVENT_TYPE_ERLEDIGT;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_FREIGABE;
 import static org.polymap.azv.AzvPlugin.EVENT_TYPE_STORNIERT;
 
@@ -95,7 +96,8 @@ public class AzvStatusCaseTableColumn
                 else if (azvStatus.equals( EVENT_TYPE_ANBEARBEITUNG )) {
                     return i18n.get( "anBearbeitung" );
                 }
-                else if (IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
+                else if (azvStatus.equals( EVENT_TYPE_ERLEDIGT )
+                        || IMosaicCaseEvent.TYPE_CLOSED.equals( mcase.getStatus() )) {
                     return i18n.get( "erledigt" );
                 }
                 else {
