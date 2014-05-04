@@ -82,6 +82,8 @@ public class AddressSearchMapAction
     private ContentProposalAdapter  proposal;
 
     private SimpleContentProposalProvider proposalProvider;
+
+    protected String                currentSearchTxtValue;
     
     
     public AddressSearchMapAction( MapViewer viewer ) {
@@ -153,13 +155,13 @@ public class AddressSearchMapAction
         // modification listener
         searchTxt.addModifyListener( new ModifyListener() {
             public void modifyText( ModifyEvent ev ) {
-                String txt = searchTxt.getText();
-                if (txt.length() < 1) {
+                currentSearchTxtValue = searchTxt.getText();
+                if (currentSearchTxtValue.length() < 1) {
                     proposalProvider.setProposals( new String[0] );
                 }
                 else {
                     new ProposalJob().schedule();
-                    new ResultCountJob().schedule();
+                    new ResultCountJob().schedule( 3000 );
                 }
             }
         });
@@ -233,7 +235,7 @@ public class AddressSearchMapAction
     class ResultCountJob
             extends UIJob {
 
-        private String      searchTextValue = searchTxt.getText();
+        private String      searchTextValue = currentSearchTxtValue;
 
         public ResultCountJob() {
             super( i18n.get( "resultsJobTitle" ) );
@@ -241,6 +243,11 @@ public class AddressSearchMapAction
 
         @Override
         protected void runWithException( IProgressMonitor monitor ) throws Exception {
+            // skip if search text has changed
+            if (searchTextValue != currentSearchTxtValue) {
+                log.info( "Search text has changed: " + searchTextValue + " -> " + currentSearchTxtValue );
+                return;
+            }
             // search
             FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
             final Iterable<JSONObject> results = addressIndex.search( searchTextValue, 100 );
