@@ -313,8 +313,10 @@ public class CasePanel
          
             // listen to changes the caseAction may perform
             action.addPropertyChangeListener( new IPropertyChangeListener() {
-                public void propertyChange( PropertyChangeEvent event ) {
-                    fillToolbarBtn( holder, action );                    
+                public void propertyChange( PropertyChangeEvent ev ) {
+                    if (holder != null && holder.btn != null && !holder.btn.isDisposed()) {
+                        fillToolbarBtn( holder, action );
+                    }
                 }
             });
             
