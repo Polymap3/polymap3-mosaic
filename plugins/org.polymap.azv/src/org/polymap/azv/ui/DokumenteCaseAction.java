@@ -196,9 +196,9 @@ public class DokumenteCaseAction
         final boolean isOutgoing = SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA );
         name = isOutgoing ? OUTGOING_PREFIX + name : name;
         
-        IMosaicDocument doc = repo.get().newDocument( mcase.get(), name );
         OutputStream out = null;
         try {
+            IMosaicDocument doc = repo.get().newDocument( mcase.get(), name );
             IOUtils.copy( in, out = doc.getOutputStream() );
             
 //          repo.get().newCaseEvent( (MosaicCase2)mcase.get(), doc.getName(), "Name: " + doc.getName() + 
