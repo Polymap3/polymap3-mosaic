@@ -139,7 +139,7 @@ public class KarteCaseAction
                     layer.setFormat( format );
                 }
                 layer.setVisibility( false );
-                mapViewer.addLayer( layer, false );
+                mapViewer.addLayer( layer, false, false );
                 suffix ++;
             }
 
@@ -163,7 +163,7 @@ public class KarteCaseAction
         styleMap.setIntentStyle( "default", standard ); //$NON-NLS-1$
         vectorLayer.setStyleMap( styleMap );
         
-        mapViewer.addLayer( vectorLayer, false );
+        mapViewer.addLayer( vectorLayer, false, false );
         
         // check if mcase has point
         drawMosaicCasePoint();

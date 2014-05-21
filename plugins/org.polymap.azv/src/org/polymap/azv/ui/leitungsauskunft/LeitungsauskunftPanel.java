@@ -137,7 +137,7 @@ public class LeitungsauskunftPanel
                     i18n.get( "layerWmsUrl"+suffix ), //$NON-NLS-1$
                     i18n.get( "layerWmsName"+suffix ) ); //$NON-NLS-1$
             //layer.setVisibility( false );
-            mapViewer.addLayer( layer, false );
+            mapViewer.addLayer( layer, false, false );
             mapViewer.addToolbarItem( new LayerMapAction( mapViewer, layer, i18n.get( "layerName"+suffix ), true ) ); //$NON-NLS-1$
             suffix ++;
         }

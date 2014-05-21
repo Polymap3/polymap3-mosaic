@@ -14,6 +14,8 @@
  */
 package org.polymap.azv.ui.map;
 
+import static com.google.common.collect.Iterables.toArray;
+
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.json.JSONObject;
 
@@ -21,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.eclipse.swt.SWT;
@@ -161,7 +162,7 @@ public class AddressSearchMapAction
                 }
                 else {
                     new ProposalJob().schedule();
-                    new ResultCountJob().schedule( 3000 );
+                    new ResultCountJob().schedule( 2000 );
                 }
             }
         });
@@ -217,14 +218,16 @@ public class AddressSearchMapAction
         protected void runWithException( IProgressMonitor monitor ) throws Exception {
             // proposals
             FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
-            final Iterable<String> results = addressIndex.propose( searchTextValue, 10 );
+            final String[] results = toArray( addressIndex.propose( searchTextValue, 10 ), String.class );
 
             // display
+            if (results.length > 1) {
             searchTxt.getDisplay().asyncExec( new Runnable() {
                 public void run() {
-                    proposalProvider.setProposals( Iterables.toArray( results, String.class ) );
+                    proposalProvider.setProposals( results );
                 }
             });
+            }
         }        
     }
 

@@ -113,7 +113,7 @@ public class HydrantenPanel
         WMSLayer hydranten = new WMSLayer( i18n.get( "layerName" ), i18n.get( "layerWmsUrl" ), i18n.get( "layerWmsLayer" ) );
         hydranten.setIsBaseLayer( false );
         hydranten.setVisibility( true );
-        mapViewer.addLayer( hydranten, false );
+        mapViewer.addLayer( hydranten, false, true );
         
         // toolbar
         mapViewer.addToolbarItem( new HomeMapAction( mapViewer ) );

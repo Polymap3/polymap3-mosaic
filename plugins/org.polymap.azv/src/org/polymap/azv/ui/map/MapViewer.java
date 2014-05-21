@@ -146,11 +146,16 @@ public class MapViewer
     }
 
 
-    public MapViewer addLayer( Layer layer, boolean isBaseLayer ) {
+    public MapViewer addLayer( Layer layer, boolean isBaseLayer, boolean isSingleTile ) {
         layer.setIsBaseLayer( isBaseLayer );
         if (layer instanceof GridLayer) {
-            ((GridLayer)layer).setTileSize( new Size( 800, 800 ) );
-            ((GridLayer)layer).setBuffer( 0 );
+            if (isSingleTile) {
+                ((GridLayer)layer).setSingleTile( true );                
+            }
+            else {
+                ((GridLayer)layer).setTileSize( new Size( 800, 800 ) );
+                ((GridLayer)layer).setBuffer( 0 );
+            }
         }
         map.addLayer( layer );
         
@@ -235,7 +240,7 @@ public class MapViewer
             if (format != null && format.length() > 0) {
                 layer.setFormat( format );
             }
-            addLayer( layer, true );
+            addLayer( layer, true, false );
             if (layer.getName().toLowerCase().contains( "dop" )) {
                 dop = layer;
             }

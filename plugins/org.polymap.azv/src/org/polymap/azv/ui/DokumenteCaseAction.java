@@ -367,26 +367,28 @@ public class DokumenteCaseAction
         viewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
                 final IMosaicDocument selected = SelectionAdapter.on( ev.getSelection() ).first( IMosaicDocument.class );
-                String url = DownloadServiceHandler.registerContent( new ContentProvider() {
-                    @Override
-                    public InputStream getInputStream() throws Exception {
-                        return selected.getInputStream();
-                    }
-                    @Override
-                    public String getFilename() {
-                        return selected.getName();
-                    }
-                    @Override
-                    public String getContentType() {
-                        return selected.getContentType();
-                    }
-                    @Override
-                    public boolean done( boolean success ) {
-                        return true;
-                    }
-                });
-                ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
-                        ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
+                if (selected != null) {
+                    String url = DownloadServiceHandler.registerContent( new ContentProvider() {
+                        @Override
+                        public InputStream getInputStream() throws Exception {
+                            return selected.getInputStream();
+                        }
+                        @Override
+                        public String getFilename() {
+                            return selected.getName();
+                        }
+                        @Override
+                        public String getContentType() {
+                            return selected.getContentType();
+                        }
+                        @Override
+                        public boolean done( boolean success ) {
+                            return true;
+                        }
+                    });
+                    ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
+                            ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
+                }
             }
         });
         viewer.addDoubleClickListener( new IDoubleClickListener() {
