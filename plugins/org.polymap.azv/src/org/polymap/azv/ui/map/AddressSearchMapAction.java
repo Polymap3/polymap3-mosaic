@@ -91,7 +91,13 @@ public class AddressSearchMapAction
         this.viewer = viewer;
     }
 
+    
+    public AddressSearchMapAction preset( String searchText ) {
+        searchTxt.setText( searchText );
+        return this;    
+    }
 
+    
     public String getSearchText() {
         return !searchTxt.getText().startsWith( i18n.get( "hint" ) ) ? searchTxt.getText() : null;
     }

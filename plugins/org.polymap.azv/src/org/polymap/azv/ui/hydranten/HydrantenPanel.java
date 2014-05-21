@@ -18,6 +18,7 @@ import java.util.Date;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.security.Principal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,12 +41,17 @@ import org.eclipse.jface.action.ContributionItem;
 import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
 import org.polymap.core.runtime.IMessages;
+import org.polymap.core.runtime.Polymap;
+import org.polymap.core.security.SecurityUtils;
 
 import org.polymap.rhei.batik.DefaultPanel;
 import org.polymap.rhei.batik.IAppContext;
 import org.polymap.rhei.batik.IPanel;
 import org.polymap.rhei.batik.IPanelSite;
 import org.polymap.rhei.batik.PanelIdentifier;
+import org.polymap.rhei.um.User;
+import org.polymap.rhei.um.UserRepository;
+
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.azv.ui.map.AddressSearchMapAction;
@@ -120,7 +126,16 @@ public class HydrantenPanel
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 250 ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 500 ) );
         mapViewer.addToolbarItem( new ScaleMapAction( mapViewer, 1000 ) );
-        mapViewer.addToolbarItem( new AddressSearchMapAction( mapViewer ) );
+        
+        AddressSearchMapAction addressSearch = new AddressSearchMapAction( mapViewer );
+        mapViewer.addToolbarItem( addressSearch );
+        if (!SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA )) {
+            Principal user = Polymap.instance().getUser();
+            User umuser = UserRepository.instance().findUser( user.getName() );
+            if (umuser != null) {
+                addressSearch.preset( umuser.address().get().city().get() );
+            }
+        }
         
         mapViewer.addToolbarItem( new ContributionItem() {
             public void fill( Composite parent ) {
