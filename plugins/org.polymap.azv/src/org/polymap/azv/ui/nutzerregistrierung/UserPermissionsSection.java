@@ -17,7 +17,6 @@ package org.polymap.azv.ui.nutzerregistrierung;
 import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
 import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
-import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT2;
 import static org.polymap.azv.AzvPlugin.ROLE_SCHACHTSCHEIN;
 
 import java.util.HashSet;
@@ -54,8 +53,8 @@ public class UserPermissionsSection {
     
     public static final IMessages   i18n = Messages.forPrefix( "UserPermissions" ); //$NON-NLS-1$
 
-    public static final List<String> allRoles = Lists.newArrayList( 
-            ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN, ROLE_ENTSORGUNG, ROLE_HYDRANTEN );
+    public static final List<String> userRequestRoles = Lists.newArrayList( 
+            ROLE_LEITUNGSAUSKUNFT, ROLE_SCHACHTSCHEIN, ROLE_ENTSORGUNG, ROLE_HYDRANTEN );
 
 
     /**
@@ -98,7 +97,7 @@ public class UserPermissionsSection {
         Composite permissions = tk.createComposite( parent );
         permissions.setLayout( new FillLayout( SWT.VERTICAL ) );
 
-        for (final String role : allRoles) {
+        for (final String role : userRequestRoles) {
             final Button btn = tk.createButton( permissions, role, SWT.CHECK );
             btn.setSelection( initialRoles.contains( role ) );
             btn.addSelectionListener( new SelectionAdapter() {
