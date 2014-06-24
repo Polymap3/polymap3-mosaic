@@ -62,7 +62,7 @@ import org.polymap.rhei.form.IFormEditorPageSite;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
-import org.polymap.azv.ui.map.AddressForm;
+import org.polymap.azv.ui.adresse.AddressForm;
 import org.polymap.azv.ui.map.HomeMapAction;
 import org.polymap.azv.ui.map.MapViewer;
 import org.polymap.mosaic.ui.MosaicUiPlugin;

@@ -224,15 +224,15 @@ public class AddressSearchMapAction
         protected void runWithException( IProgressMonitor monitor ) throws Exception {
             // proposals
             FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
-            final String[] results = toArray( addressIndex.propose( searchTextValue, 10 ), String.class );
+            final String[] results = toArray( addressIndex.propose( searchTextValue, 10, null ), String.class );
 
             // display
             if (results.length > 1) {
-            searchTxt.getDisplay().asyncExec( new Runnable() {
-                public void run() {
-                    proposalProvider.setProposals( results );
-                }
-            });
+                searchTxt.getDisplay().asyncExec( new Runnable() {
+                    public void run() {
+                        proposalProvider.setProposals( results );
+                    }
+                });
             }
         }        
     }

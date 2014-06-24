@@ -31,10 +31,12 @@ import org.opengis.feature.Property;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.qi4j.api.query.Query;
 import org.qi4j.api.unitofwork.NoSuchEntityException;
 
 import com.google.common.base.Joiner;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -50,6 +52,8 @@ import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
@@ -349,15 +353,24 @@ public class EntsorgungCaseAction
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
     
             Composite street = site.toolkit().createComposite( body );
+            street.setLayout( FormLayoutFactory.defaults().create() );
+
             Property prop = new KVPropertyAdapter( mcase.get(), KEY_STREET );
             new FormFieldBuilder( street, prop )
-                    .setLabel( i18n.get( "strasseHNr" ) ).setToolTipText( i18n.get( "strasseHNrTip" ) )
-                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
+                    .setLabel( i18n.get( "strasseHNr" ) )
+                    .setToolTipText( i18n.get( "strasseHNrTip" ) )
+                    .setField( new StringFormField() )
+                    .setValidator( new NotEmptyValidator() )
+                    .create()
+                    .setLayoutData( FormDataFactory.filled().right( 75 ).create() );
 
             prop = new KVPropertyAdapter( mcase.get(), KEY_NUMBER );
             new FormFieldBuilder( street, prop )
                     .setLabel( IFormFieldLabel.NO_LABEL )
-                    .setField( new StringFormField() ).setValidator( new NotEmptyValidator() ).create();
+                    .setField( new StringFormField() )
+                    .setValidator( new NotEmptyValidator() )
+                    .create()
+                    .setLayoutData( FormDataFactory.filled().left( 75 ).create() );
 
             Composite city = site.toolkit().createComposite( body );
             prop = new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE );

@@ -18,16 +18,19 @@ import static org.polymap.azv.model.AdresseMixin.KEY_CITY;
 import static org.polymap.azv.model.AdresseMixin.KEY_NUMBER;
 import static org.polymap.azv.model.AdresseMixin.KEY_POSTALCODE;
 import static org.polymap.azv.model.AdresseMixin.KEY_STREET;
+import static org.polymap.azv.ui.adresse.NumberxValidator.NUMBERX_PATTERN;
 import static org.polymap.rhei.field.Validators.AND;
+import static org.polymap.rhei.fulltext.FullTextIndex.FIELD_GEOM;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_CITY;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_NUMBER;
+import static org.polymap.rhei.fulltext.address.Address.FIELD_NUMBER_X;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_POSTALCODE;
 import static org.polymap.rhei.fulltext.address.Address.FIELD_STREET;
-import static org.polymap.rhei.fulltext.FullTextIndex.FIELD_GEOM;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import java.beans.PropertyChangeEvent;
 
@@ -43,6 +46,7 @@ import com.vividsolutions.jts.geom.Point;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.IAction;
 
@@ -57,6 +61,8 @@ import org.polymap.core.runtime.event.EventHandler;
 import org.polymap.core.runtime.event.EventManager;
 import org.polymap.core.security.SecurityUtils;
 import org.polymap.core.ui.ColumnLayoutFactory;
+import org.polymap.core.ui.FormDataFactory;
+import org.polymap.core.ui.FormLayoutFactory;
 
 import org.polymap.rhei.batik.Context;
 import org.polymap.rhei.batik.ContextProperty;
@@ -80,8 +86,9 @@ import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.model.AdresseMixin;
 import org.polymap.azv.model.AzvVorgang;
 import org.polymap.azv.model.OrtMixin;
-import org.polymap.azv.ui.NotEmptyValidator;
-import org.polymap.azv.ui.map.AddressValidator;
+import org.polymap.azv.ui.adresse.AddressProposal;
+import org.polymap.azv.ui.adresse.AddressValidator;
+import org.polymap.azv.ui.adresse.NumberxValidator;
 import org.polymap.azv.ui.map.DrawFeatureMapAction;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.MosaicCaseEvents;
@@ -344,26 +351,32 @@ public abstract class StartCaseAction
                     .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
 
             Composite street = site.toolkit().createComposite( body );
-            createField( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
+            street.setLayout( FormLayoutFactory.defaults().create() );
+
+            Composite fieldComposite = createField( street, new KVPropertyAdapter( mcase.get(), KEY_STREET ) )
                     .setLabel( i18n( "strasseHnr" ) ).setToolTipText( i18n( "strasseHnrTip" ) )
                     .setField( new StringFormField() )
                     .setValidator( new AddressValidator( FIELD_STREET ) ).create();
-
-            createField( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
+            new AddressProposal( (Text)fieldComposite.getChildren()[2], FIELD_STREET );
+            fieldComposite.setLayoutData( FormDataFactory.filled().right( 75 ).create() );
+            
+            fieldComposite = createField( street, new KVPropertyAdapter( mcase.get(), KEY_NUMBER ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )
-                    .setValidator( new AddressValidator( FIELD_NUMBER ) ).create();
+                    .setValidator( new NumberxValidator( FIELD_NUMBER ) ).create();
+            fieldComposite.setLayoutData( FormDataFactory.filled().left( 75 ).create() );
 
             Composite city = site.toolkit().createComposite( body );
-            createField( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
+            fieldComposite = createField( city, new KVPropertyAdapter( mcase.get(), KEY_POSTALCODE ) )
                     .setLabel( i18n( "plzOrt" ) ).setToolTipText( i18n( "plzOrtTip" ) )
                     .setField( new StringFormField() )
                     .setValidator( AND( new PlzValidator(), new AddressValidator( FIELD_POSTALCODE ) ) ).create();
 
-            createField( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
+            fieldComposite = createField( city, new KVPropertyAdapter( mcase.get(), KEY_CITY ) )
                     .setLabel( IFormFieldLabel.NO_LABEL )
                     .setField( new StringFormField() )
                     .setValidator( new AddressValidator( FIELD_CITY ) ).create();
+            new AddressProposal( (Text)fieldComposite.getChildren()[2], FIELD_CITY );
 
             // field listener
             formSite.addFieldListener( fieldListener = new IFormFieldListener() {
@@ -388,12 +401,35 @@ public abstract class StartCaseAction
                         search.put( FIELD_POSTALCODE, (String)formSite.getFieldValue( KEY_POSTALCODE ) );
                         search.put( FIELD_CITY, (String)formSite.getFieldValue( KEY_CITY ) );
                         search.put( FIELD_STREET, (String)formSite.getFieldValue( KEY_STREET ) );
-                        search.put( FIELD_NUMBER, (String)formSite.getFieldValue( KEY_NUMBER ) );
+                        //search.put( FIELD_NUMBER, (String)formSite.getFieldValue( KEY_NUMBER ) );
+
+                        // split number affix
+                        String number = (String)formSite.getFieldValue( KEY_NUMBER );
+                        if (number != null) {
+                            Matcher match = NUMBERX_PATTERN.matcher( number );
+                            if (match.find()) {
+                                search.put( FIELD_NUMBER, match.group( 1 ) );
+                                String x = match.group( 2 );
+                                if (x != null && x.length() > 0) {
+                                    search.put( FIELD_NUMBER_X, x );
+                                }
+                            }
+                        }
                         
+                        // search address
                         FullTextIndex addressIndex = AzvPlugin.instance().addressIndex();
-                        Iterable<JSONObject> addresses = new AddressFinder( addressIndex ).maxResults( 1 ).find( search );
-                        JSONObject address = Iterables.getFirst( addresses, null );
-                        if (address != null) {
+                        Iterable<JSONObject> addresses = new AddressFinder( addressIndex ).maxResults( 2 ).find( search );
+         
+                        // check result
+                        int count = Iterables.size( addresses );
+                        if (count == 0) {
+                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n( "adresseExistiertNicht" ) ) );                        
+                        }
+                        else if (count > 1) {
+                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, "Die Adresse ist nicht eindeutig" ) );                        
+                        }
+                        else {
+                            JSONObject address = Iterables.getFirst( addresses, null );
                             Point geom = (Point)address.get( FIELD_GEOM );
                             log.info( "Point: " + geom ); //$NON-NLS-1$
                             
@@ -401,9 +437,6 @@ public abstract class StartCaseAction
                             ort.setGeom( geom );
 
                             EventManager.instance().publish( new PropertyChangeEvent( StartCaseAction.this, DrawFeatureMapAction.EVENT_NAME, null, geom ) );            
-                        }
-                        else {
-                            site.getPanelSite().setStatus( new Status( IStatus.WARNING, AzvPlugin.ID, i18n( "adresseExistiertNicht" ) ) );                        
                         }
                     }
                 }

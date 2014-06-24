@@ -12,54 +12,47 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  */
-package org.polymap.azv.ui.map;
+package org.polymap.azv.ui.adresse;
 
-import org.json.JSONObject;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import com.google.common.collect.Iterables;
-
-import org.polymap.core.runtime.IMessages;
-import org.polymap.rhei.field.IFormFieldValidator;
-import org.polymap.rhei.fulltext.FullTextIndex;
-
-import org.polymap.azv.AzvPlugin;
-import org.polymap.azv.Messages;
+import org.polymap.rhei.fulltext.address.Address;
 
 /**
- * 
+ * Split number and affix and search number in the {@link Address#FIELD_NUMBER}.
  *
  * @author <a href="http://www.polymap.de">Falko Bräutigam</a>
  */
-public class AddressValidator
-        implements IFormFieldValidator {
+public class NumberxValidator
+        extends AddressValidator {
 
-    public static final IMessages   i18n = Messages.forPrefix( "AddressValidator" ); //$NON-NLS-1$
-
-    private FullTextIndex   addressIndex = AzvPlugin.instance().addressIndex();
-
-    private String          propName;
+    public static final Pattern     NUMBERX_PATTERN = Pattern.compile( "([0-9]+)[ ]*([a-zA-Z]?)" );
 
 
-    public AddressValidator( String propName ) {
-        this.propName = propName;
+    public NumberxValidator( String propName ) {
+        super( Address.FIELD_NUMBER );
     }
 
+    
     @Override
     public String validate( Object fieldValue ) {
         try {
             if (fieldValue == null || fieldValue.toString().length() == 0) {
                 return null;                    
             }
-            //Timer timer = new Timer();
-            Iterable<JSONObject> results = addressIndex.search( propName + ":" + fieldValue, 1 ); //$NON-NLS-1$
-            int count = Iterables.size( results );                
-            return count == 0 ? i18n.get( "keineDaten", fieldValue) : null;
+            
+            Matcher match = NUMBERX_PATTERN.matcher( (CharSequence)fieldValue );
+            return match.find()
+                    ? super.validate( match.group( 1 ) )
+                    : "Hausnummer/Zusatz unkorrekt: " + fieldValue;
         }
         catch (Exception e) {
             throw new RuntimeException( e );
         }
     }
 
+    
     @Override
     public Object transform2Model( Object fieldValue ) throws Exception {
         return fieldValue;
