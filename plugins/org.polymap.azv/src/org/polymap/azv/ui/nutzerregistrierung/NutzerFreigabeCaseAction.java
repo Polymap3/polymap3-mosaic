@@ -16,6 +16,7 @@ package org.polymap.azv.ui.nutzerregistrierung;
 
 import static org.polymap.azv.AzvPlugin.CASE_NUTZER;
 import static org.polymap.azv.AzvPlugin.MIN_COLUMN_WIDTH;
+import static org.polymap.azv.AzvPlugin.ROLE_DIENSTBARKEITEN;
 import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
 import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
@@ -220,7 +221,7 @@ public class NutzerFreigabeCaseAction
 
         allRoles = Lists.newArrayList( 
                 ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN,
-                ROLE_ENTSORGUNG, ROLE_HYDRANTEN );
+                ROLE_ENTSORGUNG, ROLE_DIENSTBARKEITEN, ROLE_HYDRANTEN );
         for (final String role : allRoles) {
             createBtn( left, role ).setSelection( roles.contains( role ) );
         }

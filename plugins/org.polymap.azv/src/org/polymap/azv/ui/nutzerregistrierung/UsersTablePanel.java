@@ -14,6 +14,7 @@
  */
 package org.polymap.azv.ui.nutzerregistrierung;
 
+import static org.polymap.azv.AzvPlugin.ROLE_DIENSTBARKEITEN;
 import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
 import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
@@ -189,7 +190,7 @@ public class UsersTablePanel
         permissions.setLayout( new FillLayout( SWT.VERTICAL ) );
         List<String> roles = Lists.newArrayList( 
                 ROLE_LEITUNGSAUSKUNFT, ROLE_LEITUNGSAUSKUNFT2, ROLE_SCHACHTSCHEIN,
-                ROLE_ENTSORGUNG, ROLE_HYDRANTEN, ROLE_MA, ROLE_BL
+                ROLE_ENTSORGUNG, ROLE_DIENSTBARKEITEN, ROLE_HYDRANTEN, ROLE_MA, ROLE_BL
                 );
         Set<String> groups = new HashSet( umrepo.groupsOf( umuser ) );
         for (final String role : roles) {

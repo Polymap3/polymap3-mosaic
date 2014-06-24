@@ -14,6 +14,7 @@
  */
 package org.polymap.azv.ui.nutzerregistrierung;
 
+import static org.polymap.azv.AzvPlugin.ROLE_DIENSTBARKEITEN;
 import static org.polymap.azv.AzvPlugin.ROLE_ENTSORGUNG;
 import static org.polymap.azv.AzvPlugin.ROLE_HYDRANTEN;
 import static org.polymap.azv.AzvPlugin.ROLE_LEITUNGSAUSKUNFT;
@@ -54,7 +55,7 @@ public class UserPermissionsSection {
     public static final IMessages   i18n = Messages.forPrefix( "UserPermissions" ); //$NON-NLS-1$
 
     public static final List<String> userRequestRoles = Lists.newArrayList( 
-            ROLE_LEITUNGSAUSKUNFT, ROLE_SCHACHTSCHEIN, ROLE_ENTSORGUNG, ROLE_HYDRANTEN );
+            ROLE_LEITUNGSAUSKUNFT, ROLE_SCHACHTSCHEIN, ROLE_ENTSORGUNG, ROLE_DIENSTBARKEITEN, ROLE_HYDRANTEN );
 
 
     /**
