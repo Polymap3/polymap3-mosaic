@@ -362,6 +362,21 @@ public class StartPanel
                         getContext().openPanel( WasserQualiPanel.ID );
                     }
         }));
+        actionBtns.add( createActionButton( body, i18n.get( "dienstbarkeiten" ), i18n.get( "dienstbarkeitenTip" ),
+                BatikPlugin.instance().imageForName( "resources/icons/letters.png" ), //$NON-NLS-1$
+                AzvPlugin.ROLE_DIENSTBARKEITEN,
+                true, new Runnable() {
+                    public void run() {
+                        try {
+                            // create new case; commit/rollback inside CaseAction
+                            mcase.set( AzvVorgang.newCase( repo.get(), "", "", CASE_DIENSTBARKEITEN ) );
+                            getContext().openPanel( CasePanel.ID );
+                        }
+                        catch (Exception e) {
+                            BatikApplication.handleError( i18n.get( "dienstbarkeitenFehler" ), e );
+                        }
+                    }
+        }));
 
         IPanelSection section2 = tk.createPanelSection( parent, i18n.get( "antraegeTitle" ), Section.TITLE_BAR );
         section2.addConstraint( new PriorityConstraint( 0 ), new NeighborhoodConstraint( section1, Neighborhood.BOTTOM, 100 ) );
@@ -401,21 +416,6 @@ public class StartPanel
                 true, new Runnable() {
                     public void run() {
                         getContext().openPanel( HydrantenPanel.ID );
-                    }
-        }));
-        actionBtns.add( createActionButton( body, i18n.get( "dienstbarkeiten" ), i18n.get( "dienstbarkeitenTip" ),
-                BatikPlugin.instance().imageForName( "resources/icons/letters.png" ), //$NON-NLS-1$
-                AzvPlugin.ROLE_DIENSTBARKEITEN,
-                true, new Runnable() {
-                    public void run() {
-                        try {
-                            // create new case; commit/rollback inside CaseAction
-                            mcase.set( AzvVorgang.newCase( repo.get(), "", "", CASE_DIENSTBARKEITEN ) );
-                            getContext().openPanel( CasePanel.ID );
-                        }
-                        catch (Exception e) {
-                            BatikApplication.handleError( i18n.get( "dienstbarkeitenFehler" ), e );
-                        }
                     }
         }));
         actionBtns.add( createActionButton( body, i18n.get( "leitungsauskunft" ), i18n.get( "leitungsauskunftTip" ),
