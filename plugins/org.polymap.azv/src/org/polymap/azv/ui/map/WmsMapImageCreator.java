@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 
 import org.geotools.data.ows.Specification;
 import org.geotools.data.wms.WMS1_0_0;
@@ -48,6 +49,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Joiner;
 import com.vividsolutions.jts.geom.Coordinate;
+
+import org.eclipse.rwt.RWT;
 
 import org.polymap.core.data.util.Geometries;
 
@@ -79,8 +82,9 @@ public class WmsMapImageCreator {
                 Descriptor descriptor = new Descriptor();
                 String wmsUrl = layer.getWmsUrl();
                 if (wmsUrl.startsWith( ".." )) {
-                    // XXX get port from request
-                    wmsUrl = "http://localhost:8080" + wmsUrl.substring( 2 );
+                    HttpServletRequest request = RWT.getRequest();
+                    log.info( "Services port: " + request.getLocalPort() );
+                    wmsUrl = "http://localhost:" + request.getLocalPort() + wmsUrl.substring( 2 );
                 }
                 descriptor.wmsUrl = new URL( wmsUrl );
                 descriptor.layerNames = StringUtils.split( layer.getWmsLayers(), ", " );
