@@ -176,7 +176,15 @@ public class StartPanel
                     return input.getType() == PropertyAccessEvent.TYPE.SET;
                 }
             });
-            
+
+            // Impressum
+            getContext().addPreferencesAction( new Action( Messages.get( "Impressum_titel" ) ) {
+                public void run() {
+                    ArticlePanel panel = (ArticlePanel)getContext().openPanel( ArticlePanel.ID );
+                    panel.setContent( Messages.get( "Impressum_titel" ), Messages.get( "Impressum_inhalt" ) );
+                }
+            });
+
             
             // RegisterPanel erweitern für Beantragte Rechte
             context.addListener( panelListener = new Object() {

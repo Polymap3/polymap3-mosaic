@@ -39,6 +39,10 @@
             class="org.polymap.azv.ui.AzvLoginPanel"
             id="org.polymap.azv.AzvLoginPanel">
       </panel>
+      <panel
+            class="org.polymap.azv.ui.ArticlePanel"
+            id="org.polymap.azv.ArticlePanel">
+      </panel>
    </extension>
    <extension
          point="org.polymap.core.model.moduleAssemblers">
