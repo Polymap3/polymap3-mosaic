@@ -193,6 +193,8 @@ public class UsersTablePanel
                 ROLE_ENTSORGUNG, ROLE_DIENSTBARKEITEN, ROLE_HYDRANTEN, ROLE_MA, ROLE_BL
                 );
         Set<String> groups = new HashSet( umrepo.groupsOf( umuser ) );
+        final Set<String> asignedRoles = new HashSet();
+        final Set<String> resignedRoles = new HashSet();
         for (final String role : roles) {
             final Button btn = tk.createButton( permissions, role, SWT.CHECK );
             btn.setSelection( groups.contains( role ) );
@@ -200,8 +202,11 @@ public class UsersTablePanel
                 public void widgetSelected( SelectionEvent ev ) {
                     if (btn.getSelection()) {
                         umrepo.asignGroup( umuser, role );
-                    } else {
+                        asignedRoles.add( role );
+                    } 
+                    else {
                         umrepo.resignGroup( umuser, role );
+                        resignedRoles.add( role );
                     }
                 }
             });
@@ -217,6 +222,12 @@ public class UsersTablePanel
                     personForm.submit();
                     umrepo.commitChanges();
                     viewer.update( umuser, null );
+                    
+                    if (!asignedRoles.isEmpty()) {
+                        IMessages emailI18n = Messages.forPrefix( "NutzerFreigabe" ); //$NON-NLS-1$
+                        AzvPlugin.sendEmail( umuser, emailI18n, asignedRoles.toString() );
+                    }
+                    
                     getSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okStatus" ) ) );
                 }
                 catch (Exception e) {

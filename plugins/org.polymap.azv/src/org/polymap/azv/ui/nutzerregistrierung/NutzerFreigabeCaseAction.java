@@ -32,9 +32,6 @@ import java.util.Set;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.SimpleEmail;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -65,7 +62,6 @@ import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.UserRepository;
-import org.polymap.rhei.um.email.EmailService;
 import org.polymap.rhei.um.ui.PersonForm;
 
 import org.polymap.azv.AzvPlugin;
@@ -257,14 +253,16 @@ public class NutzerFreigabeCaseAction
         mosaic.closeCase( mcase.get(), AzvPlugin.EVENT_TYPE_FREIGABE, i18n.get( "eventBeschreibung", um.groupsOf( user ) ) );
         mosaic.commitChanges();
         
-        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
-        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-        Email email = new SimpleEmail();
-        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
-        email.addTo( user.email().get() )
-                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
-                .setMsg( i18n.get( "email", header, roles ) ); //$NON-NLS-1$
-        EmailService.instance().send( email );
+        AzvPlugin.sendEmail( user, i18n, roles.toString() );
+        
+//        String salu = user.salutation().get() != null ? user.salutation().get() : ""; //$NON-NLS-1$
+//        String header = "Sehr geehrte" + (salu.equalsIgnoreCase( "Herr" ) ? "r " : " ") + salu + " " + user.name().get(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+//        Email email = new SimpleEmail();
+//        email.setCharset( "ISO-8859-1" ); //$NON-NLS-1$
+//        email.addTo( user.email().get() )
+//                .setSubject( i18n.get( "emailSubject") ) //$NON-NLS-1$
+//                .setMsg( i18n.get( "email", header, roles ) ); //$NON-NLS-1$
+//        EmailService.instance().send( email );
         
         site.getPanelSite().setStatus( new Status( IStatus.OK, AzvPlugin.ID, i18n.get( "okTxt" ) ) ); //$NON-NLS-1$
         Polymap.getSessionDisplay().asyncExec( new Runnable() {
