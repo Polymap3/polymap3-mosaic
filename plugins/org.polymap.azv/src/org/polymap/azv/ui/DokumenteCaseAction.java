@@ -190,7 +190,7 @@ public class DokumenteCaseAction
 
     
     @Override
-    public void uploadStarted( String name, String contentType, InputStream in ) throws Exception {
+    public void uploadStarted( String name, String contentType, int contentLength, InputStream in ) throws Exception {
         log.info( "received: " + name ); //$NON-NLS-1$
         
         final boolean isOutgoing = SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA );
@@ -198,6 +198,14 @@ public class DokumenteCaseAction
         
         OutputStream out = null;
         try {
+            // make upload modal: disable entire UI
+            display.asyncExec( new Runnable() {
+                public void run() {
+                    BatikApplication.shellToParentOn().setEnabled( false );
+                }
+            });
+
+            
             IMosaicDocument doc = repo.get().newDocument( mcase.get(), name );
             IOUtils.copy( in, out = doc.getOutputStream() );
             
@@ -240,6 +248,13 @@ public class DokumenteCaseAction
         finally {
             IOUtils.closeQuietly( in );
             IOUtils.closeQuietly( out );
+
+            // re-enable entire UI
+            display.asyncExec( new Runnable() {
+                public void run() {
+                    BatikApplication.shellToParentOn().setEnabled( true );
+                }
+            });
         }        
     }
 
