@@ -28,11 +28,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.polymap.core.operation.IOperationConcernFactory;
 import org.polymap.core.operation.OperationConcernAdapter;
 import org.polymap.core.operation.OperationInfo;
+import org.polymap.core.runtime.IMessages;
 
 import org.polymap.rhei.um.User;
 import org.polymap.rhei.um.operations.NewUserOperation;
 
 import org.polymap.azv.AzvPlugin;
+import org.polymap.azv.Messages;
 import org.polymap.azv.model.AzvVorgang;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
@@ -47,7 +49,9 @@ public class NewUserOperationConcern
 
     private static Log log = LogFactory.getLog( NewUserOperationConcern.class );
 
+    public static final IMessages i18n = Messages.forPrefix( "NutzerRegistrierung" );
 
+    
     @Override
     public IUndoableOperation newInstance( final IUndoableOperation op, final OperationInfo info ) {
         if (op instanceof NewUserOperation) {
@@ -56,6 +60,9 @@ public class NewUserOperationConcern
 
                 @Override
                 public IStatus execute( IProgressMonitor monitor, IAdaptable _info ) throws ExecutionException {
+                    ((NewUserOperation)op).setEmailContent( i18n.get( "email" ) );
+                    ((NewUserOperation)op).setEmailSubject( i18n.get( "emailSubject" ) );
+                    
                     // call upstream
                     IStatus result = info.next().execute( monitor, _info );
                     if (!result.isOK()) {
