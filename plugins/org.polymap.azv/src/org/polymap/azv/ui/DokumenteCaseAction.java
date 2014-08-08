@@ -14,7 +14,9 @@
  */
 package org.polymap.azv.ui;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import java.beans.PropertyChangeEvent;
 import java.io.InputStream;
@@ -30,10 +32,14 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.collect.Iterables;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.rwt.widgets.ExternalBrowser;
 
@@ -49,6 +55,7 @@ import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.core.runtime.IStatus;
@@ -75,14 +82,15 @@ import org.polymap.rhei.batik.app.BatikApplication;
 import org.polymap.rhei.batik.toolkit.ConstraintData;
 import org.polymap.rhei.batik.toolkit.IPanelSection;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint;
-import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 import org.polymap.rhei.batik.toolkit.NeighborhoodConstraint.Neighborhood;
+import org.polymap.rhei.batik.toolkit.PriorityConstraint;
 
 import org.polymap.azv.AzvPlugin;
 import org.polymap.azv.Messages;
 import org.polymap.mosaic.server.model.IMosaicCase;
 import org.polymap.mosaic.server.model.IMosaicCaseEvent;
 import org.polymap.mosaic.server.model.IMosaicDocument;
+import org.polymap.mosaic.server.model.MosaicCaseEvents;
 import org.polymap.mosaic.server.model2.MosaicRepository2;
 import org.polymap.mosaic.ui.MosaicUiPlugin;
 import org.polymap.mosaic.ui.casepanel.DefaultCaseAction;
@@ -123,10 +131,10 @@ public class DokumenteCaseAction
 
     private Display                         display;
 
-    /** Home of {@link #viewer} */
+    /** Home of {@link #viewer1} */
     private IPanelSection                   section1;
 
-    /** Home of {@link #viewer} */
+    /** Home of {@link #viewer2} */
     private IPanelSection                   section2;
 
     private Composite                       formContainer;
@@ -294,14 +302,25 @@ public class DokumenteCaseAction
 //        });
     }
 
+    
+    protected void deleteDocument( IMosaicDocument doc ) {
+        try {
+            repo.get().removeDocument( doc, mcase.get() );
+            repo.get().commitChanges();
+        }
+        catch (Exception e) {
+            BatikApplication.handleError( i18n.get( "fehlerBeimLöschen" ), e );
+        }
+    }
 
+    
     @EventHandler(display=true,delay=500)
     protected void mcaseChanged( List<PropertyChangeEvent> evs ) {
         if (viewer1 != null && !viewer1.getControl().isDisposed()) {
-            viewer1.setInput( mcase.get() );            
+            viewer1.setInput( mcase.get() );
         }
         if (viewer2 != null && !viewer2.getControl().isDisposed()) {
-            viewer2.setInput( mcase.get() );            
+            viewer2.setInput( mcase.get() );
         }
     }
 
@@ -330,7 +349,7 @@ public class DokumenteCaseAction
         }
         
         // viewer
-        TableViewer viewer = new TableViewer( _section.getBody(), SWT.NONE /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );
+        final TableViewer viewer = new TableViewer( _section.getBody(), SWT.NONE /*SWT.VIRTUAL | SWT.V_SCROLL | SWT.FULL_SELECTION |*/ );
         viewer.getTable().setLayoutData( FormDataFactory.filled().height( 200 ).width( 400 ).create() );
 
         viewer.getTable().setLinesVisible( true );
@@ -370,6 +389,54 @@ public class DokumenteCaseAction
             }
         });
         layout.addColumnData( new ColumnWeightData( 1, 90, true ) );            
+
+        // delete action column
+        boolean deletePermitted = 
+                !(MosaicCaseEvents.caseStatus( mcase.get() ) == IMosaicCaseEvent.TYPE_CLOSED)
+                && (SecurityUtils.isUserInGroup( AzvPlugin.ROLE_MA ) || _section == section1);
+        
+        if (deletePermitted) {
+            vcolumn = new TableViewerColumn( viewer, SWT.LEFT );
+            vcolumn.getColumn().setResizable( false );
+            vcolumn.setLabelProvider( new ColumnLabelProvider() {
+                // make sure you dispose these buttons when viewer input changes
+                // http://stackoverflow.com/questions/12480402/swt-tableviewer-adding-a-remove-button-to-a-column-in-the-table
+                Map<Object,Label> buttons = new HashMap();
+
+                public void update( final ViewerCell cell ) {
+                    TableItem item = (TableItem)cell.getItem();
+                    final IMosaicDocument doc = (IMosaicDocument)cell.getElement();
+                    Label button;
+                    if (buttons.containsKey( doc )) {
+                        button = buttons.get( doc );
+                    }
+                    else {
+                        button = new Label( (Composite)cell.getControl(), SWT.NONE );
+                        button.setImage( AzvPlugin.instance().imageForName( "resources/icons/errorstate.gif" ) );
+                        button.setToolTipText( "Dokument löschen" );
+                        button.addMouseListener( new MouseAdapter() {
+                            public void mouseUp( MouseEvent ev ) {
+                                log.info( "Dokument: " + doc.getName() );
+                                deleteDocument( doc );
+
+                                for (Label btn : buttons.values()) {
+                                    btn.dispose();
+                                }
+                                buttons.clear();
+                                viewer.setInput( mcase.get() );
+                            }
+                        });
+                        buttons.put( cell.getElement(), button );
+                    }
+                    TableEditor editor = new TableEditor( item.getParent() );
+                    editor.grabHorizontal = true;
+                    editor.grabVertical = true;
+                    editor.setEditor( button, item, cell.getColumnIndex() );
+                    editor.layout();
+                }
+            });
+            layout.addColumnData( new ColumnWeightData( 1, 25, false ) );
+        }
 
         viewer.addFilter( filter );
         viewer.setContentProvider( new ArrayContentProvider() {

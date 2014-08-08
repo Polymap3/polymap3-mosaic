@@ -441,7 +441,7 @@ public class MosaicRepository2
             String path = documentNameMapper.documentPath( mcase, name );
             FileObject file = documentsRoot.resolveFile( path );
             if (file.exists()) {
-                throw new IllegalArgumentException( "Dokument existiert bereits: " + path );
+                throw new IllegalStateException( "Dokument existiert bereits: " + path );
             }
             MosaicDocument doc = new MosaicDocument( file );
             
@@ -451,6 +451,28 @@ public class MosaicRepository2
                     + ", Größe: " + doc.getSize()*/, "Dokument angelegt"  );
             
             return doc;
+        }
+        catch (FileSystemException e) {
+            throw new RuntimeException( e );
+        }
+    }
+
+    
+    public void removeDocument( IMosaicDocument doc, IMosaicCase mcase ) {
+        assert doc != null : "Param 'doc' must not be null!";
+        assert mcase != null : "Param 'mcase' must not be null!";
+        try {
+            String path = documentNameMapper.documentPath( mcase, doc.getName() );
+            FileObject file = documentsRoot.resolveFile( path );
+            if (!file.exists()) {
+                throw new IllegalStateException( "Dokument existiert nicht: " + path );
+            }
+
+            file.delete();
+
+            newCaseEvent( mcase, doc.getName(), "Dokument wurde gelöscht: " + doc.getName() 
+                    /*+ ", Typ: " + doc.getContentType()
+                    + ", Größe: " + doc.getSize()*/, "Dokument gelöscht"  );
         }
         catch (FileSystemException e) {
             throw new RuntimeException( e );
