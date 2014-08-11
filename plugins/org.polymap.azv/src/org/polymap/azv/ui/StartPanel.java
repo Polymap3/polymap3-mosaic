@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import java.beans.PropertyChangeEvent;
+
 import org.opengis.filter.Filter;
 
 import org.apache.commons.logging.Log;
@@ -149,6 +151,8 @@ public class StartPanel
     private IPanelSection                   loginSection, casesSection, welcomeSection;
 
     private CasesTableViewer                casesViewer;
+    
+    private CasesTableViewer                closedCasesViewer;
     
     private List<ICasesViewerDecorator>     casesViewerDecorators = new ArrayList();
     
@@ -296,12 +300,28 @@ public class StartPanel
             deco.fill( casesViewer, filterBar );
         }
         
+        // global update listener
+        Control updateBtn = new UpdateHandler( tk ) {
+            protected void doUpdate( List<PropertyChangeEvent> events ) {
+                repo.get().rollbackChanges();
+                if (casesViewer != null) {
+                    casesViewer.refresh( true );
+                }
+                if (closedCasesViewer != null) {
+                    closedCasesViewer.refresh( true );
+                }
+            }
+            
+        }.createControl( casesSection.getBody() );
+        updateBtn.setLayoutData( FormDataFactory.filled()
+                .width( 30 ).clearRight().bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+        
         // searchField
         FeatureTableSearchField searchField = new FeatureTableSearchField( 
                 casesViewer, casesSection.getBody(), Arrays.asList( "name", "created" ) ); //$NON-NLS-1$ //$NON-NLS-2$
         Composite searchCtrl = searchField.getControl();
         searchCtrl.setLayoutData( FormDataFactory.filled()
-                .height( 27 ).bottom( casesViewer.getTable() ).left( filterBar.getControl() ).create() );
+                .height( 27 ).bottom( casesViewer.getTable() ).left( updateBtn ).create() );
         
 //        for (Control child : searchCtrl.getChildren()) {
 //            if (child instanceof Button) {
@@ -324,7 +344,7 @@ public class StartPanel
         closedCasesSection.getBody().setLayout( FormLayoutFactory.defaults().spacing( 5 ).create() );
         
         Filter filter = ff.equals( ff.property( "status" ), ff.literal( IMosaicCaseEvent.TYPE_CLOSED ) ); //$NON-NLS-1$
-        final CasesTableViewer closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
+        closedCasesViewer = new CasesTableViewer( closedCasesSection.getBody(), repo.get(), filter, SWT.NONE );
         closedCasesViewer.addColumn( new AzvStatusCaseTableColumn( repo.get() ) );
         closedCasesViewer.getTable().setLayoutData( FormDataFactory.filled().top( -1 ).height( tableHeight ).width( 420 ).create() );
         closedCasesViewer.addDoubleClickListener( new IDoubleClickListener() {

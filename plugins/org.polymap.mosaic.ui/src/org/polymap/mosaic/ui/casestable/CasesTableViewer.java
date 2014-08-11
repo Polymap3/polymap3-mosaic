@@ -119,7 +119,7 @@ public class CasesTableViewer
     }
 
     
-    @EventHandler(display=true,delay=1000,scope=Event.Scope.JVM)
+    @EventHandler(display=true,delay=1000,scope=Event.Scope.Session)
     protected void caseChanged( List<PropertyChangeEvent> ev ) {
         if (!getControl().isDisposed()) {
             refresh();
