@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.Status;
 
@@ -87,10 +88,10 @@ public abstract class AddressForm
             ILayer layer = ProjectRepository.instance().visit( Layers.finder( "adressen", "Adressen" ) ); //$NON-NLS-1$ //$NON-NLS-2$
             assert layer != null : i18n.get( "keineEbene" );
             search = new JSONObject();
-            // FIXME Test only
-            search.put( FIELD_STREET, "Lindenstraße" ); //$NON-NLS-1$
-            search.put( FIELD_CITY, "Anklam" ); //$NON-NLS-1$
-            search.put( FIELD_POSTALCODE, "17389" ); //$NON-NLS-1$
+//            // FIXME Test only
+//            search.put( FIELD_STREET, "Lindenstraße" ); //$NON-NLS-1$
+//            search.put( FIELD_CITY, "Anklam" ); //$NON-NLS-1$
+//            search.put( FIELD_POSTALCODE, "17389" ); //$NON-NLS-1$
         }
         catch (Exception e) {
             throw new RuntimeException( e );
@@ -113,6 +114,7 @@ public abstract class AddressForm
                 .setLabel( i18n.get( "strasseHNr" ) )
                 .setValidator( validator( FIELD_STREET ) )
                 .create();
+        new AddressProposal( (Text)field.getChildren()[2], FIELD_STREET );
         field.setLayoutData( FormDataFactory.filled().right( 75 ).create() );
         field.setFocus();
 
@@ -124,10 +126,15 @@ public abstract class AddressForm
 
         Composite city = site.toolkit().createComposite( body );
         createField( city, new JsonPropertyAdapter( search, FIELD_POSTALCODE ) )
-                .setLabel( i18n.get( "plzOrt" ) ).setValidator( validator( FIELD_POSTALCODE ) ).create();
+                .setLabel( i18n.get( "plzOrt" ) )
+                .setValidator( validator( FIELD_POSTALCODE ) )
+                .create();
 
-        createField( city, new JsonPropertyAdapter( search, FIELD_CITY ) )
-                .setLabel( IFormFieldLabel.NO_LABEL ).setValidator( validator( FIELD_CITY ) ).create();
+        field = createField( city, new JsonPropertyAdapter( search, FIELD_CITY ) )
+                .setLabel( IFormFieldLabel.NO_LABEL )
+                .setValidator( validator( FIELD_CITY ) )
+                .create();
+        new AddressProposal( (Text)field.getChildren()[2], FIELD_CITY );
 
         // field listener
         formSite.addFieldListener( fieldListener = new IFormFieldListener() {

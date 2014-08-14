@@ -51,7 +51,7 @@ public class AddressValidator
                 return null;                    
             }
             //Timer timer = new Timer();
-            Iterable<JSONObject> results = addressIndex.search( propName + ":" + fieldValue, 1 ); //$NON-NLS-1$
+            Iterable<JSONObject> results = addressIndex.search( propName + ":\"" + fieldValue + "\"", 1 ); //$NON-NLS-1$
             int count = Iterables.size( results );                
             return count == 0 ? i18n.get( "keineDaten", fieldValue) : null;
         }

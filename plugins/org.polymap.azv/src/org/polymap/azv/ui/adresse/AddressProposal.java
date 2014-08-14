@@ -87,7 +87,7 @@ public class AddressProposal {
         };
 
         proposal = new XContentProposalAdapter( control, controlAdapter, proposalProvider, null, null );
-        proposal.setAutoActivationDelay( 0 );
+        proposal.setAutoActivationDelay( -1 );
         control.addKeyListener( new KeyAdapter() {
             public void keyReleased( KeyEvent ev ) {
                 if (ev.keyCode == SWT.ARROW_DOWN) {
@@ -99,12 +99,17 @@ public class AddressProposal {
         // modification listener
         control.addModifyListener( new ModifyListener() {
             public void modifyText( ModifyEvent ev ) {
+                // close popup: visual feedback for user that key has been recognized;
+                // also, otherwise proposal would check in the current entries
+                proposalProvider.setProposals( new String[0] );
+                proposal.closeProposalPopup();
+
                 currentValue = AddressProposal.this.control.getText();
                 if (currentValue.length() == 0) {
                     proposalProvider.setProposals( new String[0] );
                 }
                 else {
-                    new ProposalJob().schedule( 1000 );
+                    new ProposalJob().schedule( 1750 );
                 }
             }
         });
@@ -125,6 +130,11 @@ public class AddressProposal {
 
         @Override
         protected void runWithException( IProgressMonitor monitor ) throws Exception {
+            // skip if control is disposed
+            if (control == null || control.isDisposed()) {
+                log.info( "Control is disposed." );
+                return;
+            }
             // skip if search text has changed
             if (value != currentValue) {
                 log.info( "Search text has changed: " + value + " -> " + currentValue );
@@ -139,7 +149,7 @@ public class AddressProposal {
             control.getDisplay().asyncExec( new Runnable() {
                 public void run() {
                     proposalProvider.setProposals( results );
-                    if (results.length > 0 && ! results[0].equals( value )) {
+                    if (results.length > 0 && !results[0].equals( value )) {
                         proposal.openProposalPopup();
                     }
                     else {
