@@ -17,6 +17,7 @@ package org.polymap.azv.ui;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import java.beans.PropertyChangeEvent;
 import java.io.InputStream;
@@ -41,8 +42,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableItem;
 
-import org.eclipse.rwt.widgets.ExternalBrowser;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -63,6 +62,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.polymap.core.data.operation.DownloadServiceHandler;
 import org.polymap.core.data.operation.DownloadServiceHandler.ContentProvider;
+import org.polymap.core.data.operation.DownloadServiceHandler.DownloadDialog;
 import org.polymap.core.runtime.IMessages;
 import org.polymap.core.runtime.Polymap;
 import org.polymap.core.runtime.event.EventFilter;
@@ -446,10 +446,13 @@ public class DokumenteCaseAction
         });
         viewer.setInput( mcase.get() );
         
+        // download on click
         viewer.addSelectionChangedListener( new ISelectionChangedListener() {
             public void selectionChanged( SelectionChangedEvent ev ) {
                 final IMosaicDocument selected = SelectionAdapter.on( ev.getSelection() ).first( IMosaicDocument.class );
                 if (selected != null) {
+                    final AtomicReference<DownloadDialog> dialogRef = new AtomicReference();
+                    
                     String url = DownloadServiceHandler.registerContent( new ContentProvider() {
                         @Override
                         public InputStream getInputStream() throws Exception {
@@ -465,11 +468,27 @@ public class DokumenteCaseAction
                         }
                         @Override
                         public boolean done( boolean success ) {
+                            final DownloadDialog dialog = dialogRef.get();
+                            if (dialog != null && !dialog.getShell().isDisposed()) {
+                                dialog.getShell().getDisplay().asyncExec( new Runnable() {
+                                    public void run() {
+                                        dialog.close();
+                                    }
+                                });
+                            }
                             return true;
                         }
                     });
-                    ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
-                            ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
+                    
+//                    url = "http://localhost:8080/" + url;
+                    dialogRef.set( new DownloadDialog( BatikApplication.shellToParentOn(), url )
+                            .setMessage( i18n.get( "downloadText", url ) ) );
+//                            .openBrowserWindow( "download_window", ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS )
+                    dialogRef.get().setBlockOnOpen( true );
+                    dialogRef.get().open();
+                            
+//                    ExternalBrowser.open( "download_window", url, //$NON-NLS-1$
+//                            ExternalBrowser.NAVIGATION_BAR | ExternalBrowser.STATUS );
                 }
             }
         });
