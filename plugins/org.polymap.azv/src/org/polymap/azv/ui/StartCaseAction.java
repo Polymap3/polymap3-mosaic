@@ -348,7 +348,7 @@ public abstract class StartCaseAction
             createField( body, new BeanPropertyAdapter( mcase.get(), "description" ) ) //$NON-NLS-1$
                     .setLabel( i18n( "beschreibung" ) ).setToolTipText( i18n( "beschreibungTip" ) )
                     .setField( new TextFormField() ).setValidator( new NotEmptyValidator() ).create()
-                    .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 60 ) );
+                    .setLayoutData( new ColumnLayoutData( SWT.DEFAULT, 75 ) );
 
             Composite street = site.toolkit().createComposite( body );
             street.setLayout( FormLayoutFactory.defaults().create() );

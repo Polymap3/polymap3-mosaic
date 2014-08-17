@@ -19,6 +19,7 @@ import static com.google.common.collect.Iterables.toArray;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.json.JSONObject;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -175,6 +176,7 @@ public class AddressSearchMapAction
         
         searchTxt.addModifyListener( new ModifyListener() {
             public void modifyText( ModifyEvent ev ) {
+                currentSearchTxtValue = searchTxt.getText();
                 new ResultCountJob().schedule( 2000 );
             }
         });
@@ -261,6 +263,11 @@ public class AddressSearchMapAction
             // skip if search text has changed
             if (searchTextValue != currentSearchTxtValue) {
                 log.info( "Search text has changed: " + searchTextValue + " -> " + currentSearchTxtValue );
+                return;
+            }
+            // skip empty search
+            if (StringUtils.isEmpty( searchTextValue )) {
+                log.info( "Search text is empty: " + searchTextValue );
                 return;
             }
             // search
