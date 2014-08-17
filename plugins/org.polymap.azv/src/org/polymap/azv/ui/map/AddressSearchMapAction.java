@@ -156,25 +156,26 @@ public class AddressSearchMapAction
                 if (ev.keyCode == SWT.ARROW_DOWN) {
                     proposal.setProposalPopupFocus();
                 }
+                else {
+                    // close popup: visual feedback for user that key has been recognized;
+                    // also, otherwise proposal would check in the current entries
+                    proposalProvider.setProposals( new String[0] );
+                    //proposal.closeProposalPopup();
+
+                    currentSearchTxtValue = searchTxt.getText();
+                    if (currentSearchTxtValue.length() < 1) {
+                        proposalProvider.setProposals( new String[0] );
+                    }
+                    else {
+                        new ProposalJob().schedule( 500 );
+                    }
+                }
             }
         });
         
-        // modification listener
         searchTxt.addModifyListener( new ModifyListener() {
             public void modifyText( ModifyEvent ev ) {
-                // close popup: visual feedback for user that key has been recognized;
-                // also, otherwise proposal would check in the current entries
-                proposalProvider.setProposals( new String[0] );
-                //proposal.closeProposalPopup();
-
-                currentSearchTxtValue = searchTxt.getText();
-                if (currentSearchTxtValue.length() < 1) {
-                    proposalProvider.setProposals( new String[0] );
-                }
-                else {
-                    new ProposalJob().schedule( 500 );
-                    new ResultCountJob().schedule( 2000 );
-                }
+                new ResultCountJob().schedule( 2000 );
             }
         });
         searchTxt.addListener( SWT.DefaultSelection, new Listener() {

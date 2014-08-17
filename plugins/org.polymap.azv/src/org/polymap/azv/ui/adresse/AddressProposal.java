@@ -23,8 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
@@ -90,26 +88,26 @@ public class AddressProposal {
         proposal.setAutoActivationDelay( -1 );
         control.addKeyListener( new KeyAdapter() {
             public void keyReleased( KeyEvent ev ) {
-                if (ev.keyCode == SWT.ARROW_DOWN) {
+                // just close popup, prevent re-open
+                if (ev.keyCode == SWT.ESC) {
+                }
+                // allow to select entry in popup
+                else if (ev.keyCode == SWT.ARROW_UP || ev.keyCode == SWT.ARROW_DOWN) {
                     proposal.setProposalPopupFocus();
                 }
-            }
-        });
-        
-        // modification listener
-        control.addModifyListener( new ModifyListener() {
-            public void modifyText( ModifyEvent ev ) {
-                // close popup: visual feedback for user that key has been recognized;
-                // also, otherwise proposal would check in the current entries
-                proposalProvider.setProposals( new String[0] );
-                proposal.closeProposalPopup();
-
-                currentValue = AddressProposal.this.control.getText();
-                if (currentValue.length() == 0) {
-                    proposalProvider.setProposals( new String[0] );
-                }
                 else {
-                    new ProposalJob().schedule( 1750 );
+                    // close popup: visual feedback for user that key has been recognized;
+                    // also, otherwise proposal would check in the current entries
+                    proposalProvider.setProposals( new String[0] );
+                    proposal.closeProposalPopup();
+
+                    currentValue = AddressProposal.this.control.getText();
+                    if (currentValue.length() == 0) {
+                        proposalProvider.setProposals( new String[0] );
+                    }
+                    else {
+                        new ProposalJob().schedule( 1750 );
+                    }                    
                 }
             }
         });
@@ -130,7 +128,7 @@ public class AddressProposal {
 
         @Override
         protected void runWithException( IProgressMonitor monitor ) throws Exception {
-            // skip if control is disposed
+            // skip if control is disposed or no longer focused
             if (control == null || control.isDisposed()) {
                 log.info( "Control is disposed." );
                 return;
@@ -148,9 +146,14 @@ public class AddressProposal {
             // display
             control.getDisplay().asyncExec( new Runnable() {
                 public void run() {
+                    if (!control.isFocusControl()) {
+                        log.info( "Control is no longer focused." );
+                        return;
+                    }
                     proposalProvider.setProposals( results );
                     if (results.length > 0 && !results[0].equals( value )) {
                         proposal.openProposalPopup();
+                        //proposal.setProposalPopupFocus();
                     }
                     else {
                         proposal.closeProposalPopup();
